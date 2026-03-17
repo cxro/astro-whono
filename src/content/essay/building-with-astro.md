@@ -4,7 +4,7 @@ description: A comprehensive guide to creating fast, content-focused websites
 date: 2026-01-10
 badge: Astro
 tags: ["Astro", "Web Development", "Tutorial"]
-draft: false
+draft: true
 ---
 
 Astro is a modern web framework that delivers lightning-fast performance by shipping zero JavaScript by default.

@@ -3,7 +3,7 @@ title: 写作是一种思考方式
 description: 关于写作意义的一些思考
 date: 2026-01-12
 tags: ["写作", "思考"]
-draft: false
+draft: true
 ---
 
 很多时候，我们以为自己知道一件事，直到试图把它写下来。

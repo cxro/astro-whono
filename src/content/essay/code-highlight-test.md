@@ -3,7 +3,7 @@ title: 代码高亮测试
 description: 测试不同编程语言的语法高亮效果
 date: 2026-01-05
 tags: ["代码", "测试"]
-draft: false
+draft: true
 ---
 
 本文测试主题对各种编程语言的代码高亮支持。

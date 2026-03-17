@@ -4,7 +4,7 @@ description: Thoughts on living intentionally in a connected world
 badge: Mindful
 date: 2026-01-08
 tags: ["Life", "Technology"]
-draft: false
+draft: true
 ---
 
 We live in an age of infinite distractions. Every app, every notification, every algorithm is designed to capture our attention — and they're exceptionally good at it.
