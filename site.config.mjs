@@ -20,5 +20,6 @@ export const site = {
 
 export const PAGE_SIZE_ARCHIVE = 12;
 export const PAGE_SIZE_ESSAY = 12;
+export const PAGE_SIZE_BITS = 20;
 
 export { hasSiteUrl, siteUrl };

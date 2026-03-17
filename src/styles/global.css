@@ -204,10 +204,14 @@ img {
 a {
   color: var(--text);
   text-decoration: none;
+}
+
+/* 仅将无类名链接视为默认文本链接；组件化链接自行定义 hover/focus 表现。 */
+a:where(:not([class])) {
   border-bottom: 1px solid transparent;
 }
 
-a:hover {
+a:where(:not([class])):hover {
   border-bottom-color: currentColor;
 }
 

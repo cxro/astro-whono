@@ -1,4 +1,5 @@
 ---
+import { type BitsEntry, getBitAnchorId } from '../lib/bits';
 import { createWithBase, formatDateTime } from '../utils/format';
 import { getThemeSettings } from '../lib/theme-settings';
 
@@ -7,6 +8,8 @@ const {
   excerpt = '',
   Content = null
 } = Astro.props;
+
+const bitEntry = bit as BitsEntry;
 
 const tags = bit.data.tags ?? [];
 const placeTag = tags.find((t: string) => t.toLowerCase().startsWith('loc:')) ?? '';
@@ -34,7 +37,13 @@ const wideIndex = totalImages > 1 && totalImages <= maxVisible && totalImages % 
 const hasTags = Boolean(placeText || normalTagItems.length);
 ---
 
-<article class="bit-card" data-bit data-bit-key={bit.id} data-slug={bit.data.slug ?? bit.id}>
+<article
+  class="bit-card"
+  id={getBitAnchorId(bitEntry.id)}
+  data-bit
+  data-bit-key={bitEntry.id}
+  data-slug={bitEntry.data.slug ?? bitEntry.id}
+>
   <div class="bit-author">
     <div class={`avatar${authorAvatar ? ' avatar--image' : ' is-fallback'}`} aria-hidden="true">
       {authorAvatar ? (

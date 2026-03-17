@@ -1,0 +1,350 @@
+---
+import { render } from 'astro:content';
+import BaseLayout from '../layouts/BaseLayout.astro';
+import BitCard from './BitCard.astro';
+import Lightbox from './Lightbox.astro';
+import '../styles/bits-page.css';
+import { MAX_PRIMARY_BITS_FILTER_YEARS, type BitsEntry, type BitsYearOption } from '../lib/bits';
+import { createWithBase } from '../utils/format';
+import { getThemeSettings } from '../lib/theme-settings';
+import { cleanMarkdownToText, getBitsExcerpt } from '../utils/excerpt';
+import { joinPageSubtitleText } from '../utils/format';
+
+const {
+  currentPage,
+  items,
+  nextPath = null,
+  prevPath = null,
+  resultCount,
+  totalPages,
+  yearOptions = []
+} = Astro.props as {
+  currentPage: number;
+  items: BitsEntry[];
+  nextPath?: string | null;
+  prevPath?: string | null;
+  resultCount: number;
+  totalPages: number;
+  yearOptions?: BitsYearOption[];
+};
+
+const base = import.meta.env.BASE_URL ?? '/';
+const withBase = createWithBase(base);
+const {
+  settings: {
+    page
+  }
+} = getThemeSettings();
+
+const pageTitleText = page.bits.title || '絮语';
+const pageTitleParts = [pageTitleText, currentPage > 1 ? `第 ${currentPage} 页` : null].filter(Boolean);
+const pageTitle = pageTitleParts.join(' · ');
+const subtitleText = joinPageSubtitleText(
+  page.bits.subtitle,
+  totalPages > 1 ? `第 ${currentPage} / ${totalPages} 页` : null
+);
+const pageDescription = joinPageSubtitleText(
+  `${pageTitleText}列表`,
+  page.bits.subtitle,
+  `共 ${resultCount} 条絮语`,
+  totalPages > 1 ? `第 ${currentPage} / ${totalPages} 页` : null
+) ?? `${pageTitleText}列表`;
+
+const FULL_RENDER_LIMIT = 180;
+const primaryYearOptions = yearOptions.slice(0, MAX_PRIMARY_BITS_FILTER_YEARS);
+const overflowYearOptions = yearOptions.slice(MAX_PRIMARY_BITS_FILTER_YEARS);
+
+const cards = await Promise.all(
+  items.map(async (bit) => {
+    const plain = cleanMarkdownToText(bit.body ?? '');
+    if (plain.length <= FULL_RENDER_LIMIT) {
+      const { Content } = await render(bit);
+      return { bit, excerpt: '', Content };
+    }
+    return { bit, excerpt: getBitsExcerpt(bit), Content: null };
+  })
+);
+---
+
+<BaseLayout title={pageTitle} description={pageDescription}>
+  <div class="page-header page-header--bits">
+    <div class="page-heading">
+      <h1 class="page-title">{pageTitleText}</h1>
+      {subtitleText ? <span class="page-subtitle">{subtitleText}</span> : null}
+    </div>
+  </div>
+
+  <div class="bits-toolbar">
+    <div class="bits-controls">
+      {yearOptions.length > 0 ? (
+        <div
+          class="bits-year-filter"
+          data-bits-year-filter
+          data-bits-client-control
+          role="group"
+          aria-label="按年份筛选絮语"
+        >
+          <span class="bits-year-filter__cursor" data-bits-year-cursor aria-hidden="true"></span>
+          <button
+            class="bits-year-filter__item bits-year-filter__item--all is-active"
+            type="button"
+            data-bits-year-item
+            data-bits-year=""
+            aria-label="显示全部絮语"
+            aria-pressed="true"
+          >
+            全部
+          </button>
+          {primaryYearOptions.map((option) => (
+            <button
+              class="bits-year-filter__item"
+              type="button"
+              data-bits-year-item
+              data-bits-year={option.value}
+              aria-label={`筛选 ${option.value} 年絮语，共 ${option.count} 条`}
+              aria-pressed="false"
+            >
+              {option.value}
+            </button>
+          ))}
+          {overflowYearOptions.length > 0 ? (
+            <div class="bits-year-more" data-bits-year-more data-open="false">
+              <button
+                class="bits-year-filter__item bits-year-filter__item--more"
+                type="button"
+                data-bits-year-more-trigger
+                aria-label="打开更多年份筛选"
+                aria-expanded="false"
+                aria-controls="bits-year-more-menu"
+              >
+                <span data-bits-year-more-label>更多</span>
+                <span class="bits-year-filter__caret" aria-hidden="true"></span>
+              </button>
+              <div
+                class="bits-year-menu"
+                id="bits-year-more-menu"
+                data-bits-year-menu
+                hidden
+                aria-label="更多年份筛选"
+              >
+                <div class="bits-year-menu__list">
+                  {overflowYearOptions.map((option) => (
+                    <button
+                      class="bits-year-menu__item"
+                      type="button"
+                      data-bits-year-menu-item
+                      data-bits-year={option.value}
+                      aria-label={`筛选 ${option.value} 年絮语，共 ${option.count} 条`}
+                      aria-pressed="false"
+                    >
+                      <span class="bits-year-menu__item-label">{option.value}</span>
+                      <span class="bits-year-menu__item-count">{option.count} 条</span>
+                    </button>
+                  ))}
+                </div>
+              </div>
+            </div>
+          ) : null}
+        </div>
+      ) : null}
+
+      <div class="bits-controls__actions">
+        <div class="bits-controls__search-cluster" data-has-year-filter={yearOptions.length > 0 ? 'true' : 'false'}>
+          <form class="bits-search" role="search" data-bits-search-form data-bits-client-control>
+            <label class="sr-only" for="bits-search">搜索絮语</label>
+            <input
+              id="bits-search"
+              type="search"
+              placeholder="搜索：关键词 / 标签"
+              autocomplete="off"
+              enterkeyhint="search"
+              aria-controls="bits-search-results-panel"
+            />
+            <button class="bits-search-btn" id="bits-search-btn" type="submit" aria-controls="bits-search-results-panel">
+              搜索
+            </button>
+          </form>
+          {yearOptions.length > 0 ? (
+            <div class="bits-year-select-wrap" data-bits-client-control>
+              <label class="sr-only" for="bits-year-select">按年份筛选絮语</label>
+              <select
+                class="bits-year-select"
+                id="bits-year-select"
+                data-bits-year-select
+                aria-label="按年份筛选絮语"
+              >
+                <option value="">全部</option>
+                {yearOptions.map((option) => (
+                  <option value={option.value}>{option.value}</option>
+                ))}
+              </select>
+            </div>
+          ) : null}
+        </div>
+        <button
+          class="new"
+          id="bits-new-btn"
+          type="button"
+          data-new-bit
+          data-bits-client-control
+          data-bits-draft-url="bits/draft-dialog/"
+          aria-label="碎碎念"
+          aria-haspopup="dialog"
+          aria-controls="bits-draft-dialog"
+        >
+          <span class="new-icon" aria-hidden="true">✍</span>
+          <span class="new-label">碎碎念</span>
+        </button>
+      </div>
+    </div>
+    <div class="bits-status" id="bits-search-status" role="status" aria-live="polite"></div>
+    <div class="bits-draft-load-status" id="bits-draft-load-status" role="status" aria-live="polite"></div>
+  </div>
+
+  <div data-bits-browse>
+    <div id="bits-list">
+      {cards.map(({ bit, excerpt, Content }) => (
+        <BitCard bit={bit} excerpt={excerpt} Content={Content} />
+      ))}
+    </div>
+
+    {totalPages > 1 ? (
+      <nav class="pagination" aria-label={`${pageTitleText}分页`}>
+        <div class="pagination__inner">
+          {prevPath ? <a class="pagination__link" rel="prev" href={withBase(prevPath)}>上一页</a> : null}
+          {nextPath ? (
+            <a class="pagination__link pagination__link--next" rel="next" href={withBase(nextPath)}>下一页</a>
+          ) : null}
+        </div>
+      </nav>
+    ) : null}
+  </div>
+
+  <section
+    id="bits-search-results-panel"
+    class="bits-search-results"
+    data-bits-search-results
+    hidden
+    aria-label="搜索结果"
+  >
+    <div class="bits-search-results__header">
+      <p class="bits-search-results__summary" data-bits-search-results-summary role="status" aria-live="polite">搜索结果</p>
+      <button class="bits-search-results__clear" type="button" data-bits-search-clear>重置筛选</button>
+    </div>
+    <div class="bits-search-results__list" data-bits-search-results-list></div>
+  </section>
+
+  <noscript>
+    <style>
+      [data-bits-client-control] {
+        display: none !important;
+      }
+    </style>
+    <p class="bits-noscript-note">搜索、年份筛选与草稿生成功能需要 JavaScript，当前仅保留列表浏览。</p>
+  </noscript>
+
+  <div id="bits-draft-root"></div>
+  <Lightbox
+    id="lightbox"
+    label="图片预览"
+    enableZoom={true}
+    enablePan={true}
+    enableSwipeDownClose={true}
+    mobileNav="hidden"
+    mobileCount="hidden"
+  />
+
+  <script>
+    import { createWithBase } from '../utils/format';
+    import '../scripts/bits-search.ts';
+    import '../scripts/bits-lightbox.ts';
+
+    const openBtn = document.querySelector<HTMLButtonElement>('[data-new-bit]');
+    const root = document.getElementById('bits-draft-root');
+    const loadStatus = document.getElementById('bits-draft-load-status');
+    const labelEl = openBtn?.querySelector<HTMLElement>('.new-label') ?? null;
+    const base = import.meta.env.BASE_URL ?? '/';
+    const withBase = createWithBase(base);
+    const fragmentPath = openBtn?.dataset.bitsDraftUrl ?? 'bits/draft-dialog/';
+    const defaultLabel = labelEl?.textContent?.trim() || '碎碎念';
+
+    let fragmentPromise: Promise<void> | null = null;
+    let controllerPromise: Promise<{ open: (options?: { opener?: HTMLElement | null }) => void }> | null = null;
+
+    const setLoadStatus = (text: string, tone: 'info' | 'error' = 'info') => {
+      if (!loadStatus) return;
+      loadStatus.textContent = text;
+      if (!text) {
+        loadStatus.removeAttribute('data-tone');
+        return;
+      }
+      loadStatus.setAttribute('data-tone', tone);
+    };
+
+    const setLoading = (loading: boolean) => {
+      if (!openBtn) return;
+      openBtn.disabled = loading;
+      openBtn.toggleAttribute('data-loading', loading);
+      openBtn.setAttribute('aria-busy', String(loading));
+      if (labelEl) {
+        labelEl.textContent = loading ? '加载中…' : defaultLabel;
+      }
+    };
+
+    const ensureDraftFragment = async () => {
+      if (document.getElementById('bits-draft-dialog')) return;
+      if (!root) throw new Error('bits draft root missing');
+      if (!fragmentPromise) {
+        fragmentPromise = fetch(withBase(fragmentPath))
+          .then((response) => {
+            if (!response.ok) throw new Error(`bits draft fragment ${response.status}`);
+            return response.text();
+          })
+          .then((html) => {
+            if (!html.trim()) throw new Error('bits draft fragment empty');
+            if (document.getElementById('bits-draft-dialog')) return;
+            const template = document.createElement('template');
+            template.innerHTML = html.trim();
+            root.replaceChildren(template.content.cloneNode(true));
+          })
+          .catch((error) => {
+            fragmentPromise = null;
+            throw error;
+          });
+      }
+      return fragmentPromise;
+    };
+
+    const loadDraftController = async () => {
+      if (!controllerPromise) {
+        controllerPromise = Promise.all([ensureDraftFragment(), import('../scripts/bits-draft.ts')])
+          .then(([, mod]) => {
+            const controller = mod.initBitsDraft();
+            if (!controller) throw new Error('bits draft controller init failed');
+            return controller;
+          })
+          .catch((error) => {
+            controllerPromise = null;
+            throw error;
+          });
+      }
+      return controllerPromise;
+    };
+
+    openBtn?.addEventListener('click', async (event) => {
+      event.preventDefault();
+      if (openBtn.disabled) return;
+      setLoading(true);
+      setLoadStatus('正在加载碎碎念工具…');
+      try {
+        const controller = await loadDraftController();
+        setLoadStatus('');
+        controller.open({ opener: openBtn });
+      } catch {
+        setLoadStatus('碎碎念工具加载失败，请重试。', 'error');
+      } finally {
+        setLoading(false);
+      }
+    });
+  </script>
+</BaseLayout>
