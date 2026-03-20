@@ -1,8 +1,4 @@
-import { readFile } from 'node:fs/promises';
-import path from 'node:path';
-
-const distDir = path.resolve('dist');
-const target = path.join(distDir, 'archive', 'markdown-guide', 'index.html');
+import { readSmokeFixtureHtml, reportSmokeCheckResult } from './smoke-utils.mjs';
 
 const hasClass = (html, className) => {
   const pattern = new RegExp(`class="[^"]*\\b${className}\\b`, 'i');
@@ -43,22 +39,7 @@ const checks = [
   }
 ];
 
-try {
-  const html = await readFile(target, 'utf8');
-  const failed = checks.filter((item) => !item.test(html));
+const html = await readSmokeFixtureHtml('Code block check');
+const failed = checks.filter((item) => !item.test(html)).map((item) => item.id);
 
-  if (failed.length > 0) {
-    console.error('Code block check failed:');
-    for (const item of failed) {
-      console.error(`- missing ${item.id}`);
-    }
-    process.exit(1);
-  }
-
-  console.log('Code block check passed.');
-} catch (err) {
-  console.error('Code block check failed: unable to read build output.');
-  console.error(`Expected file: ${target}`);
-  console.error('Run `npm run build` first.');
-  process.exit(1);
-}
+reportSmokeCheckResult('Code block check', failed);

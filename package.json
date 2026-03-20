@@ -20,11 +20,12 @@
     "build": "astro build",
     "preview": "astro preview",
     "check": "astro check",
+    "test": "vitest run --config ./vitest.config.ts",
     "audit:prod": "npm audit --omit=dev --audit-level=high --registry=https://registry.npmjs.org",
     "check:callout": "node ./scripts/check-callout.mjs",
     "check:codeblock": "node ./scripts/check-codeblock.mjs",
     "check:gallery": "node ./scripts/check-gallery.mjs",
-    "ci": "npm run check && npm run build && npm run check:callout && npm run check:codeblock && npm run check:gallery && npm run check:figure --if-present",
+    "ci": "npm run check && npm run test && npm run build && npm run check:callout && npm run check:codeblock && npm run check:gallery && npm run check:figure --if-present",
     "font:charset": "node ./scripts/font-charset.mjs",
     "font:subset": "node ./scripts/font-subset.mjs",
     "font:build": "npm run font:charset && npm run font:subset",
@@ -45,7 +46,8 @@
     "remark-directive": "^4.0.0",
     "ttf2woff2": "^8.0.1",
     "typescript": "^5.9.3",
-    "unist-util-visit": "^5.0.0"
+    "unist-util-visit": "^5.0.0",
+    "vitest": "^4.1.0"
   },
   "overrides": {
     "ajv": "8.18.0",

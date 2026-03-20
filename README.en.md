@@ -61,10 +61,30 @@ If execution policy blocks `npm.ps1`, use one of the following:
 ### Common Commands
 
 - `npm run check`
+- `npm test`
 - `npm run ci`
 - `npm run audit:prod`
 - `npm run new:bit`
 - `npm run font:build`
+
+<details>
+  <summary>Check and regression commands</summary>
+
+Use them depending on the situation:
+
+```bash
+# Quick troubleshooting: run individually as needed
+npm run check
+npm test
+npm run build
+
+# Final verification before commit
+npm run ci
+```
+
+- `npm test` mainly covers tag utilities, shared Theme Console validation rules, and core pure-logic regressions around theme settings `revision`.
+- `npm run ci` chains type checking, tests, build, and smoke checks; in most cases this is the only command you need before committing.
+</details>
 
 
 ## Deployment

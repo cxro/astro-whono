@@ -15,12 +15,17 @@ const getSchemaAttrs = (tagName) => {
 
 const mergeAttrs = (...lists) => Array.from(new Set(lists.flat()));
 
-const isAdminSitemapEntry = (page) => {
+const isExcludedSitemapEntry = (page) => {
   try {
     const pathname = new URL(page).pathname;
-    return pathname === '/admin/' || pathname === '/admin';
+    return pathname === '/admin/' || pathname === '/admin' || pathname === '/checks/' || pathname.startsWith('/checks/');
   } catch {
-    return page.endsWith('/admin/') || page.endsWith('/admin');
+    return (
+      page.endsWith('/admin/')
+      || page.endsWith('/admin')
+      || page.endsWith('/checks/')
+      || page.includes('/checks/')
+    );
   }
 };
 
@@ -113,7 +118,7 @@ export default defineConfig({
   site: site.url,
   // DEV 使用 server output 允许 /api/admin/settings 处理 POST；构建阶段回到 static 保持纯静态产物。
   output: process.env.NODE_ENV === 'production' ? 'static' : 'server',
-  integrations: hasSiteUrl ? [sitemap({ filter: (page) => !isAdminSitemapEntry(page) })] : [],
+  integrations: hasSiteUrl ? [sitemap({ filter: (page) => !isExcludedSitemapEntry(page) })] : [],
   trailingSlash: 'always',
   build: {
     inlineStylesheets: 'auto'

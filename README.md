@@ -61,10 +61,30 @@ npm run build && npm run preview
 ### 常用命令
 
 - `npm run check`
+- `npm test`
 - `npm run ci`
 - `npm run audit:prod`
 - `npm run new:bit`
 - `npm run font:build`
+
+<details>
+  <summary>检查与回归命令说明</summary>
+
+推荐按场景选择：
+
+```bash
+# 快速排查：按需单独执行
+npm run check
+npm test
+npm run build
+
+# 提交前最终验证
+npm run ci
+```
+
+- `npm test` 主要覆盖标签工具、Theme Console 共享校验规则，以及主题设置 `revision` 的关键纯逻辑回归。
+- `npm run ci` 会串联类型检查、测试、构建与 smoke checks；提交前通常直接执行这一条即可。
+</details>
 
 
 ## 部署

@@ -1,8 +1,4 @@
-import { readFile } from 'node:fs/promises';
-import path from 'node:path';
-
-const distDir = path.resolve('dist');
-const target = path.join(distDir, 'archive', 'markdown-guide', 'index.html');
+import { readSmokeFixtureHtml, reportSmokeCheckResult } from './smoke-utils.mjs';
 
 const getGalleryBlock = (html) => {
   const match = html.match(
@@ -30,22 +26,7 @@ const checks = [
   }
 ];
 
-try {
-  const html = await readFile(target, 'utf8');
-  const failed = checks.filter((item) => !item.test(html));
+const html = await readSmokeFixtureHtml('Gallery check');
+const failed = checks.filter((item) => !item.test(html)).map((item) => item.id);
 
-  if (failed.length > 0) {
-    console.error('Gallery check failed:');
-    for (const item of failed) {
-      console.error(`- missing ${item.id}`);
-    }
-    process.exit(1);
-  }
-
-  console.log('Gallery check passed.');
-} catch (err) {
-  console.error('Gallery check failed: unable to read build output.');
-  console.error(`Expected file: ${target}`);
-  console.error('Run `npm run build` first.');
-  process.exit(1);
-}
+reportSmokeCheckResult('Gallery check', failed);
