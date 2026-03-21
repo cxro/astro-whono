@@ -168,6 +168,11 @@ body {
   font-size: 16px;
 }
 
+html {
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+}
+
 time,
 .page-meta,
 .list-item__meta,

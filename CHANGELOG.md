@@ -7,6 +7,9 @@ The format is based on Keep a Changelog, and this project aims to follow Semanti
 
 ## [Unreleased]
 
+### Fixed
+- 修复移动端首页留白以及文章、小记页标题和元信息显示异常的问题，优化手机端浏览体验。
+
 ## [0.3.0] - 2026-03-21
 
 本次更新聚焦标签浏览、列表检索与 `/bits/` 浏览体验，并进一步提高 Theme Console 在本地维护场景下的稳定性。

@@ -665,6 +665,9 @@ body[data-reading="immersive"] .reader-toggle .icon-book-open {
 /* 阅读模式退出按钮（正文） */
 .reader-exit-anchor {
   position: relative;
+}
+
+.reader-exit-anchor[data-reader-exit-inline] {
   padding-right: 44px;
 }
 
@@ -686,12 +689,6 @@ body[data-reading="immersive"] .reader-toggle .icon-book-open {
 .reader-exit .icon {
   width: 20px;
   height: 20px;
-}
-
-@media (max-width: 900px) {
-  .reader-exit-anchor {
-    padding-right: 44px;
-  }
 }
 
 /* 浮动动作按钮（回到顶部 / 阅读模式浮层） */

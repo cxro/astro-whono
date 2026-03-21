@@ -5,6 +5,7 @@ const body = document.body;
 const themeBtn = document.getElementById('theme-toggle');
 const readerBtn = document.getElementById('reader-toggle');
 const readerExit = document.getElementById('reader-exit');
+const readerExitAnchor = readerExit?.closest('.reader-exit-anchor') as HTMLElement | null;
 const mobileMq = window.matchMedia('(max-width: 900px)');
 
 const prefersReducedMotion = () =>
@@ -103,6 +104,12 @@ const setVisible = (el: HTMLElement | null, visible: boolean) => {
   }
 };
 
+const setReaderExitInline = (inlineVisible: boolean) => {
+  if (!readerExitAnchor) return;
+  if (readerExitAnchor.hasAttribute('data-reader-exit-inline') === inlineVisible) return;
+  readerExitAnchor.toggleAttribute('data-reader-exit-inline', inlineVisible);
+};
+
 const initFloatingActions = () => {
   if (!isLongPage()) return;
 
@@ -145,6 +152,7 @@ const initFloatingActions = () => {
         readerExit.classList.remove('float-action');
       }
     }
+    setReaderExitInline(isReading && !floatExit);
   };
 
   const onScroll = () => {

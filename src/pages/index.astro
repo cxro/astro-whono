@@ -429,12 +429,15 @@ body[data-reading="immersive"] .reader-toggle .icon-book-open {
 }
 
 @media (max-width: 900px) {
+  /* Keep mobile shell rules aligned with src/styles/components/layout.css. */
   :root {
     color-scheme: light;
     --sidebar: 1fr;
     --tap-min-h: 44px;
     --pad-x: 20px;
     --card-pad: 10px 12px;
+    --quote-pad: 0.85rem;
+    --header-gap: 4px;
   }
 
   :root[data-theme="dark"] {
@@ -461,7 +464,7 @@ body[data-reading="immersive"] .reader-toggle .icon-book-open {
     position: static;
     height: auto;
     padding: calc(32px + env(safe-area-inset-top)) calc(var(--pad-x) + env(safe-area-inset-right))
-      calc(32px + env(safe-area-inset-bottom)) calc(var(--pad-x) + env(safe-area-inset-left));
+      calc(16px + env(safe-area-inset-bottom)) calc(var(--pad-x) + env(safe-area-inset-left));
     flex-direction: row;
     flex-wrap: wrap;
     align-items: center;
@@ -470,6 +473,7 @@ body[data-reading="immersive"] .reader-toggle .icon-book-open {
   }
 
   .sidebar__title {
+    transform-origin: left center;
     order: 1;
     flex: 1 1 auto;
     font-size: 24px;
@@ -494,6 +498,13 @@ body[data-reading="immersive"] .reader-toggle .icon-book-open {
     padding: 6px 8px;
     min-height: var(--tap-min-h);
     border-radius: 999px;
+    transform-origin: left center;
+  }
+
+  .nav a[aria-current="page"] {
+    text-decoration: underline;
+    text-underline-offset: 6px;
+    text-decoration-thickness: 2px;
   }
 
   .nav .dot,
@@ -501,11 +512,14 @@ body[data-reading="immersive"] .reader-toggle .icon-book-open {
     display: none;
   }
 
+  .icon-button {
+    min-width: var(--tap-min-h);
+    min-height: var(--tap-min-h);
+  }
+
   .sidebar-actions {
     order: 2;
     margin-top: 0;
-    margin-left: auto;
-    gap: 4px;
     align-self: center;
   }
 
@@ -514,6 +528,15 @@ body[data-reading="immersive"] .reader-toggle .icon-book-open {
     height: 36px;
     min-width: 36px;
     min-height: 36px;
+  }
+
+  .sidebar-actions .icon-button .icon {
+    width: 18px;
+    height: 18px;
+  }
+
+  .sidebar {
+    padding-bottom: calc(16px + env(safe-area-inset-bottom));
   }
 
   .content {
@@ -532,7 +555,39 @@ body[data-reading="immersive"] .reader-toggle .icon-book-open {
   }
 }
 
+@media (min-width: 641px) and (max-width: 900px) {
+  .sidebar {
+    padding: calc(28px + env(safe-area-inset-top)) calc(var(--pad-x) + env(safe-area-inset-right))
+      calc(36px + env(safe-area-inset-bottom)) calc(var(--pad-x) + env(safe-area-inset-left));
+    padding-bottom: calc(20px + env(safe-area-inset-bottom));
+  }
+
+  .content {
+    padding: calc(18px + env(safe-area-inset-top)) calc(var(--pad-x) + env(safe-area-inset-right))
+      calc(56px + env(safe-area-inset-bottom)) calc(var(--pad-x) + env(safe-area-inset-left));
+  }
+
+  .nav a {
+    padding: 8px 12px;
+  }
+}
+
 @media (max-width: 640px) {
+  .sidebar {
+    padding: calc(18px + env(safe-area-inset-top)) calc(var(--pad-x) + env(safe-area-inset-right))
+      calc(24px + env(safe-area-inset-bottom)) calc(var(--pad-x) + env(safe-area-inset-left));
+    padding-bottom: calc(14px + env(safe-area-inset-bottom));
+  }
+
+  .nav {
+    gap: 8px 10px;
+  }
+
+  .nav a {
+    padding: 6px 8px;
+    font-size: 15px;
+  }
+
   .content {
     padding: calc(4px + env(safe-area-inset-top)) calc(var(--pad-x) + env(safe-area-inset-right))
       calc(36px + env(safe-area-inset-bottom)) calc(var(--pad-x) + env(safe-area-inset-left));
