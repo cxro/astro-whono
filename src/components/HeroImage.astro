@@ -11,7 +11,7 @@ interface Props {
 }
 
 const {
-  alt = 'Whono theme preview',
+  alt = `Tai Nguyen's blog | trongtai37`,
   isLCP = false,
   src = null
 } = Astro.props;
@@ -24,7 +24,7 @@ const heroAssets = import.meta.glob<{ default: ImageMetadata }>(
 const base = import.meta.env.BASE_URL ?? '/';
 const withBase = createWithBase(base);
 
-const normalizedAlt = typeof alt === 'string' && alt.trim() ? alt.trim() : 'Whono theme preview';
+const normalizedAlt = typeof alt === 'string' && alt.trim() ? alt.trim() : `Tai Nguyen's blog | trongtai37`;
 const normalizedSrc = normalizeHeroImageSrc(src) ?? null;
 
 const resolveHeroAssetKey = (value: string | null): string | null => {

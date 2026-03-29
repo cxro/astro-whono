@@ -20,7 +20,7 @@ const normalTagItems: string[] = normalTags.map((t: string) => `#${t}`);
 const base = import.meta.env.BASE_URL ?? '/';
 const withBase = createWithBase(base);
 const { settings } = getThemeSettings();
-const defaultAuthorName = (settings.page.bits.defaultAuthor.name ?? 'Whono').trim() || 'Whono';
+const defaultAuthorName = (settings.page.bits.defaultAuthor.name ?? 'trongtai37').trim() || 'trongtai37';
 const authorName = (bit.data.author?.name ?? defaultAuthorName).trim() || defaultAuthorName;
 const authorAvatarRaw = (bit.data.author?.avatar ?? settings.page.bits.defaultAuthor.avatar ?? '').trim();
 const authorAvatar = authorAvatarRaw ? withBase(authorAvatarRaw) : '';

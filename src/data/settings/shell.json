@@ -1,38 +1,38 @@
 {
-  "brandTitle": "Whono",
-  "quote": "A minimal Astro theme\nfor essays, notes, and docs.\nDesigned for reading,\nopen-source.",
+  "brandTitle": "trongtai37",
+  "quote": "A minimal blog\nfor essays, notes, and docs.\nDesigned for reading.",
   "nav": [
     {
       "id": "essay",
-      "label": "随笔",
+      "label": "Essay",
       "ornament": "·",
       "visible": true,
       "order": 1
     },
     {
       "id": "bits",
-      "label": "絮语",
+      "label": "Bits",
       "ornament": "·",
       "visible": true,
       "order": 2
     },
     {
       "id": "memo",
-      "label": "小记",
+      "label": "Memo",
       "ornament": "·",
       "visible": true,
       "order": 3
     },
     {
       "id": "archive",
-      "label": "归档",
+      "label": "Archive",
       "ornament": "·",
       "visible": true,
       "order": 4
     },
     {
       "id": "about",
-      "label": "关于",
+      "label": "About",
       "ornament": "·",
       "visible": true,
       "order": 5

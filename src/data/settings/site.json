@@ -1,16 +1,16 @@
 {
-  "title": "Astro Themes by Whono",
-  "description": "一个 Astro 主题的展示站：轻量、可维护、可复用。",
-  "defaultLocale": "zh-CN",
+  "title": "Tai Nguyen's blog",
+  "description": "A minimal personal blog for essays, notes, and docs. Designed for reading",
+  "defaultLocale": "en-US",
   "footer": {
-    "startYear": 2025,
+    "startYear": 2026,
     "showCurrentYear": true,
-    "copyright": "Whono · Theme Demo · by cxro"
+    "copyright": "Whono · by cxro"
   },
   "socialLinks": {
-    "github": "https://github.com/cxro/astro-whono",
-    "x": "https://twitter.com/yourname",
-    "email": "Whono@linux.do",
+    "github": "https://github.com/trongtai37/my-blog",
+    "x": "https://twitter.com/trongtai37",
+    "email": "trongtai37@gmail.com",
     "presetOrder": {
       "github": 1,
       "x": 2,

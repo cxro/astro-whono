@@ -342,35 +342,35 @@ const THEME_SETTINGS_INVALID_MESSAGE =
 const LEGACY_INTRO_LEAD =
   '这是一个开源写作主题与示例内容库:包含 随笔/essay、小记/memo、归档/archive 与 絮语/bits，使用与配置请见 README 。';
 const LEGACY_INTRO_MORE = '更多文章请访问';
-const LEGACY_ESSAY_TITLE = '随笔';
-const LEGACY_ARCHIVE_TITLE = '归档';
+const LEGACY_ESSAY_TITLE = 'Essays';
+const LEGACY_ARCHIVE_TITLE = 'Archive';
 const LEGACY_ESSAY_SUBTITLE = '随笔与杂记';
-const LEGACY_BITS_TITLE = '絮语';
+const LEGACY_BITS_TITLE = 'Bits';
 const LEGACY_BITS_SUBTITLE = '生活不只是长篇';
-const LEGACY_ABOUT_TITLE = '关于';
+const LEGACY_ABOUT_TITLE = 'About';
 const LEGACY_QUOTE = 'A minimal Astro theme\nfor essays, notes, and docs.\nDesigned for reading,\nopen-source.';
-const LEGACY_FOOTER_START_YEAR = 2025;
+const LEGACY_FOOTER_START_YEAR = 2026;
 const LEGACY_FOOTER_SHOW_CURRENT_YEAR = true;
-const LEGACY_FOOTER_COPYRIGHT = 'Whono · Theme Demo · by cxro';
+const LEGACY_FOOTER_COPYRIGHT = `Tai Nguyen's blog · by trongtai37`;
 const DEFAULT_PRESET_SOCIAL_ORDER: SiteSocialPresetOrder = {
   github: 1,
   x: 2,
   email: 3
 };
 const LEGACY_SOCIAL_LINKS: SiteSocialLinks = {
-  github: 'https://github.com/cxro/astro-whono',
-  x: 'https://twitter.com/yourname',
-  email: 'Whono@linux.do',
+  github: 'https://github.com/trongtai37/my-blog',
+  x: 'https://twitter.com/trongtai37',
+  email: 'trongtai37@gmail.com',
   presetOrder: { ...DEFAULT_PRESET_SOCIAL_ORDER },
   custom: [],
   resolvedSocialItems: []
 };
 const LEGACY_NAV: SidebarNavItem[] = [
-  { id: 'essay', label: '随笔', ornament: ADMIN_NAV_ORNAMENT_DEFAULT, visible: true, order: 1 },
-  { id: 'bits', label: '絮语', ornament: ADMIN_NAV_ORNAMENT_DEFAULT, visible: true, order: 2 },
-  { id: 'memo', label: '小记', ornament: ADMIN_NAV_ORNAMENT_DEFAULT, visible: true, order: 3 },
-  { id: 'archive', label: '归档', ornament: ADMIN_NAV_ORNAMENT_DEFAULT, visible: true, order: 4 },
-  { id: 'about', label: '关于', ornament: ADMIN_NAV_ORNAMENT_DEFAULT, visible: true, order: 5 }
+  { id: 'essay', label: 'Essay', ornament: ADMIN_NAV_ORNAMENT_DEFAULT, visible: true, order: 1 },
+  { id: 'bits', label: 'Bits', ornament: ADMIN_NAV_ORNAMENT_DEFAULT, visible: true, order: 2 },
+  { id: 'memo', label: 'Memo', ornament: ADMIN_NAV_ORNAMENT_DEFAULT, visible: true, order: 3 },
+  { id: 'archive', label: 'Archive', ornament: ADMIN_NAV_ORNAMENT_DEFAULT, visible: true, order: 4 },
+  { id: 'about', label: 'About', ornament: ADMIN_NAV_ORNAMENT_DEFAULT, visible: true, order: 5 }
 ];
 const LEGACY_NAV_ORDER = new Map<SidebarNavId, number>(LEGACY_NAV.map((item) => [item.id, item.order]));
 
@@ -404,7 +404,7 @@ const cloneThemeSettingsReadDiagnostics = (
 const DEFAULT_SITE: SiteSettings = {
   title: 'Whono',
   description: '一个 Astro 主题的展示站：轻量、可维护、可复用。',
-  defaultLocale: 'zh-CN',
+  defaultLocale: 'en-US',
   footer: {
     startYear: LEGACY_FOOTER_START_YEAR,
     showCurrentYear: LEGACY_FOOTER_SHOW_CURRENT_YEAR,
@@ -421,7 +421,7 @@ const DEFAULT_SITE: SiteSettings = {
 };
 
 const DEFAULT_SHELL: ShellSettings = {
-  brandTitle: 'Whono',
+  brandTitle: 'trongtai37',
   quote: LEGACY_QUOTE,
   nav: cloneNavItems(LEGACY_NAV)
 };
@@ -450,7 +450,7 @@ const DEFAULT_PAGE: PageSettings = {
     title: LEGACY_BITS_TITLE,
     subtitle: LEGACY_BITS_SUBTITLE,
     defaultAuthor: {
-      name: 'Whono',
+      name: 'trongtai37',
       avatar: 'author/avatar.webp'
     }
   },

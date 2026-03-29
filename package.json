@@ -1,16 +1,16 @@
 {
-  "name": "astro-whono",
+  "name": "my-blog",
   "version": "0.3.1",
   "private": true,
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/cxro/astro-whono.git"
+    "url": "https://github.com/trongtai37/my-blog.git"
   },
   "bugs": {
-    "url": "https://github.com/cxro/astro-whono/issues"
+    "url": "https://github.com/trongtai37/my-blog/issues"
   },
-  "homepage": "https://astro.whono.me",
+  "homepage": "https://trongtai37.com",
   "type": "module",
   "engines": {
     "node": ">=22.12.0"

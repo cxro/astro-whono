@@ -8,8 +8,8 @@ import { getEntry, render } from 'astro:content';
 import { getThemeSettings } from '../../lib/theme-settings';
 
 const prod = import.meta.env.PROD;
-const DEFAULT_MEMO_TITLE = '生活小记';
-const DEFAULT_MEMO_SUBTITLE = '整理一些值得留存的片刻与回忆。';
+const DEFAULT_MEMO_TITLE = 'Life Memos';
+const DEFAULT_MEMO_SUBTITLE = 'Organize some moments and memories worth keeping.';
 
 const entry = await getEntry('memo', 'index');
 if (!entry) {
@@ -40,7 +40,7 @@ for (const h of headings) {
     groups.push(current);
   } else if (h.depth === 3) {
     if (!current) {
-      current = { title: '目录', items: [] };
+      current = { title: 'Table of Contents', items: [] };
       groups.push(current);
     }
     current.items.push({ text: h.text, slug: h.slug });
@@ -50,7 +50,7 @@ for (const h of headings) {
 
 <BaseLayout
   title={memoTitle}
-  description="整理一些值得留存的片刻与回忆。"
+  description="Organize some moments and memories worth keeping."
   bodyClass="memo-page immersive-page"
 >
   <div class="page-header reader-exit-anchor">
@@ -60,8 +60,8 @@ for (const h of headings) {
       id="reader-exit"
       class="icon-button reader-exit"
       type="button"
-      aria-label="退出阅读"
-      title="退出阅读"
+      aria-label="Exit reading mode"
+      title="Exit reading mode"
       aria-hidden="true"
       tabindex="-1"
     >
@@ -70,13 +70,13 @@ for (const h of headings) {
   </div>
 
   <div class="intro">
-    时间流经我们，如同风穿过回廊。
-    <br />总有一些瞬间，携带着特别的气息或光亮，短暂停留后便消散。
-    <br />有些感受，无法被镜头承载，有些记忆难以被影像收藏。
-    <br />也许，为瞬间的感受留下一份文字备份，正是抵抗遗忘最温柔却最有效的方式。
+    Time flows through us like wind through a corridor.
+    <br />There are always moments, carrying a special essence or light, that dissipate after a brief stay.
+    <br />Some feelings cannot be captured by a lens, and some memories are difficult to preserve in images.
+    <br />Perhaps, leaving a written backup for fleeting feelings is the gentlest yet most effective way to resist forgetting.
   </div>
 
-  <nav class="memo-toc" aria-label="目录">
+  <nav class="memo-toc" aria-label="Table of Contents">
     {groups.map((g) => (
       <details open>
         <summary>{g.title}</summary>
@@ -135,7 +135,7 @@ for (const h of headings) {
 
   <Lightbox
     id="lightbox"
-    label="图片预览"
+    label="Image Preview"
     enableZoom={false}
     enablePan={false}
     enableSwipeDownClose={false}

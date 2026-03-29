@@ -43,11 +43,11 @@ const loadAdminDevState = async () => {
   const settingsEndpoint = withBase('/api/admin/settings/');
   const navIdOrder = ADMIN_NAV_IDS;
   const navLabelFallback = {
-    essay: '随笔',
-    bits: '絮语',
-    memo: '小记',
-    archive: '归档',
-    about: '关于'
+    essay: 'Essays',
+    bits: 'Bits',
+    memo: 'Memos',
+    archive: 'Archives',
+    about: 'About'
   } as const;
   const homeIntroMaxLength = ADMIN_HOME_INTRO_MAX_LENGTH;
   const pageTitleMaxLength = ADMIN_PAGE_TITLE_MAX_LENGTH;
@@ -136,10 +136,10 @@ const AdminUiSection = adminDevState?.AdminUiSection;
         <header class="page-header page-header--admin">
           <div class="admin-heading">
             <h1 class="page-title">Theme Console</h1>
-            <span class="page-subtitle">主题设置</span>
+            <span class="page-subtitle">Theme Settings</span>
           </div>
           <p id="admin-status-live" class="admin-sr-only" role="status" aria-live="polite" aria-atomic="true"></p>
-          <p id="admin-status" class="admin-status" data-state="idle">等待加载</p>
+          <p id="admin-status" class="admin-status" data-state="idle">Waiting to load</p>
         </header>
 
         <section
@@ -154,7 +154,7 @@ const AdminUiSection = adminDevState?.AdminUiSection;
             <div class="admin-banner__lead">
               <span class="admin-banner__icon" aria-hidden="true">×</span>
               <div class="admin-banner__copy">
-                <p id="admin-error-title" class="admin-banner__title">操作未完成</p>
+                <p id="admin-error-title" class="admin-banner__title">Operation incomplete</p>
                 <p id="admin-error-message" class="admin-banner__message" hidden></p>
               </div>
             </div>
@@ -164,7 +164,7 @@ const AdminUiSection = adminDevState?.AdminUiSection;
               type="button"
               hidden
             >
-              重新检查
+              Recheck
             </button>
           </div>
           <ul id="admin-error-list" class="admin-banner__list" hidden></ul>
@@ -195,16 +195,16 @@ const AdminUiSection = adminDevState?.AdminUiSection;
         <div id="admin-actions" class="admin-actions" data-dirty="false" data-sticky="false">
           <div class="admin-actions__meta">
             <p id="admin-dirty-banner" class="admin-banner admin-banner--dirty" hidden>
-              * 你有未保存更改，离开页面会触发提醒。
+              * You have unsaved changes. Leaving the page will trigger a warning.
             </p>
             <p id="admin-status-inline" class="admin-status admin-status--inline" data-state="idle" aria-hidden="true">
-              等待加载
+              Waiting to load
             </p>
           </div>
           <div class="admin-actions__buttons">
-            <button id="admin-validate" class="admin-btn" type="button">检查配置</button>
-            <button id="admin-reset" class="admin-btn admin-btn--ghost" type="button">重置更改</button>
-            <button id="admin-save" class="admin-btn admin-btn--muted" type="button">保存</button>
+            <button id="admin-validate" class="admin-btn" type="button">Check Configuration</button>
+            <button id="admin-reset" class="admin-btn admin-btn--ghost" type="button">Reset Changes</button>
+            <button id="admin-save" class="admin-btn admin-btn--muted" type="button">Save</button>
           </div>
         </div>
 
@@ -215,11 +215,11 @@ const AdminUiSection = adminDevState?.AdminUiSection;
         <header class="page-header page-header--admin">
           <div class="admin-heading">
             <h1 class="page-title">Theme Console</h1>
-            <span class="page-subtitle">主题设置</span>
+            <span class="page-subtitle">Theme Settings</span>
           </div>
         </header>
         <p class="admin-hint">
-          Theme Console 仅在本地开发环境开放。如需修改配置，请在本地后台部署。
+          Theme Console is only available in the local development environment. To modify configurations, please run the project locally.
         </p>
       </section>
     )
@@ -231,4 +231,3 @@ const AdminUiSection = adminDevState?.AdminUiSection;
     ) : null
   }
 </BaseLayout>
-

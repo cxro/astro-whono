@@ -618,7 +618,7 @@ body[data-reading="immersive"] .reader-toggle .icon-book-open {
 
 <BaseLayout bodyClass={homeBodyClass} deferGlobalStyles={true}>
   <style slot="head" is:inline set:html={homeHeadCriticalCss}></style>
-  <h1 class="sr-only">Astro Themes by Whono</h1>
+  <h1 class="sr-only">Tai Nguyen's blog</h1>
   {
     shouldShowHero && (
       <div class="hero">
@@ -637,7 +637,7 @@ body[data-reading="immersive"] .reader-toggle .icon-book-open {
             {resolvedIntroMoreLinks.map((link, index) => (
               <>
                 {' '}
-                {index > 0 && <>或{' '}</>}
+                {index > 0 && <>or{' '}</>}
                 {index === resolvedIntroMoreLinks.length - 1 ? (
                   <span class="intro__link-tail">
                     <a href={withBase(link.href)}>{link.label}</a>
