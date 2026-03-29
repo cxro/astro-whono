@@ -1,12 +1,12 @@
 ---
-title: 代码高亮测试
-description: 测试不同编程语言的语法高亮效果
+title: Code Highlight Test
+description: Test syntax highlighting for different programming languages
 date: 2026-01-05
-tags: ["代码", "测试"]
+tags: ["code", "test"]
 draft: false
 ---
 
-本文测试主题对各种编程语言的代码高亮支持。
+This article tests the theme's code highlighting support for various programming languages.
 
 ## TypeScript
 
@@ -46,11 +46,11 @@ import "fmt"
 
 func main() {
     messages := make(chan string)
-    
+
     go func() {
         messages <- "Hello, Goroutine!"
     }()
-    
+
     msg := <-messages
     fmt.Println(msg)
 }
@@ -59,7 +59,7 @@ func main() {
 ## SQL
 
 ```sql
-SELECT 
+SELECT
     u.name,
     COUNT(p.id) as post_count,
     MAX(p.created_at) as last_post

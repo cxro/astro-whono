@@ -1,30 +1,30 @@
 ---
-title: Theme Console 配置指南
-description: 说明 astro-whono 本地 Theme Console 在开发环境下的适用范围、页面分组、配置落点与保存机制。
-badge: 指南
+title: Theme Console Configuration Guide
+description: Explains the scope, page grouping, configuration points, and saving mechanism of the local Theme Console in astro-whono during development.
+badge: Guide
 date: 2026-03-18
-tags: [ "Theme Console", "指南"]
+tags: ["Theme Console", "Guide"]
 draft: false
 ---
 
-astro-whono 提供一个本地 Theme Console，用于在开发环境中集中管理主题级配置。
+astro-whono provides a local Theme Console for centralized management of theme-level configuration during development.
 
-`/admin`主要覆盖站点信息、侧栏、首页、内页文案，以及部分阅读与代码显示选项，便于在 fork 或 clone 后统一调整这些主题设置。
+`/admin` mainly covers site info, sidebar, homepage, inner page copy, and some reading/code display options, making it easy to adjust these theme settings after forking or cloning.
 
-:::note[开发环境]
-`/admin` 仅在开发环境可写。生产环境访问该路径时，只显示只读提示。
+:::note[Development Environment]
+`/admin` is writable only in development. When accessed in production, it will show a read-only notice.
 :::
 
-## 本地启动与入口
+## Local Startup & Entry
 
-本地开发时，可通过以下命令启动项目：
+For local development, start the project with the following commands:
 
 ```bash
 npm install
 npm run dev
 ```
 
-默认情况下，开发服务器会运行在 `http://localhost:4321/`。启动后可直接访问：
+By default, the dev server runs at `http://localhost:4321/`. After starting, you can access:
 
 ```text
 http://localhost:4321/admin/
@@ -57,7 +57,8 @@ src/data/settings/
   page.json
   ui.json
 ```
-> 若 src/data/settings/*.json 尚不存在，首次在 /admin 保存时会自动生成
+
+> 若 src/data/settings/\*.json 尚不存在，首次在 /admin 保存时会自动生成
 
 Theme Console 管理的是仓库内的主题配置，相关改动仍可通过 Git 进行跟踪和回退。
 
@@ -102,7 +103,6 @@ Theme Console 管理的是仓库内的主题配置，相关改动仍可通过 Gi
 
 首页补充导语仍采用固定句式，后台只开放了文案和入口选择，尽量保持首页结构稳定。当前可选入口包括 `archive`、`essay`、`bits`、`memo`、`about` 和 `tag`。
 
-
 ### Inner Pages
 
 `Inner Pages` 负责内页层面的统一文案与显示策略：
@@ -117,12 +117,10 @@ Theme Console 管理的是仓库内的主题配置，相关改动仍可通过 Gi
 
 ![Inner Pages 分组截图](./theme-console/theme-console-inner-pages.webp)
 
-
 ### Reading / Code
 
 - 是否在代码块中显示行号
 - 是否在侧栏显示阅读模式入口
-
 
 ## 保存机制
 

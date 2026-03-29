@@ -1,5 +1,5 @@
 /* memo.css
-   只承载 memo 页面私有规则；禁止放共享正文样式或其他页面特例。
+  Only contains private rules for the memo page; do not include shared article styles or other page exceptions.
 */
 
 .memo-page {

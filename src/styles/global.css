@@ -1,11 +1,11 @@
-/* global.css 为公开站点的共享样式入口，只负责 tokens/base 与跨页面公共规则。
-   公开页聚合入口分层如下：
-   - global.css：共享基础层 + layout/list 等跨页面公共规则
-   - home.css / about.css / memo.css：页面私有规则
-   - article.css：正文页专用（prose / figure / callout / lightbox / code-block）
-   - bits-page.css：/bits/ 专用（bits / lightbox）
-   - admin.css：/admin 页面按需引入
-   断点变量覆盖仅保留共享层变量与跨页面公共规则。 */
+/* global.css is the shared style entry for the public site, responsible only for tokens/base and cross-page common rules.
+  The layered aggregation for public page entry is as follows:
+  - global.css: shared base layer + layout/list and other cross-page common rules
+  - home.css / about.css / memo.css: page-specific rules
+  - article.css: article page specific (prose / figure / callout / lightbox / code-block)
+  - bits-page.css: /bits/ specific (bits / lightbox)
+  - admin.css: imported on demand for /admin page
+  Breakpoint variable overrides retain only shared layer variables and cross-page common rules. */
 @import "./components/layout.css";
 @import "./components/lists.css";
 @import "./components/entry-tags.css";
@@ -121,7 +121,9 @@
   --code-bg: var(--code-content-bg);
   --code-action-hover-bg: #e8e8e6;
   --panel: var(--code-header-bg);
-  --font-mono: "Sarasa Mono SC", "Noto Sans Mono CJK SC", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+  --font-mono:
+    "Sarasa Mono SC", "Noto Sans Mono CJK SC", ui-monospace, SFMono-Regular,
+    Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
   --max: 900px;
   --sidebar: 320px;
   --tap-min-h: 44px;
@@ -163,7 +165,8 @@ body {
   padding: 0;
   background: var(--bg);
   color: var(--text);
-  font-family: "Noto Serif SC", ui-serif, Georgia, "Times New Roman", "Songti SC", serif;
+  font-family:
+    "Noto Serif SC", ui-serif, Georgia, "Times New Roman", "Songti SC", serif;
   line-height: 1.75;
   font-size: 16px;
 }
@@ -319,14 +322,12 @@ hr {
   .intro {
     margin: 16px 0 22px;
   }
-
 }
 
 @media (min-width: 641px) and (max-width: 900px) {
   :root {
     --pad-x: 28px;
   }
-
 }
 
 @media (max-width: 640px) {

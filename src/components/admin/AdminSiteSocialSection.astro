@@ -82,25 +82,25 @@ const socialPresetRows: readonly SocialPresetRow[] = [
   <div class="admin-social-panel">
     <div class="admin-social-panel__head">
       <p class="admin-subtitle admin-subtitle--compact">
-        <span class="admin-subtitle__main">社交链接</span>
+        <span class="admin-subtitle__main">Social Links</span>
         <span id="site-social-custom-count" class="admin-subtitle__hint admin-social-count">
-          (新增 0 / {socialCustomLimit})
+          (Added 0 / {socialCustomLimit})
         </span>
       </p>
       <div class="admin-social-actions">
         <button id="site-social-custom-add" class="admin-btn admin-btn--ghost" type="button">
-          新增链接
+          Add Link
         </button>
       </div>
     </div>
     <div class="admin-social-table">
       <div id="site-social-custom-head" class="admin-social-header" aria-hidden="true">
-        <span class="admin-social-header__order">位置</span>
-        <span class="admin-social-header__platform">平台</span>
-        <span class="admin-social-header__id">链接代号</span>
-        <span class="admin-social-header__icon">图标</span>
-        <span class="admin-social-header__href">链接地址</span>
-        <span class="admin-social-header__actions">操作</span>
+        <span class="admin-social-header__order">Order</span>
+        <span class="admin-social-header__platform">Platform</span>
+        <span class="admin-social-header__id">Link ID</span>
+        <span class="admin-social-header__icon">Icon</span>
+        <span class="admin-social-header__href">Link URL</span>
+        <span class="admin-social-header__actions">Actions</span>
       </div>
       <div id="site-social-custom-list" class="admin-social-list">
         {socialPresetRows.map((row) => <AdminSocialPresetRow row={row} />)}

@@ -31,7 +31,7 @@ const showReaderToggle = settings.ui.readingMode.showEntry;
 ---
 
 <aside class="sidebar">
-  <a class="sidebar__title" href={homeHref} aria-label={`${siteTitle} 首页`}>{siteTitle}</a>
+  <a class="sidebar__title" href={homeHref} aria-label={`${siteTitle} Home`}>{siteTitle}</a>
 
   <div class="sidebar__quote">
     {quote.split('\n').map((line) => (
@@ -67,16 +67,16 @@ const showReaderToggle = settings.ui.readingMode.showEntry;
         id="reader-toggle"
         class="icon-button reader-toggle"
         type="button"
-        aria-label="阅读模式"
+        aria-label="Reading mode"
         aria-pressed="false"
-        title="阅读模式"
+        title="Reading mode"
       >
         <Icon name="book-open" class="icon icon-book-open" />
         <Icon name="book-closed" class="icon icon-book-closed" />
       </button>
     ) : null}
 
-    <a class="icon-button rss-link" href={withBase('/archive/rss.xml')} aria-label="RSS 订阅" title="RSS 订阅">
+    <a class="icon-button rss-link" href={withBase('/archive/rss.xml')} aria-label="RSS Subscribe" title="RSS Subscribe">
       <Icon name="rss" class="icon" />
     </a>
 
@@ -84,9 +84,9 @@ const showReaderToggle = settings.ui.readingMode.showEntry;
       id="theme-toggle"
       class="icon-button theme-toggle"
       type="button"
-      aria-label="夜间模式"
+      aria-label="Dark mode"
       aria-pressed="false"
-      title="夜间模式"
+      title="Dark mode"
     >
       <Icon name="moon" class="icon icon-moon" />
       <Icon name="sun" class="icon icon-sun" />

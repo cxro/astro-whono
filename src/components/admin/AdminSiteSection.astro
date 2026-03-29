@@ -12,36 +12,36 @@ const { footerStartYearMin, footerStartYearMax, socialCustomLimit } = Astro.prop
 
 <fieldset class="admin-group">
   <legend class="admin-group__legend">
-    <span class="admin-group__legend-zh">站点设置</span>
+    <span class="admin-group__legend-zh">Site Settings</span>
     <span class="admin-group__legend-sep" aria-hidden="true">·</span>
     <span class="admin-group__legend-en">Site</span>
   </legend>
   <div class="admin-grid">
     <label class="admin-field">
       <span class="admin-label">
-        <span class="admin-label__main">站点标题</span>
-        <span class="admin-label__hint">（用于浏览器标题 / RSS / 分享）</span>
+        <span class="admin-label__main">Site Title</span>
+        <span class="admin-label__hint">(For browser title / RSS / sharing)</span>
       </span>
       <input id="site-title" type="text" autocomplete="off" />
     </label>
     <label class="admin-field">
       <span class="admin-label">
-        <span class="admin-label__main">站点语言</span>
-        <span class="admin-label__hint">（默认值为 zh-CN）</span>
+        <span class="admin-label__main">Site Language</span>
+        <span class="admin-label__hint">(Default is zh-CN)</span>
       </span>
       <input id="site-default-locale" type="text" autocomplete="off" />
     </label>
     <label class="admin-field admin-field--full">
       <span class="admin-label">
-        <span class="admin-label__main">默认 SEO 描述</span>
-        <span class="admin-label__hint">（用于搜索结果和分享摘要）</span>
+        <span class="admin-label__main">Default SEO Description</span>
+        <span class="admin-label__hint">(For search results and sharing summary)</span>
       </span>
       <textarea id="site-description" rows="3"></textarea>
     </label>
     <label class="admin-field">
       <span class="admin-label">
-        <span class="admin-label__main">页脚年份</span>
-        <span class="admin-label__hint">（结束年份自动拾取当前年）</span>
+        <span class="admin-label__main">Footer Year</span>
+        <span class="admin-label__hint">(End year automatically uses current year)</span>
       </span>
       <span class="admin-year-range">
         <input
@@ -62,23 +62,23 @@ const { footerStartYearMin, footerStartYearMax, socialCustomLimit } = Astro.prop
           value={String(footerStartYearMax)}
           readonly
           tabindex="-1"
-          aria-label="当前年份（自动）"
+          aria-label="Current year (auto)"
         />
         <label class="admin-year-range__toggle">
           <input id="site-footer-show-current-year" type="checkbox" checked />
-          <span class="sr-only">显示当前年</span>
+          <span class="sr-only">Show current year</span>
         </label>
       </span>
     </label>
     <label class="admin-field">
       <span class="admin-label">
-        <span class="admin-label__main">页脚版权文案</span>
+        <span class="admin-label__main">Footer Copyright Text</span>
       </span>
       <input id="site-footer-copyright" type="text" autocomplete="off" aria-describedby="site-footer-preview" />
     </label>
     <div class="admin-field admin-field--full">
       <p id="site-footer-preview" class="admin-help">
-        页脚预览：<code id="site-footer-preview-value">© {footerStartYearMax} Whono · Theme Demo · by cxro</code>
+        Footer preview: <code id="site-footer-preview-value">© {footerStartYearMax} Whono · Theme Demo · by cxro</code>
       </p>
     </div>
   </div>

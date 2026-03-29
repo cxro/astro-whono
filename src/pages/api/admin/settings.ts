@@ -94,7 +94,7 @@ const validateAdminWriteRequest = (request: Request, currentUrl: URL): WriteRequ
   if (!contentType.includes('application/json')) {
     return {
       status: 415,
-      error: '仅允许 application/json 请求写入 Theme Console 配置'
+      error: 'Only application/json requests are allowed to write Theme Console settings'
     };
   }
 

@@ -36,21 +36,21 @@ const {
   }
 } = getThemeSettings();
 
-const pageTitleText = page.archive.title || '归档';
-const pageTitleParts = [pageTitleText, currentTag ? `#${currentTag.label}` : null, currentPage > 1 ? `第 ${currentPage} 页` : null]
+const pageTitleText = page.archive.title || 'Archive';
+const pageTitleParts = [pageTitleText, currentTag ? `#${currentTag.label}` : null, currentPage > 1 ? `Page ${currentPage}` : null]
   .filter(Boolean);
 const pageTitle = pageTitleParts.join(' · ');
 const subtitleText = joinPageSubtitleText(
   page.archive.subtitle,
-  `共 ${resultCount} 篇内容`,
-  totalPages > 1 ? `第 ${currentPage} / ${totalPages} 页` : null
+  `Total ${resultCount} articles`,
+  totalPages > 1 ? `Page ${currentPage} / ${totalPages}` : null
 );
 const pageDescription = joinPageSubtitleText(
-  currentTag ? `归档标签 #${currentTag.label}` : `${pageTitleText}列表`,
+  currentTag ? `Archive tag #${currentTag.label}` : `${pageTitleText} List`,
   page.archive.subtitle,
-  `共 ${resultCount} 篇内容`,
-  totalPages > 1 ? `第 ${currentPage} / ${totalPages} 页` : null
-) ?? `${pageTitleText}列表`;
+  `Total ${resultCount} articles`,
+  totalPages > 1 ? `Page ${currentPage} / ${totalPages}` : null
+) ?? `${pageTitleText} List`;
 const groups = groupByUtcYear(items, (entry) => entry.data.date);
 const scopeRootPath = '/archive/';
 const fallbackListId = 'archive-tag-list';
@@ -86,7 +86,7 @@ const currentTagState = currentTag
       dialogTitleId="archive-tag-dialog-title"
       currentTag={currentTagState}
       tagOptions={tagOptions}
-      searchAriaLabel={`搜索${pageTitleText}`}
+      searchAriaLabel={`Search ${pageTitleText}`}
     />
   </div>
 
@@ -118,11 +118,11 @@ const currentTagState = currentTag
   ))}
 
   {totalPages > 1 ? (
-    <nav class="pagination" aria-label={`${pageTitleText}分页`}>
+    <nav class="pagination" aria-label={`${pageTitleText} Pagination`}>
       <div class="pagination__inner">
-        {prevPath ? <a class="pagination__link" rel="prev" href={withBase(prevPath)}>上一页</a> : null}
+        {prevPath ? <a class="pagination__link" rel="prev" href={withBase(prevPath)}>Previous</a> : null}
         {nextPath ? (
-          <a class="pagination__link pagination__link--next" rel="next" href={withBase(nextPath)}>下一页</a>
+          <a class="pagination__link pagination__link--next" rel="next" href={withBase(nextPath)}>Next</a>
         ) : null}
       </div>
     </nav>

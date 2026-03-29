@@ -420,9 +420,9 @@ if (!root) {
       });
     };
 
-    const STATUS_WAITING_SAVE = '等待保存';
-    const STATUS_CLEAN = '当前配置无未保存更改';
-    const STATUS_INVALID_SETTINGS = '配置损坏';
+    const STATUS_WAITING_SAVE = 'Waiting to save';
+    const STATUS_CLEAN = 'Current configuration has no unsaved changes';
+    const STATUS_INVALID_SETTINGS = 'Configuration corrupted';
 
     const setStatus = (state: string, message: string, options: { announce?: boolean } = {}): void => {
       const currentState = statusEl.dataset.state ?? '';
@@ -510,7 +510,7 @@ if (!root) {
       }
 
       setErrorBanner({
-        title: options.title ?? '请先处理以下问题',
+        title: options.title ?? 'Please fix the issues below first',
         ...(options.message ? { message: options.message } : {}),
         items: errors,
         retryable: options.retryable ?? false
@@ -545,13 +545,13 @@ if (!root) {
 
     const setSaving = (next: boolean): void => {
       isSaving = next;
-      saveBtn.textContent = next ? '保存中...' : '保存';
+      saveBtn.textContent = next ? 'Saving...' : 'Save';
       syncInteractiveAvailability();
     };
 
     const setValidating = (next: boolean): void => {
       isValidating = next;
-      validateBtn.textContent = next ? '校验中...' : '检查配置';
+      validateBtn.textContent = next ? 'Validating...' : 'Check configuration';
       syncInteractiveAvailability();
     };
 
@@ -607,10 +607,10 @@ if (!root) {
 
     const getDiagnosticHeadline = (diagnostic: ThemeSettingsReadDiagnostic): string => {
       const fileName = diagnostic.path.split('/').pop() || diagnostic.path;
-      if (diagnostic.code === 'invalid-json') return `${fileName} 格式错误`;
-      if (diagnostic.code === 'invalid-root') return `${fileName} 结构错误`;
-      if (diagnostic.code === 'schema-mismatch') return `${fileName} 配置不一致`;
-      return `${fileName} 读取失败`;
+      if (diagnostic.code === 'invalid-json') return `${fileName} Format error`;
+      if (diagnostic.code === 'invalid-root') return `${fileName} Structure error`;
+      if (diagnostic.code === 'schema-mismatch') return `${fileName} Configuration mismatch`;
+      return `${fileName} Read failed`;
     };
 
     const createDiagnosticMeta = (label: string, value: string, options: { mono?: boolean } = {}): HTMLElement => {
@@ -638,14 +638,14 @@ if (!root) {
       title.textContent = getDiagnosticHeadline(diagnostic);
       item.appendChild(title);
 
-      item.appendChild(createDiagnosticMeta('文件', diagnostic.path, { mono: true }));
+      item.appendChild(createDiagnosticMeta('File', diagnostic.path, { mono: true }));
 
       if (typeof diagnostic.line === 'number' && typeof diagnostic.column === 'number') {
-        item.appendChild(createDiagnosticMeta('位置', `第 ${diagnostic.line} 行，第 ${diagnostic.column} 列`));
+        item.appendChild(createDiagnosticMeta('Location', `Line ${diagnostic.line}, Column ${diagnostic.column}`));
       }
 
       if (diagnostic.detail) {
-        item.appendChild(createDiagnosticMeta('技术细节', diagnostic.detail, { mono: true }));
+        item.appendChild(createDiagnosticMeta('Technical details', diagnostic.detail, { mono: true }));
       }
 
       return item;
@@ -653,8 +653,8 @@ if (!root) {
 
     const setInvalidSettingsErrorBanner = (invalidState: ThemeSettingsEditableErrorState): void => {
       setErrorBanner({
-        title: '已切换为只读保护',
-        message: '检测到 settings 配置文件损坏。请先修复文件，再点击“重新检查”或刷新当前页面。',
+        title: 'Switched to read-only protection',
+        message: '检测到 settings 配置File损坏。请先修复File，再点击“重新检查”或刷新当前页面。',
         items: invalidState.diagnostics.map((diagnostic) => createDiagnosticListItem(diagnostic)),
         retryable: true
       });
@@ -702,8 +702,8 @@ if (!root) {
       const resolvedPayload = extractSettingsPayload(payload);
       if (!resolvedPayload) {
         clearInvalidFields();
-        setStatus('error', '返回数据格式无效');
-        setErrors([getPayloadMessage(payload) || '配置接口返回了无效的 payload'], { title: '读取配置失败' });
+        setStatus('error', 'Invalid response format');
+        setErrors([getPayloadMessage(payload) || 'Configuration API returned invalid payload'], { title: 'Failed to read configuration' });
         revealErrorState();
         return;
       }
@@ -719,7 +719,7 @@ if (!root) {
       setDirty(false);
       setStatus(
         'ready',
-        source === 'remote' ? '已同步最新配置' : '已载入初始配置',
+        source === 'remote' ? 'Latest configuration synced' : 'Initial configuration loaded',
         { announce: options.announceStatus ?? source === 'remote' }
       );
     };
@@ -732,13 +732,13 @@ if (!root) {
         }
         loadPayload(payload, 'bootstrap', { announceStatus: false });
       } catch (error) {
-        setStatus('error', '初始化数据解析失败');
+        setStatus('error', 'Failed to parse initialization data');
         console.error(error);
       }
     };
 
     const loadFromApi = async (): Promise<void> => {
-      setStatus('loading', '正在读取 /api/admin/settings', { announce: false });
+      setStatus('loading', 'Reading /api/admin/settings...', { announce: false });
       try {
         const response = await fetch(endpoint, {
           method: 'GET',
@@ -753,12 +753,12 @@ if (!root) {
           throw new Error(getPayloadMessage(payload) || `HTTP ${response.status}`);
         }
         if (!extractSettingsPayload(payload)) {
-          throw new Error(getPayloadMessage(payload) || '返回数据格式无效');
+          throw new Error(getPayloadMessage(payload) || 'Invalid response format');
         }
         loadPayload(payload, 'remote');
       } catch (error) {
         if (!isConsoleLocked) {
-          setStatus('warn', '接口读取失败，继续使用初始配置');
+          setStatus('warn', 'API read failed, continuing with initial configuration');
         }
         console.warn(error);
       }
@@ -881,7 +881,7 @@ if (!root) {
 
     socialCustomAddBtn.addEventListener('click', () => {
       if (getCustomRows().length >= ADMIN_SOCIAL_CUSTOM_LIMIT) {
-        setStatus('warn', '自定义链接已达到上限');
+        setStatus('warn', 'Custom links have reached the limit');
         return;
       }
       const row = createCustomRow(
@@ -1031,22 +1031,22 @@ if (!root) {
 
       const { draft, issues } = validateCurrentSettings();
       if (issues.length) {
-        setStatus('error', '校验未通过', { announce: false });
+        setStatus('error', 'Validation failed', { announce: false });
         revealErrorState(issues);
         return;
       }
 
       const current = canonicalize(draft);
       setValidating(true);
-      setStatus('loading', '正在进行服务端预检');
+      setStatus('loading', 'Performing server-side pre-check...');
 
       try {
         if (!currentRevision) {
           clearInvalidFields();
-          setErrors(['当前配置缺少 revision，请先同步最新配置后再检查'], {
-            title: '检查前需要重新同步配置'
+          setErrors(['Current configuration missing revision, please sync latest configuration first'], {
+            title: 'Need to resync configuration before checking'
           });
-          setStatus('error', '检查配置失败', { announce: false });
+          setStatus('error', 'Check configuration failed', { announce: false });
           revealErrorState();
           return;
         }
@@ -1064,30 +1064,30 @@ if (!root) {
             setErrors(
               serverErrors.length
                 ? serverErrors
-                : ['检测到配置已在外部更新；当前草稿仍保留在页面中，请先同步后再决定是否手工合并'],
-              { title: '检查时发现外部更新' }
+                : ['Configuration updated externally; current draft remains on page, please sync first then decide whether to manually merge'],
+              { title: 'External update detected during check' }
             );
-            setStatus('warn', '检查时发现外部更新', { announce: false });
+            setStatus('warn', 'External update detected during check', { announce: false });
             revealErrorState();
             return;
           }
 
-          setErrors(serverErrors.length ? serverErrors : ['检查配置失败，请稍后重试'], {
-            title: '检查配置失败'
+          setErrors(serverErrors.length ? serverErrors : ['Check configuration failed，请稍后重试'], {
+            title: 'Check configuration failed'
           });
-          setStatus('error', '检查配置失败', { announce: false });
+          setStatus('error', 'Check configuration failed', { announce: false });
           revealErrorState();
           return;
         }
 
         clearInvalidFields();
         clearErrorBanner();
-        setStatus('ok', '服务端预检通过，可直接保存');
+        setStatus('ok', 'Server pre-check passed, can save directly');
       } catch (error) {
         console.error(error);
         clearInvalidFields();
-        setErrors(['检查配置请求失败，请检查本地服务日志'], { title: '检查配置失败' });
-        setStatus('error', '检查配置失败', { announce: false });
+        setErrors(['Check configuration request failed, please check local service logs'], { title: 'Check configuration failed' });
+        setStatus('error', 'Check configuration failed', { announce: false });
         revealErrorState();
       } finally {
         setValidating(false);
@@ -1101,14 +1101,14 @@ if (!root) {
       clearInvalidFields();
       clearErrorBanner();
       setDirty(false);
-      setStatus('ready', '已重置为最近一次加载值');
+      setStatus('ready', 'Reset to last loaded value');
     });
 
     saveBtn.addEventListener('click', async () => {
       if (isSaving || isValidating) return;
       const { draft, issues } = validateCurrentSettings();
       if (issues.length) {
-        setStatus('error', '保存前校验失败', { announce: false });
+        setStatus('error', 'Validation failed before saving', { announce: false });
         revealErrorState(issues);
         return;
       }
@@ -1116,13 +1116,13 @@ if (!root) {
       const current = canonicalize(draft);
 
       setSaving(true);
-      setStatus('loading', '正在保存到 src/data/settings/*.json');
+      setStatus('loading', 'Saving to src/data/settings/*.json...');
 
       try {
         if (!currentRevision) {
           clearInvalidFields();
-          setErrors(['当前配置缺少 revision，请先同步最新配置后再保存'], { title: '保存前需要重新同步配置' });
-          setStatus('error', '保存失败', { announce: false });
+          setErrors(['Current configuration missing revision, please sync latest configuration first before saving'], { title: 'Need to resync configuration before saving' });
+          setStatus('error', 'Save失败', { announce: false });
           revealErrorState();
           return;
         }
@@ -1137,19 +1137,19 @@ if (!root) {
           const serverErrors = getPayloadErrors(payload);
           if (response.status === 409 && extractSettingsPayload(payload)) {
             loadPayload(payload, 'remote', { announceStatus: false });
-            setErrors(serverErrors.length ? serverErrors : ['配置已更新，已同步最新配置，请重新确认后再保存'], {
-              title: '检测到外部更新'
+            setErrors(serverErrors.length ? serverErrors : ['Configuration updated, latest configuration synced, please confirm again before saving'], {
+              title: 'External update detected'
             });
-            setStatus('warn', '检测到外部更新，已同步最新配置', { announce: false });
+            setStatus('warn', 'External update detected, latest configuration synced', { announce: false });
             revealErrorState();
             return;
           }
 
-          setErrors(serverErrors.length ? serverErrors : ['保存失败，请稍后重试'], { title: '保存失败' });
+          setErrors(serverErrors.length ? serverErrors : ['Save失败，请稍后重试'], { title: 'Save失败' });
           if (response.status === 404) {
-            setStatus('error', '当前环境不允许写入（仅 DEV 可写）', { announce: false });
+            setStatus('error', 'Current environment does not allow writing (only DEV can write)', { announce: false });
           } else {
-            setStatus('error', '保存失败', { announce: false });
+            setStatus('error', 'Save失败', { announce: false });
           }
           revealErrorState();
           return;
@@ -1157,19 +1157,19 @@ if (!root) {
 
         if (extractSettingsPayload(payload)) {
           loadPayload(payload, 'remote', { announceStatus: false });
-          setStatus('ok', '保存成功，请刷新目标页面查看效果');
+          setStatus('ok', 'Save successful, please refresh the target page to see the changes');
         } else {
           baseline = current;
           setDirty(false);
-          setStatus('ok', '保存成功');
+          setStatus('ok', 'Save successful');
         }
         clearInvalidFields();
         clearErrorBanner();
       } catch (error) {
         console.error(error);
         clearInvalidFields();
-        setErrors(['保存请求失败，请检查本地服务日志'], { title: '保存请求失败' });
-        setStatus('error', '保存失败', { announce: false });
+        setErrors(['Save request failed, please check local service logs'], { title: 'Save request failed' });
+        setStatus('error', 'Save失败', { announce: false });
         revealErrorState();
       } finally {
         setSaving(false);

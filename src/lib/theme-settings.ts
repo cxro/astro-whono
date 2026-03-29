@@ -337,16 +337,16 @@ export const getThemeSettingsFilePath = (group: ThemeSettingsFileGroup): string 
 export const getThemeSettingsRelativePath = (group: ThemeSettingsFileGroup): string => SETTINGS_RELATIVE_PATHS[group];
 
 const THEME_SETTINGS_INVALID_MESSAGE =
-  '检测到 settings JSON 配置文件损坏，Theme Console 已停止读取并禁止保存，请先修复对应文件后再重试';
+  'Detected corrupted settings JSON file. Theme Console has stopped reading and disabled saving. Please fix the file and try again.';
 
 const LEGACY_INTRO_LEAD =
-  '这是一个开源写作主题与示例内容库:包含 随笔/essay、小记/memo、归档/archive 与 絮语/bits，使用与配置请见 README 。';
-const LEGACY_INTRO_MORE = '更多文章请访问';
+  'This is an open-source writing theme and example content library containing Essays/essay, Memos/memo, Archive/archive, and Bits/bits. See README for usage and configuration.';
+const LEGACY_INTRO_MORE = 'More articles at';
 const LEGACY_ESSAY_TITLE = 'Essays';
 const LEGACY_ARCHIVE_TITLE = 'Archive';
-const LEGACY_ESSAY_SUBTITLE = '随笔与杂记';
+const LEGACY_ESSAY_SUBTITLE = 'Essays and Notes';
 const LEGACY_BITS_TITLE = 'Bits';
-const LEGACY_BITS_SUBTITLE = '生活不只是长篇';
+const LEGACY_BITS_SUBTITLE = 'Life is more than long stories';
 const LEGACY_ABOUT_TITLE = 'About';
 const LEGACY_QUOTE = 'A minimal Astro theme\nfor essays, notes, and docs.\nDesigned for reading,\nopen-source.';
 const LEGACY_FOOTER_START_YEAR = 2026;
@@ -403,7 +403,7 @@ const cloneThemeSettingsReadDiagnostics = (
 
 const DEFAULT_SITE: SiteSettings = {
   title: 'Whono',
-  description: '一个 Astro 主题的展示站：轻量、可维护、可复用。',
+  description: 'A showcase site for an Astro theme: lightweight, maintainable, and reusable.',
   defaultLocale: 'en-US',
   footer: {
     startYear: LEGACY_FOOTER_START_YEAR,

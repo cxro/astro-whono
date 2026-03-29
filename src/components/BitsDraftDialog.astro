@@ -17,34 +17,34 @@ const { settings } = getThemeSettings();
         <span class="bits-draft-title-icon" aria-hidden="true">
           <Icon name="pen" />
         </span>
-        碎碎念
+        Bits Draft
       </h2>
-      <button class="bits-draft-close" type="button" data-bits-draft-close aria-label="关闭">×</button>
+      <button class="bits-draft-close" type="button" data-bits-draft-close aria-label="Close">×</button>
     </div>
 
     <div class="bits-draft-field">
       <div class="bits-draft-field-head">
-        <label for="bits-draft-content">正文内容</label>
-        <div class="bits-draft-toolbar" data-bits-draft-toolbar role="toolbar" aria-label="常用格式">
-          <button type="button" class="bits-draft-tool" data-action="bold" data-tip="加粗" aria-label="加粗">
+        <label for="bits-draft-content">Content</label>
+        <div class="bits-draft-toolbar" data-bits-draft-toolbar role="toolbar" aria-label="Common Formats">
+          <button type="button" class="bits-draft-tool" data-action="bold" data-tip="Bold" aria-label="Bold">
             <Icon name="bold" />
           </button>
-          <button type="button" class="bits-draft-tool" data-action="italic" data-tip="斜体" aria-label="斜体">
+          <button type="button" class="bits-draft-tool" data-action="italic" data-tip="Italic" aria-label="Italic">
             <Icon name="italic" />
           </button>
-          <button type="button" class="bits-draft-tool" data-action="code" data-tip="行内代码" aria-label="行内代码">
+          <button type="button" class="bits-draft-tool" data-action="code" data-tip="Inline Code" aria-label="Inline Code">
             <Icon name="code" />
           </button>
-          <button type="button" class="bits-draft-tool" data-action="quote" data-tip="引用" aria-label="引用">
+          <button type="button" class="bits-draft-tool" data-action="quote" data-tip="Quote" aria-label="Quote">
             <Icon name="quote" />
           </button>
-          <button type="button" class="bits-draft-tool" data-action="list" data-tip="列表" aria-label="列表">
+          <button type="button" class="bits-draft-tool" data-action="list" data-tip="List" aria-label="List">
             <Icon name="list" />
           </button>
-          <button type="button" class="bits-draft-tool" data-action="link" data-tip="链接" aria-label="链接">
+          <button type="button" class="bits-draft-tool" data-action="link" data-tip="Link" aria-label="Link">
             <Icon name="link" />
           </button>
-          <button type="button" class="bits-draft-tool" data-action="paragraph" data-tip="段落" aria-label="段落">
+          <button type="button" class="bits-draft-tool" data-action="paragraph" data-tip="Paragraph" aria-label="Paragraph">
             <Icon name="paragraph" />
           </button>
         </div>
@@ -54,7 +54,7 @@ const { settings } = getThemeSettings();
         name="content"
         rows="6"
         required
-        placeholder="写点什么…"
+        placeholder="Write something..."
       ></textarea>
     </div>
 
@@ -62,20 +62,20 @@ const { settings } = getThemeSettings();
       <div class="bits-draft-field bits-draft-half">
         <label for="bits-draft-tags" class="bits-draft-label">
           <span class="bits-draft-label-icon" aria-hidden="true">#</span>
-          标签
+          Tags
         </label>
-        <input id="bits-draft-tags" name="tags" type="text" inputmode="text" placeholder="逗号或空格分隔" />
-        <div class="bits-draft-help">例：生活 阅读 / life reading</div>
+        <input id="bits-draft-tags" name="tags" type="text" inputmode="text" placeholder="Comma or space separated" />
+        <div class="bits-draft-help">Example: life reading</div>
       </div>
       <div class="bits-draft-field bits-draft-half">
         <label for="bits-draft-place" class="bits-draft-label">
           <span class="bits-draft-label-icon" aria-hidden="true">
             <Icon name="map-pin" />
           </span>
-          地点（可选）
+          Place (optional)
         </label>
-        <input id="bits-draft-place" name="place" type="text" inputmode="text" placeholder="例如:上海" />
-        <div class="bits-draft-help">生成 tags 里的 loc:&lt;地点&gt;</div>
+        <input id="bits-draft-place" name="place" type="text" inputmode="text" placeholder="e.g.: Shanghai" />
+        <div class="bits-draft-help">Generates loc:&lt;place&gt; in tags</div>
       </div>
     </div>
 
@@ -83,10 +83,10 @@ const { settings } = getThemeSettings();
       <div class="bits-draft-field">
         <div class="bits-draft-field-head bits-draft-image-head">
           <div class="bits-draft-field-title">
-            <label>插入图片（可选）</label>
-            <button class="bits-draft-image-add" type="button" data-bits-image-add>+ 添加</button>
+            <label>Insert Image (optional)</label>
+            <button class="bits-draft-image-add" type="button" data-bits-image-add>+ Add</button>
           </div>
-          <div class="bits-draft-help">自动读取图片尺寸</div>
+          <div class="bits-draft-help">Image size will be read automatically</div>
         </div>
         <div class="bits-draft-images" data-bits-images>
           <div class="bits-draft-image-row" data-bits-image-row>
@@ -96,9 +96,9 @@ const { settings } = getThemeSettings();
                 data-bits-image-src
                 type="text"
                 inputmode="url"
-                placeholder="bits/xxx.jpg 或 https://..."
+                placeholder="bits/xxx.jpg or https://..."
               />
-              <button class="bits-draft-image-clear" type="button" data-bits-image-remove aria-label="移除图片">x</button>
+              <button class="bits-draft-image-clear" type="button" data-bits-image-remove aria-label="Remove Image">x</button>
             </div>
             <input
               class="bits-draft-image-dim"
@@ -107,7 +107,7 @@ const { settings } = getThemeSettings();
               min="1"
               step="1"
               inputmode="numeric"
-              placeholder="宽度"
+              placeholder="Width"
             />
             <input
               class="bits-draft-image-dim"
@@ -116,7 +116,7 @@ const { settings } = getThemeSettings();
               min="1"
               step="1"
               inputmode="numeric"
-              placeholder="高度"
+              placeholder="Height"
             />
           </div>
         </div>
@@ -128,9 +128,9 @@ const { settings } = getThemeSettings();
                 data-bits-image-src
                 type="text"
                 inputmode="url"
-                placeholder="bits/xxx.jpg 或 https://..."
+                placeholder="bits/xxx.jpg or https://..."
               />
-              <button class="bits-draft-image-clear" type="button" data-bits-image-remove aria-label="移除图片">x</button>
+              <button class="bits-draft-image-clear" type="button" data-bits-image-remove aria-label="Remove Image">x</button>
             </div>
             <input
               class="bits-draft-image-dim"
@@ -139,7 +139,7 @@ const { settings } = getThemeSettings();
               min="1"
               step="1"
               inputmode="numeric"
-              placeholder="宽度"
+              placeholder="Width"
             />
             <input
               class="bits-draft-image-dim"
@@ -148,7 +148,7 @@ const { settings } = getThemeSettings();
               min="1"
               step="1"
               inputmode="numeric"
-              placeholder="高度"
+              placeholder="Height"
             />
           </div>
         </template>
@@ -160,7 +160,7 @@ const { settings } = getThemeSettings();
           <span class="bits-draft-link-icon" aria-hidden="true">
             <Icon name="eye" />
           </span>
-          <span>预览草稿</span>
+          <span>Preview Draft</span>
           <span class="bits-draft-link-caret" aria-hidden="true">
             <Icon name="chevron-down" />
           </span>
@@ -168,11 +168,11 @@ const { settings } = getThemeSettings();
       </div>
 
       <div class="bits-draft-manual" data-bits-manual hidden>
-        <div class="bits-draft-manual-title">草稿内容（只读）</div>
+        <div class="bits-draft-manual-title">Draft Content (Read-only)</div>
         <textarea class="bits-draft-manual-textarea" data-bits-manual-textarea rows="6" readonly></textarea>
         <div class="bits-draft-manual-actions">
           <div class="bits-draft-manual-note" data-bits-manual-note></div>
-          <button class="bits-draft-secondary" type="button" data-bits-manual-copy>手动复制</button>
+          <button class="bits-draft-secondary" type="button" data-bits-manual-copy>Copy Manually</button>
         </div>
       </div>
 
@@ -181,7 +181,7 @@ const { settings } = getThemeSettings();
           <span class="bits-identity-label-icon" aria-hidden="true">
             <Icon name="user-circle" />
           </span>
-          <span id="bits-identity-heading">作者（可选）</span>
+          <span id="bits-identity-heading">Author (optional)</span>
         </div>
         <div class="bits-identity-row">
           <div class="bits-identity-controls">
@@ -203,7 +203,7 @@ const { settings } = getThemeSettings();
             aria-controls="bits-identity-panel"
             aria-expanded="false"
           >
-            自定义作者
+            Custom Author
           </button>
         </div>
       </div>
@@ -218,22 +218,22 @@ const { settings } = getThemeSettings();
       >
         <div class="bits-identity-fields">
           <label class="bits-identity-label">
-            <span class="bits-identity-label-title">作者名</span>
+            <span class="bits-identity-label-title">Author Name</span>
             <input type="text" name="authorName" inputmode="text" data-author-name />
           </label>
           <label class="bits-identity-label">
             <span class="bits-identity-label-row">
-              <span class="bits-identity-label-title">头像路径（URL）</span>
-              <span class="bits-identity-label-hint">留空用默认头像；加载失败则显示首字符</span>
+              <span class="bits-identity-label-title">Avatar URL</span>
+              <span class="bits-identity-label-hint">Leave blank to use default avatar; if loading fails, the first character will be shown</span>
             </span>
             <input type="text" name="authorAvatar" inputmode="url" data-author-avatar />
           </label>
         </div>
         <div class="bits-identity-meta">
-          <p class="bits-identity-note">
-            留空即用当前作者，本条不会写入 author
-          </p>
-          <button type="button" class="bits-identity-reset" data-author-reset>恢复默认</button>
+            <p class="bits-identity-note">
+              Leave blank to use the current author; this entry will not be written to author
+            </p>
+          <button type="button" class="bits-identity-reset" data-author-reset>Reset to Default</button>
         </div>
       </div>
     </div>
@@ -241,12 +241,12 @@ const { settings } = getThemeSettings();
     <div class="bits-draft-footer">
       <div class="bits-draft-check">
         <input id="bits-draft-draft" name="draft" type="checkbox" />
-        <label for="bits-draft-draft">标记为草稿</label>
-        <span class="bits-draft-check-help">草稿:线上/预览默认不显示</span>
+        <label for="bits-draft-draft">Mark as Draft</label>
+        <span class="bits-draft-check-help">Draft: Not shown by default online/preview</span>
       </div>
       <div class="bits-draft-actions">
-        <button class="bits-draft-primary" type="button" data-bits-draft-generate>生成并复制</button>
-        <button class="bits-draft-secondary" type="button" data-bits-draft-download>下载 .md</button>
+        <button class="bits-draft-primary" type="button" data-bits-draft-generate>Generate & Copy</button>
+        <button class="bits-draft-secondary" type="button" data-bits-draft-download">Download .md</button>
       </div>
     </div>
   </form>

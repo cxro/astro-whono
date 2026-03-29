@@ -1,5 +1,5 @@
 /* about.css
-   只承载 about 页面私有规则；禁止回填共享布局或正文规则。
+  Only contains private rules for the about page; do not backfill shared layout or article rules.
 */
 
 .page-header.page-header--about {
@@ -201,7 +201,9 @@
   border: 1px solid var(--border);
   border-radius: 12px;
   background: var(--panel);
-  transition: background 0.2s ease, border-color 0.2s ease;
+  transition:
+    background 0.2s ease,
+    border-color 0.2s ease;
 }
 
 .site-guide-item:hover {

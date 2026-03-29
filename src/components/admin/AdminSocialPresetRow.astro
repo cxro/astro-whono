@@ -16,13 +16,13 @@ interface Props {
 }
 
 const { row } = Astro.props;
-const visibilityLabel = `隐藏 ${row.label}`;
-const removeLabel = `${row.label} 为固定项，不可删除`;
+const visibilityLabel = `Hide ${row.label}`;
+const removeLabel = `${row.label} is a fixed item and cannot be deleted`;
 ---
 
 <article class="admin-social-row admin-social-row--preset" data-social-preset-row data-social-preset-id={row.id}>
   <label class="admin-field admin-social-field admin-social-field--order">
-    <span class="admin-social-cell-label">位置</span>
+    <span class="admin-social-cell-label">Position</span>
     <span class="admin-social-order-frame">
       <span class="admin-social-order-frame__mark" aria-hidden="true">[</span>
       <input
@@ -33,14 +33,14 @@ const removeLabel = `${row.label} 为固定项，不可删除`;
         max={String(ADMIN_SOCIAL_ORDER_MAX)}
         step="1"
         inputmode="numeric"
-        aria-label={`${row.label} 位置排序`}
+        aria-label={`${row.label} position order`}
       />
       <span class="admin-social-order-frame__mark" aria-hidden="true">]</span>
     </span>
   </label>
 
   <div class="admin-field admin-social-field admin-social-field--platform admin-social-field--static">
-    <span class="admin-social-cell-label">平台</span>
+    <span class="admin-social-cell-label">Platform</span>
     <input
       class="admin-social-static-input"
       name={`site-social-${row.id}-platform-display`}
@@ -52,7 +52,7 @@ const removeLabel = `${row.label} 为固定项，不可删除`;
   </div>
 
   <div class="admin-field admin-social-field admin-social-field--id admin-social-field--static">
-    <span class="admin-social-cell-label">链接代号</span>
+    <span class="admin-social-cell-label">Link Code</span>
     <input
       class="admin-social-static-input admin-social-static-input--code"
       name={`site-social-${row.id}-id-display`}
@@ -64,7 +64,7 @@ const removeLabel = `${row.label} 为固定项，不可删除`;
   </div>
 
   <div class="admin-social-field admin-social-field--icon admin-social-field--static">
-    <span class="admin-social-cell-label">图标</span>
+    <span class="admin-social-cell-label">Icon</span>
     <div class="admin-social-icon-preview">
       <span class="admin-social-icon-only">
         <Icon name={row.id} class="admin-social-icon-only__icon" size={16} />
@@ -73,7 +73,7 @@ const removeLabel = `${row.label} 为固定项，不可删除`;
   </div>
 
   <label class="admin-field admin-social-field admin-social-field--href">
-    <span class="admin-social-cell-label">{row.id === 'email' ? '邮箱地址' : '链接地址'}</span>
+    <span class="admin-social-cell-label">{row.id === 'email' ? 'Email Address' : 'Link URL'}</span>
     <input
       id={row.inputId}
       data-social-preset-field="href"
@@ -85,7 +85,7 @@ const removeLabel = `${row.label} 为固定项，不可删除`;
   </label>
 
   <div class="admin-field admin-social-field admin-social-field--actions admin-social-field--static">
-    <span class="admin-social-cell-label">操作</span>
+    <span class="admin-social-cell-label">Actions</span>
     <div class="admin-social-row-actions">
       <button
         class="admin-social-action"

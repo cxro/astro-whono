@@ -1,33 +1,35 @@
 ---
-title: Markdown 排版指南
-description: 展示所有 Markdown 格式效果，包括标题、列表、代码、表格、引用等
+title: Markdown Formatting Guide
+description: Show all Markdown formatting effects, including headings, lists, code, tables, quotes, etc.
 date: 2026-01-15
-badge: 示例
-tags: [ "Markdown", "排版"]
+badge: Example
+tags: ["Markdown", "formatting"]
 draft: false
 ---
 
-这篇文章展示了本主题支持的所有 Markdown 排版效果。
+This article demonstrates all Markdown formatting supported by this theme.
 
-第一段……（用于列表预览）
+First paragraph... (for list preview)
+
 <!-- more -->
-后续正文……
 
-## 文本格式
+Following content...
 
-这是一段普通文本。**这是粗体文字**，*这是斜体文字*，***这是粗斜体***。你也可以使用 ~~删除线~~ 来标记废弃内容。
+## Text Formatting
 
-行内代码使用反引号包裹：`const hello = 'world'`，非常适合标记变量名或命令。
+This is a normal paragraph. **This is bold text**, _this is italic text_, **_this is bold italic_**. You can also use ~~strikethrough~~ to mark deprecated content.
 
-## 引用
+Inline code is wrapped with backticks: `const hello = 'world'`, which is great for marking variable names or commands.
 
-> 设计的价值不止于建造完成。好的设计应该能够经受时间的考验，在岁月流转中依然保持其独特的魅力与实用性。
+## Blockquote
 
-你也可以使用多段引用：
+> The value of design is not just in its completion. Good design should stand the test of time, maintaining its unique charm and practicality as years go by.
 
-> 第一段引用内容。
+You can also use multi-paragraph blockquotes:
+
+> First paragraph of the quote.
 >
-> 第二段引用内容，展示多段落效果。
+> Second paragraph of the quote, showing multi-paragraph effect.
 
 来源标注（`<cite>` 放在 blockquote 内最后一行）：
 
@@ -46,22 +48,23 @@ Pullquote（使用 `blockquote.pullquote` 变体）：
 
 支持 `note / tip / info / warning` 四种语法糖。下面先给一个最小写法；如需更精细控制，也可以直接写 HTML。
 
-~~~md
+```md
 :::note[标题]
 这是正文。
 :::
-~~~
+```
 
 如需直接写 HTML（更精确控制）：
 
-~~~html
+```html
 <div class="callout note">
   <p class="callout-title" data-icon="none">标题</p>
   <p>这是正文。</p>
 </div>
-~~~
+```
 
 说明：
+
 - 默认图标由类型决定，不需要 `<span class="callout-icon">`。
 - 隐藏图标用 `data-icon="none"`，写在 `.callout-title` 上。
 - 自定义图标可用 `data-icon="✨"`（可选）。
@@ -83,24 +86,27 @@ Pullquote（使用 `blockquote.pullquote` 变体）：
 :::
 
 :::info[Info]
+
 ```ts
-const hello = 'world';
+const hello = "world";
 ```
+
 :::
 
 :::warning[Warning]
+
 > 也可以包含引用块。
 >
 > 也可以换成多段内容。
-:::
+> :::
 
 基础语法如下：
 
-~~~text
+```text
 :::type[可选标题]
 正文内容
 :::
-~~~
+```
 
 仅支持 `note / tip / info / warning`；不支持的类型（如 `:::foo[...]`）当前会降级为 `note`。
 
@@ -137,7 +143,7 @@ const hello = 'world';
 
 ```javascript
 // 一个简单的 Astro 组件示例
-const greeting = 'Hello, World!';
+const greeting = "Hello, World!";
 
 function fibonacci(n) {
   if (n <= 1) return n;
@@ -154,12 +160,12 @@ def quick_sort(arr):
     """快速排序算法实现"""
     if len(arr) <= 1:
         return arr
-    
+
     pivot = arr[len(arr) // 2]
     left = [x for x in arr if x < pivot]
     middle = [x for x in arr if x == pivot]
     right = [x for x in arr if x > pivot]
-    
+
     return quick_sort(left) + middle + quick_sort(right)
 
 # 使用示例
@@ -193,12 +199,12 @@ npm run build
 
 ## 表格
 
-| 功能 | 状态 | 说明 |
-|:----:|:----:|:----:|
-| 响应式布局 | ✅ | 完美适配移动端 |
-| 暗色模式 | 🚧 | 开发中 |
-| RSS 订阅 | ✅ | 支持多 Feed |
-| 国际化 | ❌ | 计划中 |
+|    功能    | 状态 |      说明      |
+| :--------: | :--: | :------------: |
+| 响应式布局 |  ✅  | 完美适配移动端 |
+|  暗色模式  |  🚧  |     开发中     |
+|  RSS 订阅  |  ✅  |  支持多 Feed   |
+|   国际化   |  ❌  |     计划中     |
 
 ## 链接与图片
 
@@ -272,7 +278,7 @@ Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor i
 
 ## 混合排版
 
-这是一段包含 **粗体**、*斜体*、`代码` 和 [链接](/) 的混合排版文本。你可以在一个段落中自由组合这些元素，创造丰富的阅读体验。
+这是一段包含 **粗体**、_斜体_、`代码` 和 [链接](/) 的混合排版文本。你可以在一个段落中自由组合这些元素，创造丰富的阅读体验。
 
 ---
 

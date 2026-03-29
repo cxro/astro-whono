@@ -23,7 +23,7 @@ const applyTheme = (theme: string) => {
   const dark = theme === 'dark';
   if (themeBtn) {
     themeBtn.setAttribute('aria-pressed', dark ? 'true' : 'false');
-    const label = dark ? '浅色模式' : '夜间模式';
+    const label = dark ? 'Light mode' : 'Dark mode';
     themeBtn.setAttribute('aria-label', label);
     themeBtn.setAttribute('title', label);
   }
@@ -49,12 +49,12 @@ const setReaderDisabled = (disabled: boolean) => {
   readerBtn.setAttribute('aria-pressed', 'false');
   readerBtn.setAttribute('aria-disabled', disabled ? 'true' : 'false');
   if (disabled) {
-    readerBtn.setAttribute('title', '阅读模式（仅文章/小记页可用）');
-    readerBtn.setAttribute('aria-label', '阅读模式（仅文章/小记页可用）');
+    readerBtn.setAttribute('title', 'Reading mode (only available on article/memo pages)');
+    readerBtn.setAttribute('aria-label', 'Reading mode (only available on article/memo pages)');
     readerBtn.tabIndex = -1;
   } else {
-    readerBtn.setAttribute('title', '阅读模式');
-    readerBtn.setAttribute('aria-label', '阅读模式');
+    readerBtn.setAttribute('title', 'Reading mode');
+    readerBtn.setAttribute('aria-label', 'Reading mode');
     readerBtn.tabIndex = 0;
   }
 };
@@ -70,8 +70,8 @@ const applyReader = (on: boolean) => {
     readerBtn.setAttribute('aria-pressed', on ? 'true' : 'false');
   }
   if (readerExit) {
-    readerExit.setAttribute('aria-label', '退出阅读');
-    readerExit.setAttribute('title', '退出阅读');
+    readerExit.setAttribute('aria-label', 'Exit reading');
+    readerExit.setAttribute('title', 'Exit reading');
   }
   setVisible(readerExit as HTMLElement | null, on);
   updateFloating();

@@ -553,11 +553,11 @@ export const initCodeCopyButtons = () => {
     if (!copied) return;
 
     button.dataset.state = 'copied';
-    button.setAttribute('aria-label', '已复制');
-    button.setAttribute('title', '已复制');
+    button.setAttribute('aria-label', 'Copied');
+    button.setAttribute('title', 'Copied');
     window.setTimeout(() => {
       button.dataset.state = 'idle';
-      button.setAttribute('aria-label', '复制代码');
+      button.setAttribute('aria-label', 'Copy code');
       button.setAttribute('title', '复制代码');
     }, 1200);
   });

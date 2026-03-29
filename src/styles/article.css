@@ -1,4 +1,4 @@
-/* article.css 聚合正文页专用样式，供 ArticleLayout 与 memo 页面按需加载。 */
+/* article.css aggregates styles specific to article pages, loaded on demand by ArticleLayout and memo pages. */
 @import "./components/prose.css";
 @import "./components/figure.css";
 @import "./components/callout.css";

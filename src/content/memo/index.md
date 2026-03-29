@@ -1,75 +1,75 @@
 ---
-title: "生活小记"
-subtitle: "不曾虚度的光"
+title: "Life Memo"
+subtitle: "Light Never Wasted"
 date: 2026-01-10
 draft: false
 ---
 
-## 2025年记
+## Memo 2025
 
-### 新屋
+### New Home
 
-搬家当晚把小灯放在地上，屋里还堆着箱子。我们用纸箱当桌子，吃了顿外卖。第二天起床才觉得正式住进来。
+On the night we moved, we put the small lamp on the floor, boxes still piled up in the room. We used a cardboard box as a table and had takeout. Only after waking up the next day did it feel like we had really moved in.
 
-### 小城远行
+### Trip to a Small Town
 
-临时决定去海边小城，清晨到站，先在站前吃了热豆浆。沿堤走一圈，海风把帽子吹得东倒西歪。回来时把车票夹进钱包。
+Decided last minute to visit a seaside town. Arrived at dawn, had hot soy milk at the station. Walked along the embankment, the sea breeze knocked my hat askew. Put the train ticket in my wallet on the way back.
 
-### 夜归
+### Night Return
 
-晚上回到常走的路口，店名换了两次。雨刚停，路面反光。站了一会儿才走。
+Returned at night to a familiar intersection, the shop name had changed twice. The rain had just stopped, the road was reflective. Stood for a while before leaving.
 
-### 旧书店
+### Old Bookstore
 
-下雨时躲进旧书店，门口的小铃一直响。挑了本二手散文，在店里看了几页。老板用旧报纸包书。
+Took shelter in an old bookstore during the rain, the bell at the door kept ringing. Picked a secondhand essay collection and read a few pages inside. The owner wrapped the book in old newspaper.
 
-### 烛光饭
+### Candlelight Dinner
 
-一次停电，点蜡烛吃饭。菜很简单，屋里却安静得能听见雨声。后来把备用蜡烛补齐。
+There was a power outage once, so we ate by candlelight. The food was simple, but the room was so quiet you could hear the rain. Later, we restocked the spare candles.
 
-### 相框合影
+### Framed Photo Together
 
-整理相册时挑两张旧照片放在同一相框里。放在窗边，早上光线刚好。路过就会多看一眼。
+While organizing the album, I picked two old photos and put them in the same frame. Placed it by the window, the morning light was just right. I always take another look when passing by.
 
-### 久别相聚
+### Reunion After a Long Time
 
-多年未见的朋友来访，一起散步到河边。聊到很晚，还是很多话没说完。临走前约好下次别隔太久。
+A friend I hadn't seen in years came to visit. We walked to the riverside together. Talked late into the night, still had much left unsaid. Before leaving, we promised not to wait so long next time.
 
-### 夜跑路
+### Night Run
 
-转凉后开始夜跑，固定一条长街。路灯一盏盏过去，脚步声很清楚。回家后睡得踏实。
+Started running at night after it got cooler, always along the same long street. Passed streetlights one by one, footsteps clear in the quiet. Slept soundly after getting home.
 
-> 这一年没有大事，但留下不少可以回想的瞬间。
+> Nothing big happened this year, but there were many moments worth remembering.
 
-## 2024年记
+## Memo 2024
 
-### 河边晚
+### Evening by the River
 
-傍晚去河边坐一会儿，远处有人放音乐。风不大，水面有细碎的光。坐到天黑才回。
+Went to sit by the river in the evening, someone was playing music in the distance. The wind was gentle, the water sparkled. Stayed until it was dark.
+
 <figure class="figure">
-  <img src="/images/memo/demo-memo-01.webp" alt="图注示例图片 1" />
-  <figcaption class="figure-caption">图注示例：这是图片的说明文字。</figcaption>
+  <img src="/images/memo/demo-memo-01.webp" alt="Caption Example Image 1" />
+  <figcaption class="figure-caption">Caption Example: This is the description for the image.</figcaption>
 </figure>
 
-### 手写信
+### Handwritten Letter
 
-给远方朋友写了封信，用掉两张纸。写到最后才发现，很多话平时不会说。寄出前又读了一遍。
+Wrote a letter to a distant friend, used up two sheets of paper. Realized at the end that many things are left unsaid in daily life. Read it again before sending.
 
-### 小城旅
+### Small Town Trip
 
-周末去了附近小城，吃了当地早餐。带回几张明信片，贴在书桌前。那趟路短，但很舒服。
+Went to a nearby small town for the weekend, had the local breakfast. Brought back a few postcards and stuck them on my desk. The trip was short, but very pleasant.
 
-## 2023年记
+## Memo 2023
 
-### 初雪
+### First Snow
 
-第一场雪下得很轻，街上很安静。站在窗前看了很久。
+The first snow fell lightly, the street was very quiet. Stood by the window and watched for a long time.
 
+### Book Nook
 
-### 书角落
+Repainted the old bookshelf and filled it with favorite books. Left one shelf empty on purpose. At night, turned on a small lamp and sat for a while.
 
-把旧书架重新刷漆，摆上常读的书。特地留了一层空位。夜里开一盏小灯坐一会儿。
+### Old Friends Reunited
 
-### 旧友再见
-
-久别的朋友聚在一起吃饭。大家都变了些，但笑起来还是熟悉。散场时心里很暖。
+Gathered for a meal with friends I hadn't seen in a long time. Everyone had changed a bit, but the smiles were still familiar. Felt warm inside as we parted.

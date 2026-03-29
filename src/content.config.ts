@@ -39,7 +39,7 @@ const bitsAuthorAvatar = z
     if (normalized === undefined) {
       ctx.addIssue({
         code: 'custom',
-        message: 'author.avatar 只允许相对图片路径（例如 author/avatar.webp），不要带 public/、不要以 / 开头，也不要使用 URL、..、?、#'
+        message: 'author.avatar only allows relative image paths (e.g., author/avatar.webp). Do not include public/, do not start with /, and do not use URL, .., ?, or #.'
       });
       return;
     }
@@ -48,7 +48,7 @@ const bitsAuthorAvatar = z
     if (localFilePath && !hasProjectFile(localFilePath)) {
       ctx.addIssue({
         code: 'custom',
-        message: `author.avatar 指向的本地文件不存在：${localFilePath}`
+        message: `The local file pointed to by author.avatar does not exist: ${localFilePath}`
       });
     }
   })

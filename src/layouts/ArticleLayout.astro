@@ -72,8 +72,8 @@ const shouldShowMetaLine = articleMetaSettings.showDate
       id="reader-exit"
       class="icon-button reader-exit"
       type="button"
-      aria-label="退出阅读"
-      title="退出阅读"
+      aria-label="Exit Reading"
+      title="Exit Reading"
       aria-hidden="true"
       tabindex="-1"
     >
@@ -95,12 +95,12 @@ const shouldShowMetaLine = articleMetaSettings.showDate
         ) : null}
         {articleMetaSettings.showWordCount ? (
           <span class="meta-line__item meta-line__item--desktop-meta">
-            共 {numberFormatter.format(articleReadingStats.wordCount)} 字
+            Total {numberFormatter.format(articleReadingStats.wordCount)} words
           </span>
         ) : null}
         {articleMetaSettings.showReadingTime ? (
           <span class="meta-line__item meta-line__item--desktop-meta">
-            约 {numberFormatter.format(articleReadingStats.readingMinutes)} 分钟
+            About {numberFormatter.format(articleReadingStats.readingMinutes)} minutes
           </span>
         ) : null}
       </div>
@@ -111,11 +111,11 @@ const shouldShowMetaLine = articleMetaSettings.showDate
     <slot />
   </div>
   {(prev || next) ? (
-    <nav class="prev-next" aria-label="上一篇/下一篇">
+    <nav class="prev-next" aria-label="Previous/Next Article">
       <div class="prev-next__item">
         {prev ? (
           <a class="prev-next__link prev-next__link--prev" href={prev.href} rel="prev">
-            <span class="prev-next__label">上一篇</span>
+            <span class="prev-next__label">Previous</span>
             <span class="prev-next__title">{prev.title}</span>
           </a>
         ) : (
@@ -125,7 +125,7 @@ const shouldShowMetaLine = articleMetaSettings.showDate
       <div class="prev-next__item">
         {next ? (
           <a class="prev-next__link prev-next__link--next" href={next.href} rel="next">
-            <span class="prev-next__label">下一篇</span>
+            <span class="prev-next__label">Next</span>
             <span class="prev-next__title">{next.title}</span>
           </a>
         ) : (
@@ -137,7 +137,7 @@ const shouldShowMetaLine = articleMetaSettings.showDate
 
   <Lightbox
     id="lightbox"
-    label="图片预览"
+    label="Image Preview"
     enableZoom={false}
     enablePan={false}
     enableSwipeDownClose={false}

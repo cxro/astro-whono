@@ -8,7 +8,7 @@ const {
   excerpt,
   date,
   visibleTags = [],
-  badge = '随笔',
+  badge = 'Essay',
   slug = '',
   articleMetaSettings
 } = Astro.props as {
@@ -21,7 +21,7 @@ const {
   slug?: string;
   articleMetaSettings: ArticleMetaSettings;
 };
-const displayBadge = badge.trim() ? badge : '随笔';
+const displayBadge = badge.trim() ? badge : 'Essay';
 const shouldShowMetaLine = articleMetaSettings.showDate || (articleMetaSettings.showTags && visibleTags.length > 0);
 ---
 

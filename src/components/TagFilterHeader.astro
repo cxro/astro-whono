@@ -39,7 +39,7 @@ const {
 };
 
 const hasTagEntry = tagOptions.length > 0;
-const tagTriggerText = currentTag ? '切换标签' : '#标签';
+const tagTriggerText = currentTag ? 'Switch Tags' : '#Tags';
 ---
 
 <div class={headerClass}>
@@ -69,7 +69,7 @@ const tagTriggerText = currentTag ? '切换标签' : '#标签';
               {tagTriggerText}
             </a>
             <a class="page-subtitle__link" href={currentTag.clearHref}>
-              清除筛选
+              Clear Filter
             </a>
           </span>
         ) : (
@@ -92,7 +92,7 @@ const tagTriggerText = currentTag ? '切换标签' : '#标签';
         <input
           data-entry-search-input
           type="search"
-          placeholder="搜索：标题 / 摘要 / 标签"
+          placeholder="Search: title / abstract / tags"
           autocomplete="off"
           aria-label={searchAriaLabel}
         />
@@ -121,12 +121,12 @@ const tagTriggerText = currentTag ? '切换标签' : '#标签';
         <div class="entry-tags-dialog__head">
           <div class="entry-tags-dialog__title-wrap">
             <div class="entry-tags-dialog__title-row">
-              <h2 class="entry-tags-dialog__title" id={dialogTitleId} tabindex="-1">{pageTitleText}标签</h2>
-              <p class="entry-tags-dialog__hint">共 {tagOptions.length} 个</p>
+              <h2 class="entry-tags-dialog__title" id={dialogTitleId} tabindex="-1">{pageTitleText} Tags</h2>
+              <p class="entry-tags-dialog__hint">Total {tagOptions.length}</p>
             </div>
           </div>
           <div class="entry-tags-dialog__actions">
-            <button class="entry-tags-dialog__close" type="button" data-entry-tag-close aria-label="关闭标签选择器">
+            <button class="entry-tags-dialog__close" type="button" data-entry-tag-close aria-label="Close tag picker">
               ✕
             </button>
           </div>
@@ -149,17 +149,17 @@ const tagTriggerText = currentTag ? '切换标签' : '#标签';
     <noscript>
       <section class="entry-tags-fallback" id={fallbackListId} aria-labelledby={`${dialogTitleId}-fallback`}>
         <div class="entry-tags-fallback__head">
-          <h2 class="entry-tags-fallback__title" id={`${dialogTitleId}-fallback`}>{pageTitleText}标签</h2>
+          <h2 class="entry-tags-fallback__title" id={`${dialogTitleId}-fallback`}>{pageTitleText} Tags</h2>
           <p class="entry-tags-fallback__hint">
-            当前为无 JavaScript 模式，可直接点击下列标签进入静态结果页。
+            Currently in no-JavaScript mode, click the tags below to access result pages directly.
           </p>
         </div>
         <div class="entry-tags-dialog__toolbar">
-          <span class="entry-tags-dialog__summary">共 {tagOptions.length} 个标签，可直接访问结果页。</span>
+          <span class="entry-tags-dialog__summary">Total {tagOptions.length} tags, you can access result pages directly.</span>
           {currentTag ? (
-            <a class="entry-tags-dialog__clear" href={currentTag.clearHref}>查看全部</a>
+            <a class="entry-tags-dialog__clear" href={currentTag.clearHref}>View All</a>
           ) : (
-            <span class="entry-tags-dialog__summary entry-tags-dialog__summary--secondary">下列标签链接可直接访问结果页</span>
+            <span class="entry-tags-dialog__summary entry-tags-dialog__summary--secondary">The tag links below can access result pages directly</span>
           )}
         </div>
         <div class="entry-tags-dialog__list">
