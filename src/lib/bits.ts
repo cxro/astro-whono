@@ -1,5 +1,5 @@
 import type { CollectionEntry } from 'astro:content';
-import { getPublished, getPageSlice, getTotalPages } from './content';
+import { getPublished, getPageSlice, getTotalPages, type GetPublishedOptions } from './content';
 import { createWithBase, formatDateTime } from '../utils/format';
 import { deriveMarkdownText, truncateText } from '../utils/excerpt';
 
@@ -37,6 +37,8 @@ export type BitsDerivedText = {
   shouldRenderFull: boolean;
 };
 
+type BitsQueryOptions = Pick<GetPublishedOptions<'bits'>, 'includeDraft'>;
+
 const MAX_INDEX_TEXT = 600;
 const FULL_RENDER_LIMIT = 180;
 export const MAX_PRIMARY_BITS_FILTER_YEARS = 2;
@@ -51,8 +53,12 @@ const bitsDerivedTextById = new Map<string, BitsDerivedText>();
 
 const cloneBitEntries = (entries: readonly BitsEntry[]) => entries.slice();
 
-const loadSortedBits = () =>
+const shouldUseDefaultBitsCache = (includeDraft?: boolean) =>
+  shouldMemoizeBitQueries && includeDraft !== true;
+
+const loadSortedBits = ({ includeDraft }: BitsQueryOptions = {}) =>
   getPublished('bits', {
+    ...(includeDraft === undefined ? {} : { includeDraft }),
     orderBy: orderByBitsDate
   });
 
@@ -78,9 +84,9 @@ const buildBitsYearOptions = (bits: readonly BitsEntry[]): BitsYearOption[] => {
     }));
 };
 
-export async function getSortedBits() {
-  if (!shouldMemoizeBitQueries) {
-    return loadSortedBits();
+export async function getSortedBits(options: BitsQueryOptions = {}) {
+  if (!shouldUseDefaultBitsCache(options.includeDraft)) {
+    return loadSortedBits(options);
   }
 
   sortedBitsPromise ??= loadSortedBits();

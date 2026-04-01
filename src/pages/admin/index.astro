@@ -27,8 +27,8 @@ const adminStylesHref = overviewDevState?.adminStylesHref ?? null;
     title="Admin Console"
     subtitle="后台概览"
     description={isDev
-      ? 'Phase 1 开始接入真实概览数据与 settings 导入导出；统计仅基于 metadata 和受控摘要，不把全量正文注入后台首屏。'
-      : '当前环境仅保留后台入口与只读说明；Theme、Data 等后台工作流仍以本地开发环境为准。'}
+      ? 'Phase 2A 开始接入内容索引与只读控制台；统计与列表继续基于 metadata 和受控摘要，不把全量正文注入后台首屏。'
+      : '当前环境仅保留后台入口与只读说明；Theme、Content、Data 等后台工作流仍以本地开发环境为准。'}
     modeLabel={isDev ? 'DEV 可写' : '只读模式'}
     modeHint={isDev
       ? '当前后台仍以本地文件与 Git 为真相来源；生产环境继续保持只读。'
@@ -71,6 +71,7 @@ const adminStylesHref = overviewDevState?.adminStylesHref ?? null;
                 }
               </ul>
               <div class="admin-overview-card__actions">
+                <a class="admin-btn" href={withBase('/admin/content/')}>进入 Content Console</a>
                 <a class="admin-btn admin-btn--muted" href={withBase('/admin/theme/')}>进入 Theme Console</a>
                 <a class="admin-btn admin-btn--ghost" href={withBase('/admin/data/')}>打开 Data Console</a>
               </div>
@@ -130,6 +131,7 @@ const adminStylesHref = overviewDevState?.adminStylesHref ?? null;
                 当前环境仅保留后台稳定入口与子路由结构，不输出可写的 settings、导入导出或内容统计载荷。
               </p>
               <div class="admin-overview-card__actions">
+                <a class="admin-btn admin-btn--ghost" href={withBase('/admin/content/')}>查看 Content 子入口</a>
                 <a class="admin-btn admin-btn--ghost" href={withBase('/admin/theme/')}>查看 Theme 子入口</a>
                 <a class="admin-btn admin-btn--ghost" href={withBase('/admin/data/')}>查看 Data 子入口</a>
               </div>
@@ -142,6 +144,14 @@ const adminStylesHref = overviewDevState?.adminStylesHref ?? null;
                 `/admin/data/` 负责 settings 快照导出与导入；实际写盘仍复用本地开发态的 Theme Console 服务端校验与事务链路。
               </p>
               <p class="admin-overview-card__meta">preview / production 下只保留只读提示，不导出后台数据。</p>
+            </article>
+
+            <article class="admin-overview-card">
+              <p class="admin-overview-card__eyebrow">Phase 2A</p>
+              <h2 class="admin-overview-card__title">Content Console 进入只读索引阶段</h2>
+              <p class="admin-overview-card__body">
+                `/admin/content/` 与 `/admin/content/:collection/` 只提供内容索引、筛选、分页与元数据查看；内容写盘继续留待后续阶段。
+              </p>
             </article>
           </div>
         </section>

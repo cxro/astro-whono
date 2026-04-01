@@ -1,0 +1,125 @@
+---
+import AdminLayout from '../../../components/admin/AdminLayout.astro';
+import AdminShell from '../../../components/admin/AdminShell.astro';
+import {
+  getAdminContentCollectionHref,
+  getAdminContentOverviewData
+} from '../../../lib/admin-console/content';
+import { createWithBase } from '../../../utils/format';
+
+const isDev = import.meta.env.DEV;
+const base = import.meta.env.BASE_URL ?? '/';
+const withBase = createWithBase(base);
+
+const loadContentOverviewDevState = async () => {
+  const { default: adminStylesHref } = await import('../../../styles/components/admin.css?url');
+
+  return {
+    adminStylesHref,
+    overview: await getAdminContentOverviewData()
+  };
+};
+
+const contentOverviewDevState = isDev ? await loadContentOverviewDevState() : null;
+const adminStylesHref = contentOverviewDevState?.adminStylesHref ?? null;
+const contentOverviewTotals = contentOverviewDevState
+  ? contentOverviewDevState.overview.summaries.reduce(
+      (acc, summary) => ({
+        totalCount: acc.totalCount + summary.totalCount,
+        draftCount: acc.draftCount + summary.draftCount
+      }),
+      { totalCount: 0, draftCount: 0 }
+    )
+  : null;
+---
+
+<AdminLayout title="Content Console" stylesHref={adminStylesHref}>
+  <AdminShell
+    currentRoute="content"
+    title="Content Console"
+    subtitle="内容总入口"
+    description={isDev
+      ? 'Phase 2A 首版先落内容索引与只读控制台：按 collection 浏览、筛选、分页与查看元数据，不进入内容写盘。'
+      : '当前环境仅保留 Content Console 的路由结构与只读说明；内容索引仍以本地开发环境为准。'}
+    modeLabel={isDev ? 'DEV 只读索引' : '只读模式'}
+    modeHint={isDev
+      ? '列表与详情继续基于 metadata、frontmatter 与受控摘要生成，不把正文全文或渲染 HTML 注入后台首屏。'
+      : 'preview / production 下不输出内容索引载荷，也不提供任何内容写盘能力。'}
+  >
+    {
+      isDev && contentOverviewDevState ? (
+        <section class="admin-overview admin-content-home">
+          <article class="admin-overview-card admin-content-home__lead">
+            <div class="admin-content-home__lead-copy">
+              <p class="admin-overview-card__eyebrow">Content</p>
+              <h2 class="admin-overview-card__title">内容总览</h2>
+              <p class="admin-overview-card__body">
+                当前共收口 {contentOverviewTotals?.totalCount ?? 0} 条内容，其中草稿 {contentOverviewTotals?.draftCount ?? 0} 条。
+                当前页面只负责 collection 概览与阶段边界说明；具体筛选、分页与只读详情放在各 collection 列表页。
+              </p>
+            </div>
+            <div class="admin-overview-card__actions admin-content-home__lead-actions">
+              <a class="admin-btn" href={withBase('/admin/content/essay/')}>进入 Essay 列表</a>
+              <a class="admin-btn admin-btn--ghost" href={withBase('/admin/')}>返回 Admin 首页</a>
+            </div>
+          </article>
+
+          <div class="admin-content-home__rail">
+            {
+              contentOverviewDevState.overview.summaries.map((summary) => (
+                <article class="admin-overview-card admin-content-home__collection">
+                  <div class="admin-content-home__collection-head">
+                    <p class="admin-overview-card__eyebrow">{summary.key}</p>
+                    {summary.draftCount > 0 ? <span class="admin-badge">draft {summary.draftCount}</span> : null}
+                  </div>
+                  <h2 class="admin-overview-card__title">{summary.label}</h2>
+                  <p class="admin-overview-card__body">
+                    共 {summary.totalCount} 条内容，其中草稿 {summary.draftCount} 条；最近更新时间 {summary.latestDateLabel}。
+                  </p>
+                  <div class="admin-overview-card__actions">
+                    <a class="admin-btn" href={withBase(getAdminContentCollectionHref(summary.key))}>进入 {summary.label}</a>
+                  </div>
+                </article>
+              ))
+            }
+          </div>
+
+          <article class="admin-overview-card admin-content-home__boundary">
+            <p class="admin-overview-card__eyebrow">Phase 2A Boundary</p>
+            <h2 class="admin-overview-card__title">当前阶段仍是只读控制台</h2>
+            <ul class="admin-overview-card__list">
+              <li>真实路由：`/admin/content/` 与 `/admin/content/:collection/`。</li>
+              <li>URL 次级状态：`q / draft / tag / year / sort / page / entry`。</li>
+              <li>维护动作：公开页跳转、路径复制、`entry.id` 复制。</li>
+              <li>仍不包含：frontmatter 写回、正文编辑、内容写盘 API。</li>
+            </ul>
+          </article>
+        </section>
+      ) : (
+        <section class="admin-overview">
+          <div class="admin-overview__grid">
+            <article class="admin-overview-card">
+              <p class="admin-overview-card__eyebrow">Readonly Boundary</p>
+              <h2 class="admin-overview-card__title">Content Console 仅在本地开发环境可用</h2>
+              <p class="admin-overview-card__body">
+                当前环境继续保留 `/admin/content/` 与 `/admin/content/:collection/` 路由结构，但不输出内容列表、筛选结果或只读详情载荷。
+              </p>
+              <div class="admin-overview-card__actions">
+                <a class="admin-btn admin-btn--ghost" href={withBase('/admin/')}>返回 Admin 首页</a>
+                <a class="admin-btn admin-btn--ghost" href={withBase('/admin/theme/')}>查看 Theme 子入口</a>
+              </div>
+            </article>
+
+            <article class="admin-overview-card">
+              <p class="admin-overview-card__eyebrow">Phase 2A</p>
+              <h2 class="admin-overview-card__title">当前仅保留只读说明</h2>
+              <p class="admin-overview-card__body">
+                内容索引、分页与详情卡片只在 `npm run dev` 下可见；preview / production 继续把 `/admin` 视为只读工具壳层。
+              </p>
+            </article>
+          </div>
+        </section>
+      )
+    }
+  </AdminShell>
+</AdminLayout>

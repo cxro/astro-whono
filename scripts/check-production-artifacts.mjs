@@ -1,7 +1,11 @@
 import { existsSync, readFileSync } from 'node:fs';
 import path from 'node:path';
 import { pathToFileURL } from 'node:url';
-import { assertAdminSettingsStaticShell, expect } from './smoke-utils.mjs';
+import {
+  assertAdminContentStaticShell,
+  assertAdminSettingsStaticShell,
+  expect
+} from './smoke-utils.mjs';
 
 const normalizeSiteUrl = (value) => value.trim().replace(/\/+$/, '');
 
@@ -31,11 +35,16 @@ export const runProductionArtifactCheck = async (options = {}) => {
     'dist/essay/rss.xml',
     'dist/index.html',
     'dist/about/index.html',
+    'dist/admin/content/index.html',
+    'dist/admin/content/essay/index.html',
+    'dist/admin/content/bits/index.html',
+    'dist/admin/content/memo/index.html',
     'dist/bits/index.html',
     'dist/admin/data/index.html',
     'dist/admin/theme/index.html',
     'dist/api/admin/settings',
-    'dist/api/admin/data/settings'
+    'dist/api/admin/data/settings',
+    'dist/api/admin/content/entry'
   ];
 
   for (const artifactPath of requiredArtifacts) {
@@ -55,6 +64,7 @@ export const runProductionArtifactCheck = async (options = {}) => {
   );
   expect(!sitemapXml.includes('/admin/'), 'Admin route leaked into sitemap');
   expect(!sitemapXml.includes('/admin/theme/'), 'Admin theme route leaked into sitemap');
+  expect(!sitemapXml.includes('/admin/content/'), 'Admin content route leaked into sitemap');
   expect(!sitemapXml.includes('/admin/data/'), 'Admin data route leaked into sitemap');
   expect(
     !sitemapXml.includes(`${siteUrl}/bits/draft-dialog/`),
@@ -81,10 +91,18 @@ export const runProductionArtifactCheck = async (options = {}) => {
   expect(!/--admin-status-/.test(aboutHtml), 'Public about page still contains admin CSS tokens');
 
   const adminHtml = readText('dist/admin/index.html');
+  const adminContentHtml = readText('dist/admin/content/index.html');
+  const adminContentEssayHtml = readText('dist/admin/content/essay/index.html');
+  const adminContentBitsHtml = readText('dist/admin/content/bits/index.html');
+  const adminContentMemoHtml = readText('dist/admin/content/memo/index.html');
   const adminThemeHtml = readText('dist/admin/theme/index.html');
   const adminDataHtml = readText('dist/admin/data/index.html');
   const readonlyAdminHtmlChecks = [
     ['dist/admin/index.html', adminHtml, 'Admin Console', '/admin/theme/'],
+    ['dist/admin/content/index.html', adminContentHtml, 'Content Console', '/admin/'],
+    ['dist/admin/content/essay/index.html', adminContentEssayHtml, 'Content Console', '/admin/content/'],
+    ['dist/admin/content/bits/index.html', adminContentBitsHtml, 'Content Console', '/admin/content/'],
+    ['dist/admin/content/memo/index.html', adminContentMemoHtml, 'Content Console', '/admin/content/'],
     ['dist/admin/theme/index.html', adminThemeHtml, 'Theme Console', '/admin/'],
     ['dist/admin/data/index.html', adminDataHtml, 'Data Console', '/admin/']
   ];
@@ -94,6 +112,7 @@ export const runProductionArtifactCheck = async (options = {}) => {
     expect(html.includes(linkHref), `${filePath} is missing the expected admin route link`);
     expect(!html.includes('data-admin-root'), `${filePath} should stay readonly outside dev`);
     expect(!html.includes('id="admin-bootstrap"'), `${filePath} should not emit theme bootstrap payload`);
+    expect(!html.includes('data-admin-content-root'), `${filePath} should not emit content console payload`);
     expect(!/index@_@astro\.[^"]+\.css/.test(html), `${filePath} still links admin-only CSS`);
     expect(
       !/<script type="module" src="\/_astro\/[^"]+"><\/script>/.test(html),
@@ -267,6 +286,12 @@ export const runProductionArtifactCheck = async (options = {}) => {
   assertAdminSettingsStaticShell('dist/api/admin/settings', adminSettingsArtifact);
   const adminDataSettingsArtifact = readText('dist/api/admin/data/settings');
   assertAdminSettingsStaticShell('dist/api/admin/data/settings', adminDataSettingsArtifact, '/api/admin/data/settings/');
+  const adminContentEntryArtifact = readText('dist/api/admin/content/entry');
+  assertAdminContentStaticShell(
+    'dist/api/admin/content/entry',
+    adminContentEntryArtifact,
+    '/api/admin/content/entry/'
+  );
 
   console.log('Production artifact verification passed.');
 };

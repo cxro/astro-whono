@@ -336,4 +336,57 @@
   .admin-toggle__control {
     min-height: 32px;
   }
+
+  .admin-content-toolbar__head,
+  .admin-content-panel__head,
+  .admin-content-toolbar__bar,
+  .admin-content-toolbar__footer,
+  .admin-content-inspector__head {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .admin-content-home__lead,
+  .admin-content-home__boundary-grid,
+  .admin-content-home__rail,
+  .admin-content-inspector__grid,
+  .admin-content-item__facts {
+    grid-template-columns: 1fr;
+  }
+
+  .admin-content-toolbar {
+    position: static;
+    top: auto;
+  }
+
+  .admin-content-switcher {
+    width: 100%;
+  }
+
+  .admin-content-filter-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .admin-content-field--query {
+    grid-column: auto;
+  }
+
+  .admin-content-item {
+    grid-template-columns: 1fr;
+  }
+
+  .admin-content-item__actions {
+    justify-content: flex-start;
+    justify-items: start;
+    min-width: 0;
+  }
+
+  .admin-content-editor__grid {
+    grid-template-columns: 1fr;
+  }
+
+  .admin-content-editor__toggles {
+    flex-direction: column;
+    align-items: flex-start;
+  }
 }

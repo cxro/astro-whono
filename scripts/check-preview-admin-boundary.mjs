@@ -5,6 +5,7 @@ import path from 'node:path';
 import { pathToFileURL } from 'node:url';
 import { preview } from 'astro';
 import {
+  assertAdminContentStaticResponse,
   assertAdminSettingsStaticResponse,
   expect,
   findAvailablePort,
@@ -131,6 +132,17 @@ const assertReadonlyAdminDataShell = (label, response) => {
   expect(!response.body.includes('id="admin-data-bootstrap"'), `${label} should not emit data bootstrap payload outside dev`);
 };
 
+const assertReadonlyAdminContentShell = (label, response, linkHref) => {
+  expect(response.status === 200, `${label} returned ${response.status}`);
+  expect(
+    response.contentType.toLowerCase().includes('text/html'),
+    `${label} did not return HTML`
+  );
+  expect(response.body.includes('Content Console'), `${label} is missing the content heading`);
+  expect(response.body.includes(linkHref), `${label} is missing the expected admin route link`);
+  expect(!response.body.includes('data-admin-content-root'), `${label} should stay readonly outside dev`);
+};
+
 const assertAdminThemeDevBootstrapSafe = (label, response) => {
   expect(response.status === 200, `${label} returned ${response.status}`);
   expect(
@@ -202,9 +214,25 @@ export const runPreviewAdminBoundaryCheck = async () => {
 
     const adminOverviewResponse = await request(baseUrl, '/admin/');
     const adminThemeResponse = await request(baseUrl, '/admin/theme/');
+    const adminContentResponse = await request(baseUrl, '/admin/content/');
+    const adminEssayContentResponse = await request(baseUrl, '/admin/content/essay/');
     const adminDataResponse = await request(baseUrl, '/admin/data/');
     const getResponse = await request(baseUrl, '/api/admin/settings/');
     const exportResponse = await request(baseUrl, '/api/admin/data/settings/');
+    const contentGetResponse = await request(baseUrl, '/api/admin/content/entry/');
+    const contentPostResponse = await request(baseUrl, '/api/admin/content/entry/', {
+      method: 'POST',
+      headers: {
+        'content-type': 'application/json',
+        origin: baseUrl
+      },
+      body: JSON.stringify({
+        collection: 'essay',
+        entryId: 'preview-boundary-demo',
+        revision: 'invalid',
+        frontmatter: {}
+      })
+    });
     const postResponse = await request(baseUrl, '/api/admin/settings/', {
       method: 'POST',
       headers: {
@@ -216,11 +244,15 @@ export const runPreviewAdminBoundaryCheck = async () => {
 
     assertAdminOverviewShell('Preview GET /admin/', adminOverviewResponse);
     assertReadonlyAdminThemeShell('Preview GET /admin/theme/', adminThemeResponse);
+    assertReadonlyAdminContentShell('Preview GET /admin/content/', adminContentResponse, '/admin/');
+    assertReadonlyAdminContentShell('Preview GET /admin/content/essay/', adminEssayContentResponse, '/admin/content/');
     assertReadonlyAdminDataShell('Preview GET /admin/data/', adminDataResponse);
     assertAdminSettingsStaticResponse('GET /api/admin/settings/', getResponse);
     assertAdminSettingsStaticResponse('GET /api/admin/data/settings/', exportResponse, '/api/admin/data/settings/');
+    assertAdminContentStaticResponse('GET /api/admin/content/entry/', contentGetResponse);
+    assertAdminContentStaticResponse('POST /api/admin/content/entry/', contentPostResponse);
     assertAdminSettingsStaticResponse('POST /api/admin/settings/', postResponse);
-    console.log('Preview admin settings boundary check passed.');
+    console.log('Preview admin boundary check passed.');
   } finally {
     await server.stop();
   }
@@ -268,6 +300,8 @@ export const runDevAdminSettingsSmokeCheck = async () => {
     expect(payload.settings && typeof payload.settings === 'object', 'Dev payload settings snapshot is missing');
 
     const exportResponse = await request(baseUrl, '/api/admin/data/settings/');
+    const contentOverviewResponse = await request(baseUrl, '/admin/content/');
+    const contentEssayResponse = await request(baseUrl, '/admin/content/essay/');
     expect(exportResponse.status === 200, `Dev GET /api/admin/data/settings/ returned ${exportResponse.status}`);
     expect(
       exportResponse.contentType.toLowerCase().includes('application/json'),
@@ -279,6 +313,13 @@ export const runDevAdminSettingsSmokeCheck = async () => {
       && exportResponse.json.manifest.includedScopes.includes('settings'),
       'Dev export manifest is missing includedScopes=settings'
     );
+    expect(contentOverviewResponse.status === 200, `Dev GET /admin/content/ returned ${contentOverviewResponse.status}`);
+    expect(contentOverviewResponse.body.includes('Content Console'), 'Dev GET /admin/content/ is missing the content heading');
+    expect(contentOverviewResponse.body.includes('/admin/content/essay/'), 'Dev GET /admin/content/ is missing the essay route link');
+    expect(contentEssayResponse.status === 200, `Dev GET /admin/content/essay/ returned ${contentEssayResponse.status}`);
+    expect(contentEssayResponse.body.includes('data-admin-content-root'), 'Dev GET /admin/content/essay/ did not mount the content console root');
+    expect(contentEssayResponse.body.includes('entry.id'), 'Dev GET /admin/content/essay/ is missing readonly detail metadata');
+    expect(contentEssayResponse.body.includes('复制路径'), 'Dev GET /admin/content/essay/ is missing the copy-path action');
     expect(
       typeof exportResponse.json?.manifest?.locale === 'string' && exportResponse.json.manifest.locale.length > 0,
       'Dev export manifest is missing locale'

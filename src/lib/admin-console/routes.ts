@@ -1,8 +1,8 @@
-export type AdminRouteId = 'overview' | 'theme' | 'data';
+export type AdminRouteId = 'overview' | 'theme' | 'content' | 'data';
 
 export type AdminRouteDefinition = {
   id: AdminRouteId;
-  href: '/admin/' | '/admin/theme/' | '/admin/data/';
+  href: '/admin/' | '/admin/theme/' | '/admin/content/' | '/admin/data/';
   label: string;
   description: string;
 };
@@ -19,6 +19,12 @@ export const ADMIN_ROUTES = [
     href: '/admin/theme/',
     label: 'Theme',
     description: '主题设置'
+  },
+  {
+    id: 'content',
+    href: '/admin/content/',
+    label: 'Content',
+    description: '内容索引与只读控制台'
   },
   {
     id: 'data',

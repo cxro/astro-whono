@@ -1,0 +1,706 @@
+---
+import AdminLayout from '../../../components/admin/AdminLayout.astro';
+import AdminShell from '../../../components/admin/AdminShell.astro';
+import {
+  ADMIN_CONTENT_COLLECTIONS,
+  ADMIN_CONTENT_DRAFT_OPTIONS,
+  ADMIN_CONTENT_SORT_OPTIONS,
+  getAdminContentCollectionHref,
+  getAdminContentCollectionPageData,
+  getAdminContentPublicFallbackLabel,
+  isAdminContentCollectionKey,
+  type AdminContentCollectionKey
+} from '../../../lib/admin-console/content';
+import { readAdminContentEntryEditorPayload } from '../../../lib/admin-console/content-shared';
+import { createWithBase } from '../../../utils/format';
+
+export const getStaticPaths = () =>
+  ADMIN_CONTENT_COLLECTIONS.map((collection) => ({
+    params: { collection }
+  }));
+
+const collectionParam = Astro.params.collection;
+if (!isAdminContentCollectionKey(collectionParam ?? '')) {
+  throw new Error(`Unsupported admin content collection route: ${collectionParam ?? '(missing)'}`);
+}
+
+const collection: AdminContentCollectionKey = collectionParam;
+
+const isDev = import.meta.env.DEV;
+const base = import.meta.env.BASE_URL ?? '/';
+const withBase = createWithBase(base);
+
+const loadContentDevState = async () => {
+  const [{ default: adminContentScriptHref }, { default: adminStylesHref }] = await Promise.all([
+    import('../../../scripts/admin-content/index.ts?url'),
+    import('../../../styles/components/admin.css?url')
+  ]);
+
+  return {
+    adminContentScriptHref,
+    adminStylesHref,
+    pageData: await getAdminContentCollectionPageData(collection, Astro.url.searchParams)
+  };
+};
+
+const contentDevState = isDev ? await loadContentDevState() : null;
+const pageData = contentDevState?.pageData ?? null;
+const adminStylesHref = contentDevState?.adminStylesHref ?? null;
+const currentCollectionHref = getAdminContentCollectionHref(collection);
+const selectedEntryEditorPayload = isDev && pageData?.selectedEntry
+  ? await readAdminContentEntryEditorPayload(collection, pageData.selectedEntry.id)
+  : null;
+const selectedEntryRelativePath = selectedEntryEditorPayload?.relativePath ?? pageData?.selectedEntry?.relativePath ?? '';
+const adminContentBootstrap = selectedEntryEditorPayload?.writable
+  ? JSON.stringify({
+      endpoint: withBase('/api/admin/content/entry'),
+      collection: selectedEntryEditorPayload.collection,
+      entryId: selectedEntryEditorPayload.entryId,
+      revision: selectedEntryEditorPayload.revision
+    })
+  : null;
+
+const buildCollectionQuery = (
+  overrides: {
+    q?: string;
+    draft?: string;
+    tag?: string;
+    year?: string;
+    sort?: string;
+    page?: string;
+    entry?: string;
+  } = {}
+) => {
+  if (!pageData) return '';
+
+  const params = new URLSearchParams();
+  const append = (key: string, value: string) => {
+    const normalized = value.trim();
+    if (normalized) params.set(key, normalized);
+  };
+
+  append('q', overrides.q ?? pageData.filterState.query);
+
+  const draft = (overrides.draft ?? pageData.filterState.draft).trim();
+  if (draft && draft !== 'all') params.set('draft', draft);
+
+  const tag = (overrides.tag ?? pageData.filterState.tag).trim();
+  if (tag) params.set('tag', tag);
+
+  const year = (overrides.year ?? (pageData.filterState.year !== null ? String(pageData.filterState.year) : '')).trim();
+  if (year) params.set('year', year);
+
+  const sort = (overrides.sort ?? pageData.filterState.sort).trim();
+  if (sort && sort !== 'recent') params.set('sort', sort);
+
+  const page = (overrides.page ?? (pageData.currentPage > 1 ? String(pageData.currentPage) : '')).trim();
+  if (page && page !== '1') params.set('page', page);
+
+  const entry = (overrides.entry ?? pageData.filterState.entry).trim();
+  if (entry) params.set('entry', entry);
+
+  const query = params.toString();
+  return query ? `?${query}` : '';
+};
+
+const buildCurrentCollectionHref = (
+  overrides: Parameters<typeof buildCollectionQuery>[0] = {}
+) => withBase(`${currentCollectionHref}${buildCollectionQuery(overrides)}`);
+
+const resetHref = withBase(currentCollectionHref);
+const activeFilterCount = pageData
+  ? [
+      pageData.filterState.query.length > 0,
+      pageData.filterState.draft !== 'all',
+      pageData.filterState.tag.length > 0,
+      pageData.filterState.year !== null,
+      pageData.filterState.sort !== 'recent'
+    ].filter(Boolean).length
+  : 0;
+---
+
+<AdminLayout title="Content Console" stylesHref={adminStylesHref}>
+  <AdminShell
+    currentRoute="content"
+    title="Content Console"
+    subtitle={pageData
+      ? `${pageData.collectionLabel} · ${selectedEntryEditorPayload?.writable ? 'frontmatter 编辑' : '只读索引'}`
+      : '只读索引'}
+    description={isDev
+      ? '当前阶段在保留列表筛选、分页与只读详情的同时，首批开放 essay / bits 的 frontmatter 精确写回；正文仍保持只读。'
+      : '当前环境仅保留 `/admin/content/:collection/` 路由结构与只读说明；内容索引仍需在本地开发环境查看。'}
+    modeLabel={isDev ? 'DEV 只读索引' : '只读模式'}
+    modeHint={isDev
+      ? '次级状态继续通过 URL 查询参数承载；本轮仅打开 frontmatter 写回，不引入正文编辑或媒体面板。'
+      : 'preview / production 下不输出内容索引载荷，也不提供复制路径或公开页跳转按钮。'}
+  >
+    {isDev ? (
+      <div slot="status" class="admin-status-slot">
+        <p id="admin-content-status-live" class="admin-sr-only" role="status" aria-live="polite" aria-atomic="true"></p>
+        <p id="admin-content-status" class="admin-status" data-state="idle">等待选择条目</p>
+      </div>
+    ) : null}
+
+    {
+      isDev && pageData ? (
+        <section class="admin-overview admin-content-console" data-admin-content-root>
+          <form class="admin-overview-card admin-content-toolbar" method="get">
+            <div class="admin-content-toolbar__bar">
+              <div class="admin-content-toolbar__intro">
+                <p class="admin-overview-card__eyebrow">Content</p>
+                <h2 class="admin-overview-card__title">{pageData.collectionLabel} 列表</h2>
+                <p class="admin-overview-card__body">
+                  当前命中 {pageData.filteredCount} / {pageData.totalCount} 条内容，
+                  当前第 {pageData.currentPage} / {pageData.totalPages} 页。
+                  {activeFilterCount > 0 ? ` 已启用 ${activeFilterCount} 项筛选。` : ' 当前按默认时间顺序显示。'}
+                </p>
+              </div>
+              <div class="admin-content-switcher" role="tablist" aria-label="内容集合切换">
+                {
+                  ADMIN_CONTENT_COLLECTIONS.map((item) => {
+                    const href = withBase(getAdminContentCollectionHref(item));
+                    const isActive = item === collection;
+                    return (
+                      <a
+                        href={href}
+                        class:list={['admin-content-switcher__link', isActive && 'is-active']}
+                        aria-current={isActive ? 'page' : undefined}
+                      >
+                        {item}
+                      </a>
+                    );
+                  })
+                }
+              </div>
+            </div>
+
+            <div class="admin-content-filter-grid">
+              <label class="admin-field admin-content-field admin-content-field--query">
+                <span class="admin-field__label">搜索 title / entry.id / slug</span>
+                <input type="search" name="q" value={pageData.filterState.query} placeholder="支持空格分词" />
+              </label>
+
+              <label class="admin-field admin-content-field">
+                <span class="admin-field__label">草稿筛选</span>
+                <select name="draft">
+                  {
+                    ADMIN_CONTENT_DRAFT_OPTIONS.map((option) => (
+                      <option value={option.value} selected={option.value === pageData.filterState.draft}>
+                        {option.label}
+                      </option>
+                    ))
+                  }
+                </select>
+              </label>
+
+              <label class="admin-field admin-content-field">
+                <span class="admin-field__label">排序</span>
+                <select name="sort">
+                  {
+                    ADMIN_CONTENT_SORT_OPTIONS.map((option) => (
+                      <option value={option.value} selected={option.value === pageData.filterState.sort}>
+                        {option.label}
+                      </option>
+                    ))
+                  }
+                </select>
+              </label>
+
+              {
+                pageData.tagOptions.length > 0 ? (
+                  <label class="admin-field admin-content-field">
+                    <span class="admin-field__label">标签</span>
+                    <select name="tag">
+                      <option value="">全部标签</option>
+                      {
+                        pageData.tagOptions.map((option) => (
+                          <option value={option.value} selected={option.value === pageData.filterState.tag}>
+                            {option.label} ({option.count})
+                          </option>
+                        ))
+                      }
+                    </select>
+                  </label>
+                ) : null
+              }
+
+              {
+                pageData.yearOptions.length > 0 ? (
+                  <label class="admin-field admin-content-field">
+                    <span class="admin-field__label">年份</span>
+                    <select name="year">
+                      <option value="">全部年份</option>
+                      {
+                        pageData.yearOptions.map((option) => (
+                          <option
+                            value={option.value}
+                            selected={option.value === (pageData.filterState.year !== null ? String(pageData.filterState.year) : '')}
+                          >
+                            {option.label} ({option.count})
+                          </option>
+                        ))
+                      }
+                    </select>
+                  </label>
+                ) : null
+              }
+            </div>
+
+            <div class="admin-content-toolbar__footer">
+              <p class="admin-content-toolbar__hint">
+                {pageData.hasActiveFilters
+                  ? '当前 URL 已记录筛选状态，可以直接保留这次检索结果。'
+                  : '选择条目后会在下方显示只读详情；本阶段仍不进入 frontmatter 写盘。'}
+              </p>
+              <div class="admin-overview-card__actions">
+                <button class="admin-btn" type="submit">应用筛选</button>
+                <a class="admin-btn admin-btn--ghost" href={resetHref}>重置条件</a>
+                <a class="admin-btn admin-btn--ghost" href={withBase('/admin/content/')}>返回 Content 总入口</a>
+              </div>
+            </div>
+          </form>
+
+          {
+            pageData.selectedEntry ? (
+              <article class="admin-overview-card admin-content-inspector">
+                <div class="admin-content-inspector__head">
+                  <div class="admin-content-inspector__intro">
+                    <p class="admin-overview-card__eyebrow">当前条目</p>
+                    <h2 class="admin-overview-card__title">{pageData.selectedEntry.title}</h2>
+                    <p class="admin-overview-card__body">
+                      当前继续展示路径、frontmatter 与受控摘要；若 collection 属于首批可写范围，会在下方补充 frontmatter 编辑卡片。
+                    </p>
+                  </div>
+                  <div class="admin-overview-card__actions">
+                    <button
+                      type="button"
+                      class="admin-btn"
+                      data-admin-copy-button
+                      data-copy-label="相对路径"
+                      data-copy-text={selectedEntryRelativePath}
+                    >
+                      复制路径
+                    </button>
+                    <button
+                      type="button"
+                      class="admin-btn admin-btn--ghost"
+                      data-admin-copy-button
+                      data-copy-label="entry.id"
+                      data-copy-text={pageData.selectedEntry.id}
+                    >
+                      复制 entry.id
+                    </button>
+                    {
+                      pageData.selectedEntry.publicHref ? (
+                        <a class="admin-btn admin-btn--ghost" href={withBase(pageData.selectedEntry.publicHref)}>查看公开页</a>
+                      ) : null
+                    }
+                  </div>
+                </div>
+
+                {
+                  pageData.selectedEntry.publicHref ? null : (
+                    <p class="admin-content-inspector__note">{getAdminContentPublicFallbackLabel(pageData.selectedEntry)}</p>
+                  )
+                }
+
+                <div class="admin-content-inspector__grid">
+                  <section class="admin-content-inspector__block">
+                    <h3 class="admin-content-frontmatter__title">索引元信息</h3>
+                    <dl class="admin-data-meta admin-content-detail-meta">
+                      <dt class="admin-data-meta__label">collection</dt>
+                      <dd class="admin-data-meta__value">{pageData.selectedEntry.collection}</dd>
+                      <dt class="admin-data-meta__label">entry.id</dt>
+                      <dd class="admin-data-meta__value"><code>{pageData.selectedEntry.id}</code></dd>
+                      <dt class="admin-data-meta__label">relative path</dt>
+                      <dd class="admin-data-meta__value"><code>{selectedEntryRelativePath}</code></dd>
+                      <dt class="admin-data-meta__label">public slug</dt>
+                      <dd class="admin-data-meta__value">
+                        {pageData.selectedEntry.slug ? <code>{pageData.selectedEntry.slug}</code> : '(未设置)'}
+                      </dd>
+                      <dt class="admin-data-meta__label">date</dt>
+                      <dd class="admin-data-meta__value">{pageData.selectedEntry.dateLabel}</dd>
+                    </dl>
+                  </section>
+
+                  <section class="admin-content-inspector__block">
+                    <h3 class="admin-content-frontmatter__title">主要 frontmatter</h3>
+                    <dl class="admin-data-meta admin-content-detail-meta">
+                      {
+                        pageData.selectedEntry.frontmatterFields.map((field) => (
+                          <>
+                            <dt class="admin-data-meta__label">{field.label}</dt>
+                            <dd class="admin-data-meta__value">{field.value}</dd>
+                          </>
+                        ))
+                      }
+                    </dl>
+                  </section>
+
+                  <section class="admin-content-inspector__block admin-content-inspector__block--summary">
+                    <h3 class="admin-content-frontmatter__title">受控摘要</h3>
+                    <p class="admin-overview-card__body">
+                      {pageData.selectedEntry.excerpt ?? '当前条目未生成可展示的受控摘要。'}
+                    </p>
+                  </section>
+                </div>
+              </article>
+            ) : null
+          }
+
+          {
+            selectedEntryEditorPayload ? (
+              selectedEntryEditorPayload.writable ? (
+                <article class="admin-overview-card admin-content-panel admin-content-editor">
+                  <div class="admin-content-panel__head">
+                    <div>
+                      <p class="admin-overview-card__eyebrow">Frontmatter Editor</p>
+                      <h2 class="admin-overview-card__title">首批可写字段</h2>
+                      <p class="admin-overview-card__body">
+                        当前仅开放 {selectedEntryEditorPayload.collection} 的 frontmatter 写回。保存前可先执行
+                        dry-run；正文内容继续保持只读，不在本轮进入浏览器写盘。
+                      </p>
+                    </div>
+                    <div class="admin-content-results__meta">
+                      <span class="admin-badge">revision</span>
+                      <code class="admin-content-editor__revision">{selectedEntryEditorPayload.revision}</code>
+                    </div>
+                  </div>
+
+                  <div id="admin-content-editor-error-banner" class="admin-banner admin-banner--error" hidden>
+                    <div class="admin-banner__header">
+                      <div class="admin-banner__lead">
+                        <span class="admin-banner__icon" aria-hidden="true">!</span>
+                        <div class="admin-banner__copy">
+                          <p id="admin-content-editor-error-title" class="admin-banner__title">frontmatter 未写入</p>
+                          <p id="admin-content-editor-error-message" class="admin-banner__message" hidden></p>
+                        </div>
+                      </div>
+                    </div>
+                    <ul id="admin-content-editor-error-list" class="admin-banner__list" hidden></ul>
+                  </div>
+
+                  <form id="admin-content-editor-form" class="admin-content-editor__form">
+                    <div class="admin-content-editor__grid">
+                      {
+                        selectedEntryEditorPayload.collection === 'essay' ? (
+                          <>
+                            <label class="admin-field admin-content-editor__field" data-field-path="title">
+                              <span class="admin-field__label">title</span>
+                              <input id="admin-content-title" name="title" type="text" value={selectedEntryEditorPayload.values.title} />
+                              <p class="admin-content-editor__error" data-field-error="title" hidden></p>
+                            </label>
+
+                            <label class="admin-field admin-content-editor__field" data-field-path="date">
+                              <span class="admin-field__label">date</span>
+                              <input id="admin-content-date" name="date" type="date" value={selectedEntryEditorPayload.values.date} />
+                              <p class="admin-content-editor__error" data-field-error="date" hidden></p>
+                            </label>
+
+                            <label class="admin-field admin-content-editor__field admin-field--full" data-field-path="description">
+                              <span class="admin-field__label">description</span>
+                              <textarea id="admin-content-description" name="description">{selectedEntryEditorPayload.values.description}</textarea>
+                              <p class="admin-content-editor__error" data-field-error="description" hidden></p>
+                            </label>
+
+                            <label class="admin-field admin-content-editor__field admin-field--full" data-field-path="tags">
+                              <span class="admin-field__label">tags（每行一个）</span>
+                              <textarea id="admin-content-tags" name="tagsText">{selectedEntryEditorPayload.values.tagsText}</textarea>
+                              <p class="admin-content-editor__error" data-field-error="tags" hidden></p>
+                            </label>
+
+                            <label class="admin-field admin-content-editor__field" data-field-path="slug">
+                              <span class="admin-field__label">slug</span>
+                              <input id="admin-content-slug" name="slug" type="text" value={selectedEntryEditorPayload.values.slug} />
+                              <p class="admin-content-editor__error" data-field-error="slug" hidden></p>
+                            </label>
+
+                            <label class="admin-field admin-content-editor__field" data-field-path="badge">
+                              <span class="admin-field__label">badge</span>
+                              <input id="admin-content-badge" name="badge" type="text" value={selectedEntryEditorPayload.values.badge} />
+                              <p class="admin-content-editor__error" data-field-error="badge" hidden></p>
+                            </label>
+
+                            <label class="admin-field admin-content-editor__field admin-field--full" data-field-path="cover">
+                              <span class="admin-field__label">cover</span>
+                              <input id="admin-content-cover" name="cover" type="text" value={selectedEntryEditorPayload.values.cover} />
+                              <p class="admin-content-editor__error" data-field-error="cover" hidden></p>
+                            </label>
+
+                            <div class="admin-content-editor__toggles">
+                              <label class="admin-toggle-row">
+                                <input id="admin-content-draft" name="draft" type="checkbox" checked={selectedEntryEditorPayload.values.draft} />
+                                <span>draft</span>
+                              </label>
+                              <label class="admin-toggle-row">
+                                <input id="admin-content-archive" name="archive" type="checkbox" checked={selectedEntryEditorPayload.values.archive} />
+                                <span>archive</span>
+                              </label>
+                            </div>
+                          </>
+                        ) : selectedEntryEditorPayload.collection === 'bits' ? (
+                          <>
+                            <label class="admin-field admin-content-editor__field" data-field-path="title">
+                              <span class="admin-field__label">title（可选）</span>
+                              <input id="admin-content-title" name="title" type="text" value={selectedEntryEditorPayload.values.title} />
+                              <p class="admin-content-editor__error" data-field-error="title" hidden></p>
+                            </label>
+
+                            <label class="admin-field admin-content-editor__field" data-field-path="date">
+                              <span class="admin-field__label">date</span>
+                              <input id="admin-content-date" name="date" type="text" value={selectedEntryEditorPayload.values.date} />
+                              <p class="admin-content-editor__error" data-field-error="date" hidden></p>
+                            </label>
+
+                            <label class="admin-field admin-content-editor__field admin-field--full" data-field-path="description">
+                              <span class="admin-field__label">description</span>
+                              <textarea id="admin-content-description" name="description">{selectedEntryEditorPayload.values.description}</textarea>
+                              <p class="admin-content-editor__error" data-field-error="description" hidden></p>
+                            </label>
+
+                            <label class="admin-field admin-content-editor__field admin-field--full" data-field-path="tags">
+                              <span class="admin-field__label">tags（每行一个）</span>
+                              <textarea id="admin-content-tags" name="tagsText">{selectedEntryEditorPayload.values.tagsText}</textarea>
+                              <p class="admin-content-editor__error" data-field-error="tags" hidden></p>
+                            </label>
+
+                            <label class="admin-field admin-content-editor__field" data-field-path="authorName">
+                              <span class="admin-field__label">author.name</span>
+                              <input id="admin-content-author-name" name="authorName" type="text" value={selectedEntryEditorPayload.values.authorName} />
+                              <p class="admin-content-editor__error" data-field-error="authorName" hidden></p>
+                            </label>
+
+                            <label class="admin-field admin-content-editor__field" data-field-path="authorAvatar">
+                              <span class="admin-field__label">author.avatar</span>
+                              <input id="admin-content-author-avatar" name="authorAvatar" type="text" value={selectedEntryEditorPayload.values.authorAvatar} />
+                              <p class="admin-content-editor__error" data-field-error="authorAvatar" hidden></p>
+                            </label>
+
+                            <label class="admin-field admin-content-editor__field admin-field--full" data-field-path="imagesText">
+                              <span class="admin-field__label">images（JSON 数组）</span>
+                              <textarea id="admin-content-images" name="imagesText" spellcheck="false">{selectedEntryEditorPayload.values.imagesText}</textarea>
+                              <p class="admin-content-editor__error" data-field-error="imagesText" hidden></p>
+                            </label>
+
+                            <div class="admin-content-editor__toggles">
+                              <label class="admin-toggle-row">
+                                <input id="admin-content-draft" name="draft" type="checkbox" checked={selectedEntryEditorPayload.values.draft} />
+                                <span>draft</span>
+                              </label>
+                            </div>
+                          </>
+                        ) : null
+                      }
+                    </div>
+                  </form>
+
+                  <article id="admin-content-write-preview" class="admin-overview-card admin-content-editor__preview" hidden>
+                    <p id="admin-content-write-preview-title" class="admin-overview-card__title">dry-run 结果</p>
+                    <p id="admin-content-write-preview-body" class="admin-overview-card__body"></p>
+                    <ul id="admin-content-write-preview-list" class="admin-content-editor__preview-list"></ul>
+                  </article>
+
+                  <div class="admin-content-toolbar__footer">
+                    <p class="admin-content-toolbar__hint">
+                      真实写盘前会再次执行 revision 校验；若当前条目已被外部修改，后台会拒绝覆盖并要求刷新。
+                    </p>
+                    <div class="admin-overview-card__actions">
+                      <button id="admin-content-dry-run" class="admin-btn admin-btn--ghost" type="button">执行 dry-run</button>
+                      <button id="admin-content-save" class="admin-btn" type="button">保存 frontmatter</button>
+                    </div>
+                  </div>
+
+                  <div id="admin-content-bootstrap" hidden>{adminContentBootstrap}</div>
+                </article>
+              ) : (
+                <article class="admin-overview-card admin-content-panel admin-content-editor admin-content-editor--readonly">
+                  <p class="admin-overview-card__eyebrow">Readonly Schema</p>
+                  <h2 class="admin-overview-card__title">当前 collection 仍保持只读</h2>
+                  <p class="admin-overview-card__body">
+                    {selectedEntryEditorPayload.readonlyReason}
+                  </p>
+                  <dl class="admin-data-meta admin-content-detail-meta">
+                    <dt class="admin-data-meta__label">memo.date</dt>
+                    <dd class="admin-data-meta__value">可选字段，不要求必填</dd>
+                    <dt class="admin-data-meta__label">memo.slug</dt>
+                    <dd class="admin-data-meta__value">使用普通字符串，不复用 essay 的 slugRule 正则</dd>
+                  </dl>
+                </article>
+              )
+            ) : null
+          }
+
+          <article class="admin-overview-card admin-content-panel admin-content-results">
+            <div class="admin-content-panel__head admin-content-panel__head--results">
+              <div>
+                <p class="admin-overview-card__eyebrow">Results</p>
+                <h2 class="admin-overview-card__title">{pageData.collectionLabel} 条目</h2>
+                <p class="admin-overview-card__body">
+                  {pageData.hasActiveFilters
+                    ? '当前结果已按筛选条件收窄；详情显示在列表上方。'
+                    : '列表优先展示标题、路径、slug 与公开状态，便于快速定位条目。'}
+                </p>
+              </div>
+              <div class="admin-content-results__meta">
+                <span class="admin-badge">page {pageData.currentPage}/{pageData.totalPages}</span>
+                <span class="admin-badge">{pageData.pageItems.length} 项</span>
+                {activeFilterCount > 0 ? <span class="admin-badge">筛选 {activeFilterCount}</span> : null}
+              </div>
+            </div>
+
+            {
+              pageData.pageItems.length > 0 ? (
+                <>
+                  <ol class="admin-content-list">
+                    {
+                      pageData.pageItems.map((item) => {
+                        const isActive = pageData.selectedEntry?.id === item.id;
+                        const detailHref = buildCurrentCollectionHref({
+                          page: String(pageData.currentPage),
+                          entry: item.id
+                        });
+                        return (
+                          <li class:list={['admin-content-item', isActive && 'is-active']}>
+                            <div class="admin-content-item__body">
+                              <div class="admin-content-item__header">
+                                <p class="admin-content-item__eyebrow">
+                                  <span>{item.dateLabel}</span>
+                                  <span aria-hidden="true">/</span>
+                                  <span>{item.collectionLabel}</span>
+                                </p>
+                                <div class="admin-content-item__title-row">
+                                  <a class="admin-content-item__title" href={detailHref}>{item.title}</a>
+                                  {isActive ? <span class="admin-badge">当前</span> : null}
+                                  {item.isDraft ? <span class="admin-badge">draft</span> : null}
+                                  {item.archive === false ? <span class="admin-badge">archive off</span> : null}
+                                </div>
+                              </div>
+
+                              <dl class="admin-content-item__facts">
+                                <div class="admin-content-item__fact">
+                                  <dt>entry.id</dt>
+                                  <dd><code>{item.id}</code></dd>
+                                </div>
+                                <div class="admin-content-item__fact">
+                                  <dt>path</dt>
+                                  <dd><code>{item.relativePath}</code></dd>
+                                </div>
+                                <div class="admin-content-item__fact">
+                                  <dt>slug</dt>
+                                  <dd>{item.slug ? <code>{item.slug}</code> : '(未设置)'}</dd>
+                                </div>
+                              </dl>
+
+                              {item.excerpt ? <p class="admin-content-item__excerpt">{item.excerpt}</p> : null}
+                              {
+                                item.tags.length > 0 ? (
+                                  <p class="admin-content-item__tags">
+                                    {item.tags.map((tag) => (
+                                      <span class="admin-badge">#{tag}</span>
+                                    ))}
+                                  </p>
+                                ) : null
+                              }
+                            </div>
+
+                            <div class="admin-content-item__actions">
+                              <a class:list={['admin-btn', !isActive && 'admin-btn--ghost']} href={detailHref}>
+                                {isActive ? '当前条目' : '查看详情'}
+                              </a>
+                              {
+                                item.publicHref ? (
+                                  <a class="admin-btn admin-btn--ghost" href={withBase(item.publicHref)}>公开页</a>
+                                ) : (
+                                  <span class="admin-content-item__hint">{getAdminContentPublicFallbackLabel(item)}</span>
+                                )
+                              }
+                            </div>
+                          </li>
+                        );
+                      })
+                    }
+                  </ol>
+
+                  {
+                    pageData.totalPages > 1 ? (
+                      <nav class="admin-content-pagination" aria-label="内容分页">
+                        <div class="admin-overview-card__actions">
+                          {
+                            pageData.currentPage > 1 ? (
+                              <a
+                                class="admin-btn admin-btn--ghost"
+                                href={buildCurrentCollectionHref({
+                                  page: String(pageData.currentPage - 1),
+                                  entry: ''
+                                })}
+                                rel="prev"
+                              >
+                                上一页
+                              </a>
+                            ) : null
+                          }
+                          {
+                            Array.from({ length: pageData.totalPages }, (_, index) => index + 1).map((page) => (
+                              <a
+                                class:list={['admin-btn', page !== pageData.currentPage && 'admin-btn--ghost']}
+                                href={buildCurrentCollectionHref({
+                                  page: String(page),
+                                  entry: ''
+                                })}
+                                aria-current={page === pageData.currentPage ? 'page' : undefined}
+                              >
+                                {page}
+                              </a>
+                            ))
+                          }
+                          {
+                            pageData.currentPage < pageData.totalPages ? (
+                              <a
+                                class="admin-btn admin-btn--ghost"
+                                href={buildCurrentCollectionHref({
+                                  page: String(pageData.currentPage + 1),
+                                  entry: ''
+                                })}
+                                rel="next"
+                              >
+                                下一页
+                              </a>
+                            ) : null
+                          }
+                        </div>
+                      </nav>
+                    ) : null
+                  }
+                </>
+              ) : (
+                <p class="admin-content-empty">
+                  当前筛选条件没有命中条目。可以尝试清空搜索词、切换 draft 状态，或移除标签/年份限制。
+                </p>
+              )
+            }
+          </article>
+        </section>
+      ) : (
+        <section class="admin-overview">
+          <article class="admin-overview-card">
+            <p class="admin-overview-card__eyebrow">Readonly Boundary</p>
+            <h2 class="admin-overview-card__title">内容索引仅在本地开发环境可用</h2>
+            <p class="admin-overview-card__body">
+              当前环境继续保留 `/admin/content/:collection/` 路由结构，但不输出列表、详情卡片、复制路径按钮或任何内容索引载荷。
+            </p>
+            <div class="admin-overview-card__actions">
+              <a class="admin-btn admin-btn--ghost" href={withBase('/admin/content/')}>返回 Content 总入口</a>
+              <a class="admin-btn admin-btn--ghost" href={withBase('/admin/')}>返回 Admin 首页</a>
+            </div>
+          </article>
+        </section>
+      )
+    }
+  </AdminShell>
+
+  {
+    isDev && contentDevState?.adminContentScriptHref ? (
+      <script is:inline type="module" src={contentDevState.adminContentScriptHref}></script>
+    ) : null
+  }
+</AdminLayout>

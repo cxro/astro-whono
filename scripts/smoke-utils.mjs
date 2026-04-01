@@ -45,16 +45,35 @@ export const assertStaticRedirectShell = (label, body, expectedPath) => {
   );
 };
 
-export const assertAdminSettingsStaticShell = (label, body, expectedPath = '/api/admin/settings/') => {
+const assertAdminApiStaticShell = (label, body, expectedPath, leakedMarkers) => {
   assertStaticRedirectShell(label, body, expectedPath);
-  expect(
-    !body.includes('"revision"') && !body.includes('"settings"'),
-    `${label} leaked editable Theme Console payload in production preview`
-  );
+  for (const marker of leakedMarkers) {
+    expect(
+      !body.includes(marker),
+      `${label} leaked API payload marker ${marker} in production preview`
+    );
+  }
   expect(
     !body.includes('"mode":"readonly"') && !body.includes('"mode": "readonly"'),
     `${label} still looks like the removed production readonly JSON contract`
   );
+};
+
+export const assertAdminSettingsStaticShell = (label, body, expectedPath = '/api/admin/settings/') => {
+  assertAdminApiStaticShell(label, body, expectedPath, ['"revision"', '"settings"']);
+};
+
+export const assertAdminContentStaticShell = (
+  label,
+  body,
+  expectedPath = '/api/admin/content/entry/'
+) => {
+  assertAdminApiStaticShell(label, body, expectedPath, [
+    '"revision"',
+    '"writable"',
+    '"changedFields"',
+    '"frontmatter"'
+  ]);
 };
 
 export const assertAdminSettingsStaticResponse = (label, response, expectedPath = '/api/admin/settings/') => {
@@ -63,6 +82,18 @@ export const assertAdminSettingsStaticResponse = (label, response, expectedPath 
     `${label} unexpectedly returned JSON in production preview`
   );
   assertAdminSettingsStaticShell(label, response.body, expectedPath);
+};
+
+export const assertAdminContentStaticResponse = (
+  label,
+  response,
+  expectedPath = '/api/admin/content/entry/'
+) => {
+  expect(
+    !response.contentType.toLowerCase().includes('application/json'),
+    `${label} unexpectedly returned JSON in production preview`
+  );
+  assertAdminContentStaticShell(label, response.body, expectedPath);
 };
 
 export const waitForHttpReady = async (url, options = {}) => {
