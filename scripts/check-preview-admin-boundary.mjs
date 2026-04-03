@@ -222,7 +222,6 @@ const assertAdminMediaDevShell = (label, response) => {
   expect(response.body.includes('Media Console'), `${label} is missing the media heading`);
   expect(response.body.includes('data-admin-media-root'), `${label} is missing the media console root`);
   expect(response.body.includes('id="admin-media-bootstrap"'), `${label} is missing the media bootstrap payload`);
-  expect(response.body.includes('最小媒体浏览器'), `${label} is missing the phase 4B copy`);
 };
 
 const stopProcess = async (child) => {

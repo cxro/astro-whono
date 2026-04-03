@@ -12,6 +12,10 @@ import {
   isAdminContentCollectionKey,
   type AdminContentCollectionKey
 } from '../../../lib/admin-console/content';
+import {
+  ADMIN_MEDIA_LIST_API_PATH,
+  ADMIN_MEDIA_META_API_PATH
+} from '../../../lib/admin-console/media-shared';
 import { readAdminContentEntryEditorPayload } from '../../../lib/admin-console/content-shared';
 import { createWithBase } from '../../../utils/format';
 
@@ -60,8 +64,14 @@ const adminContentBootstrap = selectedEntryEditorPayload?.writable
       revision: selectedEntryEditorPayload.revision
     })
   : null;
-const adminMediaListEndpoint = withBase('/api/admin/media/list');
-const adminMediaMetaEndpoint = withBase('/api/admin/media/meta');
+const adminMediaListEndpoint = withBase(ADMIN_MEDIA_LIST_API_PATH);
+const adminMediaMetaEndpoint = withBase(ADMIN_MEDIA_META_API_PATH);
+const contentConsoleSubtitle = pageData
+  ? `${pageData.collectionLabel} · ${selectedEntryEditorPayload?.writable ? 'frontmatter 编辑' : '只读索引'}`
+  : '内容索引';
+const contentConsoleModeLabel = isDev
+  ? (selectedEntryEditorPayload?.writable ? 'DEV frontmatter 编辑' : 'DEV 内容索引')
+  : '只读模式';
 
 type AdminBitsImageRow = {
   src: string;
@@ -157,16 +167,8 @@ const activeFilterCount = pageData
   <AdminShell
     currentRoute="content"
     title="Content Console"
-    subtitle={pageData
-      ? `${pageData.collectionLabel} · ${selectedEntryEditorPayload?.writable ? 'frontmatter 编辑' : '只读索引'}`
-      : '只读索引'}
-    description={isDev
-      ? '当前阶段在保留列表筛选、分页与只读详情的同时，首批开放 essay / bits 的 frontmatter 精确写回；正文仍保持只读。'
-      : '当前环境仅保留 `/admin/content/:collection/` 路由结构与只读说明；内容索引仍需在本地开发环境查看。'}
-    modeLabel={isDev ? 'DEV 只读索引' : '只读模式'}
-    modeHint={isDev
-      ? '次级状态继续通过 URL 查询参数承载；本轮仅打开 frontmatter 写回，不引入正文编辑或媒体面板。'
-      : 'preview / production 下不输出内容索引载荷，也不提供复制路径或公开页跳转按钮。'}
+    subtitle={contentConsoleSubtitle}
+    modeLabel={contentConsoleModeLabel}
   >
     {isDev ? (
       <div slot="status" class="admin-status-slot">
@@ -284,7 +286,7 @@ const activeFilterCount = pageData
               <p class="admin-content-toolbar__hint">
                 {pageData.hasActiveFilters
                   ? '当前 URL 已记录筛选状态，可以直接保留这次检索结果。'
-                  : '选择条目后会在下方显示只读详情；本阶段仍不进入 frontmatter 写盘。'}
+                  : '选择条目后会在下方显示索引详情；essay / bits 会补充 frontmatter 编辑卡片，memo 继续保持只读。'}
               </p>
               <div class="admin-overview-card__actions">
                 <button class="admin-btn" type="submit">应用筛选</button>

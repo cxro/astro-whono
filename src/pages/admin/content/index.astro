@@ -38,13 +38,7 @@ const contentOverviewTotals = contentOverviewDevState
     currentRoute="content"
     title="Content Console"
     subtitle="内容总入口"
-    description={isDev
-      ? 'Phase 2A 首版先落内容索引与只读控制台：按 collection 浏览、筛选、分页与查看元数据，不进入内容写盘。'
-      : '当前环境仅保留 Content Console 的路由结构与只读说明；内容索引仍以本地开发环境为准。'}
     modeLabel={isDev ? 'DEV 只读索引' : '只读模式'}
-    modeHint={isDev
-      ? '列表与详情继续基于 metadata、frontmatter 与受控摘要生成，不把正文全文或渲染 HTML 注入后台首屏。'
-      : 'preview / production 下不输出内容索引载荷，也不提供任何内容写盘能力。'}
   >
     {
       isDev && contentOverviewDevState ? (

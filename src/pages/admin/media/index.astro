@@ -1,101 +1,90 @@
 ---
+import Icon from '../../../components/Icon.astro';
 import AdminLayout from '../../../components/admin/AdminLayout.astro';
 import AdminShell from '../../../components/admin/AdminShell.astro';
 import {
-  ADMIN_MEDIA_DIRECTORY_OPTIONS,
-  normalizeAdminMediaDirectory
+  ADMIN_MEDIA_LIST_API_PATH,
+  ADMIN_MEDIA_META_API_PATH,
+  invalidateAdminMediaCaches,
+  listAdminMediaBrowseIndex,
+  listAdminMediaScopeIndex,
+  type AdminMediaBrowseIndexItem,
+  type AdminMediaScopeIndex
 } from '../../../lib/admin-console/media-shared';
 import { createWithBase } from '../../../utils/format';
 
 const isDev = import.meta.env.DEV;
 const base = import.meta.env.BASE_URL ?? '/';
 const withBase = createWithBase(base);
-const DEFAULT_MEDIA_DIRECTORY = 'public' as const;
+const DEFAULT_MEDIA_GROUP = 'all' as const;
+const DEFAULT_MEDIA_SCOPE = '' as const;
 
-const rawDirectory = Astro.url.searchParams.has('dir')
-  ? Astro.url.searchParams.get('dir')
-  : DEFAULT_MEDIA_DIRECTORY;
+const rawGroup = Astro.url.searchParams.get('group')?.trim().toLowerCase() ?? DEFAULT_MEDIA_GROUP;
+const rawScope = Astro.url.searchParams.get('scope')?.trim().toLowerCase() ?? DEFAULT_MEDIA_SCOPE;
+const rawSubgroup = Astro.url.searchParams.get('sub')?.trim() ?? '';
 const rawQuery = Astro.url.searchParams.get('q')?.trim() ?? '';
-const rawOwner = Astro.url.searchParams.get('owner')?.trim() ?? '';
+const hasInitialQuery = rawQuery.length > 0;
 const rawPage = Number.parseInt(Astro.url.searchParams.get('page')?.trim() ?? '1', 10);
-const selectedDirectory = normalizeAdminMediaDirectory(rawDirectory);
+const shouldRefresh = Astro.url.searchParams.get('refresh')?.trim() === '1';
+const selectedGroup = rawGroup || DEFAULT_MEDIA_GROUP;
+const selectedScope = rawScope === 'recent' ? 'recent' : DEFAULT_MEDIA_SCOPE;
+const selectedSubgroup = selectedGroup === DEFAULT_MEDIA_GROUP ? '' : rawSubgroup;
 const selectedPage = Number.isInteger(rawPage) && rawPage > 0 ? rawPage : 1;
 
-const MEDIA_DIRECTORY_COPY: Record<
-  (typeof ADMIN_MEDIA_DIRECTORY_OPTIONS)[number]['value'],
-  { shortLabel: string; pathLabel: string; summary: string }
-> = {
-  '': {
-    shortLabel: '全部资源',
-    pathLabel: '全部目录',
-    summary: '一次查看站点里可用的本地图片。'
-  },
-  'public/author': {
-    shortLabel: '头像资源',
-    pathLabel: 'public/author/**',
-    summary: '适合作者头像和默认头像。'
-  },
-  'public/bits': {
-    shortLabel: '絮语配图',
-    pathLabel: 'public/bits/**',
-    summary: '适合 Bits 配图和公开插图。'
-  },
-  'public/images': {
-    shortLabel: '页面插图',
-    pathLabel: 'public/images/**',
-    summary: '适合首页和普通页面插图。'
-  },
-  public: {
-    shortLabel: '公开图片',
-    pathLabel: 'public/**',
-    summary: '浏览 public 下的全部公开图片。'
-  },
-  'src/assets': {
-    shortLabel: '站点素材',
-    pathLabel: 'src/assets/**',
-    summary: '适合主题资源和首页主图。'
-  },
-  'src/content': {
-    shortLabel: '文章附件',
-    pathLabel: 'src/content/**',
-    summary: '浏览文章或笔记同目录里的图片。'
+const loadMediaDevState = async (): Promise<{
+  adminMediaScriptHref: string;
+  adminStylesHref: string;
+  browseIndex: AdminMediaBrowseIndexItem[] | null;
+  scopeIndex: AdminMediaScopeIndex;
+  didRefresh: boolean;
+}> => {
+  if (shouldRefresh) {
+    invalidateAdminMediaCaches();
   }
-};
 
-const loadMediaDevState = async () => {
   const [{ default: adminMediaScriptHref }, { default: adminStylesHref }] = await Promise.all([
     import('../../../scripts/admin-media/index.ts?url'),
     import('../../../styles/components/admin.css?url')
   ]);
+  const [browseIndex, scopeIndex] = await Promise.all([
+    listAdminMediaBrowseIndex().catch(() => null),
+    listAdminMediaScopeIndex().catch(() => ({ recent: [] }))
+  ]);
 
   return {
     adminMediaScriptHref,
-    adminStylesHref
+    adminStylesHref,
+    browseIndex,
+    scopeIndex,
+    didRefresh: shouldRefresh
   };
 };
 
 const mediaDevState = isDev ? await loadMediaDevState() : null;
 const bootstrapText = mediaDevState
   ? JSON.stringify({
-      listEndpoint: withBase('/api/admin/media/list/'),
+      listEndpoint: withBase(ADMIN_MEDIA_LIST_API_PATH),
+      metaEndpoint: withBase(ADMIN_MEDIA_META_API_PATH),
       initialState: {
-        directory: selectedDirectory || DEFAULT_MEDIA_DIRECTORY,
+        scope: selectedScope,
+        group: selectedGroup,
+        subgroup: selectedSubgroup,
         query: rawQuery,
-        owner: rawOwner,
         page: selectedPage
-      }
+      },
+      browseIndex: mediaDevState.browseIndex,
+      scopeIndex: mediaDevState.scopeIndex,
+      didRefresh: mediaDevState.didRefresh
     })
   : null;
 ---
 
-<AdminLayout title="Media" stylesHref={mediaDevState?.adminStylesHref ?? null}>
+<AdminLayout title="Media Console" stylesHref={mediaDevState?.adminStylesHref ?? null}>
   <AdminShell
     currentRoute="media"
-    title="Media"
+    title="Media Console"
     subtitle="图库"
-    description={isDev ? null : '当前环境仅保留媒体库入口说明。'}
     modeLabel={isDev ? '本地浏览' : '只读说明'}
-    modeHint={null}
   >
     {isDev ? (
       <div slot="status" class="admin-status-slot">
@@ -107,68 +96,84 @@ const bootstrapText = mediaDevState
     {
       isDev && bootstrapText ? (
         <section class="admin-overview admin-media-console" data-admin-media-root>
-          <form id="admin-media-form" class="admin-media-console__toolbar admin-media-console__filters">
-            <label class="admin-field admin-content-field">
-              <span class="admin-field__label">图片分类</span>
-              <select id="admin-media-directory" name="dir">
-                {
-                  ADMIN_MEDIA_DIRECTORY_OPTIONS.map((option) => (
-                    <option
-                      value={option.value}
-                      selected={option.value === (selectedDirectory || DEFAULT_MEDIA_DIRECTORY)}
-                    >
-                      {MEDIA_DIRECTORY_COPY[option.value].shortLabel}
-                    </option>
-                  ))
-                }
-              </select>
-            </label>
+          <form id="admin-media-form" class="admin-overview-card admin-media-browser__controls">
+            <div class="admin-media-browser__head">
+              <div class="admin-media-browser__copy">
+                <h2 class="admin-overview-card__title">图片管理</h2>
+              </div>
 
-            <label id="admin-media-owner-field" class="admin-field admin-content-field" hidden>
-              <span class="admin-field__label">所属内容</span>
-              <select id="admin-media-owner" name="owner" disabled>
-                <option value="">全部内容</option>
-              </select>
-            </label>
+              <div class="admin-media-browser__search-row">
+                <div
+                  id="admin-media-search-panel"
+                  class="admin-media-browser__search-panel"
+                  data-open={hasInitialQuery ? 'true' : 'false'}
+                  aria-hidden={hasInitialQuery ? 'false' : 'true'}
+                >
+                  <label class="admin-media-browser__search-shell" for="admin-media-query">
+                    <span class="admin-sr-only">搜索图片</span>
+                    <input
+                      id="admin-media-query"
+                      name="q"
+                      type="search"
+                      inputmode="search"
+                      tabindex={hasInitialQuery ? undefined : '-1'}
+                      value={rawQuery}
+                      placeholder="搜索图片"
+                      autocomplete="off"
+                    />
+                  </label>
+                </div>
 
-            <label class="admin-field admin-content-field admin-content-field--query">
-              <span class="admin-field__label">搜索图片</span>
-              <input
-                id="admin-media-query"
-                name="q"
-                type="search"
-                inputmode="search"
-                value={rawQuery}
-                placeholder="例如：avatar、hero、2026"
-                autocomplete="off"
-              />
-            </label>
+                <button
+                  id="admin-media-search-toggle"
+                  class="admin-media-browser__tool-btn"
+                  type="button"
+                  aria-label="搜索图片"
+                  aria-controls="admin-media-search-panel"
+                  aria-expanded={hasInitialQuery ? 'true' : 'false'}
+                  data-active={hasInitialQuery ? 'true' : 'false'}
+                  title="搜索图片"
+                >
+                  <Icon name="search" />
+                </button>
 
-            <div class="admin-overview-card__actions admin-media-console__filter-actions">
-              <button id="admin-media-apply" class="admin-btn" type="submit">查看结果</button>
-              <button id="admin-media-reset" class="admin-btn admin-btn--ghost" type="button">清空筛选</button>
+                <button
+                  id="admin-media-refresh"
+                  class="admin-media-browser__tool-btn"
+                  type="button"
+                  aria-label="刷新媒体库并重置筛选"
+                  title="刷新媒体库并重置筛选"
+                >
+                  <Icon name="refresh" />
+                </button>
+
+                <button id="admin-media-recent" class="admin-media-browser__recent-link" type="button">最近修改</button>
+              </div>
+            </div>
+
+            <div class="admin-media-browser__filters">
+              <div id="admin-media-groups-wrap" class="admin-media-browser__filter-group">
+                <div class="admin-media-browser__filter-head">
+                  <p class="admin-media-browser__filter-label">使用场景</p>
+                  <button id="admin-media-show-uncategorized" class="admin-btn admin-btn--ghost" type="button" hidden>
+                    显示未归类
+                  </button>
+                </div>
+                <div id="admin-media-groups" class="admin-media-browser__chips"></div>
+              </div>
+
+              <div id="admin-media-subgroups-wrap" class="admin-media-browser__filter-group" hidden>
+                <p class="admin-media-browser__filter-label">应用位置</p>
+                <div id="admin-media-subgroups" class="admin-media-browser__chips"></div>
+              </div>
             </div>
           </form>
 
-          <article class="admin-overview-card admin-media-console__results">
-            <div class="admin-content-panel__head admin-content-panel__head--results admin-media-console__results-head">
-              <div>
-                <h2 class="admin-overview-card__title">图片列表</h2>
-                <p id="admin-media-results-summary" class="admin-overview-card__body">
-                  这里会显示当前范围内的图片。
-                </p>
-              </div>
-
-              <div class="admin-media-console__results-meta">
-                <span id="admin-media-results-count" class="admin-badge admin-media-console__results-badge">0 张</span>
-                <span id="admin-media-results-page" class="admin-badge admin-media-console__results-badge">第 1 / 1 页</span>
-              </div>
-            </div>
-
-            <ul id="admin-media-result-list" class="admin-media-list"></ul>
+          <article class="admin-overview-card admin-media-browser__results">
+            <ul id="admin-media-result-list" class="admin-media-browser__grid"></ul>
             <p id="admin-media-empty" class="admin-content-empty" hidden>没有找到符合条件的图片。</p>
 
-            <div class="admin-media-console__pager">
+            <div class="admin-media-browser__pager">
               <p id="admin-media-page-meta" class="admin-overview-card__meta">第 1 / 1 页</p>
               <div class="admin-overview-card__actions">
                 <button id="admin-media-prev" class="admin-btn admin-btn--ghost" type="button" disabled>上一页</button>
@@ -177,13 +182,15 @@ const bootstrapText = mediaDevState
             </div>
           </article>
 
+          <article id="admin-media-detail" class="admin-overview-card admin-media-browser__detail" hidden></article>
+
           <div id="admin-media-bootstrap" hidden>{bootstrapText}</div>
         </section>
       ) : (
         <section class="admin-overview">
           <article class="admin-overview-card">
             <p class="admin-overview-card__eyebrow">Readonly</p>
-            <h2 class="admin-overview-card__title">Media 仅在本地环境可用</h2>
+            <h2 class="admin-overview-card__title">Media Console 仅在本地环境可用</h2>
             <p class="admin-overview-card__body">
               当前环境保留入口说明，但不会显示图片列表或路径复制功能。
             </p>

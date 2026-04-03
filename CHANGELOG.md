@@ -17,6 +17,7 @@ The format is based on Keep a Changelog, and this project aims to follow Semanti
 - 新增 `/admin/checks/` 与 `src/lib/admin-console/checks.ts`，首批聚合 settings 保护态、essay slug、bits 媒体路径与 tag 路由键诊断。
 - 新增 Phase 4A 媒体共享层 `src/lib/admin-console/media-shared.ts`，以及 `GET /api/admin/media/list/`、`GET /api/admin/media/meta/` 两个 dev-only 媒体只读接口。
 - 新增后台共用 `AdminMediaPicker` dialog 与 Theme / Content 共享的 media picker 客户端控制器。
+- 新增 Media Console 显式“刷新媒体库”入口，以及次级“最近修改”快捷筛选；结果按本地文件最近修改时间派生。
 
 ### Changed
 - Theme Console 的未保存离开提醒从单纯 `beforeunload` 扩展为路由级 dirty guard；切换后台真实路由时会先显式确认。
@@ -30,9 +31,14 @@ The format is based on Keep a Changelog, and this project aims to follow Semanti
 - `bits` collection 编辑页现用图片行编辑器替代原始 JSON 文本输入；图片选择、宽高回填与最终保存继续复用既有内容写盘链路。
 - Theme Console 的 `home.heroImageSrc` 与 `page.bits.defaultAuthor.avatar` 现共享字段级媒体辅助，并在 preview / production 边界检查中纳入 `/api/admin/media/list/`、`/api/admin/media/meta/` 的静态壳断言。
 - `/api/admin/media/list/` 现支持 `dir` 目录参数，可按 `public/**`、`src/assets/**`、`src/content/**` 受控范围收窄扫描；Theme / Content 既有 picker 契约保持兼容。
+- `/admin/media/` 开发态现优先消费 SSR 注入的完整 browse 轻索引；一级分类、二级分类、搜索与分页切换在客户端本地完成，详情区仅在选中后按 `path` 请求 `/api/admin/media/meta/` 补齐尺寸、体积与 MIME。
+- 媒体共享层现对 content owner、asset list、本地 inspection meta 与 `recent` scope 索引使用短 TTL 进程内缓存，并支持通过刷新入口显式失效；整体仍保持 `list/meta` 只读 contract 不变。
 
 ### Fixed
 - 修正文档中的 Data Console manifest 协议说明，明确当前固定字段为 `schemaVersion / createdAt / includedScopes / excludes / locale`。
+- 修复 Theme Console、Content Console 与 Media Console 对 `/api/admin/media/list/`、`/api/admin/media/meta/` 的尾斜杠拼接不一致问题，避免部分入口下出现 404。
+- 修复 `/admin/media/` 首屏挂载后会重复拉取同一列表，以及 browse 切换仍依赖服务端列表导致的明显卡顿；当前首屏与 browse 切换均优先走本地 bootstrap 结果。
+- 修复媒体浏览默认系统资源过滤过宽的问题；现在仅隐藏 `public/` 根目录级站点图标/预览资源，不再误伤 `src/content/**/preview-*.png` 这类真实附件。
 
 ## [0.3.1] - 2026-03-24
 

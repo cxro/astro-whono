@@ -26,13 +26,7 @@ const adminStylesHref = overviewDevState?.adminStylesHref ?? null;
     currentRoute="overview"
     title="Admin Console"
     subtitle="后台概览"
-    description={isDev
-      ? 'Phase 3 已接入结构化检查摘要；概览继续只展示统计、最近内容与 maintainer 摘要，不把全量正文注入后台首屏。'
-      : '当前环境仅保留后台入口与只读说明；Theme、Content、Data 等后台工作流仍以本地开发环境为准。'}
     modeLabel={isDev ? 'DEV 可写' : '只读模式'}
-    modeHint={isDev
-      ? '当前后台仍以本地文件与 Git 为真相来源；生产环境继续保持只读。'
-      : '当前环境仅保留后台入口与只读说明，不提供写入能力。'}
   >
     {
       isDev && overviewDevState ? (

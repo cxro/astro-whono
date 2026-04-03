@@ -39,9 +39,7 @@ const bootstrapText =
     currentRoute="data"
     title="Data Console"
     subtitle="设置导入导出"
-    description="Phase 1 先只覆盖 settings 快照导出与导入；内容快照、恢复和批量迁移仍留在后续阶段。"
     modeLabel={isDev ? 'DEV 可写' : '只读模式'}
-    modeHint={isDev ? '当前页面复用现有 Theme Console 校验、dry-run、revision 与事务写盘链路。' : 'Data Console 仅在本地开发环境可用；preview 与 production 仅保留只读边界。'}
   >
     {isDev ? (
       <div slot="status" class="admin-status-slot">

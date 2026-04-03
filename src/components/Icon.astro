@@ -7,6 +7,7 @@ type IconName =
   | 'moon'
   | 'sun'
   | 'search'
+  | 'refresh'
   | 'pen'
   | 'bold'
   | 'italic'
@@ -309,6 +310,50 @@ const socialIconBody = Object.prototype.hasOwnProperty.call(socialIconBodies, no
   >
     <circle cx="11" cy="11" r="6.5" fill="none" stroke="currentColor" stroke-width="1.8"></circle>
     <path d="M16 16L20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"></path>
+  </svg>
+)}
+
+{name === 'refresh' && (
+  <svg
+    class={className}
+    width={iconSize}
+    height={iconSize}
+    viewBox="0 0 24 24"
+    aria-hidden={ariaHidden}
+    aria-label={ariaLabel}
+    role={role}
+    focusable="false"
+  >
+    <path
+      d="M19 8.5A7.5 7.5 0 0 0 6.4 6.6"
+      fill="none"
+      stroke="currentColor"
+      stroke-linecap="round"
+      stroke-width="1.8"
+    />
+    <path
+      d="M5 3.8v4.6h4.6"
+      fill="none"
+      stroke="currentColor"
+      stroke-linecap="round"
+      stroke-linejoin="round"
+      stroke-width="1.8"
+    />
+    <path
+      d="M5 15.5A7.5 7.5 0 0 0 17.6 17.4"
+      fill="none"
+      stroke="currentColor"
+      stroke-linecap="round"
+      stroke-width="1.8"
+    />
+    <path
+      d="M19 20.2v-4.6h-4.6"
+      fill="none"
+      stroke="currentColor"
+      stroke-linecap="round"
+      stroke-linejoin="round"
+      stroke-width="1.8"
+    />
   </svg>
 )}
 

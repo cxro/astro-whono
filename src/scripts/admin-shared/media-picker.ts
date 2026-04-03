@@ -62,12 +62,19 @@ const formatBytes = (size: number | null): string => {
   return `${(size / (1024 * 1024)).toFixed(1)} MB`;
 };
 
+const getOriginLabel = (origin: AdminMediaPickerMeta['origin']): string => {
+  if (origin === 'public') return '公开资源';
+  if (origin === 'src/assets') return '站点素材';
+  if (origin === 'src/content') return '文章附件';
+  return '本地资源';
+};
+
 export const formatAdminMediaMetaSummary = (meta: Pick<AdminMediaPickerMeta, 'kind' | 'origin' | 'width' | 'height' | 'size'>): string => {
   if (meta.kind === 'remote') {
     return '远程图片；不自动读取本地尺寸';
   }
 
-  const originLabel = meta.origin ?? 'local';
+  const originLabel = getOriginLabel(meta.origin);
   const sizeLabel = formatBytes(meta.size);
   if (meta.width && meta.height) {
     return `${originLabel} · ${meta.width}×${meta.height} · ${sizeLabel}`;

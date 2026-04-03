@@ -14,23 +14,12 @@ import { createAdminMediaPicker } from '../admin-shared/media-picker';
 import { createAdminThemeMediaFields } from './media-fields';
 import { shouldGuardAdminNavigation } from './navigation-guard';
 import { createSocialLinks } from './social-links';
+import { createAdminConsoleUiState } from './ui-state';
 import { createValidation, type ValidationIssue } from './validation';
 
 type RequiredElements<T extends Record<string, Element | null>> = { [K in keyof T]: NonNullable<T[K]> };
 type LoadSource = 'bootstrap' | 'remote';
 type LooseRecord = Record<string, unknown>;
-type AdminControl = HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement | HTMLButtonElement;
-type ErrorBannerState = {
-  title: string;
-  message?: string;
-  items?: Array<string | HTMLElement>;
-  retryable?: boolean;
-};
-type ErrorBannerOptions = {
-  title?: string;
-  message?: string;
-  retryable?: boolean;
-};
 
 const root = document.querySelector<HTMLElement>('[data-admin-root]');
 
@@ -398,12 +387,22 @@ if (!root) {
 
     let baseline: EditableSettings | null = null;
     let currentRevision: string | null = null;
-    let isDirty = false;
-    let isSaving = false;
-    let isValidating = false;
-    let isConsoleLocked = false;
-    let isAdminActionsNearViewport = false;
     const statusTargets = [statusEl, statusInlineEl].filter((target): target is HTMLElement => target !== null);
+    const uiState = createAdminConsoleUiState({
+      root,
+      adminActions,
+      dirtyBanner,
+      errorBanner,
+      errorTitleEl,
+      errorMessageEl,
+      errorListEl,
+      errorRetryBtn,
+      validateBtn,
+      saveBtn,
+      statusTargets,
+      statusLiveEl,
+      queryAll
+    });
 
     const scrollIntoViewWithOffset = (element: HTMLElement): void => {
       const top = element.getBoundingClientRect().top + window.scrollY - 24;
@@ -429,160 +428,24 @@ if (!root) {
       });
     };
 
-    const STATUS_WAITING_SAVE = '等待保存';
-    const STATUS_CLEAN = '当前配置无未保存更改';
     const STATUS_INVALID_SETTINGS = '配置损坏';
-
-    const setStatus = (state: string, message: string, options: { announce?: boolean } = {}): void => {
-      const primaryStatusTarget = statusTargets[0] ?? null;
-      const currentState = primaryStatusTarget?.dataset.state ?? '';
-      const currentMessage = primaryStatusTarget?.textContent?.trim() || '';
-      if (statusTargets.length > 0 && (currentState !== state || currentMessage !== message)) {
-        statusTargets.forEach((target) => {
-          target.dataset.state = state;
-          target.textContent = message;
-        });
-      }
-
-      if (options.announce === false) return;
-      if (!statusLiveEl) return;
-
-      const liveState = statusLiveEl.dataset.state ?? '';
-      const liveMessage = statusLiveEl.textContent?.trim() || '';
-      if (liveState === state && liveMessage === message) return;
-      statusLiveEl.dataset.state = state;
-      statusLiveEl.textContent = message;
-    };
 
     const mediaPicker = createAdminMediaPicker();
     themeMediaFields = createAdminThemeMediaFields({
       root,
       picker: mediaPicker,
-      setStatus
+      setStatus: uiState.setStatus
     });
-
-    const syncDirtyStatus = (next: boolean): void => {
-      const primaryStatusTarget = statusTargets[0] ?? null;
-      const currentState = primaryStatusTarget?.dataset.state;
-      const currentMessage = primaryStatusTarget?.textContent?.trim() || '';
-
-      if (next) {
-        if ((currentState === 'ready' || currentState === 'ok') && currentMessage !== STATUS_WAITING_SAVE) {
-          setStatus('ready', STATUS_WAITING_SAVE);
-        }
-        return;
-      }
-
-      if (currentState === 'ready' && currentMessage === STATUS_WAITING_SAVE) {
-        setStatus('ready', STATUS_CLEAN);
-      }
-    };
-
-    const clearErrorBanner = (): void => {
-      errorBanner.hidden = true;
-      errorTitleEl.textContent = '';
-      errorMessageEl.hidden = true;
-      errorMessageEl.textContent = '';
-      errorListEl.hidden = true;
-      errorListEl.replaceChildren();
-      errorRetryBtn.hidden = true;
-    };
-
-    const setErrorBanner = ({ title, message, items = [], retryable = false }: ErrorBannerState): void => {
-      errorBanner.hidden = false;
-      errorTitleEl.textContent = title;
-
-      if (message) {
-        errorMessageEl.hidden = false;
-        errorMessageEl.textContent = message;
-      } else {
-        errorMessageEl.hidden = true;
-        errorMessageEl.textContent = '';
-      }
-
-      errorListEl.replaceChildren();
-      if (items.length) {
-        const fragment = document.createDocumentFragment();
-        items.forEach((item) => {
-          if (typeof item === 'string') {
-            const entry = document.createElement('li');
-            entry.className = 'admin-banner__list-item';
-            entry.textContent = item;
-            fragment.appendChild(entry);
-            return;
-          }
-          fragment.appendChild(item);
-        });
-        errorListEl.appendChild(fragment);
-        errorListEl.hidden = false;
-      } else {
-        errorListEl.hidden = true;
-      }
-
-      errorRetryBtn.hidden = !retryable;
-    };
-
-    const setErrors = (errors: string[], options: ErrorBannerOptions = {}): void => {
-      if (!errors.length) {
-        clearErrorBanner();
-        return;
-      }
-
-      setErrorBanner({
-        title: options.title ?? '请先处理以下问题',
-        ...(options.message ? { message: options.message } : {}),
-        items: errors,
-        retryable: options.retryable ?? false
-      });
-    };
-
-    const setDirty = (next: boolean): void => {
-      isDirty = next;
-      dirtyBanner.hidden = !next;
-      adminActions.dataset.dirty = String(next);
-      adminActions.dataset.sticky = String(next && !isAdminActionsNearViewport);
-      syncDirtyStatus(next);
-    };
-
-    const syncInteractiveAvailability = (): void => {
-      const isInteractionLocked = isConsoleLocked || isSaving || isValidating;
-      queryAll<AdminControl>(root, 'input, textarea, select, button').forEach((element) => {
-        if (element === errorRetryBtn) {
-          element.disabled = isSaving || isValidating;
-          return;
-        }
-
-        element.disabled = isInteractionLocked;
-      });
-    };
-
-    const setConsoleLocked = (next: boolean): void => {
-      isConsoleLocked = next;
-      root.dataset.consoleLocked = String(next);
-      syncInteractiveAvailability();
-    };
-
-    const setSaving = (next: boolean): void => {
-      isSaving = next;
-      saveBtn.textContent = next ? '保存中...' : '保存';
-      syncInteractiveAvailability();
-    };
-
-    const setValidating = (next: boolean): void => {
-      isValidating = next;
-      validateBtn.textContent = next ? '校验中...' : '检查配置';
-      syncInteractiveAvailability();
-    };
 
     const setValidationIssues = (issues: readonly ValidationIssue[]): void => {
       markInvalidFields(issues);
-      setErrors(issues.map((issue) => issue.message));
+      uiState.setErrors(issues.map((issue) => issue.message));
     };
 
     const refreshDirty = (): void => {
       if (!baseline) return;
       const current = canonicalize(collectSettings());
-      setDirty(JSON.stringify(current) !== JSON.stringify(baseline));
+      uiState.setDirty(JSON.stringify(current) !== JSON.stringify(baseline));
     };
 
     const validateCurrentSettings = (): { draft: EditableSettings; issues: ValidationIssue[] } => {
@@ -671,7 +534,7 @@ if (!root) {
     };
 
     const setInvalidSettingsErrorBanner = (invalidState: ThemeSettingsEditableErrorState): void => {
-      setErrorBanner({
+      uiState.setErrorBanner({
         title: '已切换为只读保护',
         message: '检测到 settings 配置文件损坏。请先修复文件，再点击“重新检查”或刷新当前页面。',
         items: invalidState.diagnostics.map((diagnostic) => createDiagnosticListItem(diagnostic)),
@@ -689,10 +552,10 @@ if (!root) {
       currentRevision = null;
       baseline = null;
       clearInvalidFields();
-      setDirty(false);
-      setConsoleLocked(true);
+      uiState.setDirty(false);
+      uiState.setConsoleLocked(true);
       setInvalidSettingsErrorBanner(invalidState);
-      setStatus(
+      uiState.setStatus(
         'error',
         STATUS_INVALID_SETTINGS,
         options.announceStatus === undefined ? {} : { announce: options.announceStatus }
@@ -721,43 +584,65 @@ if (!root) {
       const resolvedPayload = extractSettingsPayload(payload);
       if (!resolvedPayload) {
         clearInvalidFields();
-        setStatus('error', '返回数据格式无效');
-        setErrors([getPayloadMessage(payload) || '配置接口返回了无效的 payload'], { title: '读取配置失败' });
+        uiState.setStatus('error', '返回数据格式无效');
+        uiState.setErrors([getPayloadMessage(payload) || '配置接口返回了无效的 payload'], { title: '读取配置失败' });
         revealErrorState();
         return;
       }
 
-      setConsoleLocked(false);
+      uiState.setConsoleLocked(false);
       currentRevision = resolvedPayload.revision;
       const normalized = canonicalize(resolvedPayload.settings);
       applySettings(normalized);
       finalizeAppliedSettings();
       baseline = canonicalize(collectSettings());
       clearInvalidFields();
-      clearErrorBanner();
-      setDirty(false);
-      setStatus(
+      uiState.clearErrorBanner();
+      uiState.setDirty(false);
+      uiState.setStatus(
         'ready',
         source === 'remote' ? '已同步最新配置' : '已载入初始配置',
         { announce: options.announceStatus ?? source === 'remote' }
       );
     };
 
-    const loadBootstrap = (): void => {
+    const setInitialLoadError = (message: string): void => {
+      currentRevision = null;
+      baseline = null;
+      clearInvalidFields();
+      uiState.setDirty(false);
+      uiState.setConsoleLocked(true);
+      uiState.setStatus('error', '初始化失败');
+      uiState.setErrors([message], {
+        title: '读取配置失败',
+        message: '未能读取 Theme Console 当前配置。请点击“重新检查”重试。',
+        retryable: true
+      });
+      revealErrorState();
+    };
+
+    const hasInitialSettings = (): boolean => baseline !== null && currentRevision !== null;
+
+    const loadBootstrap = (): 'ready' | 'locked' | 'fallback' => {
       try {
         const payload = JSON.parse(bootstrapEl.textContent || '{}') as unknown;
         if (applyInvalidSettingsState(payload, { announceStatus: false })) {
-          return;
+          return 'locked';
+        }
+        if (!extractSettingsPayload(payload)) {
+          console.warn('Theme Console bootstrap payload is invalid; falling back to /api/admin/settings/.');
+          return 'fallback';
         }
         loadPayload(payload, 'bootstrap', { announceStatus: false });
+        return 'ready';
       } catch (error) {
-        setStatus('error', '初始化数据解析失败');
-        console.error(error);
+        console.warn(error);
+        return 'fallback';
       }
     };
 
     const loadFromApi = async (): Promise<void> => {
-      setStatus('loading', '正在读取 /api/admin/settings', { announce: false });
+      uiState.setStatus('loading', '正在读取 /api/admin/settings', { announce: false });
       try {
         const response = await fetch(endpoint, {
           method: 'GET',
@@ -776,8 +661,10 @@ if (!root) {
         }
         loadPayload(payload, 'remote');
       } catch (error) {
-        if (!isConsoleLocked) {
-          setStatus('warn', '接口读取失败，继续使用初始配置');
+        if (hasInitialSettings()) {
+          uiState.setStatus('warn', '接口读取失败，继续使用初始配置');
+        } else if (!uiState.isConsoleLocked()) {
+          setInitialLoadError(error instanceof Error ? error.message : '初始化请求失败，请稍后重试');
         }
         console.warn(error);
       }
@@ -825,7 +712,7 @@ if (!root) {
     };
 
     errorRetryBtn.addEventListener('click', () => {
-      if (!isConsoleLocked) return;
+      if (!uiState.isConsoleLocked()) return;
       void loadFromApi();
     });
 
@@ -886,8 +773,7 @@ if (!root) {
     if ('IntersectionObserver' in window) {
       const adminActionsObserver = new IntersectionObserver(
         (entries) => {
-          isAdminActionsNearViewport = entries.some((entry) => entry.isIntersecting);
-          adminActions.dataset.sticky = String(isDirty && !isAdminActionsNearViewport);
+          uiState.setActionsNearViewport(entries.some((entry) => entry.isIntersecting));
         },
         {
           root: null,
@@ -900,7 +786,7 @@ if (!root) {
 
     socialCustomAddBtn.addEventListener('click', () => {
       if (getCustomRows().length >= ADMIN_SOCIAL_CUSTOM_LIMIT) {
-        setStatus('warn', '自定义链接已达到上限');
+        uiState.setStatus('warn', '自定义链接已达到上限');
         return;
       }
       const row = createCustomRow(
@@ -1046,26 +932,26 @@ if (!root) {
     });
 
     validateBtn.addEventListener('click', async () => {
-      if (isSaving || isValidating) return;
+      if (uiState.isSaving() || uiState.isValidating()) return;
 
       const { draft, issues } = validateCurrentSettings();
       if (issues.length) {
-        setStatus('error', '校验未通过', { announce: false });
+        uiState.setStatus('error', '校验未通过', { announce: false });
         revealErrorState(issues);
         return;
       }
 
       const current = canonicalize(draft);
-      setValidating(true);
-      setStatus('loading', '正在进行服务端预检');
+      uiState.setValidating(true);
+      uiState.setStatus('loading', '正在进行服务端预检');
 
       try {
         if (!currentRevision) {
           clearInvalidFields();
-          setErrors(['当前配置缺少 revision，请先同步最新配置后再检查'], {
+          uiState.setErrors(['当前配置缺少 revision，请先同步最新配置后再检查'], {
             title: '检查前需要重新同步配置'
           });
-          setStatus('error', '检查配置失败', { announce: false });
+          uiState.setStatus('error', '检查配置失败', { announce: false });
           revealErrorState();
           return;
         }
@@ -1080,36 +966,36 @@ if (!root) {
           const serverErrors = getPayloadErrors(payload);
 
           if (response.status === 409) {
-            setErrors(
+            uiState.setErrors(
               serverErrors.length
                 ? serverErrors
                 : ['检测到配置已在外部更新；当前草稿仍保留在页面中，请先同步后再决定是否手工合并'],
               { title: '检查时发现外部更新' }
             );
-            setStatus('warn', '检查时发现外部更新', { announce: false });
+            uiState.setStatus('warn', '检查时发现外部更新', { announce: false });
             revealErrorState();
             return;
           }
 
-          setErrors(serverErrors.length ? serverErrors : ['检查配置失败，请稍后重试'], {
+          uiState.setErrors(serverErrors.length ? serverErrors : ['检查配置失败，请稍后重试'], {
             title: '检查配置失败'
           });
-          setStatus('error', '检查配置失败', { announce: false });
+          uiState.setStatus('error', '检查配置失败', { announce: false });
           revealErrorState();
           return;
         }
 
         clearInvalidFields();
-        clearErrorBanner();
-        setStatus('ok', '服务端预检通过，可直接保存');
+        uiState.clearErrorBanner();
+        uiState.setStatus('ok', '服务端预检通过，可直接保存');
       } catch (error) {
         console.error(error);
         clearInvalidFields();
-        setErrors(['检查配置请求失败，请检查本地服务日志'], { title: '检查配置失败' });
-        setStatus('error', '检查配置失败', { announce: false });
+        uiState.setErrors(['检查配置请求失败，请检查本地服务日志'], { title: '检查配置失败' });
+        uiState.setStatus('error', '检查配置失败', { announce: false });
         revealErrorState();
       } finally {
-        setValidating(false);
+        uiState.setValidating(false);
       }
     });
 
@@ -1118,30 +1004,30 @@ if (!root) {
       applySettings(deepClone(baseline));
       finalizeAppliedSettings();
       clearInvalidFields();
-      clearErrorBanner();
-      setDirty(false);
-      setStatus('ready', '已重置为最近一次加载值');
+      uiState.clearErrorBanner();
+      uiState.setDirty(false);
+      uiState.setStatus('ready', '已重置为最近一次加载值');
     });
 
     saveBtn.addEventListener('click', async () => {
-      if (isSaving || isValidating) return;
+      if (uiState.isSaving() || uiState.isValidating()) return;
       const { draft, issues } = validateCurrentSettings();
       if (issues.length) {
-        setStatus('error', '保存前校验失败', { announce: false });
+        uiState.setStatus('error', '保存前校验失败', { announce: false });
         revealErrorState(issues);
         return;
       }
 
       const current = canonicalize(draft);
 
-      setSaving(true);
-      setStatus('loading', '正在保存到 src/data/settings/*.json');
+      uiState.setSaving(true);
+      uiState.setStatus('loading', '正在保存到 src/data/settings/*.json');
 
       try {
         if (!currentRevision) {
           clearInvalidFields();
-          setErrors(['当前配置缺少 revision，请先同步最新配置后再保存'], { title: '保存前需要重新同步配置' });
-          setStatus('error', '保存失败', { announce: false });
+          uiState.setErrors(['当前配置缺少 revision，请先同步最新配置后再保存'], { title: '保存前需要重新同步配置' });
+          uiState.setStatus('error', '保存失败', { announce: false });
           revealErrorState();
           return;
         }
@@ -1156,19 +1042,19 @@ if (!root) {
           const serverErrors = getPayloadErrors(payload);
           if (response.status === 409 && extractSettingsPayload(payload)) {
             loadPayload(payload, 'remote', { announceStatus: false });
-            setErrors(serverErrors.length ? serverErrors : ['配置已更新，已同步最新配置，请重新确认后再保存'], {
+            uiState.setErrors(serverErrors.length ? serverErrors : ['配置已更新，已同步最新配置，请重新确认后再保存'], {
               title: '检测到外部更新'
             });
-            setStatus('warn', '检测到外部更新，已同步最新配置', { announce: false });
+            uiState.setStatus('warn', '检测到外部更新，已同步最新配置', { announce: false });
             revealErrorState();
             return;
           }
 
-          setErrors(serverErrors.length ? serverErrors : ['保存失败，请稍后重试'], { title: '保存失败' });
+          uiState.setErrors(serverErrors.length ? serverErrors : ['保存失败，请稍后重试'], { title: '保存失败' });
           if (response.status === 404) {
-            setStatus('error', '当前环境不允许写入（仅 DEV 可写）', { announce: false });
+            uiState.setStatus('error', '当前环境不允许写入（仅 DEV 可写）', { announce: false });
           } else {
-            setStatus('error', '保存失败', { announce: false });
+            uiState.setStatus('error', '保存失败', { announce: false });
           }
           revealErrorState();
           return;
@@ -1176,29 +1062,29 @@ if (!root) {
 
         if (extractSettingsPayload(payload)) {
           loadPayload(payload, 'remote', { announceStatus: false });
-          setStatus('ok', '保存成功，请刷新目标页面查看效果');
+          uiState.setStatus('ok', '保存成功，请刷新目标页面查看效果');
         } else {
           baseline = current;
-          setDirty(false);
-          setStatus('ok', '保存成功');
+          uiState.setDirty(false);
+          uiState.setStatus('ok', '保存成功');
         }
         clearInvalidFields();
-        clearErrorBanner();
+        uiState.clearErrorBanner();
       } catch (error) {
         console.error(error);
         clearInvalidFields();
-        setErrors(['保存请求失败，请检查本地服务日志'], { title: '保存请求失败' });
-        setStatus('error', '保存失败', { announce: false });
+        uiState.setErrors(['保存请求失败，请检查本地服务日志'], { title: '保存请求失败' });
+        uiState.setStatus('error', '保存失败', { announce: false });
         revealErrorState();
       } finally {
-        setSaving(false);
+        uiState.setSaving(false);
       }
     });
 
     document.addEventListener(
       'click',
       (event) => {
-        if (!isDirty) return;
+        if (!uiState.isDirty()) return;
         if (!(event.target instanceof Element)) return;
 
         const anchor = event.target.closest('a[href]');
@@ -1206,7 +1092,7 @@ if (!root) {
 
         if (
           !shouldGuardAdminNavigation({
-            isDirty,
+            isDirty: uiState.isDirty(),
             currentUrl: window.location.href,
             nextUrl: anchor.href,
             button: event.button,
@@ -1226,18 +1112,19 @@ if (!root) {
 
         event.preventDefault();
         event.stopPropagation();
-        setStatus('warn', '已取消页面切换，请先保存或重置当前更改', { announce: false });
+        uiState.setStatus('warn', '已取消页面切换，请先保存或重置当前更改', { announce: false });
       },
       true
     );
 
     window.addEventListener('beforeunload', (event) => {
-      if (!isDirty) return;
+      if (!uiState.isDirty()) return;
       event.preventDefault();
       Reflect.set(event, 'returnValue', '');
     });
 
-    loadBootstrap();
-    void loadFromApi();
+    if (loadBootstrap() === 'fallback') {
+      void loadFromApi();
+    }
   }
 }

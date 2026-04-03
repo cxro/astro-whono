@@ -30,7 +30,7 @@ export const ADMIN_ROUTES = [
     id: 'content',
     href: '/admin/content/',
     label: 'Content',
-    description: '内容索引与只读控制台'
+    description: '内容索引与 frontmatter 控制台'
   },
   {
     id: 'media',

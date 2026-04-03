@@ -1,0 +1,196 @@
+/* Admin Panels
+   负责后台共享页面壳、概览卡片、轻量统计卡、badge 与 data meta/list。
+*/
+
+.admin-shell {
+  margin-top: 18px;
+  min-width: 0;
+  display: grid;
+  gap: 16px;
+}
+
+.admin-overview {
+  display: grid;
+  gap: 16px;
+}
+
+.admin-overview__grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+}
+
+.admin-overview-card {
+  display: grid;
+  gap: 10px;
+  min-width: 0;
+  padding: 18px;
+  border: 1px solid var(--border);
+  border-radius: 18px;
+  background: linear-gradient(180deg, var(--bg) 0%, var(--code-content-bg) 100%);
+  box-shadow: 0 20px 40px -34px var(--overlay-35);
+}
+
+.admin-overview-card__eyebrow {
+  margin: 0;
+  color: var(--faint);
+  font-size: 12px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.admin-overview-card__title {
+  margin: 0;
+  font-size: 20px;
+  line-height: 1.35;
+}
+
+.admin-overview-card__body,
+.admin-overview-card__meta {
+  margin: 0;
+  color: var(--muted);
+  font-size: 14px;
+  line-height: 1.7;
+}
+
+.admin-overview-card__meta {
+  color: var(--faint);
+}
+
+.admin-overview-card__list {
+  margin: 0;
+  padding-left: 18px;
+  color: var(--muted);
+  font-size: 14px;
+  line-height: 1.7;
+}
+
+.admin-overview-card__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: auto;
+}
+
+.admin-metric-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.admin-metric-card {
+  min-width: 0;
+  padding: 12px 14px;
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  background: var(--panel);
+}
+
+.admin-metric-card__label,
+.admin-metric-card__meta,
+.admin-data-meta__label,
+.admin-data-meta__value,
+.admin-data-result-list__title {
+  margin: 0;
+}
+
+.admin-metric-card__label {
+  color: var(--faint);
+  font-size: 12px;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.admin-metric-card__value {
+  margin: 8px 0 4px;
+  font-size: 28px;
+  line-height: 1.1;
+}
+
+.admin-metric-card__meta {
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.admin-recent-list,
+.admin-data-result-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.admin-recent-list {
+  display: grid;
+  gap: 10px;
+}
+
+.admin-recent-list__item,
+.admin-data-result-list__item {
+  padding: 12px 14px;
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  background: var(--panel);
+}
+
+.admin-recent-list__link {
+  color: var(--text);
+  text-decoration: none;
+}
+
+.admin-recent-list__link:hover {
+  text-decoration: underline;
+}
+
+.admin-recent-list__meta,
+.admin-data-result-list__meta {
+  margin: 6px 0 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 10px;
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.admin-badge {
+  display: inline-flex;
+  align-items: center;
+  min-height: 20px;
+  padding: 0 7px;
+  border-radius: 999px;
+  background: var(--panel);
+  border: 1px solid var(--border);
+  color: var(--faint);
+  font-size: 11px;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.admin-data-meta {
+  margin: 0;
+  display: grid;
+  grid-template-columns: max-content minmax(0, 1fr);
+  gap: 6px 12px;
+}
+
+.admin-data-meta__label {
+  color: var(--faint);
+  font-size: 12px;
+}
+
+.admin-data-meta__value {
+  min-width: 0;
+  color: var(--text);
+  font-size: 13px;
+  word-break: break-word;
+}
+
+.admin-data-result-list {
+  display: grid;
+  gap: 10px;
+}
+
+.admin-data-result-list__title {
+  color: var(--text);
+  font-size: 14px;
+  font-weight: 700;
+}

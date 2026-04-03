@@ -1,0 +1,82 @@
+/* Admin Checks
+   负责 Checks Console 的工具条、分类面板与问题列表。
+*/
+
+.admin-checks-console {
+  display: grid;
+  gap: 16px;
+}
+
+.admin-checks-toolbar,
+.admin-checks-category {
+  background: var(--panel);
+  box-shadow: none;
+}
+
+.admin-checks-toolbar__bar,
+.admin-checks-category__head,
+.admin-checks-issue__head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px 16px;
+}
+
+.admin-checks-toolbar__copy,
+.admin-checks-category__copy,
+.admin-checks-issue__copy {
+  display: grid;
+  gap: 10px;
+  min-width: 0;
+}
+
+.admin-checks-toolbar__metrics {
+  margin-top: 4px;
+}
+
+.admin-checks-category__badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.admin-checks-issue-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  gap: 10px;
+}
+
+.admin-checks-issue {
+  display: grid;
+  gap: 12px;
+  padding: 12px 14px;
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  background: var(--bg);
+}
+
+.admin-checks-issue__title {
+  margin: 0;
+  color: var(--text);
+  font-size: 15px;
+  line-height: 1.5;
+}
+
+.admin-checks-issue__meta {
+  padding-top: 8px;
+  border-top: 1px dashed var(--border);
+}
+
+.admin-checks-empty {
+  margin: 0;
+  padding: 12px 14px;
+  border: 1px dashed var(--border);
+  border-radius: 14px;
+  background: var(--bg);
+  color: var(--muted);
+  font-size: 14px;
+  line-height: 1.65;
+}

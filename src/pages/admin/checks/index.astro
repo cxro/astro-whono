@@ -50,13 +50,7 @@ const buildChecksHref = (category: AdminChecksFilterValue): string => {
     currentRoute="checks"
     title="Checks Console"
     subtitle="结构化诊断与发布前自检"
-    description={isDev
-      ? 'Phase 3 首批只聚合源文件层高价值诊断：settings 保护态、essay slug、bits 媒体路径与 tag 路由键；构建产物 smoke check 仍以 CLI 为主。'
-      : '当前环境仅保留 Checks Console 路由结构与只读说明；实际诊断扫描仍以本地开发环境为准。'}
     modeLabel={isDev ? 'DEV 快速扫描' : '只读模式'}
-    modeHint={isDev
-      ? '当前页面直接复用现有校验链路与源文件扫描，不新增第二套 schema / CLI 规则系统。'
-      : 'preview / production 下不输出结构化诊断结果，也不替代发布前 CLI 校验。'}
   >
     {
       isDev && checksDevState ? (

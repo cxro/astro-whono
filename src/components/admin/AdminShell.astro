@@ -6,16 +6,12 @@ const {
   currentRoute,
   title,
   subtitle,
-  description = null,
-  modeLabel,
-  modeHint = null
+  modeLabel
 } = Astro.props as {
   currentRoute: AdminRouteId;
   title: string;
   subtitle: string;
-  description?: string | null;
   modeLabel: string;
-  modeHint?: string | null;
 };
 ---
 
@@ -31,15 +27,9 @@ const {
     <slot name="status" />
   </header>
 
-  <div class="admin-shell__lead">
-    {modeHint ? <p class="admin-hint admin-hint--mode">{modeHint}</p> : null}
-    <AdminNav currentRoute={currentRoute} />
-  </div>
+  <AdminNav currentRoute={currentRoute} />
 
   <div class="admin-shell">
-    <div class="admin-shell__body">
-      {description ? <p class="admin-shell__description">{description}</p> : null}
-      <slot />
-    </div>
+    <slot />
   </div>
 </section>

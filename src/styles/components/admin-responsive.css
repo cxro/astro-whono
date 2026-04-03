@@ -31,9 +31,6 @@
     grid-template-columns: 1fr;
   }
 
-  .admin-shell__lead {
-    gap: 8px;
-  }
 
   .admin-route-nav {
     overflow-x: auto;
@@ -45,7 +42,7 @@
     flex-wrap: nowrap;
     width: max-content;
     min-width: 100%;
-    gap: 8px 14px;
+    gap: 8px 16px;
   }
 
   .admin-route-nav__item {
@@ -348,7 +345,6 @@
     min-height: 32px;
   }
 
-  .admin-content-toolbar__head,
   .admin-content-panel__head,
   .admin-content-toolbar__bar,
   .admin-content-toolbar__footer,
@@ -358,7 +354,6 @@
   }
 
   .admin-content-home__lead,
-  .admin-content-home__boundary-grid,
   .admin-content-home__rail,
   .admin-content-inspector__grid,
   .admin-content-item__facts {
@@ -401,37 +396,11 @@
     align-items: flex-start;
   }
 
+  /* Shared media helpers collapse to single column on mobile. */
   .admin-content-image-row__grid,
   .admin-media-field-input,
   .admin-media-picker__item-button {
     grid-template-columns: 1fr;
-  }
-
-  .admin-media-console__pager {
-    flex-direction: column;
-    align-items: stretch;
-  }
-
-  .admin-media-console__filters {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-
-  .admin-media-console__filters .admin-content-field--query,
-  .admin-media-console__filter-actions {
-    grid-column: 1 / -1;
-  }
-
-  .admin-media-console__filter-actions,
-  .admin-media-console__results-meta {
-    justify-content: flex-start;
-  }
-
-  .admin-media-list__item {
-    grid-template-columns: 1fr;
-  }
-
-  .admin-media-list__preview {
-    aspect-ratio: 16 / 9;
   }
 
   .admin-content-image-row__footer,

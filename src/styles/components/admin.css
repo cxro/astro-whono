@@ -1,8 +1,12 @@
 /* Admin Console aggregator
-   /admin 页面按需引入；内部继续按 form / social / nav / responsive 拆分。
+   /admin 页面按需引入；内部按 Theme form / shared panels / route blocks / responsive 拆分。
  */
 
 @import "./admin-form.css";
+@import "./admin-panels.css";
+@import "./admin-content.css";
+@import "./admin-checks.css";
+@import "./admin-media.css";
 @import "./admin-social.css";
 @import "./admin-nav.css";
 @import "./admin-responsive.css";

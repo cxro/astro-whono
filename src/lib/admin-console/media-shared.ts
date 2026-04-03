@@ -33,6 +33,42 @@ export type AdminMediaDirectoryOption = {
 export type AdminMediaOwnerOption = {
   value: string;
   label: string;
+  count: number;
+};
+
+export type AdminMediaBrowseGroup = 'all' | 'essay' | 'bits' | 'memo' | 'assets' | 'pages' | 'uncategorized';
+
+export type AdminMediaBrowseGroupOption = {
+  value: AdminMediaBrowseGroup;
+  label: string;
+  count: number;
+  hidden?: boolean;
+};
+
+export type AdminMediaBrowseSubgroupOption = {
+  value: string;
+  label: string;
+  count: number;
+};
+
+export type AdminMediaScopeKey = 'recent';
+
+export type AdminMediaScopeIndex = {
+  recent: string[];
+};
+
+export type AdminMediaBrowseIndexItem = {
+  path: string;
+  origin: AdminMediaOrigin;
+  fileName: string;
+  owner: string | null;
+  ownerLabel: string | null;
+  browseGroup: Exclude<AdminMediaBrowseGroup, 'all'>;
+  browseGroupLabel: string;
+  browseSubgroup: string;
+  browseSubgroupLabel: string | null;
+  preferredValue: string | null;
+  previewSrc: string | null;
 };
 
 export type AdminMediaListItem = {
@@ -42,6 +78,11 @@ export type AdminMediaListItem = {
   fileName: string;
   owner: string | null;
   ownerLabel: string | null;
+  browseGroup: Exclude<AdminMediaBrowseGroup, 'all'>;
+  browseGroupLabel: string;
+  browseSubgroup: string;
+  browseSubgroupLabel: string | null;
+  preferredValue: string | null;
   width: number | null;
   height: number | null;
   size: number | null;
@@ -54,6 +95,10 @@ export type AdminMediaListResult = {
   directory: AdminMediaDirectory;
   owner: string;
   ownerOptions: AdminMediaOwnerOption[];
+  group: string;
+  subgroup: string;
+  groupOptions: AdminMediaBrowseGroupOption[];
+  subgroupOptions: AdminMediaBrowseSubgroupOption[];
   page: number;
   limit: number;
   totalCount: number;
@@ -79,6 +124,30 @@ type AdminMediaAssetRecord = {
   fileName: string;
   owner: string | null;
   ownerLabel: string | null;
+};
+
+type AdminMediaBrowseResolvedGroup = Exclude<AdminMediaBrowseGroup, 'all'>;
+
+type AdminMediaAssetBrowseMeta = {
+  browseGroup: AdminMediaBrowseResolvedGroup;
+  browseGroupLabel: string;
+  browseSubgroup: string;
+  browseSubgroupLabel: string | null;
+  preferredValue: string | null;
+  hiddenFromBrowse: boolean;
+};
+
+type AdminMediaBrowseAsset = AdminMediaAssetRecord & { value: string } & AdminMediaAssetBrowseMeta;
+
+type AdminMediaListRequest = {
+  field: AdminMediaFieldContext | null;
+  directory: AdminMediaDirectory;
+  owner: string;
+  group: string;
+  subgroup: string;
+  query: string;
+  page: number;
+  limit: number;
 };
 
 type ContentCollectionKey = keyof typeof CONTENT_COLLECTION_LABELS;
@@ -108,9 +177,21 @@ type LocalMediaTarget = {
   previewSrc: string | null;
 };
 
+type AdminMediaInspectionMeta = Pick<AdminMediaMetaResult, 'width' | 'height' | 'size' | 'mimeType'>;
+
+type AdminMediaShortCacheEntry<T> = {
+  expiresAt: number;
+  value: T;
+};
+
+export const ADMIN_MEDIA_LIST_API_PATH = '/api/admin/media/list/' as const;
+export const ADMIN_MEDIA_META_API_PATH = '/api/admin/media/meta/' as const;
+
 const IMAGE_LOCAL_EXT_RE = /\.(?:avif|gif|jpe?g|png|svg|webp)$/i;
 const MARKDOWN_EXT_RE = /\.(?:md|mdx)$/i;
 const RELATIVE_CONTENT_ASSET_RE = /!\[[^\]]*]\(([^)]+)\)|<img[^>]+src=["']([^"']+)["']/g;
+const ADMIN_MEDIA_SHORT_CACHE_TTL_MS = 3_000;
+const ADMIN_MEDIA_SHORT_CACHE_MAX_ENTRIES = 32;
 const CONTENT_COLLECTION_LABELS = {
   essay: '随笔',
   bits: '絮语',
@@ -148,6 +229,42 @@ const MIME_BY_EXT: Record<string, string> = {
   '.svg': 'image/svg+xml',
   '.webp': 'image/webp'
 };
+const ADMIN_MEDIA_BROWSE_GROUP_LABELS = {
+  all: '全部',
+  essay: '随笔',
+  bits: 'Bits',
+  memo: 'Memo',
+  assets: '配置素材',
+  pages: '公共页面图',
+  uncategorized: '未归类'
+} as const satisfies Record<AdminMediaBrowseGroup, string>;
+
+const ADMIN_MEDIA_BROWSE_GROUP_ORDER = [
+  'all',
+  'essay',
+  'bits',
+  'memo',
+  'assets',
+  'pages',
+  'uncategorized'
+] as const satisfies readonly AdminMediaBrowseGroup[];
+
+const ADMIN_MEDIA_PAGE_ALLOWLIST = [
+  { prefix: 'public/images/archive/', subgroup: 'archive', label: 'Archive' },
+  { prefix: 'public/images/home/', subgroup: 'home', label: 'Home' },
+  { prefix: 'public/images/about/', subgroup: 'about', label: 'About' }
+] as const;
+
+const ADMIN_MEDIA_ASSET_SUBGROUP_LABELS = {
+  avatar: '头像',
+  other: '其他'
+} as const;
+
+const SYSTEM_ASSET_FILE_PATTERNS = [
+  /^favicon(?:[-\w]*)?\.(?:avif|gif|jpe?g|png|svg|webp)$/i,
+  /^apple-touch-icon(?:[-\w]*)?\.(?:avif|gif|jpe?g|png|svg|webp)$/i,
+  /^preview-[^/]+\.(?:avif|gif|jpe?g|png|svg|webp)$/i
+] as const;
 
 const FIELD_CONFIG: Record<
   AdminMediaFieldContext,
@@ -177,6 +294,15 @@ const FIELD_CONFIG: Record<
     toValue: (assetPath, origin) => (origin === 'public' ? assetPath.slice('public/'.length) : null)
   }
 };
+const ADMIN_MEDIA_FIELD_CONTEXTS = Object.freeze(Object.keys(FIELD_CONFIG) as AdminMediaFieldContext[]);
+const adminMediaOwnerOptionsCache = new Map<string, AdminMediaShortCacheEntry<AdminMediaContentOwner[]>>();
+const adminMediaOwnerOptionsPendingLoads = new Map<string, Promise<AdminMediaContentOwner[]>>();
+const adminMediaAssetListCache = new Map<string, AdminMediaShortCacheEntry<AdminMediaAssetRecord[]>>();
+const adminMediaAssetListPendingLoads = new Map<string, Promise<AdminMediaAssetRecord[]>>();
+const adminMediaInspectionMetaCache = new Map<string, AdminMediaShortCacheEntry<AdminMediaInspectionMeta>>();
+const adminMediaInspectionMetaPendingLoads = new Map<string, Promise<AdminMediaInspectionMeta>>();
+const adminMediaScopeIndexCache = new Map<string, AdminMediaShortCacheEntry<AdminMediaScopeIndex>>();
+const adminMediaScopeIndexPendingLoads = new Map<string, Promise<AdminMediaScopeIndex>>();
 
 export const ADMIN_MEDIA_DIRECTORY_OPTIONS = [
   {
@@ -250,6 +376,59 @@ const normalizePositiveInteger = (
 
 const normalizeSearchQuery = (value: string | null): string => (value ?? '').trim().toLowerCase();
 const normalizeOwnerValue = (value: string | null | undefined): string => (value ?? '').trim().replace(/\\/g, '/');
+const toAbsoluteAssetPath = (assetPath: string): string => path.join(getProjectRoot(), ...assetPath.split('/'));
+const getAdminMediaCacheKey = (...parts: string[]): string => `${getProjectRoot()}::${parts.join('::')}`;
+
+const readAdminMediaShortCache = <T>(
+  cache: Map<string, AdminMediaShortCacheEntry<T>>,
+  key: string
+): T | null => {
+  const cached = cache.get(key);
+  if (!cached) return null;
+  if (cached.expiresAt <= Date.now()) {
+    cache.delete(key);
+    return null;
+  }
+  return cached.value;
+};
+
+const writeAdminMediaShortCache = <T>(
+  cache: Map<string, AdminMediaShortCacheEntry<T>>,
+  key: string,
+  value: T
+): T => {
+  cache.set(key, {
+    expiresAt: Date.now() + ADMIN_MEDIA_SHORT_CACHE_TTL_MS,
+    value
+  });
+  while (cache.size > ADMIN_MEDIA_SHORT_CACHE_MAX_ENTRIES) {
+    const oldestKey = cache.keys().next().value;
+    if (typeof oldestKey !== 'string') break;
+    cache.delete(oldestKey);
+  }
+  return value;
+};
+
+const withAdminMediaShortCache = async <T>(
+  cache: Map<string, AdminMediaShortCacheEntry<T>>,
+  pendingLoads: Map<string, Promise<T>>,
+  key: string,
+  load: () => Promise<T>
+): Promise<T> => {
+  const cached = readAdminMediaShortCache(cache, key);
+  if (cached !== null) return cached;
+
+  const pending = pendingLoads.get(key);
+  if (pending) return pending;
+
+  const nextLoad = load()
+    .then((value) => writeAdminMediaShortCache(cache, key, value))
+    .finally(() => {
+      pendingLoads.delete(key);
+    });
+  pendingLoads.set(key, nextLoad);
+  return nextLoad;
+};
 
 export const normalizeAdminLocalImageSource = (value: string): string | null => {
   const normalized = value.trim().replace(/\\/g, '/').replace(/^\.\/+/, '');
@@ -275,8 +454,16 @@ export const normalizeAdminBitsImageSource = (value: string): string | null => {
   return normalizeAdminLocalImageSource(value);
 };
 
-const getPreviewSrcFromPath = (assetPath: string): string | null =>
-  assetPath.startsWith('public/') ? `/${assetPath.slice('public/'.length)}` : null;
+const toDevFsPreviewSrc = (assetPath: string): string =>
+  `/@fs/${encodeURI(toAbsoluteAssetPath(assetPath).replace(/\\/g, '/'))}`;
+
+const getPreviewSrcFromPath = (assetPath: string): string | null => {
+  if (assetPath.startsWith('public/')) return `/${assetPath.slice('public/'.length)}`;
+  if (assetPath.startsWith('src/assets/') || assetPath.startsWith('src/content/')) {
+    return toDevFsPreviewSrc(assetPath);
+  }
+  return null;
+};
 
 const getMimeType = (assetPath: string): string | null =>
   MIME_BY_EXT[path.extname(assetPath).toLowerCase()] ?? null;
@@ -375,33 +562,41 @@ const loadContentOwnerOptions = async (): Promise<AdminMediaContentOwner[]> => {
   const projectRoot = getProjectRoot();
   const contentRoot = path.join(projectRoot, 'src', 'content');
   if (!existsSync(contentRoot)) return [];
+  const cacheKey = getAdminMediaCacheKey('content-owners');
 
-  const markdownFiles = await walkMarkdownFiles(contentRoot);
-  const owners = await Promise.all(
-    markdownFiles.map(async (filePath) => {
-      const relativeFilePath = path.relative(projectRoot, filePath).replace(/\\/g, '/');
-      const relativeWithoutExt = relativeFilePath.replace(MARKDOWN_EXT_RE, '');
-      const segments = relativeWithoutExt.split('/');
-      const collection = segments[2] as ContentCollectionKey | undefined;
-      if (!collection || !(collection in CONTENT_COLLECTION_LABELS)) return null;
+  return withAdminMediaShortCache(
+    adminMediaOwnerOptionsCache,
+    adminMediaOwnerOptionsPendingLoads,
+    cacheKey,
+    async () => {
+      const markdownFiles = await walkMarkdownFiles(contentRoot);
+      const owners = await Promise.all(
+        markdownFiles.map(async (filePath) => {
+          const relativeFilePath = path.relative(projectRoot, filePath).replace(/\\/g, '/');
+          const relativeWithoutExt = relativeFilePath.replace(MARKDOWN_EXT_RE, '');
+          const segments = relativeWithoutExt.split('/');
+          const collection = segments[2] as ContentCollectionKey | undefined;
+          if (!collection || !(collection in CONTENT_COLLECTION_LABELS)) return null;
 
-      const entryId = segments.slice(3).join('/');
-      if (!entryId) return null;
+          const entryId = segments.slice(3).join('/');
+          if (!entryId) return null;
 
-      const source = await readFile(filePath, 'utf8');
-      const title = extractContentTitle(source);
-      const fallbackId = entryId.endsWith('/index') ? entryId.slice(0, -'/index'.length) : entryId;
-      const normalizedTitle = title || humanizeEntryId(fallbackId || entryId) || entryId;
+          const source = await readFile(filePath, 'utf8');
+          const title = extractContentTitle(source);
+          const fallbackId = entryId.endsWith('/index') ? entryId.slice(0, -'/index'.length) : entryId;
+          const normalizedTitle = title || humanizeEntryId(fallbackId || entryId) || entryId;
 
-      return {
-        value: relativeWithoutExt,
-        label: `${CONTENT_COLLECTION_LABELS[collection]} · ${normalizedTitle}`,
-        aliases: extractContentAssetAliases(source, relativeWithoutExt)
-      } satisfies AdminMediaContentOwner;
-    })
+          return {
+            value: relativeWithoutExt,
+            label: `${CONTENT_COLLECTION_LABELS[collection]} · ${normalizedTitle}`,
+            aliases: extractContentAssetAliases(source, relativeWithoutExt)
+          } satisfies AdminMediaContentOwner;
+        })
+      );
+
+      return owners.filter((owner): owner is AdminMediaContentOwner => owner !== null);
+    }
   );
-
-  return owners.filter((owner): owner is AdminMediaContentOwner => owner !== null);
 };
 
 const resolveAssetOwner = (
@@ -465,33 +660,42 @@ const listAdminMediaAssets = async (
   contentOwners?: readonly AdminMediaContentOwner[]
 ): Promise<AdminMediaAssetRecord[]> => {
   const projectRoot = getProjectRoot();
-  const roots = resolveMediaScanTargets(directory);
-  const resolvedContentOwners = roots.some((root) => root.origin === 'src/content')
-    ? (contentOwners?.length ? [...contentOwners] : await loadContentOwnerOptions())
-    : [];
+  const cacheKey = getAdminMediaCacheKey('asset-list', directory || 'all');
 
-  const entries = await Promise.all(
-    roots.map(async ({ origin, rootPath }) => {
-      if (!existsSync(rootPath)) return [] as AdminMediaAssetRecord[];
-      const files = await walkImageFiles(rootPath);
-      return files.map((filePath) => {
-        const relativePath = path.relative(projectRoot, filePath).replace(/\\/g, '/');
-        const matchedOwner = origin === 'src/content'
-          ? resolveAssetOwner(relativePath, resolvedContentOwners)
-          : null;
+  return withAdminMediaShortCache(
+    adminMediaAssetListCache,
+    adminMediaAssetListPendingLoads,
+    cacheKey,
+    async () => {
+      const roots = resolveMediaScanTargets(directory);
+      const resolvedContentOwners = roots.some((root) => root.origin === 'src/content')
+        ? (contentOwners?.length ? [...contentOwners] : await loadContentOwnerOptions())
+        : [];
 
-        return {
-          path: relativePath,
-          origin,
-          fileName: path.basename(filePath),
-          owner: matchedOwner?.value ?? null,
-          ownerLabel: matchedOwner?.label ?? null
-        } satisfies AdminMediaAssetRecord;
-      });
-    })
+      const entries = await Promise.all(
+        roots.map(async ({ origin, rootPath }) => {
+          if (!existsSync(rootPath)) return [] as AdminMediaAssetRecord[];
+          const files = await walkImageFiles(rootPath);
+          return files.map((filePath) => {
+            const relativePath = path.relative(projectRoot, filePath).replace(/\\/g, '/');
+            const matchedOwner = origin === 'src/content'
+              ? resolveAssetOwner(relativePath, resolvedContentOwners)
+              : null;
+
+            return {
+              path: relativePath,
+              origin,
+              fileName: path.basename(filePath),
+              owner: matchedOwner?.value ?? null,
+              ownerLabel: matchedOwner?.label ?? null
+            } satisfies AdminMediaAssetRecord;
+          });
+        })
+      );
+
+      return entries.flat();
+    }
   );
-
-  return entries.flat();
 };
 
 const getFieldSortRank = (field: AdminMediaFieldContext | null, assetPath: string): number => {
@@ -522,6 +726,302 @@ const toFieldValue = (field: AdminMediaFieldContext | null, record: AdminMediaAs
   return config.toValue(record.path, record.origin);
 };
 
+const getCompatibleFieldValues = (record: AdminMediaAssetRecord): string[] =>
+  Array.from(
+    new Set(
+      ADMIN_MEDIA_FIELD_CONTEXTS.map((field) => toFieldValue(field, record)).filter(
+        (value): value is string => typeof value === 'string' && value.length > 0
+      )
+    )
+  );
+
+const getPreferredFieldValue = (record: AdminMediaAssetRecord): string | null => {
+  const compatibleValues = getCompatibleFieldValues(record);
+  const [preferredValue] = compatibleValues;
+  return compatibleValues.length === 1 ? preferredValue ?? null : null;
+};
+const normalizeBrowseGroupParam = (value: string | null | undefined): string =>
+  (value ?? '').trim().toLowerCase().replace(/\\/g, '/');
+
+const normalizeBrowseSubgroupParam = (value: string | null | undefined): string =>
+  (value ?? '').trim().replace(/\\/g, '/');
+
+const isAdminMediaBrowseGroup = (value: string): value is AdminMediaBrowseGroup =>
+  value in ADMIN_MEDIA_BROWSE_GROUP_LABELS;
+
+const isSystemAssetPath = (assetPath: string): boolean => {
+  if (path.posix.dirname(assetPath) !== 'public') return false;
+  const fileName = path.posix.basename(assetPath);
+  return SYSTEM_ASSET_FILE_PATTERNS.some((pattern) => pattern.test(fileName));
+};
+
+const getBitsBrowseSubgroup = (assetPath: string): { browseSubgroup: string; browseSubgroupLabel: string | null } => {
+  const relativePath = assetPath.startsWith('public/bits/')
+    ? assetPath.slice('public/bits/'.length)
+    : assetPath.startsWith('src/content/bits/')
+      ? assetPath.slice('src/content/bits/'.length)
+      : '';
+  const firstSegment = relativePath.split('/', 1)[0] ?? '';
+  if (/^(?:19|20)\d{2}$/.test(firstSegment)) {
+    return {
+      browseSubgroup: firstSegment,
+      browseSubgroupLabel: firstSegment
+    };
+  }
+
+  return {
+    browseSubgroup: '',
+    browseSubgroupLabel: null
+  };
+};
+
+const resolveBrowseMeta = (record: AdminMediaAssetRecord): AdminMediaAssetBrowseMeta => {
+  const preferredValue = getPreferredFieldValue(record);
+  if (isSystemAssetPath(record.path)) {
+    return {
+      browseGroup: 'uncategorized',
+      browseGroupLabel: ADMIN_MEDIA_BROWSE_GROUP_LABELS.uncategorized,
+      browseSubgroup: '',
+      browseSubgroupLabel: null,
+      preferredValue,
+      hiddenFromBrowse: true
+    };
+  }
+
+  if (record.path.startsWith('src/content/essay/')) {
+    return {
+      browseGroup: 'essay',
+      browseGroupLabel: ADMIN_MEDIA_BROWSE_GROUP_LABELS.essay,
+      browseSubgroup: record.owner ?? '',
+      browseSubgroupLabel: record.ownerLabel,
+      preferredValue,
+      hiddenFromBrowse: false
+    };
+  }
+
+  if (record.path.startsWith('src/content/memo/') || record.path.startsWith('public/images/memo/')) {
+    return {
+      browseGroup: 'memo',
+      browseGroupLabel: ADMIN_MEDIA_BROWSE_GROUP_LABELS.memo,
+      browseSubgroup: '',
+      browseSubgroupLabel: null,
+      preferredValue,
+      hiddenFromBrowse: false
+    };
+  }
+
+  if (record.path.startsWith('src/content/bits/') || record.path.startsWith('public/bits/')) {
+    const bitsSubgroup = getBitsBrowseSubgroup(record.path);
+    return {
+      browseGroup: 'bits',
+      browseGroupLabel: ADMIN_MEDIA_BROWSE_GROUP_LABELS.bits,
+      browseSubgroup: bitsSubgroup.browseSubgroup,
+      browseSubgroupLabel: bitsSubgroup.browseSubgroupLabel,
+      preferredValue,
+      hiddenFromBrowse: false
+    };
+  }
+
+  if (record.path.startsWith('public/author/')) {
+    return {
+      browseGroup: 'assets',
+      browseGroupLabel: ADMIN_MEDIA_BROWSE_GROUP_LABELS.assets,
+      browseSubgroup: 'avatar',
+      browseSubgroupLabel: ADMIN_MEDIA_ASSET_SUBGROUP_LABELS.avatar,
+      preferredValue,
+      hiddenFromBrowse: false
+    };
+  }
+
+  if (record.path.startsWith('src/assets/')) {
+    return {
+      browseGroup: 'assets',
+      browseGroupLabel: ADMIN_MEDIA_BROWSE_GROUP_LABELS.assets,
+      browseSubgroup: 'other',
+      browseSubgroupLabel: ADMIN_MEDIA_ASSET_SUBGROUP_LABELS.other,
+      preferredValue,
+      hiddenFromBrowse: false
+    };
+  }
+
+  const matchedPage = ADMIN_MEDIA_PAGE_ALLOWLIST.find((item) => record.path.startsWith(item.prefix));
+  if (matchedPage) {
+    return {
+      browseGroup: 'pages',
+      browseGroupLabel: ADMIN_MEDIA_BROWSE_GROUP_LABELS.pages,
+      browseSubgroup: matchedPage.subgroup,
+      browseSubgroupLabel: matchedPage.label,
+      preferredValue,
+      hiddenFromBrowse: false
+    };
+  }
+
+  return {
+    browseGroup: 'uncategorized',
+    browseGroupLabel: ADMIN_MEDIA_BROWSE_GROUP_LABELS.uncategorized,
+    browseSubgroup: '',
+    browseSubgroupLabel: null,
+    preferredValue,
+    hiddenFromBrowse: false
+  };
+};
+
+const buildBrowseGroupOptions = (assets: readonly AdminMediaBrowseAsset[]): AdminMediaBrowseGroupOption[] => {
+  const groupCounts = assets.reduce((counts, asset) => {
+    counts.set(asset.browseGroup, (counts.get(asset.browseGroup) ?? 0) + 1);
+    return counts;
+  }, new Map<AdminMediaBrowseResolvedGroup, number>());
+
+  return ADMIN_MEDIA_BROWSE_GROUP_ORDER.map((group) => ({
+    value: group,
+    label: ADMIN_MEDIA_BROWSE_GROUP_LABELS[group],
+    count: group === 'all' ? assets.length : (groupCounts.get(group) ?? 0),
+    hidden: group === 'uncategorized'
+  }));
+};
+
+const buildBrowseSubgroupOptions = (
+  group: AdminMediaBrowseResolvedGroup,
+  assets: readonly AdminMediaBrowseAsset[]
+): AdminMediaBrowseSubgroupOption[] => {
+  const subgroupMap = assets.reduce((map, asset) => {
+    if (asset.browseGroup !== group || !asset.browseSubgroup) return map;
+    const current = map.get(asset.browseSubgroup);
+    if (current) {
+      current.count += 1;
+      return map;
+    }
+
+    map.set(asset.browseSubgroup, {
+      value: asset.browseSubgroup,
+      label: asset.browseSubgroupLabel ?? asset.browseSubgroup,
+      count: 1
+    });
+    return map;
+  }, new Map<string, AdminMediaBrowseSubgroupOption>());
+
+  return Array.from(subgroupMap.values()).sort((left, right) => {
+    if (/^(?:19|20)\d{2}$/.test(left.value) && /^(?:19|20)\d{2}$/.test(right.value)) {
+      return Number.parseInt(right.value, 10) - Number.parseInt(left.value, 10);
+    }
+    return left.label.localeCompare(right.label, 'zh-CN');
+  });
+};
+
+export const invalidateAdminMediaCaches = (): void => {
+  adminMediaOwnerOptionsCache.clear();
+  adminMediaOwnerOptionsPendingLoads.clear();
+  adminMediaAssetListCache.clear();
+  adminMediaAssetListPendingLoads.clear();
+  adminMediaInspectionMetaCache.clear();
+  adminMediaInspectionMetaPendingLoads.clear();
+  adminMediaScopeIndexCache.clear();
+  adminMediaScopeIndexPendingLoads.clear();
+};
+
+const toAdminMediaBrowseAsset = (asset: AdminMediaAssetRecord): AdminMediaBrowseAsset | null => {
+  const browseMeta = resolveBrowseMeta(asset);
+  if (browseMeta.hiddenFromBrowse) return null;
+  return {
+    ...asset,
+    value: asset.path,
+    ...browseMeta
+  } satisfies AdminMediaBrowseAsset;
+};
+
+const listAdminMediaBrowseAssets = async (): Promise<AdminMediaBrowseAsset[]> => {
+  const assets = await listAdminMediaAssets('');
+  return assets
+    .map(toAdminMediaBrowseAsset)
+    .filter((asset): asset is AdminMediaBrowseAsset => asset !== null)
+    .sort((left, right) => sortMediaAssets(null, left, right));
+};
+
+export const listAdminMediaBrowseIndex = async (): Promise<AdminMediaBrowseIndexItem[]> => {
+  const browseAssets = await listAdminMediaBrowseAssets();
+  return browseAssets.map((asset) => ({
+    path: asset.path,
+    origin: asset.origin,
+    fileName: asset.fileName,
+    owner: asset.owner,
+    ownerLabel: asset.ownerLabel,
+    browseGroup: asset.browseGroup,
+    browseGroupLabel: asset.browseGroupLabel,
+    browseSubgroup: asset.browseSubgroup,
+    browseSubgroupLabel: asset.browseSubgroupLabel,
+    preferredValue: asset.preferredValue,
+    previewSrc: getPreviewSrcFromPath(asset.path)
+  }));
+};
+
+export const listAdminMediaScopeIndex = async (): Promise<AdminMediaScopeIndex> => {
+  const cacheKey = getAdminMediaCacheKey('scope-index');
+
+  return withAdminMediaShortCache(
+    adminMediaScopeIndexCache,
+    adminMediaScopeIndexPendingLoads,
+    cacheKey,
+    async () => {
+      const browseAssets = await listAdminMediaBrowseAssets();
+      const recent = (
+        await Promise.all(
+          browseAssets.map(async (asset) => {
+            try {
+              const fileStat = await stat(toAbsoluteAssetPath(asset.path));
+              return {
+                path: asset.path,
+                mtimeMs: fileStat.mtimeMs
+              };
+            } catch {
+              return null;
+            }
+          })
+        )
+      )
+        .filter((entry): entry is { path: string; mtimeMs: number } => entry !== null)
+        .sort((left, right) => {
+          const timeDiff = right.mtimeMs - left.mtimeMs;
+          return timeDiff !== 0 ? timeDiff : left.path.localeCompare(right.path);
+        })
+        .map((entry) => entry.path);
+
+      return {
+        recent
+      } satisfies AdminMediaScopeIndex;
+    }
+  );
+};
+
+const toAdminMediaListItem = async (
+  item: AdminMediaAssetRecord & { value: string },
+  browseMeta: AdminMediaAssetBrowseMeta = resolveBrowseMeta(item)
+): Promise<AdminMediaListItem> => {
+  const meta = await readLocalMediaMeta({
+    path: item.path,
+    value: item.value,
+    origin: item.origin,
+    previewSrc: getPreviewSrcFromPath(item.path)
+  });
+
+  return {
+    path: item.path,
+    value: item.value,
+    origin: item.origin,
+    fileName: item.fileName,
+    owner: item.owner,
+    ownerLabel: item.ownerLabel,
+    browseGroup: browseMeta.browseGroup,
+    browseGroupLabel: browseMeta.browseGroupLabel,
+    browseSubgroup: browseMeta.browseSubgroup,
+    browseSubgroupLabel: browseMeta.browseSubgroupLabel,
+    preferredValue: browseMeta.preferredValue,
+    width: meta.width,
+    height: meta.height,
+    size: meta.size,
+    mimeType: meta.mimeType,
+    previewSrc: meta.previewSrc
+  } satisfies AdminMediaListItem;
+};
 const readSvgSize = (buffer: Buffer): { width: number | null; height: number | null } => {
   const source = buffer.toString('utf8');
   const widthMatch = source.match(/\bwidth=["']([0-9.]+)(?:px)?["']/i);
@@ -639,7 +1139,7 @@ const readWebpSize = (buffer: Buffer): { width: number; height: number } | null 
 };
 
 const readLocalImageSize = async (assetPath: string): Promise<{ width: number | null; height: number | null }> => {
-  const absolutePath = path.join(getProjectRoot(), ...assetPath.split('/'));
+  const absolutePath = toAbsoluteAssetPath(assetPath);
   const buffer = await readFile(absolutePath);
   const extension = path.extname(assetPath).toLowerCase();
 
@@ -656,23 +1156,42 @@ const readLocalImageSize = async (assetPath: string): Promise<{ width: number | 
   return { width: null, height: null };
 };
 
-const readLocalMediaMeta = async (target: LocalMediaTarget): Promise<AdminMediaMetaResult> => {
-  const absolutePath = path.join(getProjectRoot(), ...target.path.split('/'));
+const readLocalInspectionMeta = async (assetPath: string): Promise<AdminMediaInspectionMeta> => {
+  const absolutePath = toAbsoluteAssetPath(assetPath);
   if (!existsSync(absolutePath)) {
-    throw new AdminMediaError(`媒体文件不存在：${target.path}`, 404);
+    throw new AdminMediaError(`媒体文件不存在：${assetPath}`, 404);
   }
 
-  const [{ width, height }, fileStat] = await Promise.all([readLocalImageSize(target.path), stat(absolutePath)]);
+  const cacheKey = getAdminMediaCacheKey('inspection-meta', assetPath);
+  return withAdminMediaShortCache(
+    adminMediaInspectionMetaCache,
+    adminMediaInspectionMetaPendingLoads,
+    cacheKey,
+    async () => {
+      const [{ width, height }, fileStat] = await Promise.all([readLocalImageSize(assetPath), stat(absolutePath)]);
+
+      return {
+        width,
+        height,
+        size: fileStat.size,
+        mimeType: getMimeType(assetPath)
+      };
+    }
+  );
+};
+
+const readLocalMediaMeta = async (target: LocalMediaTarget): Promise<AdminMediaMetaResult> => {
+  const inspectionMeta = await readLocalInspectionMeta(target.path);
 
   return {
     kind: 'local',
     path: target.path,
     value: target.value,
     origin: target.origin,
-    width,
-    height,
-    size: fileStat.size,
-    mimeType: getMimeType(target.path),
+    width: inspectionMeta.width,
+    height: inspectionMeta.height,
+    size: inspectionMeta.size,
+    mimeType: inspectionMeta.mimeType,
     previewSrc: target.previewSrc
   };
 };
@@ -736,38 +1255,49 @@ const resolveLocalTargetFromFieldValue = (field: AdminMediaFieldContext, rawValu
 
 const resolveLocalTargetFromPath = (assetPath: string): LocalMediaTarget => {
   const normalizedPath = assetPath.trim().replace(/\\/g, '/');
-  if (!normalizedPath || !IMAGE_LOCAL_EXT_RE.test(normalizedPath)) {
-    throw new AdminMediaError('媒体路径不是受支持的本地图片文件');
+  if (
+    !normalizedPath
+    || normalizedPath.startsWith('/')
+    || normalizedPath.startsWith('//')
+    || /^[A-Za-z]+:\/\//.test(normalizedPath)
+    || /(^|\/)\.\.(?:\/|$)/.test(normalizedPath)
+    || normalizedPath.includes('?')
+    || normalizedPath.includes('#')
+    || !IMAGE_LOCAL_EXT_RE.test(normalizedPath)
+  ) {
+    throw new AdminMediaError('媒体路径必须是 public/**、src/assets/** 或 src/content/** 下的规范仓库相对图片路径');
   }
 
-  if (normalizedPath.startsWith('public/')) {
+  const canonicalPath = path.posix.normalize(normalizedPath);
+
+  if (canonicalPath.startsWith('public/')) {
     return {
-      path: normalizedPath,
-      value: normalizedPath.slice('public/'.length),
+      path: canonicalPath,
+      value: canonicalPath.slice('public/'.length),
       origin: 'public',
-      previewSrc: getPreviewSrcFromPath(normalizedPath)
+      previewSrc: getPreviewSrcFromPath(canonicalPath)
     };
   }
 
-  if (normalizedPath.startsWith('src/assets/')) {
+  if (canonicalPath.startsWith('src/assets/')) {
     return {
-      path: normalizedPath,
-      value: normalizedPath,
+      path: canonicalPath,
+      value: canonicalPath,
       origin: 'src/assets',
-      previewSrc: null
+      previewSrc: getPreviewSrcFromPath(canonicalPath)
     };
   }
 
-  if (normalizedPath.startsWith('src/content/')) {
+  if (canonicalPath.startsWith('src/content/')) {
     return {
-      path: normalizedPath,
-      value: normalizedPath,
+      path: canonicalPath,
+      value: canonicalPath,
       origin: 'src/content',
-      previewSrc: null
+      previewSrc: getPreviewSrcFromPath(canonicalPath)
     };
   }
 
-  throw new AdminMediaError('媒体路径必须位于 public/**、src/assets/** 或 src/content/**');
+  throw new AdminMediaError('媒体路径必须是 public/**、src/assets/** 或 src/content/** 下的规范仓库相对图片路径');
 };
 
 export const getAdminMediaMeta = async (input: AdminMediaMetaInput): Promise<AdminMediaMetaResult> => {
@@ -822,74 +1352,108 @@ export const listAdminMediaItems = async ({
   field = null,
   directory = '',
   owner = '',
+  group = '',
+  subgroup = '',
   query = '',
   page = 1,
   limit = 24
-}: {
-  field?: AdminMediaFieldContext | null;
-  directory?: AdminMediaDirectory;
-  owner?: string;
-  query?: string;
-  page?: number;
-  limit?: number;
-} = {}): Promise<AdminMediaListResult> => {
+}: Partial<AdminMediaListRequest> = {}): Promise<AdminMediaListResult> => {
   const normalizedQuery = query.trim().toLowerCase();
-  const ownerOptions = directory === 'src/content' ? await loadContentOwnerOptions() : [];
+  const normalizedGroup = normalizeBrowseGroupParam(group);
+  const normalizedSubgroup = normalizeBrowseSubgroupParam(subgroup);
+  const safeLimit = Math.max(1, Math.min(limit, 60));
+  const isBrowseMode = !field && normalizedGroup.length > 0;
+
+  if (isBrowseMode) {
+    const browseAssets = (await listAdminMediaBrowseAssets()).filter((asset) => matchesMediaQuery(asset, normalizedQuery));
+
+    const groupOptions = buildBrowseGroupOptions(browseAssets);
+    const isKnownGroup = isAdminMediaBrowseGroup(normalizedGroup);
+    const browsePool = (() => {
+      if (!isKnownGroup) return [] as AdminMediaBrowseAsset[];
+      if (normalizedGroup === 'all') return browseAssets;
+      return browseAssets.filter((asset) => asset.browseGroup === normalizedGroup);
+    })();
+    const subgroupOptions = isKnownGroup && normalizedGroup !== 'all'
+      ? buildBrowseSubgroupOptions(normalizedGroup, browsePool)
+      : [];
+    const activeSubgroup = isKnownGroup && normalizedGroup !== 'all' && subgroupOptions.some((option) => option.value === normalizedSubgroup)
+      ? normalizedSubgroup
+      : '';
+    const filtered = activeSubgroup
+      ? browsePool.filter((asset) => asset.browseSubgroup === activeSubgroup)
+      : browsePool;
+    const totalPages = Math.max(1, Math.ceil(filtered.length / safeLimit));
+    const safePage = Math.min(Math.max(page, 1), totalPages);
+    const startIndex = (safePage - 1) * safeLimit;
+    const pageItems = filtered.slice(startIndex, startIndex + safeLimit);
+    const items = await Promise.all(pageItems.map((item) => toAdminMediaListItem(item, item)));
+
+    return {
+      field: null,
+      directory: '',
+      owner: '',
+      ownerOptions: [],
+      group: normalizedGroup,
+      subgroup: activeSubgroup,
+      groupOptions,
+      subgroupOptions,
+      page: safePage,
+      limit: safeLimit,
+      totalCount: filtered.length,
+      totalPages,
+      items
+    };
+  }
+
+  const contentOwners = directory === 'src/content' ? await loadContentOwnerOptions() : [];
+  const assets = await listAdminMediaAssets(directory, contentOwners);
+  const mappedAssets = assets
+    .map((asset) => {
+      const value = toFieldValue(field, asset);
+      if (!value) return null;
+      return { ...asset, value };
+    })
+    .filter((asset): asset is AdminMediaAssetRecord & { value: string } => asset !== null);
+  const queryMatchedAssets = mappedAssets
+    .filter((asset) => matchesMediaQuery(asset, normalizedQuery))
+    .sort((left, right) => sortMediaAssets(field, left, right));
+  const ownerCountMap = queryMatchedAssets.reduce((counts, asset) => {
+    if (!asset.owner) return counts;
+    counts.set(asset.owner, (counts.get(asset.owner) ?? 0) + 1);
+    return counts;
+  }, new Map<string, number>());
+  const ownerOptions = directory === 'src/content'
+    ? contentOwners
+        .map((contentOwner) => ({
+          value: contentOwner.value,
+          label: contentOwner.label,
+          count: ownerCountMap.get(contentOwner.value) ?? 0
+        }))
+        .filter((option) => option.count > 0)
+    : [];
   const normalizedOwner = directory === 'src/content'
     ? (() => {
         const candidate = normalizeOwnerValue(owner);
         return ownerOptions.some((option) => option.value === candidate) ? candidate : '';
       })()
     : '';
-  const assets = await listAdminMediaAssets(directory, ownerOptions);
-
-  const filtered = assets
-    .map((asset) => {
-      const value = toFieldValue(field, asset);
-      if (!value) return null;
-      return { ...asset, value };
-    })
-    .filter((asset): asset is AdminMediaAssetRecord & { value: string } => asset !== null)
-    .filter((asset) => !normalizedOwner || asset.owner === normalizedOwner)
-    .filter((asset) => matchesMediaQuery(asset, normalizedQuery))
-    .sort((left, right) => sortMediaAssets(field, left, right));
-
-  const safeLimit = Math.max(1, Math.min(limit, 60));
+  const filtered = queryMatchedAssets.filter((asset) => !normalizedOwner || asset.owner === normalizedOwner);
   const totalPages = Math.max(1, Math.ceil(filtered.length / safeLimit));
   const safePage = Math.min(Math.max(page, 1), totalPages);
   const startIndex = (safePage - 1) * safeLimit;
   const pageItems = filtered.slice(startIndex, startIndex + safeLimit);
-
-  const items = await Promise.all(
-    pageItems.map(async (item) => {
-      const meta = await readLocalMediaMeta({
-        path: item.path,
-        value: item.value,
-        origin: item.origin,
-        previewSrc: getPreviewSrcFromPath(item.path)
-      });
-
-      return {
-        path: item.path,
-        value: item.value,
-        origin: item.origin,
-        fileName: item.fileName,
-        owner: item.owner,
-        ownerLabel: item.ownerLabel,
-        width: meta.width,
-        height: meta.height,
-        size: meta.size,
-        mimeType: meta.mimeType,
-        previewSrc: meta.previewSrc
-      } satisfies AdminMediaListItem;
-    })
-  );
+  const items = await Promise.all(pageItems.map((item) => toAdminMediaListItem(item)));
 
   return {
     field,
     directory,
     owner: normalizedOwner,
     ownerOptions,
+    group: '',
+    subgroup: '',
+    groupOptions: [],
+    subgroupOptions: [],
     page: safePage,
     limit: safeLimit,
     totalCount: filtered.length,
@@ -898,19 +1462,14 @@ export const listAdminMediaItems = async ({
   };
 };
 
-export const getAdminMediaListRequest = (searchParams: URLSearchParams): {
-  field: AdminMediaFieldContext | null;
-  directory: AdminMediaDirectory;
-  owner: string;
-  query: string;
-  page: number;
-  limit: number;
-} => {
+export const getAdminMediaListRequest = (searchParams: URLSearchParams): AdminMediaListRequest => {
   const rawField = (searchParams.get('field') ?? '').trim();
   return {
     field: isAdminMediaFieldContext(rawField) ? rawField : null,
     directory: normalizeAdminMediaDirectory(searchParams.get('dir')),
     owner: normalizeOwnerValue(searchParams.get('owner')),
+    group: normalizeBrowseGroupParam(searchParams.get('group')),
+    subgroup: normalizeBrowseSubgroupParam(searchParams.get('sub')),
     query: normalizeSearchQuery(searchParams.get('q')),
     page: normalizePositiveInteger(searchParams.get('page'), { fallback: 1 }),
     limit: normalizePositiveInteger(searchParams.get('limit'), { fallback: 24, max: 60 })
