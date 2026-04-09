@@ -1,53 +1,53 @@
 ---
-title: Theme Console 配置指南
-description: 说明 astro-whono 本地 Theme Console 在开发环境下的适用范围、页面分组、配置落点与保存机制。
-badge: 指南
+title: Theme Console Guide
+description: Explains the scope, page groups, configuration targets, and save mechanism of astro-whono's local Theme Console in development environment.
+badge: Guide
 date: 2026-03-18
-tags: [ "Theme Console", "指南"]
+tags: [ "Theme Console", "Guide"]
 draft: false
 ---
 
-astro-whono 提供一个本地 Theme Console，用于在开发环境中集中管理主题级配置。
+astro-whono provides a local Theme Console for managing theme-level configurations in the development environment.
 
-`/admin`主要覆盖站点信息、侧栏、首页、内页文案，以及部分阅读与代码显示选项，便于在 fork 或 clone 后统一调整这些主题设置。
+`/admin` primarily covers site information, sidebar, homepage, inner page copy, and some reading and code display options, making it easy to adjust these theme settings after forking or cloning.
 
-:::note[开发环境]
-`/admin` 仅在开发环境可写。生产环境访问该路径时，只显示只读提示。
+:::note[Development Environment]
+`/admin` is writable only in development environment. When accessed in production, it shows read-only status.
 :::
 
-## 本地启动与入口
+## Local Startup and Entry
 
-本地开发时，可通过以下命令启动项目：
+During local development, start the project with:
 
 ```bash
 npm install
 npm run dev
 ```
 
-默认情况下，开发服务器会运行在 `http://localhost:4321/`。启动后可直接访问：
+By default, the dev server runs at `http://localhost:4321/`. After starting, access directly:
 
 ```text
 http://localhost:4321/admin/
 ```
 
-如果本地修改了开发端口，请将 `4321` 替换为实际端口。
+If you changed the dev port, replace `4321` with the actual port.
 
-## 适用范围
+## Scope
 
-Theme Console 当前适合处理以下几类配置：
+Theme Console currently handles these configuration categories:
 
-- 站点标题、默认语言、默认 SEO 描述
-- 页脚年份与版权文案
-- 社交链接及其排序
-- 侧栏站点名、引用文案、导航顺序与显隐
-- 首页 Hero、首页导语及首页内部入口
-- `/essay/`、`/archive/`、`/bits/`、`/memo/`、`/about/` 的主副标题
-- 文章元信息显示选项
-- 代码块行号与阅读模式入口
+- Site title, default language, default SEO description
+- Footer year and copyright text
+- Social links and their ordering
+- Sidebar site name, quote text, navigation order and visibility
+- Homepage Hero, homepage intro, and homepage internal links
+- Main and subtitles for `/essay/`, `/archive/`, `/bits/`, `/memo/`, `/about/`
+- Article metadata display options
+- Code block line numbers and reading mode entry
 
-## 配置文件
+## Configuration Files
 
-保存后的设置会按分组自动写入 `src/data/settings/`：
+Saved settings are automatically written to `src/data/settings/` by group:
 
 ```text
 src/data/settings/
@@ -57,81 +57,81 @@ src/data/settings/
   page.json
   ui.json
 ```
-> 若 src/data/settings/*.json 尚不存在，首次在 /admin 保存时会自动生成
+> If src/data/settings/*.json doesn't exist yet, it will be auto-generated on first save in /admin
 
-Theme Console 管理的是仓库内的主题配置，相关改动仍可通过 Git 进行跟踪和回退。
+Theme Console manages theme configurations within the repository; changes can still be tracked and reverted via Git.
 
-## 页面分组
+## Page Groups
 
-`/admin` 当前按编辑场景拆分为五组。
+`/admin` is currently divided into five groups by editing scenario.
 
 ### Site
 
-`Site` 负责站点层面的基础信息：
+`Site` handles site-level basic information:
 
-- 站点标题
-- 默认语言
-- 默认 SEO 描述
-- 页脚年份与版权文案
-- 社交链接
+- Site title
+- Default language
+- Default SEO description
+- Footer year and copyright text
+- Social links
 
-其中社交链接支持固定平台与自定义链接混排，并允许统一排序。
+Social links support mixing fixed platforms with custom links, with unified ordering.
 
 ### Sidebar
 
-`Sidebar` 负责壳层与导航相关配置：
+`Sidebar` handles shell and navigation related configurations:
 
-- 侧栏站点名
-- 侧栏引用文案
-- 侧栏分隔线样式
-- 导航名称、排序、后缀字符与显隐状态
+- Sidebar site name
+- Sidebar quote text
+- Sidebar divider style
+- Navigation name, order, suffix character, and visibility
 
-![Sidebar 分组截图](./theme-console/theme-console-sidebar.webp)
+![Sidebar group screenshot](./theme-console/theme-console-sidebar.webp)
 
 ### Home
 
-`Home` 负责首页展示相关配置：
+`Home` handles homepage display related configurations:
 
-- Hero 图片地址与说明文字
-- Hero 显隐
-- 首页导语主文案
-- 首页导语补充文案
-- 补充导语中的主链接与第二链接
+- Hero image URL and alt text
+- Hero visibility
+- Homepage intro lead text
+- Homepage intro more text
+- Primary and secondary links in intro more
 
-![Home 分组截图](./theme-console/theme-console-home.webp)
+![Home group screenshot](./theme-console/theme-console-home.webp)
 
-首页补充导语仍采用固定句式，后台只开放了文案和入口选择，尽量保持首页结构稳定。当前可选入口包括 `archive`、`essay`、`bits`、`memo`、`about` 和 `tag`。
+Homepage intro more still uses fixed sentence structure; the backend only exposes text and entry selection to keep homepage structure stable. Currently selectable entries include `archive`, `essay`, `bits`, `memo`, `about`, and `tag`.
 
 
 ### Inner Pages
 
-`Inner Pages` 负责内页层面的统一文案与显示策略：
+`Inner Pages` handles unified copy and display strategy for inner pages:
 
-- `/essay/` 页面主副标题
-- `/archive/` 页面主副标题
-- `/bits/` 页面主副标题
-- `/memo/` 页面主副标题
-- `/about/` 页面主副标题
-- 文章元信息是否显示日期、标签、字数、阅读时长
-- `/bits/` 默认作者名与头像
+- `/essay/` page main and subtitle
+- `/archive/` page main and subtitle
+- `/bits/` page main and subtitle
+- `/memo/` page main and subtitle
+- `/about/` page main and subtitle
+- Whether to show date, tags, word count, reading time in article metadata
+- `/bits/` default author name and avatar
 
-![Inner Pages 分组截图](./theme-console/theme-console-inner-pages.webp)
+![Inner Pages group screenshot](./theme-console/theme-console-inner-pages.webp)
 
 
 ### Reading / Code
 
-- 是否在代码块中显示行号
-- 是否在侧栏显示阅读模式入口
+- Whether to show line numbers in code blocks
+- Whether to show reading mode entry in sidebar
 
 
-## 保存机制
+## Save Mechanism
 
-- 保存按 `site / shell / home / page / ui` 分组回写，不直接修改模板源码
-- 多数字段提供即时预览或明确的页面对应关系
-- 保存前会执行字段校验
-- 保存时会附带版本信息，用于避免并发修改造成的静默覆盖
-- 写入过程包含失败回滚，避免多文件半成功状态
+- Saves write back by group: `site / shell / home / page / ui`, without directly modifying template source
+- Most fields provide instant preview or clear page correspondence
+- Field validation runs before saving
+- Version info is included when saving to avoid silent overwrites from concurrent modifications
+- Write process includes rollback on failure to avoid partial success states
 
 ---
 
-以上内容覆盖了 Theme Console 当前常用的配置入口与保存机制。如果在使用时发现配置异常或保存问题，欢迎提交 Issue。
+The above covers the commonly used configuration entries and save mechanism in Theme Console. If you encounter configuration anomalies or save issues during use, feel free to submit an Issue.

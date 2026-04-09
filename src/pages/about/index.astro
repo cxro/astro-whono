@@ -5,7 +5,7 @@ import '../../styles/about.css';
 import { getThemeSettings, type SiteSocialIconKey } from '../../lib/theme-settings';
 const { settings } = getThemeSettings();
 const resolvedSocialItems = settings.site.socialLinks.resolvedSocialItems.filter((item) => item.visible);
-const aboutTitle = settings.page.about.title || '关于';
+const aboutTitle = settings.page.about.title || 'About';
 const aboutSubtitle = settings.page.about.subtitle;
 
 type SocialActionItem = {
@@ -72,107 +72,107 @@ const contactItems: ContactItem[] = [
     }
   </div>
   <p class="about-intro-line">
-    Whono是一个基于 Astro 的极简双栏写作主题：干净、快速、为阅读而设计。<br />
-    内容以 Markdown 写作，支持暗色模式、代码高亮、RSS 与沉浸式阅读，适合作为个人写作与轻量内容发布的起点。<br />
-    主题已开源维护，如果你有改进建议或想一起完善，欢迎创建 <a href="https://github.com/cxro/astro-whono/issues">Issue</a> 交流。
+    Whono is a minimal two-column writing theme for Astro: clean, fast, designed for reading.<br />
+    Content is written in Markdown, supporting dark mode, code highlighting, RSS, and immersive reading. Perfect for personal writing and lightweight content publishing.<br />
+    The theme is open-source and actively maintained. If you have suggestions or want to contribute, feel free to open an <a href="https://github.com/cxro/astro-whono/issues">Issue</a>.
   </p>
-  <h2 class="section-title about-section-title">栏目指引</h2>
+  <h2 class="section-title about-section-title">Site Guide</h2>
   <div class="site-guide">
     <article class="site-guide-item">
       <div class="site-guide-head">
-        <h3 class="site-guide-title">随笔</h3>
+        <h3 class="site-guide-title">Essays</h3>
         <span class="site-guide-link">/essay/</span>
       </div>
-      <p class="site-guide-desc">文章流列表（含未归档内容）。</p>
+      <p class="site-guide-desc">Article stream list (includes unarchived content).</p>
     </article>
     <article class="site-guide-item">
       <div class="site-guide-head">
-        <h3 class="site-guide-title">絮语</h3>
+        <h3 class="site-guide-title">Bits</h3>
         <span class="site-guide-link">/bits/</span>
       </div>
-      <p class="site-guide-desc">短内容动态流，碎片想法（支持多图）。</p>
+      <p class="site-guide-desc">Short content stream, fragmented thoughts (supports multiple images).</p>
     </article>
     <article class="site-guide-item">
       <div class="site-guide-head">
-        <h3 class="site-guide-title">小记</h3>
+        <h3 class="site-guide-title">Memo</h3>
         <span class="site-guide-link">/memo/</span>
       </div>
-      <p class="site-guide-desc">整理一些值得留存的片刻与回忆。</p>
+      <p class="site-guide-desc">Collecting moments and memories worth keeping.</p>
     </article>
     <article class="site-guide-item">
       <div class="site-guide-head">
-        <h3 class="site-guide-title">归档</h3>
+        <h3 class="site-guide-title">Archive</h3>
         <span class="site-guide-link">/archive/</span>
       </div>
-      <p class="site-guide-desc">按年份分组的归档目录。</p>
+      <p class="site-guide-desc">Year-based archive directory.</p>
     </article>
   </div>
 
-  <h2 class="section-title about-section-title">技术栈</h2>
+  <h2 class="section-title about-section-title">Tech Stack</h2>
   <div class="tech-stack">
     <section class="tech-group">
-      <div class="tech-group-title">构建与渲染</div>
+      <div class="tech-group-title">Build & Rendering</div>
       <ul class="tech-list">
         <li class="tech-item">
           <div class="tech-item-head">
             <span class="tech-item-title">Astro / Vite</span>
           </div>
-          <div class="tech-item-desc">内容站点与构建</div>
+          <div class="tech-item-desc">Content site and build</div>
         </li>
         <li class="tech-item">
           <div class="tech-item-head">
-            <span class="tech-item-title">CSS / 排版</span>
+            <span class="tech-item-title">CSS / Typography</span>
           </div>
-          <div class="tech-item-desc">排版与阅读体验</div>
+          <div class="tech-item-desc">Typography and reading experience</div>
         </li>
       </ul>
     </section>
     <section class="tech-group">
-      <div class="tech-group-title">语言与工具</div>
+      <div class="tech-group-title">Languages & Tools</div>
       <ul class="tech-list">
         <li class="tech-item">
           <div class="tech-item-head">
             <span class="tech-item-title">TypeScript</span>
           </div>
-          <div class="tech-item-desc">类型约束与脚本支持</div>
+          <div class="tech-item-desc">Type constraints and script support</div>
         </li>
         <li class="tech-item">
           <div class="tech-item-head">
             <span class="tech-item-title">Markdown</span>
           </div>
-          <div class="tech-item-desc">内容写作与发布流程</div>
+          <div class="tech-item-desc">Content writing and publishing workflow</div>
         </li>
       </ul>
     </section>
     
   </div>
 
-  <h2 class="section-title about-section-title">常见问题</h2>
-  <section class="qa-list" aria-label="常见问题">
+  <h2 class="section-title about-section-title">FAQ</h2>
+  <section class="qa-list" aria-label="Frequently Asked Questions">
     <details class="qa-item">
-      <summary class="qa-question"><span class="qa-icon" aria-hidden="true">Q</span>为什么我部署后会看到 SITE_URL is not set 警告？</summary>
-      <p class="qa-answer">因为没配置生产域名。未设置时会用占位域名，<code>canonical</code>/<code>og:url</code>/<code>sitemap</code>/<code>robots</code> 会不完整。部署平台里环境变量中添加 <code>SITE_URL=https://你的域名</code>，重新构建即可。</p>
+      <summary class="qa-question"><span class="qa-icon" aria-hidden="true">Q</span>Why do I see "SITE_URL is not set" warning after deployment?</summary>
+      <p class="qa-answer">Because the production domain is not configured. Without it, a placeholder domain will be used, and <code>canonical</code>/<code>og:url</code>/<code>sitemap</code>/<code>robots</code> will be incomplete. Add <code>SITE_URL=https://your-domain</code> as an environment variable in your deployment platform and rebuild.</p>
     </details>
     <details class="qa-item">
-      <summary class="qa-question"><span class="qa-icon" aria-hidden="true">Q</span>为什么有的文章没出现在归档里？</summary>
-      <p class="qa-answer">归档会过滤掉 <code>archive: false</code> 的文章。它们仍然是“已发布可访问”的，但不会出现在归档列表与归档 RSS 中（用于少数不想被目录收录的内容）。</p>
+      <summary class="qa-question"><span class="qa-icon" aria-hidden="true">Q</span>Why don't some articles appear in the archive?</summary>
+      <p class="qa-answer">The archive filters out articles with <code>archive: false</code>. They remain published and accessible, but won't appear in archive lists or the archive RSS (for content you don't want cataloged).</p>
     </details>
     <details class="qa-item">
-      <summary class="qa-question"><span class="qa-icon" aria-hidden="true">Q</span>为什么我在 /essay/ 点开文章会跳到 /archive/.../？</summary>
-      <p class="qa-answer">项目把文章详情统一在 <code>/archive/{'{'}slug{'}'}/</code>，<code>/essay/</code> 主要作为文章流列表入口，这样可以避免重复详情路由，便于长期维护。</p>
+      <summary class="qa-question"><span class="qa-icon" aria-hidden="true">Q</span>Why does clicking an article in /essay/ jump to /archive/.../?</summary>
+      <p class="qa-answer">Article details are unified under <code>/archive/{'{'}slug{'}'}/</code>. <code>/essay/</code> serves as the article stream list entry to avoid duplicate detail routes and simplify long-term maintenance.</p>
     </details>
     <details class="qa-item">
-      <summary class="qa-question"><span class="qa-icon" aria-hidden="true">Q</span>如何反馈问题或参与改进？</summary>
-      <p class="qa-answer">直接在仓库创建 <a href="https://github.com/cxro/astro-whono/issues">Issue</a>，或提交 <a href="https://github.com/cxro/astro-whono/pulls">Pull Request</a>。</p>
+      <summary class="qa-question"><span class="qa-icon" aria-hidden="true">Q</span>How do I report issues or contribute?</summary>
+      <p class="qa-answer">Create an <a href="https://github.com/cxro/astro-whono/issues">Issue</a> directly in the repository, or submit a <a href="https://github.com/cxro/astro-whono/pulls">Pull Request</a>.</p>
     </details>
   </section>
 
   {
     contactItems.length ? (
       <>
-        <h2 class="section-title about-section-title">联系与订阅</h2>
-        <section class="contact-block" aria-label="联系方式">
-          <p class="contact-note">如果你有问题、建议，或想订阅更新，可以通过以下方式联系。</p>
+        <h2 class="section-title about-section-title">Contact & Subscribe</h2>
+        <section class="contact-block" aria-label="Contact Information">
+          <p class="contact-note">If you have questions, suggestions, or want to subscribe to updates, you can reach out through the following channels.</p>
           <ul class="contact-list">
             {contactItems.map((item) => (
               <li>

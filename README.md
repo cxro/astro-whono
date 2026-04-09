@@ -1,67 +1,64 @@
 # astro-whono
 
-[中文](README.md) | [English](README.en.md)
+[![CI](https://img.shields.io/github/actions/workflow/status/cxro/astro-whono/ci.yml?style=flat&label=CI&labelColor=2E3440&color=A3BE8C&logo=githubactions&logoColor=ECEFF4)](https://github.com/cxro/astro-whono/actions/workflows/ci.yml)  [![Node](https://img.shields.io/badge/Node-%3E%3D22.12.0-81A1C1?style=flat&labelColor=2E3440&logo=nodedotjs&logoColor=ECEFF4)](README.en.md#requirements)  [![Astro](https://img.shields.io/github/package-json/dependency-version/cxro/astro-whono/astro?branch=main&style=flat&label=Astro&labelColor=2E3440&color=BC52EE&logo=astro&logoColor=ECEFF4)](https://docs.astro.build/)  [![License](https://img.shields.io/badge/License-MIT-4C566A?style=flat&labelColor=2E3440&logo=opensourceinitiative&logoColor=ECEFF4)](LICENSE)
 
-[![CI](https://img.shields.io/github/actions/workflow/status/cxro/astro-whono/ci.yml?style=flat&label=CI&labelColor=2E3440&color=A3BE8C&logo=githubactions&logoColor=ECEFF4)](https://github.com/cxro/astro-whono/actions/workflows/ci.yml)  [![Node](https://img.shields.io/badge/Node-%3E%3D22.12.0-81A1C1?style=flat&labelColor=2E3440&logo=nodedotjs&logoColor=ECEFF4)](https://github.com/cxro/astro-whono#%E7%8E%AF%E5%A2%83%E8%A6%81%E6%B1%82)  [![Astro](https://img.shields.io/github/package-json/dependency-version/cxro/astro-whono/astro?branch=main&style=flat&label=Astro&labelColor=2E3440&color=BC52EE&logo=astro&logoColor=ECEFF4)](https://docs.astro.build/)  [![License](https://img.shields.io/badge/License-MIT-4C566A?style=flat&labelColor=2E3440&logo=opensourceinitiative&logoColor=ECEFF4)](LICENSE)
+**✨ astro-whono is now upgraded to Astro v6**
 
-**✨ astro-whono 现已升级至 Astro v6**
+A minimal two-column Astro theme for personal writing and lightweight publishing.
 
-一个极简双栏的 Astro 主题，用于个人写作与轻量内容发布。
+## Links
 
-
-## 链接
-
-- 在线演示：<https://astro.whono.me>
-- 仓库地址：<https://github.com/cxro/astro-whono>
+- Live demo: <https://astro.whono.me>
+- Repository: <https://github.com/cxro/astro-whono>
 
 
-## 预览
+## Preview
 
 <p align="center">
-  <img src="public/preview-light.png" width="49%" alt="浅色预览" />
-  <img src="public/preview-dark.png" width="49%" alt="深色预览" />
+  <img src="public/preview-light.png" width="49%" alt="Light preview" />
+  <img src="public/preview-dark.png" width="49%" alt="Dark preview" />
 </p>
 
 
-## 特性
+## Features
 
-- 双栏布局（侧栏导航 + 内容区）
-- 移动端适配
-- 内容集合：随笔 / 絮语 / 小记（归档为目录视图）
-- 内置本地 Theme Console（/admin）：开发环境下**可视化管理站点配置**，fork / clone 后可快速完成站点接管
-- 絮语草稿生成器：/bits 页面一键生成 Markdown（复制/下载），支持多图与自动读取尺寸
-- RSS：默认归档订阅 + 分栏订阅
-- 浅色 / 深色模式 + 阅读模式
-
-
-## 开始使用
-
-### 环境要求
-
-- Node.js 22.12+（建议使用 `.nvmrc`）
+- Two-column layout (sidebar navigation + content area)
+- Responsive design for mobile devices
+- Content collections: essay / bits / memo (archive is generated from essay)
+- Built-in local Theme Console (`/admin`) for visually managing site settings during development, making it easy to take over the theme after forking or cloning
+- Bits draft generator on `/bits/`: one-click Markdown output (copy/download), with multi-image support and automatic image dimension detection
+- RSS: default archive feed + section feeds
+- Light / dark theme + reading mode
 
 
-### 快速开始
+## Getting Started
+
+### Requirements
+
+- Node.js 22.12+ (`.nvmrc` recommended)
+
+
+### Quick Start
 
 ```bash
 npm i
-# 可重复安装（推荐 CI/排障时使用）
+# Repeatable install (recommended for CI/troubleshooting)
 # npm ci
 npm run dev
 npm run build && npm run preview
 ```
 
 <details>
-  <summary>Windows（PowerShell）提示</summary>
+  <summary>Windows (PowerShell) note</summary>
 
-如遇执行策略拦截 `npm.ps1`，可用：
+If execution policy blocks `npm.ps1`, use one of the following:
 
 - `cmd /c npm run ...`
-- 或改用 Git Bash / WSL
+- Or use Git Bash / WSL
 </details>
 
 
-### 常用命令
+### Common Commands
 
   - npm run dev
   - npm run build
@@ -69,259 +66,259 @@ npm run build && npm run preview
   - npm run new:bit
 
 <details>
-  <summary>检查与回归命令说明</summary>
+  <summary>Check and regression commands</summary>
 
-推荐按场景选择：
+Use them depending on the situation:
 
 ```bash
-# 默认回归（GitHub Actions ）
+# Default regression entry (GitHub Actions)
 npm run ci
 
-# 发布前手动复核绝对链接 / sitemap / RSS（需已确定正式域名）
-SITE_URL=https://你的域名 npm run build
-SITE_URL=https://你的域名 npm run check:prod-artifacts
+# Manual release verification for absolute links / sitemap / RSS
+SITE_URL=https://your-domain npm run build
+SITE_URL=https://your-domain npm run check:prod-artifacts
 
-# 仅在改动 Theme Console 或 /admin 边界时
+# Only when changing Theme Console or /admin boundaries
 npm run check:preview-admin
 ```
 
-- `npm test` 主要覆盖标签工具、Theme Console 共享校验规则，以及主题设置 `revision` 的关键纯逻辑回归。
-  - npm run ci 是默认回归入口；npm run ci:core 仅用于更快的本地增量回归。
-  - 未设置 SITE_URL 时，npm run build 仍可构建，但 SEO 相关输出会不完整。
-  - 发布前如需核对绝对链接产物，设置真实 SITE_URL 后运行 npm run check:prod-artifacts。
+- `npm test` mainly covers tag utilities, shared Theme Console validation rules, and core pure-logic regressions around theme settings `revision`.
+- `npm run ci` is the default regression entry; `npm run ci:core` is only for faster local incremental checks.
+- `npm run build` still works without `SITE_URL`, but SEO-related outputs will be incomplete.
+- Before release, if you need to verify absolute-link artifacts, set a real `SITE_URL` and run `npm run check:prod-artifacts`.
 </details>
 
 
-## 部署
+## Deployment
 
-### 一键部署
+### One-click Deploy
 
 [![Deploy to Vercel](https://img.shields.io/badge/Deploy-Vercel-000000?style=flat&logo=vercel&logoColor=white)](https://vercel.com/new/clone?repository-url=https://github.com/cxro/astro-whono)&nbsp;&nbsp;[![Deploy to Netlify](https://img.shields.io/badge/Deploy-Netlify-00C7B7?style=flat&logo=netlify&logoColor=white)](https://app.netlify.com/start/deploy?repository=https://github.com/cxro/astro-whono)&nbsp;&nbsp;[![Deploy to Cloudflare Pages](https://img.shields.io/badge/Deploy-Cloudflare%20Pages-F38020?style=flat&logo=cloudflare&logoColor=white)](https://dash.cloudflare.com/?to=/:account/workers-and-pages)
 
-> 建议在生产环境设置：SITE_URL=https://你的域名 （不要以 / 结尾）。
-> 未设置时会使用占位地址，页面可访问，但分享与收录相关链接可能不完整。
+> For production, set: `SITE_URL=https://your-domain` (without a trailing slash).
+> If not set, the site can still run, but link metadata for sharing/indexing may be incomplete.
 
 <details>
-  <summary><strong>Cloudflare Pages 部署（手动导入仓库）</strong></summary>
+  <summary><strong>Cloudflare Pages deployment (manual repository import)</strong></summary>
 
-**构建设置**
-- Framework preset：Astro
-- Build command：`npm run build`
-- Output directory：`dist`
+**Build settings**
+- Framework preset: `Astro`
+- Build command: `npm run build`
+- Output directory: `dist`
 
-**Node.js 版本（通常不用填）**
-- 本项目已提供 `.nvmrc`，Cloudflare Pages 会自动读取。
-- 如需手动指定，可在 Pages 的环境变量里设置：`NODE_VERSION=22.22.0`
+**Node.js version (usually not required)**
+- This project includes `.nvmrc`, and Cloudflare Pages reads it automatically.
+- If you need to set it manually, add `NODE_VERSION=22.22.0` in environment variables.
 
-**环境变量（强烈推荐：生产环境一定要设）**
-- 在 Pages 项目 → Settings → Environment variables 添加：`SITE_URL=https://你的域名`（例如 `https://astro.whono.me`，不要以 `/` 结尾）
+**Environment variables (strongly recommended for production)**
+- In Pages project -> Settings -> Environment variables, add: `SITE_URL=https://your-domain` (for example `https://astro.whono.me`, without a trailing `/`).
 
-**为什么要设 `SITE_URL`？**
-- Astro 会用它生成 canonical、Open Graph 的 `og:url`、RSS 链接、sitemap 等“必须是完整网址”的内容；不设置时，站点也能部署，但这些链接可能变成相对地址或占位域名，影响分享预览和搜索引擎收录。
+**Why set `SITE_URL`?**
+- Astro uses it to generate canonical, Open Graph `og:url`, RSS links, sitemap, and other fields that require absolute URLs. Without `SITE_URL`, deployment still works, but these links may fall back to relative paths or placeholder domains, which can hurt share previews and search indexing.
 
-**关于 sitemap / robots**
-- 只有设置了 `SITE_URL`，才会生成 sitemap，并且 `/robots.txt` 才会输出 `Sitemap:` 行（避免指向错误域名）。
+**About sitemap / robots**
+- `sitemap` is generated only when `SITE_URL` is set, and `/robots.txt` includes a `Sitemap:` line only in that case (to avoid pointing to the wrong domain).
 
 </details>
 
 <details>
-<summary><strong>部署后检查</strong></summary>
+<summary><strong>Post-deploy checklist</strong></summary>
 
-- 首页 / 列表 / 详情页可访问
-- RSS 可访问（`/rss.xml` 及分栏 RSS）
-- 设置 `SITE_URL` 后：canonical / `og:url` 指向你的域名
-- Network 不再请求演示域名资源
+- Home page / list pages / detail pages are accessible
+- RSS endpoints are accessible (`/rss.xml` and section feeds)
+- With `SITE_URL` set: canonical / `og:url` point to your domain
+- No network requests to demo-domain resources
 
 </details>
 
 
-## 配置与入口
+## Configuration and Entry Points
 
-### 项目入口
+### Project Entry Points
 
-- 站点配置：`site.config.mjs`
-- 内容集合：`src/content.config.ts`
-- 样式共享入口：`src/styles/global.css`
-- 页面 / 场景样式入口：`src/styles/home.css`、`src/styles/about.css`、`src/styles/memo.css`、`src/styles/article.css`、`src/styles/bits-page.css`
-- 后台样式入口：`src/styles/components/admin.css`（仅 `/admin` 使用）
+- Site config: `site.config.mjs`
+- Content collections: `src/content.config.ts`
+- Shared style entry: `src/styles/global.css`
+- Page / scene style entries: `src/styles/home.css`, `src/styles/about.css`, `src/styles/memo.css`, `src/styles/article.css`, `src/styles/bits-page.css`
+- Admin style entry: `src/styles/components/admin.css` (used only by `/admin`)
 
-### Theme Console（/admin）
+### Theme Console (`/admin`)
 
-astro-whono 内置本地 Theme Console，用于开发环境中可视化配置主题，在fork 或 clone 项目后，无需熟悉整个项目结构即可快速完成站点接管。
+astro-whono includes a local Theme Console for visually configuring the theme during development. After forking or cloning the project, you can take over site-level settings without first learning the entire codebase structure.
 
 <details>
-<summary><strong>🖼️ Theme Console 预览</strong></summary>
+<summary><strong>🖼️ Theme Console Preview</strong></summary>
 
 <br>
 
-站点设置与侧栏配置：
+Site settings and sidebar configuration:
 
 ![Theme Console - Site and Sidebar](.github/assets/theme-console-overview-1.png)
 
-首页、内页与阅读/代码设置：
+Home page, inner pages, and reading/code settings:
 
 ![Theme Console - Home, Pages and UI](.github/assets/theme-console-overview-2.png)
 
 </details>
 
-#### 当前可配置内容
-Theme Console 主要面向**站点级**和**页面级**配置，目前支持：
+#### What you can configure
+Theme Console currently focuses on **site-level** and **page-level** settings, including:
 
-- 站点标题、描述、品牌名等基础信息
-- 首页导语与 Hero图片设置
-- 侧边栏导航的显示、顺序与文案
-- 社交链接与自定义社交项
-- 底部版权行 / Footer 基础文案
-- 固定内页的主副标题
-- 文章元信息展示规则
-- /bits/ 页面默认作者
+- Site title, description, brand name, and other basic metadata
+- Home intro copy and Hero image settings
+- Sidebar navigation labels, visibility, and ordering
+- Social links and custom social items
+- Footer copyright line / basic footer copy
+- Main title and subtitle for fixed inner pages
+- Default author for the `/bits/` page
 
-#### 如何启用
+#### How to use it
 
-Theme Console 默认用于**本地开发环境**。
+Theme Console is intended for **local development** by default.
 
-启动开发环境：
+Start the dev server:
 
 ```bash
 npm install
 npm run dev
 ```
-在浏览器中打开 `http://localhost:4321/admin/`
-(如果你修改了开发端口，请将 `4321` 替换为实际端口。)
 
-#### 生产环境说明
+Then open `http://localhost:4321/admin/` in your browser.
+(If you changed the dev server port, replace `4321` with your actual port.)
 
-- Theme Console 仅在本地开发环境可用，支持读取、校验和保存配置
-- 生产构建保持静态站点输出；`/admin/` 仅显示只读提示
-- `/api/admin/settings/` 仅供本地开发使用，生产环境不要依赖该接口
+#### Production behavior
+
+- Theme Console is available only in local development, with config loading, validation, and saving enabled
+- Production builds remain static output; `/admin/` shows a read-only notice only
+- `/api/admin/settings/` is for local development only and should not be treated as a production API
+
+#### Compatibility for existing forks
+
+- If `src/data/settings/*.json` does not exist yet, the frontend still reads config via `settings > legacy > default`
+- The JSON files are generated only after the first save in `/admin`, so no manual migration script is required
 
 
-#### 兼容迁移（已 fork用户）：
+## Content and Writing
 
-- 未创建 `src/data/settings/*.json` 时，前台仍会按 `settings > legacy > default` 正常读取
-- 首次在 `/admin` 点击保存后，才会生成对应的 JSON 文件，无需手动执行迁移脚本
+### Collections and Routes
+
+Content Collections:
+- Essay: `src/content/essay`
+- Bits: `src/content/bits`
+- Memo: `src/content/memo/index.md`
+- Archive: generated from essay entries via the `archive` field
+
+Main routes:
+- List pages: `/archive/`, `/essay/`, `/bits/`, `/memo/`, `/about/`
+- Canonical detail route: `/archive/[slug]` (`/essay/[slug]` remains as a compatibility redirect)
+
+### Image Assets
+
+- Images inside article content: prefer `src/content/**` or `src/assets/**`, so Astro can process and optimize them during build
+- `/bits/` images: place them under `public/bits/**` and use the actual file path, for example `bits/demo-01.jpg`
+- Default avatar for `/bits/`: place it under `public/author/**` and use the actual file path, for example `author/your-avatar.png`
+- Home Hero: supports `src/assets/**`, `public/**`, and `https://` image URLs
+- If you need a public direct URL, or do not want Astro to process the asset, place it under `public/**`
 
 
-## 内容与写作
+### Core Frontmatter Fields
 
-### 内容与路由
-
-内容集合（Content Collections）：
-- 随笔：位于 `src/content/essay` 目录
-- 絮语：位于 `src/content/bits` 目录
-- 小记：位于 `src/content/memo/index.md`
-- 归档：由随笔集合按 `archive` 字段生成目录视图
-
-主要路由：
-- 列表页：`/archive/`、`/essay/`、`/bits/`、`/memo/`、`/about/`
-- 详情页规范入口：/archive/[slug]（/essay/[slug] 保留兼容跳转）
-
-### 图片资源
-
-- 文章正文图片：建议放 `src/content/**` 或 `src/assets/**`， Astro 在构建时可以参与处理优化
-- `/bits/` 配图：放 `public/bits/**`，并填写实际文件路径，例如 `bits/demo-01.jpg`
-- `/bits/` 默认头像：放 `public/author/**`，并填写实际文件路径，例如 `author/your-avatar.png`
-- 首页 Hero：支持 `src/assets/**`、`public/**` 和 `https://` 图片地址
-- 需要公共直链，或不希望经过 Astro 处理的图片：放 `public/**`
-
-### 核心字段（Frontmatter）
-
-随笔：
+Essay:
 ```yaml
 title: My Post
 date: 2026-01-01
-draft: false        # 草稿：上线后不会出现在列表/RSS（本地预览可见，默认是 false，可省略）
-archive: true       # 归档开关：false 不进 /archive 与 /archive/rss.xml（默认 true，详情与 /essay 仍可见，可省略）
-slug: optional      # 自定义 URL slug（默认使用拍平后的内容路径，例如 2024/my-post → 2024-my-post）
-badge: optional     # 列表徽标；未填时列表显示“随笔”
+draft: false        # Draft: hidden from list/RSS in production (visible in local preview; default false, optional)
+archive: true       # Archive switch: false excludes it from /archive and /archive/rss.xml (default true; detail page and /essay remain available)
+slug: optional      # Custom URL slug (defaults to the flattened content path, e.g. 2024/my-post -> 2024-my-post)
+badge: optional     # List badge; if omitted, list shows "Essay"
 ```
 
-絮语（bits）：
+Bits:
 ```yaml
-date: 2026-01-01T12:00:00+08:00 # 示例；生成器按本地时区输出
-tags:                           # 可选标签（默认空数组，可省略）
-  - loc:深圳                    # 地点标签写法：loc:<地点>，仅展示第一个
-  - 阅读
-images:                         # 可选：多图（自动读取图片尺寸，用于减少页面跳动 CLS）
-  - src: bits/demo-01.webp      # 支持相对路径 bits/... 或绝对 URL https://...
+date: 2026-01-01T12:00:00+08:00 # Example; generator outputs local timezone
+tags:                           # Optional tags (defaults to empty array)
+  - loc:Shenzhen                # Location tag format: loc:<place>; only the first one is displayed
+  - reading
+images:                         # Optional: multi-image list (dimensions reduce CLS)
+  - src: bits/demo-01.webp      # Supports relative path bits/... or absolute URL https://...
     width: 800
     height: 800
-# draft: true   # 可选：草稿；`dev` 可见，`build/preview` 与线上默认不显示
+# draft: true   # Optional draft; visible in `dev`, hidden by default in `build/preview` and production
 ```
 
-当前 `/bits/` 不会基于 `slug` 生成详情页，也不会把它作为前台可见文案显示；如无明确扩展需求，通常无需填写。
+`/bits/` does not currently generate detail routes from `slug`, nor does it render it as visible UI text; unless you are extending the theme, you usually do not need to set it.
 
-作者信息（仅 /bits/ 页面）：
+Author info (on `/bits/` only):
 
-- 默认作者与头像优先读取 Theme Console 的 `page.bits.defaultAuthor`；未创建 `src/data/settings/page.json` 时回退到 `site.config.mjs` 的 `site.author` / `site.authorAvatar`
-- `authorAvatar` 仅写相对图片路径（不带 `public/`、不带前导 `/`），例如：`author/avatar.webp`；该路径必须对应 `public/**` 中实际存在的文件
-- 单条 bits 可在 frontmatter 用 `author` 覆盖：
+- Default author and avatar are read from Theme Console via `page.bits.defaultAuthor`; if `src/data/settings/page.json` does not exist yet, they fall back to `site.author` / `site.authorAvatar` in `site.config.mjs`
+- `authorAvatar` should be a relative image path only (no `public/`, no leading `/`), for example: `author/avatar.webp`; the file must actually exist under `public/**`
+- Per-bit overrides are supported via `author` in frontmatter:
 
 ```yaml
 author:
   name: Alice
   avatar: author/alice.webp
 ```
-- 单条 bits 的 `author.avatar` 与默认头像遵循同一规则：仅允许相对图片路径，并应指向 `public/**` 中实际存在的文件
+- Per-bit `author.avatar` follows the same rule as the default avatar: it must be a relative image path pointing to an existing file under `public/**`
 
-- 头像图片缺失或加载失败时，会自动回退到首字母头像
-
-
-### 摘要与描述（description）
-
-- 列表摘要默认从正文生成（清洗后截断）
-- 可用 `<!-- more -->` 指定摘要截取位置
-- `description` 仅用于 SEO/OG（meta description），不影响列表摘要
+- If the avatar is missing or fails to load, it automatically falls back to an initial-based avatar.
 
 
-### 写作约定（内容块）
+### Excerpt and Description (`description`)
 
-- Callout：推荐语法糖 `:::note[title] ... :::`（note / tip / info / warning）；HTML 方式使用 `.callout-title`，隐藏图标用 `data-icon="none"`
-- Figure：`figure > (img|picture) + figcaption?`
-- Gallery：`ul.gallery > li > figure > (img|picture) + figcaption?`（可选 cols-2/cols-3）
-- Quote：标准 `blockquote`，可选 `cite` 标注来源
-- Pullquote：`blockquote.pullquote`
-- Code Block：构建时增强工具栏/复制按钮/行号（作者无需额外写法）
+- List excerpt is generated from content by default (sanitized and truncated)
+- Use `<!-- more -->` to define excerpt split point
+- `description` is used for SEO/OG (meta description) only and does not affect list excerpts
 
-Callout 示例：
+
+### Writing Conventions (Content Blocks)
+
+- Callout: recommended directive syntax `:::note[title] ... :::` (`note` / `tip` / `info` / `warning`); in HTML form use `.callout-title`, and use `data-icon="none"` to hide icon
+- Figure: `figure > (img|picture) + figcaption?`
+- Gallery: `ul.gallery > li > figure > (img|picture) + figcaption?` (optional `cols-2` / `cols-3`)
+- Quote: standard `blockquote`, optional `cite` for source
+- Pullquote: `blockquote.pullquote`
+- Code Block: toolbar / copy button / line numbers are enhanced at build time (no extra author-side syntax needed)
+
+Callout example:
 
 ```md
 :::note[Note]
-这里是正文……
+Body text goes here...
 :::
 ```
 
-HTML 示例：
+HTML example:
 
 ```html
 <div class="callout note">
   <p class="callout-title" data-icon="none">Note</p>
-  <p>这里是正文……</p>
+  <p>Body text goes here...</p>
 </div>
 ```
 
 
-## 字体与许可
+## Fonts and Licensing
 
-本主题使用两套字体排版（自托管 + 子集化）：
-- Noto Serif SC（400 / 600）
-- LXGW WenKai Lite（Regular）
+This theme uses two typeface families (self-hosted + subsetted):
+- Noto Serif SC (400 / 600)
+- LXGW WenKai Lite (Regular)
 
-仓库提交的是子集化后的 WOFF2 字体（latin / cjk-common / cjk-ext 三段，`unicode-range` 按需加载），因此 **clone 即用**。
-子集字符集由仓库文本 + `tools/charset-base.txt`（3500 常用字）共同生成，用来降低缺字概率。
+The repository includes subsetted WOFF2 files (`latin` / `cjk-common` / `cjk-ext`, loaded on demand via `unicode-range`), so you can use the project immediately after cloning.
+Subset charset is generated from repository text plus `tools/charset-base.txt` (3,500 common characters) to reduce missing-glyph cases.
 
-重新生成字体子集：
-1. 安装 Python 3，并执行 `python -m pip install fonttools brotli zopfli`
-2. 确认 `pyftsubset --help` 可用；若不可用，请把 Python Scripts 目录加入 `PATH`
-3. 把源字体放到 `tools/fonts-src/`
-4. 运行 `npm run font:build`
-5. 缺字时，把字符补到 `tools/charset-base.txt` 后重新执行 `npm run font:build`
-6. `tools/charset-common.txt` 会在 `npm run font:charset` 时重生成；除非你只想重跑 `npm run font:subset`，否则不要手改它
+To regenerate font subsets:
+1. Install Python 3, then run `python -m pip install fonttools brotli zopfli`
+2. Make sure `pyftsubset --help` works; if it does not, add the Python Scripts directory to `PATH`
+3. Put the source fonts in `tools/fonts-src/`
+4. Run `npm run font:build`
+5. If glyphs are missing, add the characters to `tools/charset-base.txt` and rerun `npm run font:build`
+6. `tools/charset-common.txt` is regenerated by `npm run font:charset`; do not edit it unless you only want to rerun `npm run font:subset`
 
 <details>
-  <summary>字体文件清单（子集 + 源字体）</summary>
+  <summary>Font file list (subsets + source files)</summary>
 
-子集文件（仓库内）：
+Subset files (tracked in repository):
 - `public/fonts/lxgw-wenkai-lite-latin.woff2`
 - `public/fonts/lxgw-wenkai-lite-cjk-common.woff2`
 - `public/fonts/lxgw-wenkai-lite-cjk-ext.woff2`
@@ -332,30 +329,30 @@ HTML 示例：
 - `public/fonts/noto-serif-sc-600-cjk-common.woff2`
 - `public/fonts/noto-serif-sc-600-cjk-ext.woff2`
 
-源字体（不入库）：
+Source files (not tracked in repository):
 - `tools/fonts-src/LXGWWenKaiLite-Regular.woff2`
 - `tools/fonts-src/NotoSerifSC-Regular.ttf`
 - `tools/fonts-src/NotoSerifSC-SemiBold.ttf`
 </details>
 
-字体许可：SIL Open Font License 1.1（见 `public/fonts/OFL-LXGW-WenKai-Lite.txt` 与 `public/fonts/OFL-NotoSerifSC.txt`）。
+Font license: SIL Open Font License 1.1 (see `public/fonts/OFL-LXGW-WenKai-Lite.txt` and `public/fonts/OFL-NotoSerifSC.txt`).
 
 
 ## RSS
 
-- `/rss.xml`（默认 RSS；与 `/archive/rss.xml` 使用同源归档数据）
-- `/archive/rss.xml`（归档订阅）
+- `/rss.xml` (default feed; uses the same archive items as `/archive/rss.xml`)
+- `/archive/rss.xml` (archive feed)
 - `/essay/rss.xml`
 
-部署时建议设置 `SITE_URL`（影响 RSS/OG/canonical 的绝对链接）。
+Setting `SITE_URL` is recommended for deployment (affects absolute links in RSS/OG/canonical).
 
 
-## 贡献
+## Contributing
 
-欢迎创建 Issue 来报告问题或提出想法。
-欢迎提交 Pull Request 参与开发，建议从 feature/* 分支发起。
+Issues are welcome for bug reports and ideas.
+Pull requests are welcome; using a `feature/*` branch is recommended.
 
-### Fork 同步上游
+### Sync Upstream in a Fork
 
 ```bash
 git remote add upstream https://github.com/cxro/astro-whono.git
@@ -366,13 +363,13 @@ git push origin main --tags
 ```
 
 
-## 致谢
+## Acknowledgements
 
-- 感谢 [elizen/elizen-blog](https://github.com/elizen/elizen-blog)，这是本主题设计的起点，其风格源自Hugo 主题  [yihui/hugo-ivy](https://github.com/yihui/hugo-ivy)
+- Thanks to [elizen/elizen-blog](https://github.com/elizen/elizen-blog), the starting point of this theme design, which is inspired by the Hugo theme [yihui/hugo-ivy](https://github.com/yihui/hugo-ivy)
 
 
-## 许可证
+## License
 
-License：MIT
+License: MIT
 
 

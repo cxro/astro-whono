@@ -15,7 +15,7 @@ const { homeIntroMaxLength } = Astro.props;
 
 <fieldset class="admin-group">
   <legend class="admin-group__legend">
-    <span class="admin-group__legend-zh">首页设置</span>
+    <span class="admin-group__legend-zh">Home Settings</span>
     <span class="admin-group__legend-sep" aria-hidden="true">·</span>
     <span class="admin-group__legend-en">Home</span>
   </legend>
@@ -23,13 +23,13 @@ const { homeIntroMaxLength } = Astro.props;
     <div class="admin-field admin-field--full">
       <div class="admin-hero-grid">
         <span class="admin-label__copy admin-hero-grid__copy">
-          <label class="admin-label__main" for="home-hero-image-src">Hero 图片地址</label>
-          <span class="admin-label__hint">（地址留空时回退内置默认图）</span>
+          <label class="admin-label__main" for="home-hero-image-src">Hero Image URL</label>
+          <span class="admin-label__hint">(defaults to built-in image if empty)</span>
         </span>
-        <label class="admin-label__main admin-hero-grid__heading" for="home-hero-image-alt">Hero 图片说明</label>
+        <label class="admin-label__main admin-hero-grid__heading" for="home-hero-image-alt">Hero Image Alt Text</label>
         <label class="admin-label__toggle admin-hero-grid__toggle" for="home-show-hero">
           <input id="home-show-hero" type="checkbox" checked />
-          <span>展示</span>
+          <span>Show</span>
         </label>
         <input
           id="home-hero-image-src"
@@ -37,8 +37,8 @@ const { homeIntroMaxLength } = Astro.props;
           type="text"
           inputmode="url"
           spellcheck="false"
-          placeholder="当前使用：src/assets/hero.png"
-          aria-label="Hero 图片地址"
+          placeholder="Currently using: src/assets/hero.png"
+          aria-label="Hero Image URL"
         />
         <input
           id="home-hero-image-alt"
@@ -46,19 +46,19 @@ const { homeIntroMaxLength } = Astro.props;
           type="text"
           maxlength={ADMIN_HERO_IMAGE_ALT_MAX_LENGTH}
           placeholder={ADMIN_HERO_IMAGE_ALT_DEFAULT}
-          aria-label="Hero 图片说明"
+          aria-label="Hero Image Alt Text"
         />
       </div>
-      <p class="admin-help">注：支持 src/assets/**、public/** 或 https:// 图床链接</p>
+      <p class="admin-help">Note: Supports src/assets/**, public/**, or https:// image URLs</p>
     </div>
     <div class="admin-field admin-field--full">
       <div class="admin-label admin-label--split">
         <span class="admin-label__copy">
-          <label class="admin-label__main" for="home-intro-lead">首页导语主文案</label>
+          <label class="admin-label__main" for="home-intro-lead">Homepage Intro Lead</label>
         </span>
         <label class="admin-label__toggle" for="home-show-intro-lead">
           <input id="home-show-intro-lead" type="checkbox" checked />
-          <span>展示</span>
+          <span>Show</span>
         </label>
       </div>
       <textarea id="home-intro-lead" rows="3" maxlength={homeIntroMaxLength}></textarea>
@@ -66,27 +66,27 @@ const { homeIntroMaxLength } = Astro.props;
     <div class="admin-field admin-field--full">
       <div class="admin-label admin-label--split">
         <span class="admin-label__copy">
-          <label class="admin-label__main" for="home-intro-more">首页导语补充文案</label>
-          <span class="admin-label__hint">（固定句式：补充文案 + 链接 + 可选“或” + 链接）</span>
+          <label class="admin-label__main" for="home-intro-more">Homepage Intro More</label>
+          <span class="admin-label__hint">(format: text + link + optional "or" + link)</span>
         </span>
         <label class="admin-label__toggle" for="home-show-intro-more">
           <input id="home-show-intro-more" type="checkbox" checked />
-          <span>展示</span>
+          <span>Show</span>
         </label>
       </div>
-      <div class="admin-inline-builder admin-inline-builder--intro-more" role="group" aria-label="首页导语补充句式编辑器">
+      <div class="admin-inline-builder admin-inline-builder--intro-more" role="group" aria-label="Homepage Intro More Editor">
         <textarea
           id="home-intro-more"
           class="admin-inline-builder__text"
           rows="1"
           maxlength={homeIntroMaxLength}
-          aria-label="首页导语补充文案"
+          aria-label="Homepage Intro More"
         ></textarea>
         <span class="admin-inline-builder__select-group">
           <select
             id="home-intro-more-link-primary"
             class="admin-inline-builder__select"
-            aria-label="首页导语补充主链接"
+            aria-label="Homepage Intro More Primary Link"
           >
             {ADMIN_HOME_INTRO_LINK_OPTIONS.map((option) => (
               <option value={option.id} selected={option.id === ADMIN_HOME_INTRO_LINK_DEFAULT[0]}>
@@ -102,18 +102,18 @@ const { homeIntroMaxLength } = Astro.props;
             type="checkbox"
             aria-controls="home-intro-more-link-secondary"
           />
-          <span>启用双链接</span>
+          <span>Enable Dual Links</span>
         </label>
         <span
           id="home-intro-more-link-secondary-group"
           class="admin-inline-builder__secondary"
           aria-disabled="true"
         >
-          <span class="admin-inline-builder__secondary-sep">或</span>
+          <span class="admin-inline-builder__secondary-sep">or</span>
           <select
             id="home-intro-more-link-secondary"
             class="admin-inline-builder__select"
-            aria-label="首页导语补充第二链接"
+            aria-label="Homepage Intro More Secondary Link"
             disabled
           >
             {ADMIN_HOME_INTRO_LINK_OPTIONS.map((option) => (
@@ -125,7 +125,7 @@ const { homeIntroMaxLength } = Astro.props;
         </span>
       </div>
       <p class="admin-help">
-        补充导语预览：<code id="home-intro-more-preview" class="admin-help__preview-value">更多文章请访问 归档。</code>
+        Intro More Preview: <code id="home-intro-more-preview" class="admin-help__preview-value">More articles at Archive.</code>
       </p>
     </div>
   </div>

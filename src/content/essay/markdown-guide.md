@@ -1,85 +1,85 @@
 ---
-title: Markdown 排版指南
-description: 展示所有 Markdown 格式效果，包括标题、列表、代码、表格、引用等
+title: Markdown Formatting Guide
+description: Demonstrates all Markdown formatting effects supported by this theme, including headings, lists, code, tables, quotes, and more
 date: 2026-01-15
-badge: 示例
-tags: [ "Markdown", "排版"]
+badge: Example
+tags: [ "Markdown", "Formatting"]
 draft: false
 ---
 
-这篇文章展示了本主题支持的所有 Markdown 排版效果。
+This article demonstrates all Markdown formatting effects supported by this theme.
 
-第一段……（用于列表预览）
+First paragraph... (for list preview)
 <!-- more -->
-后续正文……
+Rest of the content...
 
-## 文本格式
+## Text Formatting
 
-这是一段普通文本。**这是粗体文字**，*这是斜体文字*，***这是粗斜体***。你也可以使用 ~~删除线~~ 来标记废弃内容。
+This is normal text. **This is bold text**, *this is italic text*, ***this is bold italic***. You can also use ~~strikethrough~~ to mark deprecated content.
 
-行内代码使用反引号包裹：`const hello = 'world'`，非常适合标记变量名或命令。
+Inline code uses backticks: `const hello = 'world'`, perfect for marking variable names or commands.
 
-## 引用
+## Quotes
 
-> 设计的价值不止于建造完成。好的设计应该能够经受时间的考验，在岁月流转中依然保持其独特的魅力与实用性。
+> The value of design goes beyond completion. Good design should stand the test of time, maintaining its unique charm and practicality through the years.
 
-你也可以使用多段引用：
+You can also use multi-paragraph quotes:
 
-> 第一段引用内容。
+> First paragraph of quote content.
 >
-> 第二段引用内容，展示多段落效果。
+> Second paragraph, showing multi-paragraph effect.
 
-来源标注（`<cite>` 放在 blockquote 内最后一行）：
+Source attribution (using `<cite>` at the last line inside blockquote):
 
-> 设计的价值不止于建造完成。
+> The value of design goes beyond completion.
 >
 > <cite>— Dieter Rams</cite>
 
-Pullquote（使用 `blockquote.pullquote` 变体）：
+Pullquote (using `blockquote.pullquote` variant):
 
 <blockquote class="pullquote">
-  你那么憎恨那些人，跟他们斗了那么久，最终却变得和他们一样。人世间没有任何理想值得以这样的沉沦为代价。
-  <cite>— 百年孤独</cite>
+  You hate those people so much and fight them for so long, only to become like them. No ideal in this world is worth such degradation.
+  <cite>— One Hundred Years of Solitude</cite>
 </blockquote>
 
-## 提示块（Callout）
+## Callouts
 
-支持 `note / tip / info / warning` 四种语法糖。下面先给一个最小写法；如需更精细控制，也可以直接写 HTML。
+Supports four types: `note / tip / info / warning`. Here's minimal syntax first; for finer control, you can also write HTML directly.
 
 ~~~md
-:::note[标题]
-这是正文。
+:::note[Title]
+This is the content.
 :::
 ~~~
 
-如需直接写 HTML（更精确控制）：
+To write HTML directly (more precise control):
 
 ~~~html
 <div class="callout note">
-  <p class="callout-title" data-icon="none">标题</p>
-  <p>这是正文。</p>
+  <p class="callout-title" data-icon="none">Title</p>
+  <p>This is the content.</p>
 </div>
 ~~~
 
-说明：
-- 默认图标由类型决定，不需要 `<span class="callout-icon">`。
-- 隐藏图标用 `data-icon="none"`，写在 `.callout-title` 上。
-- 自定义图标可用 `data-icon="✨"`（可选）。
+Notes:
+- Default icon determined by type, no `<span class="callout-icon">` needed.
+- Hide icon with `data-icon="none"` on `.callout-title`.
+- Custom icon with `data-icon="✨"` (optional).
 
-### 语法糖变体示例（Callout）
+### Syntax Sugar Examples (Callout)
 
-这一组示例主要展示不同类型、标题形式与内容结构在前端的实际样式。
+This group shows actual frontend styles for different types, title formats, and content structures.
 
 :::note
-这是无标题示例。
+This is a no-title example.
 :::
 
-:::note[带标题]
-这是普通段落正文。
+:::note[With Title]
+This is normal paragraph content.
 :::
 
 :::tip[Tip]
-可以包含行内代码 `npm run dev`、强调文本和 [链接](https://astro.build)。
+Can include inline code `npm run dev`, emphasized text, and [links](https://astro.build).
 :::
 
 :::info[Info]
@@ -89,54 +89,54 @@ const hello = 'world';
 :::
 
 :::warning[Warning]
-> 也可以包含引用块。
+> Can also include quote blocks.
 >
-> 也可以换成多段内容。
+> Can be multiple paragraphs.
 :::
 
-基础语法如下：
+Basic syntax:
 
 ~~~text
-:::type[可选标题]
-正文内容
+:::type[Optional Title]
+Content text
 :::
 ~~~
 
-仅支持 `note / tip / info / warning`；不支持的类型（如 `:::foo[...]`）当前会降级为 `note`。
+Only `note / tip / info / warning` supported; unsupported types (like `:::foo[...]`) fall back to `note`.
 
-## 列表
+## Lists
 
-### 无序列表
+### Unordered List
 
-- 第一项
-- 第二项
-  - 嵌套项 A
-  - 嵌套项 B
-- 第三项
+- First item
+- Second item
+  - Nested item A
+  - Nested item B
+- Third item
 
-### 有序列表
+### Ordered List
 
-1. 准备工作
-2. 安装依赖
-3. 运行项目
-   1. 开发模式
-   2. 生产构建
+1. Preparation
+2. Install dependencies
+3. Run project
+   1. Development mode
+   2. Production build
 
-### 任务列表
+### Task List
 
-- [x] 完成设计稿
-- [x] 开发首页
-- [ ] 编写文档
-- [ ] 发布上线
+- [x] Complete design draft
+- [x] Develop homepage
+- [ ] Write documentation
+- [ ] Deploy to production
 
-## 代码块
+## Code Blocks
 
-以下代码块用于展示工具栏（语言/行数/复制按钮）与行号（默认开启）。
+The following code blocks demonstrate toolbar (language/lines/copy button) and line numbers (enabled by default).
 
 ### JavaScript
 
 ```javascript
-// 一个简单的 Astro 组件示例
+// A simple Astro component example
 const greeting = 'Hello, World!';
 
 function fibonacci(n) {
@@ -151,7 +151,7 @@ console.log(fibonacci(10)); // 55
 
 ```python
 def quick_sort(arr):
-    """快速排序算法实现"""
+    """Quick sort algorithm implementation"""
     if len(arr) <= 1:
         return arr
     
@@ -162,7 +162,7 @@ def quick_sort(arr):
     
     return quick_sort(left) + middle + quick_sort(right)
 
-# 使用示例
+# Usage example
 numbers = [3, 6, 8, 10, 1, 2, 1]
 print(quick_sort(numbers))
 ```
@@ -183,97 +183,97 @@ print(quick_sort(numbers))
 ### Shell
 
 ```bash
-# 安装依赖并启动开发服务器
+# Install dependencies and start dev server
 npm install
 npm run dev
 
-# 构建生产版本
+# Build production version
 npm run build
 ```
 
-## 表格
+## Tables
 
-| 功能 | 状态 | 说明 |
+| Feature | Status | Description |
 |:----:|:----:|:----:|
-| 响应式布局 | ✅ | 完美适配移动端 |
-| 暗色模式 | 🚧 | 开发中 |
-| RSS 订阅 | ✅ | 支持多 Feed |
-| 国际化 | ❌ | 计划中 |
+| Responsive Layout | ✅ | Perfect mobile adaptation |
+| Dark Mode | 🚧 | In development |
+| RSS Feed | ✅ | Multi-feed support |
+| Internationalization | ❌ | Planned |
 
-## 链接与图片
+## Links and Images
 
-这是一个 [外部链接](https://astro.build)，会在新标签页打开。
+This is an [external link](https://astro.build) that opens in a new tab.
 
 ### Figure / Caption
 
-**案例 A：img + figcaption**
+**Case A: img + figcaption**
 
 <figure class="figure">
-  <img src="/images/archive/demo-archive-01.webp" alt="图注示例图片 1" />
-  <figcaption class="figure-caption">图注示例：这是图片的说明文字。</figcaption>
+  <img src="/images/archive/demo-archive-01.webp" alt="Figure caption example image 1" />
+  <figcaption class="figure-caption">Figure caption example: This is the image description text.</figcaption>
 </figure>
 
-**案例 B：无 figcaption**
+**Case B: Without figcaption**
 
 <figure class="figure">
-  <img src="/images/archive/demo-archive-02.webp" alt="无图注示例" />
+  <img src="/images/archive/demo-archive-02.webp" alt="No caption example" />
 </figure>
 
-**案例 C：picture + figcaption（可选）**
+**Case C: picture + figcaption (optional)**
 
 <figure class="figure">
   <picture>
     <source srcset="/images/archive/demo-archive-03.webp" type="image/webp" />
-    <img src="/images/archive/demo-archive-02.webp" alt="图注示例图片 2" />
+    <img src="/images/archive/demo-archive-02.webp" alt="Figure caption example image 2" />
   </picture>
-  <figcaption class="figure-caption">图注示例：picture 的说明文字。</figcaption>
+  <figcaption class="figure-caption">Figure caption example: picture description text.</figcaption>
 </figure>
 
-> 说明：当前样式下 `img` 与 `picture` 视觉一致。`picture` 主要用于给同一张图准备多个“备用版本”，浏览器将自动选最合适的那张（如手机小图、电脑大图，或优先用 WebP/AVIF）。不需要自动选版本时，用 `img` 就行。
+> Note: Current styles make `img` and `picture` visually consistent. `picture` is mainly for providing multiple "fallback versions" of the same image; browser automatically picks the most suitable (e.g., mobile small image, desktop large image, or prefer WebP/AVIF). When automatic selection isn't needed, use `img`.
 
 ### Gallery
 
-**案例：两图排版（含可选 figcaption）**
+**Case: Two-image layout (with optional figcaption)**
 
 <ul class="gallery">
   <li>
     <figure>
-      <img src="/images/archive/demo-archive-01.webp" alt="画廊示例 1" />
-      <figcaption>第一张图注（可选）</figcaption>
+      <img src="/images/archive/demo-archive-01.webp" alt="Gallery example 1" />
+      <figcaption>First image caption (optional)</figcaption>
     </figure>
   </li>
   <li>
     <figure>
-      <img src="/images/archive/demo-archive-02.webp" alt="画廊示例 2" />
-      <figcaption>第二张图注（可选）</figcaption>
+      <img src="/images/archive/demo-archive-02.webp" alt="Gallery example 2" />
+      <figcaption>Second image caption (optional)</figcaption>
     </figure>
   </li>
 </ul>
 
-## 分割线
+## Divider
 
-上方是一些内容。
+Content above.
 
 ---
 
-下方是另一些内容。
+Content below.
 
-## 数学与特殊字符
+## Math and Special Characters
 
-常用数学符号：π ≈ 3.14159，e ≈ 2.71828
+Common math symbols: π ≈ 3.14159, e ≈ 2.71828
 
-特殊字符：© 2026 · ™ · ® · € · £ · ¥ · → · ← · ↑ · ↓
+Special characters: © 2026 · ™ · ® · € · £ · ¥ · → · ← · ↑ · ↓
 
-## 英文段落
+## English Paragraph
 
 > The best way to predict the future is to invent it. — Alan Kay
 
 Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris.
 
-## 混合排版
+## Mixed Formatting
 
-这是一段包含 **粗体**、*斜体*、`代码` 和 [链接](/) 的混合排版文本。你可以在一个段落中自由组合这些元素，创造丰富的阅读体验。
+This paragraph contains **bold**, *italic*, `code`, and [links](/). You can freely combine these elements to create rich reading experiences.
 
 ---
 
-以上就是本主题支持的所有 Markdown 格式。如果你发现任何渲染问题，欢迎提交 Issue！
+That's all Markdown formats supported by this theme. If you find any rendering issues, feel free to submit an Issue!

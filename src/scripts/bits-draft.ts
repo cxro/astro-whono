@@ -375,11 +375,11 @@ export const initBitsDraft = (): BitsDraftController | null => {
   };
 
   const setAuthorPlaceholders = () => {
-    if (authorNameEl) authorNameEl.placeholder = defaultAuthorName ? `默认：${defaultAuthorName}` : '默认：匿名';
+    if (authorNameEl) authorNameEl.placeholder = defaultAuthorName ? `Default: ${defaultAuthorName}` : 'Default: Anonymous';
     if (authorAvatarEl) {
       authorAvatarEl.placeholder = defaultAuthorAvatar
-        ? `默认：${defaultAuthorAvatar}`
-        : '可填相对图片路径（例如 author/avatar.webp，留空用默认头像）';
+        ? `Default: ${defaultAuthorAvatar}`
+        : 'Relative image path (e.g. author/avatar.webp, leave empty for default)';
     }
   };
 
@@ -413,11 +413,11 @@ export const initBitsDraft = (): BitsDraftController | null => {
   const updateIdentityPill = () => {
     const authorName = normalizeAuthorName(authorNameEl?.value ?? '');
     const authorAvatar = normalizeAuthorAvatar(authorAvatarEl?.value ?? '');
-    const displayName = authorName || defaultAuthorName || '匿名';
-    const label = !authorName && !authorAvatar ? `${displayName}（当前）` : displayName;
+    const displayName = authorName || defaultAuthorName || 'Anonymous';
+    const label = !authorName && !authorAvatar ? `${displayName} (current)` : displayName;
     if (identityNameEl) identityNameEl.textContent = label;
     const avatarSrc = authorAvatar || defaultAuthorAvatar;
-    const fallback = Array.from(displayName)[0] ?? '匿';
+    const fallback = Array.from(displayName)[0] ?? 'A';
     renderIdentityAvatar(avatarSrc, fallback);
   };
 
@@ -524,16 +524,16 @@ export const initBitsDraft = (): BitsDraftController | null => {
       const width = image.naturalWidth;
       const height = image.naturalHeight;
       if (!width || !height) {
-        setStatus('无法自动读取，请手动填写。');
+        setStatus('Unable to auto-detect, please enter manually.');
         return;
       }
       refs.widthEl.value = String(width);
       refs.heightEl.value = String(height);
-      setStatus(`已自动读取：${width}×${height}`);
+      setStatus(`Auto-detected: ${width}×${height}`);
     };
     image.onerror = () => {
       if (requestId !== state.requestId) return;
-      setStatus('无法自动读取，请手动填写。');
+      setStatus('Unable to auto-detect, please enter manually.');
     };
     image.src = previewSrc;
   };
@@ -609,7 +609,7 @@ export const initBitsDraft = (): BitsDraftController | null => {
       const widthValue = refs.widthEl.value.trim();
       const heightValue = refs.heightEl.value.trim();
       if (!widthValue || !heightValue) {
-        setStatus('图片已填写，请补全宽高。', 'error');
+        setStatus('Image added, please complete width and height.', 'error');
         if (widthValue) refs.heightEl.focus();
         else refs.widthEl.focus();
         return null;
@@ -617,12 +617,12 @@ export const initBitsDraft = (): BitsDraftController | null => {
       const width = Number(widthValue);
       const height = Number(heightValue);
       if (!Number.isFinite(width) || width <= 0) {
-        setStatus('图片宽度需为正数。', 'error');
+        setStatus('Image width must be positive.', 'error');
         refs.widthEl.focus();
         return null;
       }
       if (!Number.isFinite(height) || height <= 0) {
-        setStatus('图片高度需为正数。', 'error');
+        setStatus('Image height must be positive.', 'error');
         refs.heightEl.focus();
         return null;
       }
@@ -635,7 +635,7 @@ export const initBitsDraft = (): BitsDraftController | null => {
     if (!contentEl) return null;
     const content = contentEl.value.trim();
     if (!content) {
-      setStatus('请先填写内容。', 'error');
+      setStatus('Please enter content first.', 'error');
       contentEl.focus();
       return null;
     }
@@ -652,7 +652,7 @@ export const initBitsDraft = (): BitsDraftController | null => {
     const authorName = normalizeAuthorName(authorNameEl?.value ?? '');
     const authorAvatar = normalizeBitsAvatarPath(authorAvatarEl?.value ?? '');
     if (authorAvatar === undefined) {
-      setStatus('作者头像只允许相对图片路径（例如 author/avatar.webp），不要带 public/、不要以 / 开头，也不要使用 URL、..、?、#。', 'error');
+      setStatus('Author avatar only accepts relative image paths (e.g. author/avatar.webp), without public/, without leading /, and no URLs, .., ?, #.', 'error');
       authorAvatarEl?.focus();
       return null;
     }
@@ -864,7 +864,7 @@ export const initBitsDraft = (): BitsDraftController | null => {
     manualTextarea.select();
     const copied = await tryClipboardCopy(manualTextarea.value);
     if (manualNote) {
-      manualNote.textContent = copied ? '已复制草稿。' : '已为你选中文本，按 ⌘C / Ctrl+C 复制。';
+      manualNote.textContent = copied ? 'Draft copied.' : 'Text selected, press ⌘C / Ctrl+C to copy.';
     }
   });
 
@@ -884,11 +884,11 @@ export const initBitsDraft = (): BitsDraftController | null => {
     } else if (hasGenerated && lastMarkdown) {
       markdown = lastMarkdown;
     } else {
-      setStatus('请先填写内容。', 'error');
+      setStatus('Please enter content first.', 'error');
       contentEl?.focus();
       return;
     }
-    showManualCopy(markdown, '已生成草稿。');
+    showManualCopy(markdown, 'Draft generated.');
   });
 
   toolbar?.addEventListener('click', (event) => {
@@ -933,12 +933,12 @@ export const initBitsDraft = (): BitsDraftController | null => {
     if (!markdown) return;
     rememberMarkdown(markdown);
     if (!window.isSecureContext || !navigator.clipboard?.writeText) {
-      showManualCopy(markdown, '已生成草稿。');
+      showManualCopy(markdown, 'Draft generated.');
       return;
     }
     const copied = await tryClipboardCopy(markdown);
-    if (copied) setStatus('已复制草稿。', 'success');
-    else showManualCopy(markdown, '已生成草稿。');
+    if (copied) setStatus('Draft copied.', 'success');
+    else showManualCopy(markdown, 'Draft generated.');
   });
 
   downloadBtn?.addEventListener('click', () => {
@@ -955,7 +955,7 @@ export const initBitsDraft = (): BitsDraftController | null => {
     link.click();
     document.body.removeChild(link);
     URL.revokeObjectURL(url);
-    setStatus('已下载草稿。', 'success');
+    setStatus('Draft downloaded.', 'success');
   });
 
   cachedController = {

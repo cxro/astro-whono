@@ -1,75 +1,75 @@
 ---
-title: "生活小记"
-subtitle: "不曾虚度的光"
+title: "Life Notes"
+subtitle: "Light Never Wasted"
 date: 2026-01-10
 draft: false
 ---
 
-## 2025年记
+## 2025 Notes
 
-### 新屋
+### New Home
 
-搬家当晚把小灯放在地上，屋里还堆着箱子。我们用纸箱当桌子，吃了顿外卖。第二天起床才觉得正式住进来。
+On moving night, we put a small lamp on the floor, boxes still stacked around. We used cardboard boxes as a table and had takeout. Only the next morning did it feel like we officially lived here.
 
-### 小城远行
+### Small Town Trip
 
-临时决定去海边小城，清晨到站，先在站前吃了热豆浆。沿堤走一圈，海风把帽子吹得东倒西歪。回来时把车票夹进钱包。
+Decided spontaneously to visit a coastal town. Arrived early morning, had hot soy milk in front of the station. Walked along the dike, sea wind blowing the hat every which way. Kept the ticket in my wallet on the way back.
 
-### 夜归
+### Night Return
 
-晚上回到常走的路口，店名换了两次。雨刚停，路面反光。站了一会儿才走。
+Back at the usual intersection at night, the shop name had changed twice. Rain had just stopped, the road reflecting light. Stood there a while before leaving.
 
-### 旧书店
+### Old Bookstore
 
-下雨时躲进旧书店，门口的小铃一直响。挑了本二手散文，在店里看了几页。老板用旧报纸包书。
+Ducked into an old bookstore to escape the rain, the small bell at the door kept ringing. Picked out a secondhand prose collection, read a few pages in the shop. The owner wrapped it in old newspaper.
 
-### 烛光饭
+### Candlelight Dinner
 
-一次停电，点蜡烛吃饭。菜很简单，屋里却安静得能听见雨声。后来把备用蜡烛补齐。
+Power outage once, ate by candlelight. Simple dishes, but the room was quiet enough to hear the rain. Later stocked up on backup candles.
 
-### 相框合影
+### Framed Photos
 
-整理相册时挑两张旧照片放在同一相框里。放在窗边，早上光线刚好。路过就会多看一眼。
+While organizing albums, picked two old photos for the same frame. Placed by the window, morning light just right. Glance at it every time I pass by.
 
-### 久别相聚
+### Long-Awaited Reunion
 
-多年未见的朋友来访，一起散步到河边。聊到很晚，还是很多话没说完。临走前约好下次别隔太久。
+A friend I hadn't seen in years came to visit, we walked to the river together. Talked until late, still much left unsaid. Agreed before leaving not to wait so long next time.
 
-### 夜跑路
+### Night Running
 
-转凉后开始夜跑，固定一条长街。路灯一盏盏过去，脚步声很清楚。回家后睡得踏实。
+Started night running after it turned cool, same long street every time. Streetlights passed one by one, footsteps very clear. Slept soundly after getting home.
 
-> 这一年没有大事，但留下不少可以回想的瞬间。
+> Nothing major this year, but many moments worth remembering.
 
-## 2024年记
+## 2024 Notes
 
-### 河边晚
+### Evening by the River
 
-傍晚去河边坐一会儿，远处有人放音乐。风不大，水面有细碎的光。坐到天黑才回。
+Sat by the river in the evening, someone playing music in the distance. Light wind, water surface with scattered light. Sat until dark before heading back.
 <figure class="figure">
-  <img src="/images/memo/demo-memo-01.webp" alt="图注示例图片 1" />
-  <figcaption class="figure-caption">图注示例：这是图片的说明文字。</figcaption>
+  <img src="/images/memo/demo-memo-01.webp" alt="Figure caption example image 1" />
+  <figcaption class="figure-caption">Figure caption example: This is the image description text.</figcaption>
 </figure>
 
-### 手写信
+### Handwritten Letter
 
-给远方朋友写了封信，用掉两张纸。写到最后才发现，很多话平时不会说。寄出前又读了一遍。
+Wrote a letter to a distant friend, used up two sheets of paper. Only at the end realized how much I don't usually say. Read it once more before sending.
 
-### 小城旅
+### Small Town Travel
 
-周末去了附近小城，吃了当地早餐。带回几张明信片，贴在书桌前。那趟路短，但很舒服。
+Weekend trip to a nearby small town, had local breakfast. Brought back a few postcards, stuck them above the desk. Short trip, but very comfortable.
 
-## 2023年记
+## 2023 Notes
 
-### 初雪
+### First Snow
 
-第一场雪下得很轻，街上很安静。站在窗前看了很久。
+First snow fell very lightly, streets were very quiet. Stood by the window watching for a long time.
 
 
-### 书角落
+### Book Corner
 
-把旧书架重新刷漆，摆上常读的书。特地留了一层空位。夜里开一盏小灯坐一会儿。
+Repainted the old bookshelf, arranged frequently read books. Deliberately left one shelf empty. Sit a while at night with a small lamp on.
 
-### 旧友再见
+### Old Friends Reunited
 
-久别的朋友聚在一起吃饭。大家都变了些，但笑起来还是熟悉。散场时心里很暖。
+Long-lost friends gathered for a meal. Everyone had changed a bit, but the laughter was still familiar. Heart felt warm when parting.

@@ -1,15 +1,15 @@
 {
   "essay": {
-    "title": "随笔",
-    "subtitle": "随笔与杂记"
+    "title": "Essays",
+    "subtitle": "Essays and Notes"
   },
   "archive": {
-    "title": "归档",
+    "title": "Archive",
     "subtitle": null
   },
   "bits": {
-    "title": "絮语",
-    "subtitle": "生活不只是长篇",
+    "title": "Bits",
+    "subtitle": "Life is more than long posts",
     "defaultAuthor": {
       "name": "Whono",
       "avatar": "author/avatar.webp"
@@ -20,7 +20,7 @@
     "subtitle": null
   },
   "about": {
-    "title": "关于",
+    "title": "About",
     "subtitle": null
   }
 }

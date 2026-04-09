@@ -243,9 +243,9 @@ const setStatus = (
 const formatResultsSummary = (count: number, year: number | null) => {
   const summary =
     count > MAX_VISIBLE_RESULTS
-      ? `找到 ${count} 条结果，当前显示前 ${MAX_VISIBLE_RESULTS} 条`
-      : `找到 ${count} 条结果`;
-  return year ? `${year} 年 · ${summary}` : summary;
+      ? `Found ${count} results, showing first ${MAX_VISIBLE_RESULTS}`
+      : `Found ${count} results`;
+  return year ? `${year} · ${summary}` : summary;
 };
 
 const isResultsVisible = () => resultsRoot?.hasAttribute('hidden') === false;
@@ -323,10 +323,10 @@ const setActiveYearState = (year: number | null) => {
     const isMoreActive = isOverflowYear(year);
     yearMoreRoot.dataset.active = String(isMoreActive);
     yearMoreTrigger.classList.toggle('is-active', isMoreActive);
-    yearMoreTrigger.setAttribute('aria-label', isMoreActive ? `打开更多年份筛选，当前 ${year} 年` : '打开更多年份筛选');
+    yearMoreTrigger.setAttribute('aria-label', isMoreActive ? `Open more year filters, current ${year}` : 'Open more year filters');
   }
   if (yearMoreLabel) {
-    yearMoreLabel.textContent = isOverflowYear(year) ? String(year) : '更多';
+    yearMoreLabel.textContent = isOverflowYear(year) ? String(year) : 'More';
   }
   if (yearSelect) {
     yearSelect.value = year === null ? '' : String(year);
@@ -390,15 +390,15 @@ const showBrowse = () => {
     resultsListEl.innerHTML = '';
   }
   if (resultsSummaryEl) {
-    resultsSummaryEl.textContent = '搜索结果';
+    resultsSummaryEl.textContent = 'Search Results';
   }
 };
 
 const getEmptyResultsText = (query: string, year: number | null) => {
   if (year !== null && query) {
-    return '这个年份下没有匹配内容，试试换个关键词或年份。';
+    return 'No matches in this year, try a different keyword or year.';
   }
-  return '未找到相关内容，换个关键词试试。';
+  return 'No relevant content found, try different keywords.';
 };
 
 const renderResults = (matchedItems: IndexItem[]) => {
@@ -418,7 +418,7 @@ const renderResults = (matchedItems: IndexItem[]) => {
       const queryTerms = tokenizeSearchQuery(query);
       const snippet = getDisplaySnippet(item, queryTerms);
       const dateLabel = item.dateLabel?.trim() ?? '';
-      const pageHint = item.page && item.page !== currentBitsPage ? `来自第 ${item.page} 页` : '';
+      const pageHint = item.page && item.page !== currentBitsPage ? `From page ${item.page}` : '';
       const { placeText, normalTags } = getDisplayTags(item.tags ?? []);
       const place = placeText
         ? `<span class="bit-search-result__tag bit-search-result__tag--place">📍 ${highlightText(placeText, queryTerms)}</span>`
@@ -441,7 +441,7 @@ const renderResults = (matchedItems: IndexItem[]) => {
           <div class="bit-search-result__thumb">
             <img
               src="${escapeHtml(item.thumbnail.src)}"
-              alt="${escapeHtml(item.thumbnail.alt || snippet || '絮语配图')}"
+              alt="${escapeHtml(item.thumbnail.alt || snippet || 'Bit image')}"
               width="${item.thumbnail.width}"
               height="${item.thumbnail.height}"
               loading="lazy"
@@ -509,7 +509,7 @@ const resetFilters = (options: { focusInput?: boolean } = {}) => {
 
 const setDegradedMode = () => {
   if (input) {
-    input.placeholder = '索引加载失败';
+    input.placeholder = 'Index failed to load';
     input.disabled = true;
     input.setAttribute('aria-disabled', 'true');
   }
@@ -533,7 +533,7 @@ const setDegradedMode = () => {
   }
   yearSelectWrap?.setAttribute('data-disabled', 'true');
   closeMoreMenu();
-  setStatus('索引加载失败，已禁用搜索');
+  setStatus('Index failed to load, search disabled');
   showBrowse();
 };
 
@@ -541,7 +541,7 @@ const indexLoader = createJsonIndexLoader<IndexItem>({
   url: indexUrl,
   shouldBypassCache: shouldBypassIndexCache,
   onPending: () => {
-    setStatus('正在加载索引...', { visible: false });
+    setStatus('Loading index...', { visible: false });
   },
   onResolved: (data) => {
     indexHay = new Map(
@@ -593,7 +593,7 @@ const applyFilter = async (preloadedIndex: IndexItem[] | null = null) => {
     showBrowse();
     if (resultsRoot && resultsListEl) {
       if (resultsSummaryEl) {
-        resultsSummaryEl.textContent = '无匹配结果';
+        resultsSummaryEl.textContent = 'No matches';
       }
       resultsListEl.innerHTML = `<p class="bits-search-results__empty">${escapeHtml(getEmptyResultsText(rawQuery, activeYear))}</p>`;
       browseRoot?.setAttribute('hidden', 'true');

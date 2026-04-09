@@ -1,6 +1,6 @@
 {
-  "introLead": "这是一个开源写作主题与示例内容库:包含 随笔/essay、小记/memo、归档/archive 与 絮语/bits，使用与配置请见 README 。",
-  "introMore": "更多文章请访问",
+  "introLead": "This is an open-source writing theme and sample content library: includes Essays, Memo, Archive, and Bits. For setup and configuration, see the README.",
+  "introMore": "More articles at",
   "introMoreLinks": [
     "archive",
     "tag"

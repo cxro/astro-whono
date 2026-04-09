@@ -7,7 +7,7 @@
   },
   "articleMeta": {
     "showDate": true,
-    "dateLabel": "发布于：",
+    "dateLabel": "Published:",
     "showTags": true,
     "showWordCount": true,
     "showReadingTime": true

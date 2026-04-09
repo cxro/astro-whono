@@ -6,8 +6,8 @@ title: Markdown Smoke Fixture
 
 ## Callout
 
-:::tip[一个小建议]
-这里是 smoke fixture 的 callout 内容。
+:::tip[A Small Tip]
+This is the callout content for the smoke fixture.
 :::
 
 ## Code Block

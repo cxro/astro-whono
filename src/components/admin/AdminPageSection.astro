@@ -18,7 +18,7 @@ const {
 
 <fieldset class="admin-group">
   <legend class="admin-group__legend">
-    <span class="admin-group__legend-zh">内页设置</span>
+    <span class="admin-group__legend-zh">Inner Page Settings</span>
     <span class="admin-group__legend-sep" aria-hidden="true">·</span>
     <span class="admin-group__legend-en">Inner pages</span>
   </legend>
@@ -26,19 +26,19 @@ const {
     <label class="admin-field">
       <span class="admin-label">
         <span class="admin-label__main">
-          <code>/essay/</code> 页面主 <span class="admin-label__pipe" aria-hidden="true">|</span> 副标题
+          <code>/essay/</code> Page Title <span class="admin-label__pipe" aria-hidden="true">|</span> Subtitle
         </span>
-        <span class="admin-label__hint">（动态计数 / RSS 固定输出）</span>
+        <span class="admin-label__hint">(dynamic count / RSS fixed output)</span>
       </span>
-      <span class="admin-title-pair" role="group" aria-label="/essay/ 页面主标题与副标题">
+      <span class="admin-title-pair" role="group" aria-label="/essay/ Page Title and Subtitle">
         <input
           id="page-essay-title"
           class="admin-title-pair__input admin-title-pair__input--title"
           type="text"
           maxlength={pageTitleMaxLength}
           autocomplete="off"
-          placeholder="随笔"
-          aria-label="/essay/ 页面主标题"
+          placeholder="Essays"
+          aria-label="/essay/ Page Title"
         />
         <span class="admin-title-pair__sep" aria-hidden="true">|</span>
         <input
@@ -47,26 +47,26 @@ const {
           type="text"
           maxlength={pageSubtitleMaxLength}
           autocomplete="off"
-          placeholder="随笔与杂记"
-          aria-label="/essay/ 页面副标题"
+          placeholder="Essays and Notes"
+          aria-label="/essay/ Page Subtitle"
         />
       </span>
     </label>
     <label class="admin-field">
       <span class="admin-label">
         <span class="admin-label__main">
-          <code>/bits/</code> 页面主 <span class="admin-label__pipe" aria-hidden="true">|</span> 副标题
+          <code>/bits/</code> Page Title <span class="admin-label__pipe" aria-hidden="true">|</span> Subtitle
         </span>
       </span>
-      <span class="admin-title-pair" role="group" aria-label="/bits/ 页面主标题与副标题">
+      <span class="admin-title-pair" role="group" aria-label="/bits/ Page Title and Subtitle">
         <input
           id="page-bits-title"
           class="admin-title-pair__input admin-title-pair__input--title"
           type="text"
           maxlength={pageTitleMaxLength}
           autocomplete="off"
-          placeholder="絮语"
-          aria-label="/bits/ 页面主标题"
+          placeholder="Bits"
+          aria-label="/bits/ Page Title"
         />
         <span class="admin-title-pair__sep" aria-hidden="true">|</span>
         <input
@@ -75,19 +75,19 @@ const {
           type="text"
           maxlength={pageSubtitleMaxLength}
           autocomplete="off"
-          placeholder="生活不只是长篇"
-          aria-label="/bits/ 页面副标题"
+          placeholder="Life is more than long posts"
+          aria-label="/bits/ Page Subtitle"
         />
       </span>
     </label>
     <label class="admin-field admin-field--full admin-field--memo">
       <span class="admin-label">
         <span class="admin-label__main">
-          <code>/memo/</code> 页面主 <span class="admin-label__pipe" aria-hidden="true">|</span> 副标题
+          <code>/memo/</code> Page Title <span class="admin-label__pipe" aria-hidden="true">|</span> Subtitle
         </span>
-        <span class="admin-label__hint">（填写后覆盖对应字段，留空则沿用 src/content/memo/index.md）</span>
+        <span class="admin-label__hint">(overrides field when filled; empty uses src/content/memo/index.md)</span>
       </span>
-      <span class="admin-title-pair" role="group" aria-label="/memo/ 页面主标题与副标题">
+      <span class="admin-title-pair" role="group" aria-label="/memo/ Page Title and Subtitle">
         <input
           id="page-memo-title"
           class="admin-title-pair__input admin-title-pair__input--title"
@@ -95,7 +95,7 @@ const {
           maxlength={pageTitleMaxLength}
           autocomplete="off"
           placeholder={memoTitlePlaceholder || undefined}
-          aria-label="/memo/ 页面主标题"
+          aria-label="/memo/ Page Title"
         />
         <span class="admin-title-pair__sep" aria-hidden="true">|</span>
         <input
@@ -105,26 +105,26 @@ const {
           maxlength={pageSubtitleMaxLength}
           autocomplete="off"
           placeholder={memoSubtitlePlaceholder || undefined}
-          aria-label="/memo/ 页面副标题"
+          aria-label="/memo/ Page Subtitle"
         />
       </span>
     </label>
     <label class="admin-field">
       <span class="admin-label">
         <span class="admin-label__main">
-          <code>/archive/</code> 页面主 <span class="admin-label__pipe" aria-hidden="true">|</span> 副标题
+          <code>/archive/</code> Page Title <span class="admin-label__pipe" aria-hidden="true">|</span> Subtitle
         </span>
-        <span class="admin-label__hint">（动态计数 / RSS 固定输出）</span>
+        <span class="admin-label__hint">(dynamic count / RSS fixed output)</span>
       </span>
-      <span class="admin-title-pair" role="group" aria-label="/archive/ 页面主标题与副标题">
+      <span class="admin-title-pair" role="group" aria-label="/archive/ Page Title and Subtitle">
         <input
           id="page-archive-title"
           class="admin-title-pair__input admin-title-pair__input--title"
           type="text"
           maxlength={pageTitleMaxLength}
           autocomplete="off"
-          placeholder="归档"
-          aria-label="/archive/ 页面主标题"
+          placeholder="Archive"
+          aria-label="/archive/ Page Title"
         />
         <span class="admin-title-pair__sep" aria-hidden="true">|</span>
         <input
@@ -133,26 +133,26 @@ const {
           type="text"
           maxlength={pageSubtitleMaxLength}
           autocomplete="off"
-          placeholder="按年份分组的归档目录"
-          aria-label="/archive/ 页面副标题"
+          placeholder="Archive grouped by year"
+          aria-label="/archive/ Page Subtitle"
         />
       </span>
     </label>
     <label class="admin-field">
       <span class="admin-label">
         <span class="admin-label__main">
-          <code>/about/</code> 页面主 <span class="admin-label__pipe" aria-hidden="true">|</span> 副标题
+          <code>/about/</code> Page Title <span class="admin-label__pipe" aria-hidden="true">|</span> Subtitle
         </span>
       </span>
-      <span class="admin-title-pair" role="group" aria-label="/about/ 页面主标题与副标题">
+      <span class="admin-title-pair" role="group" aria-label="/about/ Page Title and Subtitle">
         <input
           id="page-about-title"
           class="admin-title-pair__input admin-title-pair__input--title"
           type="text"
           maxlength={pageTitleMaxLength}
           autocomplete="off"
-          placeholder="关于"
-          aria-label="/about/ 页面主标题"
+          placeholder="About"
+          aria-label="/about/ Page Title"
         />
         <span class="admin-title-pair__sep" aria-hidden="true">|</span>
         <input
@@ -161,7 +161,7 @@ const {
           type="text"
           maxlength={pageSubtitleMaxLength}
           autocomplete="off"
-          aria-label="/about/ 页面副标题"
+          aria-label="/about/ Page Subtitle"
         />
       </span>
     </label>
@@ -169,61 +169,61 @@ const {
 
   <div class="admin-subgroup">
     <p class="admin-subtitle">
-      <span class="admin-subtitle__main">文章元信息</span>
-      <span class="admin-subtitle__hint">（字数/时长仅详情页，移动端隐藏）</span>
+      <span class="admin-subtitle__main">Article Meta Info</span>
+      <span class="admin-subtitle__hint">(word count/time only on detail pages, hidden on mobile)</span>
     </p>
     <div class="admin-toggle-row-group admin-toggle-row-group--article-meta">
       <div class="admin-toggle-row admin-toggle-row--with-inline-field">
         <label class="admin-toggle-row admin-toggle-row--compact" for="ui-article-meta-show-date">
           <input id="ui-article-meta-show-date" type="checkbox" />
-          <span>显示发布日期</span>
+          <span>Show Publication Date</span>
         </label>
         <span class="admin-toggle-row__sep" aria-hidden="true">|</span>
         <label class="admin-inline-field" for="ui-article-meta-date-label">
-          <span class="admin-inline-field__label">前缀：</span>
+          <span class="admin-inline-field__label">Prefix:</span>
           <input
             id="ui-article-meta-date-label"
             class="admin-inline-field__input"
             type="text"
             maxlength={ADMIN_ARTICLE_META_DATE_LABEL_MAX_LENGTH}
             autocomplete="off"
-            placeholder="发布于："
+            placeholder="Published:"
           />
         </label>
       </div>
       <label class="admin-toggle-row">
         <input id="ui-article-meta-show-tags" type="checkbox" />
-        <span>显示标签</span>
+        <span>Show Tags</span>
       </label>
       <label class="admin-toggle-row">
         <input id="ui-article-meta-show-word-count" type="checkbox" />
-        <span>显示字数</span>
+        <span>Show Word Count</span>
       </label>
       <label class="admin-toggle-row">
         <input id="ui-article-meta-show-reading-time" type="checkbox" />
-        <span>显示阅读时长</span>
+        <span>Show Reading Time</span>
       </label>
     </div>
     <p class="admin-help admin-help--article-meta-preview">
-      预览：<code id="article-meta-preview-value" class="admin-help__preview-value">{'发布于：2026-03-18 · #Astro\u00A0\u00A0#写作 · 共 2,416 字 · 约 6 分钟'}</code>
+      Preview: <code id="article-meta-preview-value" class="admin-help__preview-value">{'Published: 2026-03-18 · #Astro  #Writing · 2,416 words · ~6 min'}</code>
     </p>
   </div>
 
   <div class="admin-subgroup">
     <p class="admin-subtitle">
-      <span class="admin-subtitle__main">/bits/页默认作者</span>
+      <span class="admin-subtitle__main">/bits/ Page Default Author</span>
     </p>
     <div class="admin-grid">
       <label class="admin-field">
         <span class="admin-label">
-          <span class="admin-label__main">默认作者名</span>
+          <span class="admin-label__main">Default Author Name</span>
         </span>
         <input id="page-bits-author-name" type="text" autocomplete="off" />
       </label>
       <label class="admin-field">
         <span class="admin-label">
-          <span class="admin-label__main">默认头像</span>
-          <span class="admin-label__hint">（相对路径）</span>
+          <span class="admin-label__main">Default Avatar</span>
+          <span class="admin-label__hint">(relative path)</span>
         </span>
         <input id="page-bits-author-avatar" type="text" autocomplete="off" />
       </label>

@@ -1,7 +1,7 @@
 {
   "title": "Astro Themes by Whono",
-  "description": "一个 Astro 主题的展示站：轻量、可维护、可复用。",
-  "defaultLocale": "zh-CN",
+  "description": "A minimal Astro theme for writing: lightweight, maintainable, reusable.",
+  "defaultLocale": "en-US",
   "footer": {
     "startYear": 2025,
     "showCurrentYear": true,

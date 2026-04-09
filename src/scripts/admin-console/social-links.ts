@@ -73,7 +73,7 @@ export const createSocialLinks = ({
     customSocialOptionElements.map((option) => {
       const value = normalizeAdminSocialIconKey(option.value) ?? defaultCustomSocialIconKey;
       const label =
-        option.getAttribute('data-social-default-label')?.trim() || option.textContent?.trim() || '链接';
+        option.getAttribute('data-social-default-label')?.trim() || option.textContent?.trim() || 'Link';
       return [value, label];
     })
   );
@@ -81,7 +81,7 @@ export const createSocialLinks = ({
     customSocialIconLabels.get(iconKey)
     || customSocialIconLabels.get(fallbackCustomSocialIconKey)
     || customSocialIconLabels.get(defaultCustomSocialIconKey)
-    || '链接';
+    || 'Link';
   const isEditableCustomLabelIconKey = (iconKey: SiteSocialIconKey): boolean =>
     iconKey === fallbackCustomSocialIconKey;
 
@@ -161,8 +161,8 @@ export const createSocialLinks = ({
     const visible = isPresetRowVisible(row);
     toggleBtn.dataset.state = visible ? 'visible' : 'hidden';
     toggleBtn.setAttribute('aria-pressed', visible ? 'true' : 'false');
-    toggleBtn.setAttribute('aria-label', visible ? `隐藏 ${label}` : `恢复 ${label}`);
-    toggleBtn.setAttribute('title', visible ? `隐藏 ${label}` : `恢复 ${label}`);
+    toggleBtn.setAttribute('aria-label', visible ? `Hide ${label}` : `Restore ${label}`);
+    toggleBtn.setAttribute('title', visible ? `Hide ${label}` : `Restore ${label}`);
   };
 
   const normalizeSocialOrders = (): void => {
@@ -336,9 +336,9 @@ export const createSocialLinks = ({
     const visible = Boolean(visibleInput.checked);
     toggleBtn.dataset.state = visible ? 'visible' : 'hidden';
     toggleBtn.setAttribute('aria-pressed', visible ? 'true' : 'false');
-    toggleBtn.setAttribute('aria-label', visible ? '隐藏链接' : '显示链接');
-    toggleBtn.setAttribute('title', visible ? '隐藏链接' : '显示链接');
-    toggleLabel.textContent = visible ? '隐藏链接' : '显示链接';
+    toggleBtn.setAttribute('aria-label', visible ? 'Hide Link' : 'Show Link');
+    toggleBtn.setAttribute('title', visible ? 'Hide Link' : 'Show Link');
+    toggleLabel.textContent = visible ? 'Hide Link' : 'Show Link';
   };
 
   const finalizeCustomIdInput = (
@@ -425,7 +425,7 @@ export const createSocialLinks = ({
   const updateCustomRowsUi = (): void => {
     const rows = getCustomRows();
     socialCustomHead.hidden = false;
-    socialCustomCountEl.textContent = `(新增 ${rows.length} / ${ADMIN_SOCIAL_CUSTOM_LIMIT})`;
+    socialCustomCountEl.textContent = `(Add ${rows.length} / ${ADMIN_SOCIAL_CUSTOM_LIMIT})`;
     socialCustomAddBtn.disabled = rows.length >= ADMIN_SOCIAL_CUSTOM_LIMIT;
   };
 

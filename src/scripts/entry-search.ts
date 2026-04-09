@@ -218,10 +218,10 @@ if (!root) {
 
   const getStatusPrefix = (query: string, totalMatches: number) => {
     if (query && activeTagLabel) {
-      return `标签 #${activeTagLabel} 下共命中 ${totalMatches} 条`;
+      return `${totalMatches} matches under tag #${activeTagLabel}`;
     }
     if (query) {
-      return totalMatches === 0 ? '未找到匹配内容' : `共命中 ${totalMatches} 条`;
+      return totalMatches === 0 ? 'No matches found' : `${totalMatches} matches total`;
     }
     return '';
   };
@@ -234,18 +234,18 @@ if (!root) {
     }
 
     if (totalMatches === 0) {
-      setStatus('未找到匹配内容');
+      setStatus('No matches found');
       return;
     }
     if (visibleMatches === totalMatches) {
-      setStatus(query && !activeTagKey ? `命中 ${totalMatches} 条` : prefix);
+      setStatus(query && !activeTagKey ? `${totalMatches} matches` : prefix);
       return;
     }
     if (visibleMatches === 0) {
-      setStatus(`${prefix}（当前页无结果，可翻页继续查看）`);
+      setStatus(`${prefix} (no results on current page, try other pages)`);
       return;
     }
-    setStatus(`${prefix}（当前页 ${visibleMatches} 条，可翻页查看更多）`);
+    setStatus(`${prefix} (${visibleMatches} on this page, more on other pages)`);
   };
 
   const scheduleApplyFilter = (delay = FILTER_DEBOUNCE_MS) => {
@@ -254,7 +254,7 @@ if (!root) {
 
   const setDegradedMode = () => {
     if (input) {
-      input.placeholder = '索引加载失败';
+      input.placeholder = 'Index failed to load';
       input.disabled = true;
       input.setAttribute('aria-disabled', 'true');
     }
@@ -265,14 +265,14 @@ if (!root) {
     setSearchOpen(true);
     showAllItems();
     syncSections(false);
-    setStatus('索引加载失败，已禁用搜索');
+    setStatus('Index failed to load, search disabled');
   };
 
   const indexLoader = createJsonIndexLoader<IndexItem>({
     url: indexUrl,
     shouldBypassCache: shouldBypassIndexCache,
     onPending: () => {
-      setStatus('正在加载索引...', { visible: false });
+      setStatus('Loading index...', { visible: false });
     },
     onResolved: (data) => {
       indexHay = new Map(
