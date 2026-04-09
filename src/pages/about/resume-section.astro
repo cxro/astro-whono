@@ -1,0 +1,179 @@
+---
+// Resume section component for the About page
+// This component displays resume content and provides a PDF download option
+// Edit this file to update your resume information
+
+interface Props {
+  // Optional PDF URL for download
+  pdfUrl?: string;
+}
+
+const { pdfUrl } = Astro.props;
+---
+
+<section class="resume-section" aria-labelledby="resume-heading">
+  <h2 id="resume-heading" class="section-title">Resume</h2>
+  
+  <div class="resume-intro">
+    <p>Download my resume: 
+      {pdfUrl ? (
+        <a href={pdfUrl} download class="resume-download">
+          <span>Download PDF</span>
+        </a>
+      ) : (
+        <span class="resume-download--placeholder">PDF coming soon</span>
+      )}
+    </p>
+  </div>
+
+  <!-- Resume content structure - customize as needed -->
+  <div class="resume-content">
+    <!-- Summary Section -->
+    <section class="resume-block">
+      <h3 class="resume-block__title">Summary</h3>
+      <p class="resume-block__content">
+        <!-- Add your professional summary here -->
+        Your professional summary goes here...
+      </p>
+    </section>
+
+    <!-- Experience Section -->
+    <section class="resume-block">
+      <h3 class="resume-block__title">Experience</h3>
+      
+      <div class="resume-item">
+        <div class="resume-item__header">
+          <h4 class="resume-item__title">Job Title</h4>
+          <span class="resume-item__company">Company Name</span>
+          <span class="resume-item__date">Start Date - Present</span>
+        </div>
+        <ul class="resume-item__details">
+          <li>Key achievement or responsibility</li>
+          <li>Another achievement</li>
+        </ul>
+      </div>
+      
+      <!-- Add more experience items as needed -->
+    </section>
+
+    <!-- Education Section -->
+    <section class="resume-block">
+      <h3 class="resume-block__title">Education</h3>
+      
+      <div class="resume-item">
+        <div class="resume-item__header">
+          <h4 class="resume-item__title">Degree Name</h4>
+          <span class="resume-item__company">University Name</span>
+          <span class="resume-item__date">Graduation Year</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- Skills Section -->
+    <section class="resume-block">
+      <h3 class="resume-block__title">Skills</h3>
+      
+      <div class="skills-list">
+        <!-- Add your skills here -->
+        <span class="skill-tag">Skill 1</span>
+        <span class="skill-tag">Skill 2</span>
+        <span class="skill-tag">Skill 3</span>
+      </div>
+    </section>
+  </div>
+</section>
+
+<style>
+  .resume-section {
+    margin-top: 3rem;
+  }
+
+  .resume-intro {
+    margin-bottom: 2rem;
+  }
+
+  .resume-download,
+  .resume-download--placeholder {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem 1rem;
+    background: var(--color-bg-secondary, #f5f5f5);
+    border-radius: 4px;
+    text-decoration: none;
+    color: inherit;
+  }
+
+  .resume-download:hover {
+    background: var(--color-bg-tertiary, #e5e5e5);
+  }
+
+  .resume-block {
+    margin-bottom: 2rem;
+  }
+
+  .resume-block__title {
+    font-size: 1.25rem;
+    font-weight: 600;
+    margin-bottom: 1rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 2px solid var(--color-border, #e5e5e5);
+  }
+
+  .resume-item {
+    margin-bottom: 1.5rem;
+  }
+
+  .resume-item__header {
+    margin-bottom: 0.5rem;
+  }
+
+  .resume-item__title {
+    font-size: 1.125rem;
+    font-weight: 600;
+    margin: 0;
+  }
+
+  .resume-item__company {
+    display: block;
+    color: var(--color-text-secondary, #666);
+  }
+
+  .resume-item__date {
+    display: block;
+    font-size: 0.875rem;
+    color: var(--color-text-tertiary, #999);
+  }
+
+  .resume-item__details {
+    margin: 0.5rem 0 0;
+    padding-left: 1.25rem;
+  }
+
+  .resume-item__details li {
+    margin-bottom: 0.25rem;
+  }
+
+  .skills-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+
+  .skill-tag {
+    padding: 0.25rem 0.75rem;
+    background: var(--color-bg-secondary, #f5f5f5);
+    border-radius: 4px;
+    font-size: 0.875rem;
+  }
+
+  /* Dark mode support */
+  :global([data-theme="dark"]) .resume-download,
+  :global([data-theme="dark"]) .skill-tag {
+    background: var(--color-bg-secondary-dark, #2a2a2a);
+  }
+
+  :global([data-theme="dark"]) .resume-block__title {
+    border-color: var(--color-border-dark, #333);
+  }
+</style>

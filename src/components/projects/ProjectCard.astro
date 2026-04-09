@@ -1,0 +1,157 @@
+---
+import Icon from '../Icon.astro';
+
+interface Props {
+  title: string;
+  description: string;
+  github?: string;
+  url?: string;
+  tech?: string[];
+  featured?: boolean;
+}
+
+const { title, description, github, url, tech = [], featured = false } = Astro.props;
+
+// Determine the primary link (URL > GitHub > none)
+const primaryLink = url || (github ? `https://github.com/${github}` : null);
+const displayUrl = url ? new URL(url).hostname.replace(/^www\./, '') : null;
+---
+
+<article class={`project-card ${featured ? 'project-card--featured' : ''}`}>
+  <div class="project-card__content">
+    <h3 class="project-card__title">
+      {primaryLink ? (
+        <a href={primaryLink} target="_blank" rel="noopener noreferrer">
+          {title}
+        </a>
+      ) : (
+        title
+      )}
+    </h3>
+    
+    <p class="project-card__description">{description}</p>
+    
+    {tech.length > 0 && (
+      <ul class="project-card__tech">
+        {tech.map((item) => (
+          <li class="project-card__tech-item">{item}</li>
+        ))}
+      </ul>
+    )}
+  </div>
+  
+  <div class="project-card__actions">
+    {github && (
+      <a 
+        href={`https://github.com/${github}`} 
+        class="project-card__link"
+        target="_blank"
+        rel="noopener noreferrer"
+        aria-label={`View ${title} on GitHub`}
+      >
+        <Icon name="github" size={18} />
+        <span>GitHub</span>
+      </a>
+    )}
+    
+    {url && (
+      <a 
+        href={url} 
+        class="project-card__link"
+        target="_blank"
+        rel="noopener noreferrer"
+        aria-label={`Visit ${title} website`}
+      >
+        <Icon name="globe" size={18} />
+        <span>{displayUrl}</span>
+      </a>
+    )}
+  </div>
+</article>
+
+<style>
+  .project-card {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    padding: 1.5rem;
+    border: 1px solid var(--color-border, #e5e5e5);
+    border-radius: 8px;
+    background: var(--color-bg, #ffffff);
+    transition: box-shadow 0.2s ease;
+  }
+
+  .project-card:hover {
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  }
+
+  .project-card--featured {
+    border-color: var(--color-accent, #ff6b6b);
+  }
+
+  .project-card__title {
+    margin: 0 0 0.75rem;
+    font-size: 1.25rem;
+    font-weight: 600;
+  }
+
+  .project-card__title a {
+    color: inherit;
+    text-decoration: none;
+  }
+
+  .project-card__title a:hover {
+    text-decoration: underline;
+  }
+
+  .project-card__description {
+    margin: 0 0 1rem;
+    color: var(--color-text-secondary, #666);
+    line-height: 1.6;
+  }
+
+  .project-card__tech {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin: 0 0 1.5rem;
+    padding: 0;
+    list-style: none;
+  }
+
+  .project-card__tech-item {
+    padding: 0.25rem 0.75rem;
+    font-size: 0.875rem;
+    background: var(--color-bg-secondary, #f5f5f5);
+    border-radius: 4px;
+  }
+
+  .project-card__actions {
+    display: flex;
+    gap: 1rem;
+    margin-top: auto;
+  }
+
+  .project-card__link {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: var(--color-link, #0066cc);
+    text-decoration: none;
+    font-size: 0.875rem;
+  }
+
+  .project-card__link:hover {
+    text-decoration: underline;
+  }
+
+  /* Dark mode support */
+  :global([data-theme="dark"]) .project-card {
+    border-color: var(--color-border-dark, #333);
+    background: var(--color-bg-dark, #1a1a1a);
+  }
+
+  :global([data-theme="dark"]) .project-card__tech-item {
+    background: var(--color-bg-secondary-dark, #2a2a2a);
+  }
+</style>
