@@ -1,10 +1,10 @@
 {
-  "brandTitle": "Whono",
-  "quote": "A minimal Astro theme\nfor essays, notes, and docs.\nDesigned for reading,\nopen-source.",
+  "brandTitle": "Shuhan Luo",
+  "quote": "Life-long learner and enjoyer of the human experience.",
   "nav": [
     {
       "id": "essay",
-      "label": "Essays",
+      "label": "Thoughts",
       "ornament": "·",
       "visible": true,
       "order": 1
@@ -13,29 +13,43 @@
       "id": "bits",
       "label": "Bits",
       "ornament": "·",
-      "visible": true,
+      "visible": false,
       "order": 2
     },
     {
       "id": "memo",
       "label": "Memo",
       "ornament": "·",
-      "visible": true,
+      "visible": false,
       "order": 3
     },
     {
       "id": "archive",
       "label": "Archive",
       "ornament": "·",
-      "visible": true,
+      "visible": false,
       "order": 4
+    },
+    {
+      "id": "projects",
+      "label": "Projects",
+      "ornament": "·",
+      "visible": true,
+      "order": 5
+    },
+    {
+      "id": "gallery",
+      "label": "Gallery",
+      "ornament": "·",
+      "visible": true,
+      "order": 6
     },
     {
       "id": "about",
       "label": "About",
       "ornament": "·",
       "visible": true,
-      "order": 5
+      "order": 7
     }
   ]
 }

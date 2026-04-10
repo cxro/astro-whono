@@ -1,7 +1,7 @@
 {
   "essay": {
-    "title": "Essays",
-    "subtitle": "Essays and Notes"
+    "title": "Thoughts",
+    "subtitle": "Essays and reflections"
   },
   "archive": {
     "title": "Archive",
@@ -11,7 +11,7 @@
     "title": "Bits",
     "subtitle": "Life is more than long posts",
     "defaultAuthor": {
-      "name": "Whono",
+      "name": "Shuhan Luo",
       "avatar": "author/avatar.webp"
     }
   },
@@ -22,5 +22,13 @@
   "about": {
     "title": "About",
     "subtitle": null
+  },
+  "projects": {
+    "title": "Projects",
+    "subtitle": "Things I've built"
+  },
+  "gallery": {
+    "title": "Gallery",
+    "subtitle": "Moments captured"
   }
 }

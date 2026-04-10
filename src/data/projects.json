@@ -1,4 +1,21 @@
 {
-  "projects": [],
+  "projects": [
+    {
+      "title": "TERRELLA",
+      "description": "A web application for exploring and visualizing data",
+      "github": "shuhanluo/TERRELLA",
+      "url": "https://terrella.vercel.app/",
+      "tech": ["React", "TypeScript", "Next.js"],
+      "featured": true
+    },
+    {
+      "title": "Half-Life 2 VSCode Soundpack",
+      "description": "A VSCode extension that brings Half-Life 2 sounds to your editor",
+      "github": "shuhanluo/Half-Life-2-VSCode-Soundpack",
+      "url": null,
+      "tech": ["TypeScript", "VSCode Extension API"],
+      "featured": false
+    }
+  ],
   "githubUsername": "shuhanluo"
 }
