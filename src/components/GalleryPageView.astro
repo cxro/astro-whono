@@ -1,0 +1,143 @@
+﻿---
+import { render } from 'astro:content';
+import BaseLayout from '../layouts/BaseLayout.astro';
+import GalleryCard from './GalleryCard.astro';
+import Lightbox from './Lightbox.astro';
+import '../styles/gallery-page.css';
+import { MAX_PRIMARY_GALLERY_FILTER_YEARS, type GalleryEntry, type GalleryYearOption } from '../lib/gallery';
+import { createWithBase } from '../utils/format';
+import { getThemeSettings } from '../lib/theme-settings';
+import { joinPageSubtitleText } from '../utils/format';
+
+const {
+  currentPage, items, nextPath = null, prevPath = null, resultCount, totalPages, yearOptions = []
+} = Astro.props as {
+  currentPage: number; items: GalleryEntry[]; nextPath?: string | null; prevPath?: string | null;
+  resultCount: number; totalPages: number; yearOptions?: GalleryYearOption[];
+};
+
+const base = import.meta.env.BASE_URL ?? '/';
+const withBase = createWithBase(base);
+const { settings: { page } } = getThemeSettings();const galleryPage = (page as any).gallery || {};
+
+const pageTitleText = galleryPage.title || 'Gallery';
+const pageTitleParts = [pageTitleText, currentPage > 1 ? `Page ${currentPage}` : null].filter(Boolean);
+const pageTitle = pageTitleParts.join(' � ');
+const subtitleText = joinPageSubtitleText(galleryPage.subtitle, totalPages > 1 ? `Page ${currentPage} / ${totalPages}` : null);
+const pageDescription = joinPageSubtitleText(`${pageTitleText} list`, galleryPage.subtitle, `${resultCount} entries`, totalPages > 1 ? `Page ${currentPage} / ${totalPages}` : null) ?? `${pageTitleText} list`;
+
+const primaryYearOptions = yearOptions.slice(0, MAX_PRIMARY_GALLERY_FILTER_YEARS);
+const overflowYearOptions = yearOptions.slice(MAX_PRIMARY_GALLERY_FILTER_YEARS);
+const priorityMediaId = items.find((bit) => (bit.data.images?.length ?? 0) > 0)?.id ?? null;
+
+const cards = await Promise.all(
+  items.map(async (bit) => {
+    const { plainText } = { plainText: '' }; // simplified
+    if (bit.body) {
+      const { Content } = await render(bit);
+      return { bit, Content };
+    }
+    return { bit, Content: null };
+  })
+);
+---
+
+<BaseLayout title={pageTitle} description={pageDescription}>
+  <div class="page-header page-header--gallery">
+    <div class="page-heading">
+      <h1 class="page-title">{pageTitleText}</h1>
+      {subtitleText ? <span class="page-subtitle">{subtitleText}</span> : null}
+    </div>
+  </div>
+
+  <div class="gallery-toolbar">
+    <div class="gallery-controls">
+      {yearOptions.length > 0 ? (
+        <div class="gallery-year-filter" data-gallery-year-filter role="group" aria-label="Filter by year">
+          <button class="gallery-year-filter__item gallery-year-filter__item--all is-active" type="button" data-gallery-year-item data-gallery-year="" aria-label="Show all" aria-pressed="true">All</button>
+          {primaryYearOptions.map((option) => (
+            <button class="gallery-year-filter__item" type="button" data-gallery-year-item data-gallery-year={option.value} aria-label={`Filter ${option.value}, ${option.count} entries`} aria-pressed="false">{option.value}</button>
+          ))}
+          {overflowYearOptions.length > 0 ? (
+            <div class="gallery-year-more" data-gallery-year-more data-open="false">
+              <button class="gallery-year-filter__item gallery-year-filter__item--more" type="button" data-gallery-year-more-trigger aria-label="More years" aria-expanded="false" aria-controls="gallery-year-more-menu">
+                <span data-gallery-year-more-label>More</span>
+                <span class="gallery-year-filter__caret" aria-hidden="true"></span>
+              </button>
+              <div class="gallery-year-menu" id="gallery-year-more-menu" data-gallery-year-menu hidden aria-label="More years">
+                <div class="gallery-year-menu__list">
+                  {overflowYearOptions.map((option) => (
+                    <button class="gallery-year-menu__item" type="button" data-gallery-year-menu-item data-gallery-year={option.value} aria-label={`Filter ${option.value}, ${option.count} entries`} aria-pressed="false">
+                      <span class="gallery-year-menu__item-label">{option.value}</span>
+                      <span class="gallery-year-menu__item-count">{option.count}</span>
+                    </button>
+                  ))}
+                </div>
+              </div>
+            </div>
+          ) : null}
+        </div>
+      ) : null}
+
+      <div class="gallery-controls__actions">
+        <div class="gallery-controls__search-cluster" data-has-year-filter={yearOptions.length > 0 ? 'true' : 'false'}>
+          <form class="gallery-search" role="search" data-gallery-search-form>
+            <label class="sr-only" for="gallery-search">Search gallery</label>
+            <input id="gallery-search" type="search" placeholder="Search: keywords / tags" autocomplete="off" enterkeyhint="search" aria-controls="gallery-search-results-panel" />
+            <button class="gallery-search-btn" id="gallery-search-btn" type="submit" aria-controls="gallery-search-results-panel">Search</button>
+          </form>
+          {yearOptions.length > 0 ? (
+            <div class="gallery-year-select-wrap">
+              <label class="sr-only" for="gallery-year-select">Filter by year</label>
+              <select class="gallery-year-select" id="gallery-year-select" data-gallery-year-select aria-label="Filter by year">
+                <option value="">All</option>
+                {yearOptions.map((option) => (
+                  <option value={option.value}>{option.value}</option>
+                ))}
+              </select>
+            </div>
+          ) : null}
+        </div>
+      </div>
+    </div>
+    <div class="gallery-status" id="gallery-search-status"></div>
+    <p class="sr-only" id="gallery-search-live" role="status" aria-live="polite" aria-atomic="true"></p>
+  </div>
+
+  <div data-gallery-browse>
+    <div id="gallery-list">
+      {items.map((bit) => (
+        <GalleryCard bit={bit} prioritizeLeadMedia={bit.id === priorityMediaId} />
+      ))}
+    </div>
+
+    {totalPages > 1 ? (
+      <nav class="pagination" aria-label={`${pageTitleText} pagination`}>
+        <div class="pagination__inner">
+          {prevPath ? <a class="pagination__link" rel="prev" href={withBase(prevPath)}>Previous</a> : null}
+          {nextPath ? <a class="pagination__link pagination__link--next" rel="next" href={withBase(nextPath)}>Next</a> : null}
+        </div>
+      </nav>
+    ) : null}
+  </div>
+
+  <section id="gallery-search-results-panel" class="gallery-search-results" data-gallery-search-results hidden aria-label="Search results">
+    <div class="gallery-search-results__header">
+      <p class="gallery-search-results__summary" data-gallery-search-results-summary role="status" aria-live="polite">Search results</p>
+      <button class="gallery-search-results__clear" type="button" data-gallery-search-clear>Reset</button>
+    </div>
+    <div class="gallery-search-results__list" data-gallery-search-results-list></div>
+  </section>
+
+  <noscript>
+    <style>[data-gallery-client-control] { display: none !important; }</style>
+    <p class="gallery-noscript-note">Search and year filtering require JavaScript. Only list browsing is available.</p>
+  </noscript>
+
+  <Lightbox id="lightbox" label="Image preview" enableZoom={true} enablePan={true} enableSwipeDownClose={true} mobileNav="hidden" mobileCount="hidden" />
+
+  <script>
+    import '../scripts/gallery-search.ts';
+    import '../scripts/gallery-lightbox.ts';
+  </script>
+</BaseLayout>

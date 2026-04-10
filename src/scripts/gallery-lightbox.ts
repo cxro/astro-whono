@@ -1,6 +1,6 @@
-import { initBitsLightbox } from './lightbox';
+﻿import { initGalleryLightbox } from './lightbox';
 
-initBitsLightbox({
+initGalleryLightbox({
   dialogId: 'lightbox',
   enableZoom: true,
   enablePan: true,

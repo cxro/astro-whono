@@ -1,32 +1,31 @@
 ---
-import BitsPageView from '../../../components/BitsPageView.astro';
+import GalleryPageView from '../../../components/GalleryPageView.astro';
 import { buildPaginatedPaths } from '../../../lib/content';
-import { getBitsPageData, getBitsPagePath } from '../../../lib/bits';
+import { getGalleryPageData, getGalleryPagePath } from '../../../lib/gallery';
 import { PAGE_SIZE_BITS } from '../../../../site.config.mjs';
 
 export const prerender = true;
 
 export async function getStaticPaths() {
-  const { totalPages } = await getBitsPageData(1, PAGE_SIZE_BITS);
+  const { totalPages } = await getGalleryPageData(1, PAGE_SIZE_BITS);
   return buildPaginatedPaths(totalPages);
 }
 
 const currentPage = Number(Astro.params.page);
-const { items, yearOptions, totalCount, totalPages } = await getBitsPageData(currentPage, PAGE_SIZE_BITS);
+const { items, yearOptions, totalCount, totalPages } = await getGalleryPageData(currentPage, PAGE_SIZE_BITS);
 
 if (!Number.isInteger(currentPage) || currentPage <= 1 || currentPage > totalPages) {
-  throw new Error(`Unknown gallery page: ${Astro.params.page ?? ''}`);
+  throw new Error('Unknown gallery page: ' + (Astro.params.page ?? ''));
 }
 
 ---
 
-<BitsPageView
+<GalleryPageView
   items={items}
   resultCount={totalCount}
   currentPage={currentPage}
   totalPages={totalPages}
   yearOptions={yearOptions}
-  prevPath={currentPage === 2 ? '/gallery/' : getBitsPagePath(currentPage - 1)}
-  nextPath={currentPage < totalPages ? getBitsPagePath(currentPage + 1) : null}
-  activeNavId="gallery"
+  prevPath={currentPage === 2 ? '/gallery/' : getGalleryPagePath(currentPage - 1)}
+  nextPath={currentPage < totalPages ? getGalleryPagePath(currentPage + 1) : null}
 />

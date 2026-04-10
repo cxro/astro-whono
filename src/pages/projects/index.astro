@@ -5,8 +5,8 @@ import projectsData from '../../data/projects.json';
 import { getThemeSettings } from '../../lib/theme-settings';
 
 const { settings } = getThemeSettings();
-const pageTitle = settings.page.projects.title || 'Projects';
-const pageSubtitle = settings.page.projects.subtitle;
+const projectsPage = (settings.page as any).projects || {};const pageTitle = projectsPage.title || 'Projects';
+const pageSubtitle = projectsPage.subtitle;
 
 const { projects, githubUsername } = projectsData;
 

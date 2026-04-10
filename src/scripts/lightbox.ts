@@ -787,3 +787,63 @@ export const initArticleLightbox = (options: ArticleLightboxOptions = {}) => {
     openFromTrigger(trigger);
   });
 };
+
+export const initGalleryLightbox = (options: LightboxOptions = {}) => {
+  const controller = createLightboxController({
+    enableZoom: true,
+    enablePan: true,
+    enableSwipeDownClose: true,
+    enableSwipeNav: true,
+    ...options
+  });
+  if (!controller) return;
+
+  const imagesCache = new WeakMap<HTMLElement, LightboxImage[]>();
+  const parsePositiveDimension = (value: string | undefined) => {
+    const parsed = Number(value ?? '');
+    return Number.isFinite(parsed) && parsed > 0 ? parsed : undefined;
+  };
+  const toGalleryLightboxImage = (node: HTMLElement): LightboxImage | null => {
+    const safeSrc = toSafeDocumentImageUrl(node.dataset.galleryImageSrc ?? '');
+    if (!safeSrc) return null;
+    const alt = node.dataset.galleryImageAlt ?? '';
+    const width = parsePositiveDimension(node.dataset.galleryImageWidth);
+    const height = parsePositiveDimension(node.dataset.galleryImageHeight);
+    return {
+      src: safeSrc,
+      ...(alt ? { alt } : {}),
+      ...(width ? { width } : {}),
+      ...(height ? { height } : {})
+    };
+  };
+
+  const parseImages = (card: HTMLElement) => {
+    const cached = imagesCache.get(card);
+    if (cached) return cached;
+    const imageNodes = Array.from(card.querySelectorAll<HTMLElement>('[data-gallery-image-item]'));
+    if (imageNodes.length === 0) return null;
+    const sanitized = imageNodes
+      .map(toGalleryLightboxImage)
+      .filter((item): item is LightboxImage => item !== null);
+    if (sanitized.length === 0) return null;
+    imagesCache.set(card, sanitized);
+    return sanitized;
+  };
+
+  const handleOpen = (button: HTMLButtonElement, index: number) => {
+    const card = button.closest<HTMLElement>('[data-gallery]');
+    if (!card) return;
+    const images = parseImages(card);
+    if (!images || images.length === 0) return;
+    controller.open(images, index, { opener: button });
+  };
+
+  document.addEventListener('click', (event) => {
+    const target = event.target as HTMLElement | null;
+    if (!target) return;
+    const button = target.closest<HTMLButtonElement>('[data-gallery-image-button]');
+    if (!button) return;
+    const index = Number(button.getAttribute('data-gallery-image-index') ?? '0');
+    handleOpen(button, index);
+  });
+};

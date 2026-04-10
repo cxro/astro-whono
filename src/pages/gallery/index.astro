@@ -1,21 +1,19 @@
-<parameter name="content">---
-import BitsPageView from '../../components/BitsPageView.astro';
-import { getBitsPageData, getBitsPagePath } from '../../lib/bits';
+---
+import GalleryPageView from '../../components/GalleryPageView.astro';
+import { getGalleryPageData, getGalleryPagePath } from '../../lib/gallery';
 import { PAGE_SIZE_BITS } from '../../../site.config.mjs';
 
 const currentPage = 1;
-const { items, yearOptions, totalCount, totalPages } = await getBitsPageData(currentPage, PAGE_SIZE_BITS);
+const { items, yearOptions, totalCount, totalPages } = await getGalleryPageData(currentPage, PAGE_SIZE_BITS);
 ---
 
-<BitsPageView
+<GalleryPageView
   items={items}
   resultCount={totalCount}
   currentPage={currentPage}
   totalPages={totalPages}
   yearOptions={yearOptions}
   prevPath={null}
-  nextPath={totalPages > 1 ? getBitsPagePath(currentPage + 1) : null}
-  activeNavId="gallery"
+  nextPath={totalPages > 1 ? getGalleryPagePath(currentPage + 1) : null}
 />
-</parameter>
-<parameter name="filePath">C:\Users\azrai\.local\share\opencode\worktree\66ded04990379aae2f09487a0d16ad0b3d3f5f79\tidy-rocket\src\pages\gallery\index.astro</parameter>
+
