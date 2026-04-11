@@ -39,7 +39,7 @@
 }
 
 .memo-toc summary::after {
-  content: "▶";
+  content: '▶';
   font-size: 10px;
   color: var(--muted);
   transition: transform 0.2s ease;
@@ -51,7 +51,7 @@
 }
 
 .memo-toc summary::before {
-  content: "";
+  content: '';
   width: 4px;
   height: 4px;
   border-radius: 999px;
@@ -89,7 +89,7 @@
   font-variant-numeric: tabular-nums;
 }
 
-:root[data-theme="dark"] .toc-num {
+:root[data-theme='dark'] .toc-num {
   background: #242424;
   border-color: #3a3a3a;
   color: var(--muted);
@@ -105,7 +105,7 @@
 
 .memo-content h2::before,
 .memo-content h2::after {
-  content: "-";
+  content: '-';
   margin: 0 10px;
   color: var(--border);
 }
@@ -137,18 +137,18 @@
   font-variant-numeric: tabular-nums;
 }
 
-:root[data-theme="dark"] .memo-content h3::before {
+:root[data-theme='dark'] .memo-content h3::before {
   background: #242424;
   border-color: #3a3a3a;
   color: var(--muted);
 }
 
-body.memo-page[data-reading="immersive"] .prose {
+body.memo-page[data-reading='immersive'] .prose {
   font-size: 16px;
   line-height: 1.85;
 }
 
-body.memo-page[data-reading="immersive"] .prose p {
+body.memo-page[data-reading='immersive'] .prose p {
   margin: 14px 0;
 }
 

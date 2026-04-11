@@ -13,7 +13,7 @@ export const GET: APIRoute = async () => {
   return new Response(JSON.stringify(index), {
     headers: {
       'Content-Type': 'application/json; charset=utf-8',
-      'Cache-Control': cacheControl
-    }
+      'Cache-Control': cacheControl,
+    },
   });
 };

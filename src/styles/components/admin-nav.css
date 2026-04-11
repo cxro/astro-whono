@@ -35,7 +35,11 @@
 }
 
 .admin-nav-header {
-  background: linear-gradient(180deg, var(--panel) 0%, var(--code-header-bg) 100%);
+  background: linear-gradient(
+    180deg,
+    var(--panel) 0%,
+    var(--code-header-bg) 100%
+  );
   color: var(--muted);
   font-size: 12px;
   border-bottom: 1px solid var(--border);
@@ -81,7 +85,11 @@
   padding: 3px 10px;
   border-radius: 12px;
   border: 1px solid var(--border);
-  background: linear-gradient(180deg, var(--code-content-bg) 0%, var(--panel) 100%);
+  background: linear-gradient(
+    180deg,
+    var(--code-content-bg) 0%,
+    var(--panel) 100%
+  );
   color: var(--muted);
   box-shadow:
     inset 0 1px 0 rgba(255, 255, 255, 0.45),
@@ -118,7 +126,11 @@
   padding: 0 12px;
   border: 1px solid var(--border);
   border-radius: 14px;
-  background: linear-gradient(180deg, var(--bg) 0%, var(--code-content-bg) 100%);
+  background: linear-gradient(
+    180deg,
+    var(--bg) 0%,
+    var(--code-content-bg) 100%
+  );
   transition:
     border-color 160ms ease,
     background-color 160ms ease,
@@ -138,7 +150,7 @@
   color: var(--faint);
   font-size: 15px;
   line-height: 1;
-  font-family: "LXGW WenKai Lite", "Kaiti SC", "STKaiti", serif;
+  font-family: 'LXGW WenKai Lite', 'Kaiti SC', 'STKaiti', serif;
 }
 
 .admin-nav-field--name input {
@@ -201,5 +213,5 @@
   color: var(--faint);
   font-size: 11px;
   line-height: 1.4;
-  font-family: "LXGW WenKai Lite", "Kaiti SC", "STKaiti", serif;
+  font-family: 'LXGW WenKai Lite', 'Kaiti SC', 'STKaiti', serif;
 }

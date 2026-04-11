@@ -1,7 +1,4 @@
-import type {
-  SidebarNavId,
-  SiteSocialPresetId
-} from '@/lib/theme-settings';
+import type { SidebarNavId, SiteSocialPresetId } from '@/lib/theme-settings';
 import { validateAdminThemeSettings } from '@/lib/admin-console/shared';
 import { type EditableSettings } from './form-codec';
 
@@ -10,7 +7,10 @@ export type ValidationIssue = {
   focusTarget?: () => HTMLElement | null;
 };
 
-type QueryAll = <T extends Element>(parent: ParentNode, selector: string) => T[];
+type QueryAll = <T extends Element>(
+  parent: ParentNode,
+  selector: string
+) => T[];
 
 type ValidationContext = {
   form: HTMLFormElement;
@@ -54,7 +54,10 @@ type ValidationContext = {
   inputPageBitsAuthorName: HTMLInputElement;
   inputPageBitsAuthorAvatar: HTMLInputElement;
   inputSidebarDividerDefault: HTMLInputElement;
-  getPresetFieldTarget: (id: SiteSocialPresetId, field: 'order' | 'href') => () => HTMLElement | null;
+  getPresetFieldTarget: (
+    id: SiteSocialPresetId,
+    field: 'order' | 'href'
+  ) => () => HTMLElement | null;
   getCustomFieldTarget: (
     index: number,
     field: 'order' | 'iconKey' | 'id' | 'label' | 'href'
@@ -67,9 +70,17 @@ type ValidationContext = {
   getFirstNavLabelTarget: () => HTMLElement | null;
 };
 
-const CUSTOM_ITEM_PATH_RE = /^site\.socialLinks\.custom\[(\d+)\](?:\.(id|label|href|iconKey|order|visible))?$/;
-const NAV_PATH_RE = /^shell\.nav(?:(?:\.([a-z]+))|\[(\d+)\])(?:\.(id|label|ornament|order|visible))?$/;
-const PAGE_TITLE_INPUT_KEYS = ['essay', 'archive', 'bits', 'memo', 'about'] as const;
+const CUSTOM_ITEM_PATH_RE =
+  /^site\.socialLinks\.custom\[(\d+)\](?:\.(id|label|href|iconKey|order|visible))?$/;
+const NAV_PATH_RE =
+  /^shell\.nav(?:(?:\.([a-z]+))|\[(\d+)\])(?:\.(id|label|ornament|order|visible))?$/;
+const PAGE_TITLE_INPUT_KEYS = [
+  'essay',
+  'archive',
+  'bits',
+  'memo',
+  'about',
+] as const;
 
 export const createValidation = ({
   form,
@@ -117,10 +128,12 @@ export const createValidation = ({
   getCustomFieldTarget,
   getCustomVisibilityTarget,
   getNavFieldTarget,
-  getFirstNavLabelTarget
+  getFirstNavLabelTarget,
 }: ValidationContext) => {
-  const createIssue = (message: string, focusTarget?: () => HTMLElement | null): ValidationIssue =>
-    focusTarget ? { message, focusTarget } : { message };
+  const createIssue = (
+    message: string,
+    focusTarget?: () => HTMLElement | null
+  ): ValidationIssue => (focusTarget ? { message, focusTarget } : { message });
 
   const resolveIssueField = (issue: ValidationIssue): HTMLElement | null => {
     const candidate = issue.focusTarget?.();
@@ -128,7 +141,9 @@ export const createValidation = ({
   };
 
   const clearInvalidFields = (): void => {
-    queryAll<HTMLElement>(form, '[aria-invalid="true"]').forEach((element) => element.removeAttribute('aria-invalid'));
+    queryAll<HTMLElement>(form, '[aria-invalid="true"]').forEach((element) =>
+      element.removeAttribute('aria-invalid')
+    );
   };
 
   const markInvalidFields = (issues: readonly ValidationIssue[]): void => {
@@ -142,22 +157,30 @@ export const createValidation = ({
     });
   };
 
-  const pageTitleTargets: Record<(typeof PAGE_TITLE_INPUT_KEYS)[number], () => HTMLElement | null> = {
+  const pageTitleTargets: Record<
+    (typeof PAGE_TITLE_INPUT_KEYS)[number],
+    () => HTMLElement | null
+  > = {
     essay: () => inputPageEssayTitle,
     archive: () => inputPageArchiveTitle,
     bits: () => inputPageBitsTitle,
     memo: () => inputPageMemoTitle,
-    about: () => inputPageAboutTitle
+    about: () => inputPageAboutTitle,
   };
-  const pageSubtitleTargets: Record<(typeof PAGE_TITLE_INPUT_KEYS)[number], () => HTMLElement | null> = {
+  const pageSubtitleTargets: Record<
+    (typeof PAGE_TITLE_INPUT_KEYS)[number],
+    () => HTMLElement | null
+  > = {
     essay: () => inputPageEssaySubtitle,
     archive: () => inputPageArchiveSubtitle,
     bits: () => inputPageBitsSubtitle,
     memo: () => inputPageMemoSubtitle,
-    about: () => inputPageAboutSubtitle
+    about: () => inputPageAboutSubtitle,
   };
 
-  const resolveSharedIssueTarget = (path: string): (() => HTMLElement | null) | undefined => {
+  const resolveSharedIssueTarget = (
+    path: string
+  ): (() => HTMLElement | null) | undefined => {
     switch (path) {
       case 'site.title':
         return () => inputSiteTitle;
@@ -222,7 +245,9 @@ export const createValidation = ({
     }
 
     if (path.startsWith('site.socialLinks.presetOrder.')) {
-      const presetId = path.slice('site.socialLinks.presetOrder.'.length) as SiteSocialPresetId;
+      const presetId = path.slice(
+        'site.socialLinks.presetOrder.'.length
+      ) as SiteSocialPresetId;
       return getPresetFieldTarget(presetId, 'order');
     }
 
@@ -233,18 +258,26 @@ export const createValidation = ({
       if (!Number.isInteger(index)) return undefined;
       if (field === 'visible') return getCustomVisibilityTarget(index);
       if (field && field !== 'visible') {
-        return getCustomFieldTarget(index, field as 'id' | 'label' | 'href' | 'iconKey' | 'order');
+        return getCustomFieldTarget(
+          index,
+          field as 'id' | 'label' | 'href' | 'iconKey' | 'order'
+        );
       }
       return getCustomFieldTarget(index, 'id');
     }
 
-    if (path === 'home.introMoreLinks' || path.startsWith('home.introMoreLinks[')) {
+    if (
+      path === 'home.introMoreLinks' ||
+      path.startsWith('home.introMoreLinks[')
+    ) {
       return () => inputHomeIntroMoreLinkPrimary;
     }
 
     if (path.startsWith('page.')) {
       const segments = path.split('.');
-      const pageId = segments[1] as (typeof PAGE_TITLE_INPUT_KEYS)[number] | undefined;
+      const pageId = segments[1] as
+        | (typeof PAGE_TITLE_INPUT_KEYS)[number]
+        | undefined;
       const field = segments[2];
       if (pageId && PAGE_TITLE_INPUT_KEYS.includes(pageId)) {
         if (field === 'title') return pageTitleTargets[pageId];
@@ -257,7 +290,8 @@ export const createValidation = ({
       const navId = navMatch[1] as SidebarNavId | undefined;
       const field = navMatch[3];
       if (!navId) return getFirstNavLabelTarget;
-      if (!field || field === 'id' || field === 'label') return getNavFieldTarget(navId, 'label');
+      if (!field || field === 'id' || field === 'label')
+        return getNavFieldTarget(navId, 'label');
       if (field === 'ornament' || field === 'order' || field === 'visible') {
         return getNavFieldTarget(navId, field);
       }
@@ -276,6 +310,6 @@ export const createValidation = ({
     validateSettings,
     clearInvalidFields,
     markInvalidFields,
-    resolveIssueField
+    resolveIssueField,
   };
 };

@@ -1,9 +1,16 @@
 ---
 import { render } from 'astro:content';
-import { getEssaySlug, getVisibleEssayRouteEntries, type EssayEntry } from '../../lib/content';
+import {
+  getEssaySlug,
+  getVisibleEssayRouteEntries,
+  type EssayEntry,
+} from '../../lib/content';
 import ArticleLayout from '../../layouts/ArticleLayout.astro';
 import { createWithBase } from '../../utils/format';
-import { getThemeSettings, getVisibleArticleMetaTags } from '../../lib/theme-settings';
+import {
+  getThemeSettings,
+  getVisibleArticleMetaTags,
+} from '../../lib/theme-settings';
 
 type ArticleNeighborLink = {
   href: string;
@@ -22,12 +29,18 @@ export async function getStaticPaths() {
       props: {
         entry,
         prev: prev
-          ? { href: withBase(`/archive/${getEssaySlug(prev)}/`), title: prev.data.title }
+          ? {
+              href: withBase(`/archive/${getEssaySlug(prev)}/`),
+              title: prev.data.title,
+            }
           : null,
         next: next
-          ? { href: withBase(`/archive/${getEssaySlug(next)}/`), title: next.data.title }
-          : null
-      }
+          ? {
+              href: withBase(`/archive/${getEssaySlug(next)}/`),
+              title: next.data.title,
+            }
+          : null,
+      },
     };
   });
 }

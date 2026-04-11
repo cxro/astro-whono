@@ -8,7 +8,7 @@ const {
   excerpt,
   date,
   visibleTags = [],
-  articleMetaSettings
+  articleMetaSettings,
 } = Astro.props as {
   href: string;
   title: string;
@@ -18,7 +18,9 @@ const {
   articleMetaSettings: ArticleMetaSettings;
 };
 
-const shouldShowMetaLine = articleMetaSettings.showDate || (articleMetaSettings.showTags && visibleTags.length > 0);
+const shouldShowMetaLine =
+  articleMetaSettings.showDate ||
+  (articleMetaSettings.showTags && visibleTags.length > 0);
 ---
 
 <a class="list-item list-item--link" href={href}>
@@ -26,18 +28,25 @@ const shouldShowMetaLine = articleMetaSettings.showDate || (articleMetaSettings.
     <h3 class="list-item__title">{title}</h3>
   </div>
   {excerpt ? <p class="list-item__excerpt">{excerpt}</p> : null}
-  {shouldShowMetaLine ? (
-    <div class="meta-line meta-line--items">
-      {articleMetaSettings.showDate ? (
-        <span class="meta-line__item">
-          {articleMetaSettings.dateLabel ? `${articleMetaSettings.dateLabel}` : ''}{formatISODateUtc(date)}
-        </span>
-      ) : null}
-      {articleMetaSettings.showTags && visibleTags.length ? (
-        <span class="meta-line__item meta-line__item--tags">
-          {visibleTags.map((tag) => <span class="tag">#{tag}</span>)}
-        </span>
-      ) : null}
-    </div>
-  ) : null}
+  {
+    shouldShowMetaLine ? (
+      <div class="meta-line meta-line--items">
+        {articleMetaSettings.showDate ? (
+          <span class="meta-line__item">
+            {articleMetaSettings.dateLabel
+              ? `${articleMetaSettings.dateLabel}`
+              : ''}
+            {formatISODateUtc(date)}
+          </span>
+        ) : null}
+        {articleMetaSettings.showTags && visibleTags.length ? (
+          <span class="meta-line__item meta-line__item--tags">
+            {visibleTags.map((tag) => (
+              <span class="tag">#{tag}</span>
+            ))}
+          </span>
+        ) : null}
+      </div>
+    ) : null
+  }
 </a>

@@ -10,12 +10,11 @@
   border: 0;
   border-radius: 0;
   box-shadow: none;
-  font-family: "LXGW WenKai Lite","Kaiti SC","STKaiti",serif;
+  font-family: 'LXGW WenKai Lite', 'Kaiti SC', 'STKaiti', serif;
 }
 
-
 .prose .callout::before {
-  content: "";
+  content: '';
   position: absolute;
   left: 0;
   top: 6px;
@@ -32,11 +31,11 @@
 .prose .callout .callout-title {
   display: flex;
   align-items: center;
-  gap: .5rem;
-  margin: 0 0 .35rem 0;
+  gap: 0.5rem;
+  margin: 0 0 0.35rem 0;
   font-weight: 600;
   font-style: italic;
-  letter-spacing: .02em;
+  letter-spacing: 0.02em;
   line-height: 1.2;
 }
 
@@ -45,7 +44,7 @@
 }
 
 .prose .callout .callout-title::before {
-  content: "";
+  content: '';
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -82,7 +81,7 @@
   --callout-icon: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0%200%2024%2024' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><path d='M10.3%203.9l-8.4%2014.5a1.6%201.6%200%200%200%201.4%202.4h16.4a1.6%201.6%200%200%200%201.4-2.4L13.7%203.9a1.6%201.6%200%200%200-3.4%200z'/><path d='M12%209v5'/><path d='M12%2016h.01'/></svg>");
 }
 
-@supports ((-webkit-mask-image: url("")) or (mask-image: url(""))) {
+@supports ((-webkit-mask-image: url('')) or (mask-image: url(''))) {
   .prose .callout .callout-title::before {
     border-radius: 0;
     box-shadow: none;
@@ -105,7 +104,7 @@
   mask: none;
 }
 
-.prose .callout .callout-title[data-icon="none"]::before {
+.prose .callout .callout-title[data-icon='none']::before {
   display: none;
 }
 

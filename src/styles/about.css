@@ -21,7 +21,7 @@
 
 .about-intro-line {
   margin: 30px 0 0;
-  font-family: "LXGW WenKai Lite", "Kaiti SC", "STKaiti", serif;
+  font-family: 'LXGW WenKai Lite', 'Kaiti SC', 'STKaiti', serif;
 }
 
 .about-section-title {
@@ -56,7 +56,7 @@
   font-size: 16px;
   line-height: 1.75;
   font-weight: 400;
-  font-family: "LXGW WenKai Lite", "Kaiti SC", "STKaiti", serif;
+  font-family: 'LXGW WenKai Lite', 'Kaiti SC', 'STKaiti', serif;
 }
 
 .qa-icon {
@@ -78,7 +78,7 @@
   color: var(--muted);
   font-size: 16px;
   line-height: 1.75;
-  font-family: "LXGW WenKai Lite", "Kaiti SC", "STKaiti", serif;
+  font-family: 'LXGW WenKai Lite', 'Kaiti SC', 'STKaiti', serif;
 }
 
 .contact-block {
@@ -90,7 +90,7 @@
   color: var(--text);
   font-size: 16px;
   line-height: 1.75;
-  font-family: "LXGW WenKai Lite", "Kaiti SC", "STKaiti", serif;
+  font-family: 'LXGW WenKai Lite', 'Kaiti SC', 'STKaiti', serif;
 }
 
 .contact-list {
@@ -110,7 +110,7 @@
   color: var(--text);
   font-size: 16px;
   line-height: 1.75;
-  font-family: "LXGW WenKai Lite", "Kaiti SC", "STKaiti", serif;
+  font-family: 'LXGW WenKai Lite', 'Kaiti SC', 'STKaiti', serif;
 }
 
 .contact-link-head {
@@ -143,7 +143,7 @@
 }
 
 .focus-list li::before {
-  content: "•";
+  content: '•';
   color: var(--faint);
 }
 
@@ -201,7 +201,9 @@
   border: 1px solid var(--border);
   border-radius: 12px;
   background: var(--panel);
-  transition: background 0.2s ease, border-color 0.2s ease;
+  transition:
+    background 0.2s ease,
+    border-color 0.2s ease;
 }
 
 .site-guide-item:hover {
@@ -209,7 +211,7 @@
   border-color: #e0dedc;
 }
 
-:root[data-theme="dark"] .site-guide-item:hover {
+:root[data-theme='dark'] .site-guide-item:hover {
   background: #2f2f2f;
   border-color: #3b3b3b;
 }

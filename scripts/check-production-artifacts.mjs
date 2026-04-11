@@ -7,17 +7,25 @@ const normalizeSiteUrl = (value) => value.trim().replace(/\/+$/, '');
 
 export const resolveRequiredSiteUrl = () => {
   const siteUrl = normalizeSiteUrl(process.env.SITE_URL ?? '');
-  expect(siteUrl.length > 0, 'SITE_URL is required for production artifact verification');
+  expect(
+    siteUrl.length > 0,
+    'SITE_URL is required for production artifact verification'
+  );
   return siteUrl;
 };
 
 const readText = (filePath) => {
-  expect(existsSync(filePath), `Expected build artifact is missing: ${filePath}`);
+  expect(
+    existsSync(filePath),
+    `Expected build artifact is missing: ${filePath}`
+  );
   return readFileSync(filePath, 'utf8');
 };
 
-const PREV_LINK_PATTERN = /<a class="prev-next__link prev-next__link--prev"[^>]*rel="prev">/;
-const NEXT_LINK_PATTERN = /<a class="prev-next__link prev-next__link--next"[^>]*rel="next">/;
+const PREV_LINK_PATTERN =
+  /<a class="prev-next__link prev-next__link--prev"[^>]*rel="prev">/;
+const NEXT_LINK_PATTERN =
+  /<a class="prev-next__link prev-next__link--next"[^>]*rel="next">/;
 
 export const runProductionArtifactCheck = async (options = {}) => {
   const siteUrl = options.siteUrl ?? resolveRequiredSiteUrl();
@@ -32,11 +40,14 @@ export const runProductionArtifactCheck = async (options = {}) => {
     'dist/index.html',
     'dist/about/index.html',
     'dist/bits/index.html',
-    'dist/api/admin/settings'
+    'dist/api/admin/settings',
   ];
 
   for (const artifactPath of requiredArtifacts) {
-    expect(existsSync(artifactPath), `Expected build artifact is missing: ${artifactPath}`);
+    expect(
+      existsSync(artifactPath),
+      `Expected build artifact is missing: ${artifactPath}`
+    );
   }
 
   const robotsTxt = readText('dist/robots.txt');
@@ -60,8 +71,13 @@ export const runProductionArtifactCheck = async (options = {}) => {
     sitemapXml.matchAll(/<loc>([^<]+)<\/loc>/g),
     (match) => match[1].trim()
   ).filter(Boolean);
-  const leakedEssayDetail = sitemapLocs.find((loc) => /^\/essay\/[^/]+\/$/.test(new URL(loc).pathname));
-  expect(!leakedEssayDetail, `Essay compatibility redirect leaked into sitemap: ${leakedEssayDetail}`);
+  const leakedEssayDetail = sitemapLocs.find((loc) =>
+    /^\/essay\/[^/]+\/$/.test(new URL(loc).pathname)
+  );
+  expect(
+    !leakedEssayDetail,
+    `Essay compatibility redirect leaked into sitemap: ${leakedEssayDetail}`
+  );
 
   const aboutHtml = readText('dist/about/index.html');
   expect(
@@ -72,11 +88,20 @@ export const runProductionArtifactCheck = async (options = {}) => {
     aboutHtml.includes(`<meta property="og:url" content="${siteUrl}/about/"`),
     'About page og:url no longer matches SITE_URL'
   );
-  expect(!/\.admin-/.test(aboutHtml), 'Public about page still contains admin CSS rules');
-  expect(!/--admin-status-/.test(aboutHtml), 'Public about page still contains admin CSS tokens');
+  expect(
+    !/\.admin-/.test(aboutHtml),
+    'Public about page still contains admin CSS rules'
+  );
+  expect(
+    !/--admin-status-/.test(aboutHtml),
+    'Public about page still contains admin CSS tokens'
+  );
 
   const adminHtml = readText('dist/admin/index.html');
-  expect(!/index@_@astro\.[^"]+\.css/.test(adminHtml), 'Readonly admin page still links admin-only CSS');
+  expect(
+    !/index@_@astro\.[^"]+\.css/.test(adminHtml),
+    'Readonly admin page still links admin-only CSS'
+  );
   expect(
     !/<script type="module" src="\/_astro\/[^"]+"><\/script>/.test(adminHtml),
     'Readonly admin page still links an external _astro module script'
@@ -99,16 +124,34 @@ export const runProductionArtifactCheck = async (options = {}) => {
   }
   if (/class="meta-line meta-line--items"/.test(indexHtml)) {
     const requiredHomeMetaRules = [
-      [/\.meta-line\s*\{/, 'Homepage critical CSS is missing the .meta-line rule for above-the-fold entries'],
-      [/\.meta-line--items\s*\{/, 'Homepage critical CSS is missing the .meta-line--items rule for above-the-fold entries'],
-      [/\.meta-line__item\s*\{/, 'Homepage critical CSS is missing the .meta-line__item rule for above-the-fold entries'],
-      [/\.meta-line__item--tags\s*\{/, 'Homepage critical CSS is missing the .meta-line__item--tags rule for above-the-fold entries'],
+      [
+        /\.meta-line\s*\{/,
+        'Homepage critical CSS is missing the .meta-line rule for above-the-fold entries',
+      ],
+      [
+        /\.meta-line--items\s*\{/,
+        'Homepage critical CSS is missing the .meta-line--items rule for above-the-fold entries',
+      ],
+      [
+        /\.meta-line__item\s*\{/,
+        'Homepage critical CSS is missing the .meta-line__item rule for above-the-fold entries',
+      ],
+      [
+        /\.meta-line__item--tags\s*\{/,
+        'Homepage critical CSS is missing the .meta-line__item--tags rule for above-the-fold entries',
+      ],
       [
         /\.meta-line__item\s*\+\s*\.meta-line__item::before\s*\{/,
-        'Homepage critical CSS is missing the .meta-line__item + .meta-line__item::before separator rule'
+        'Homepage critical CSS is missing the .meta-line__item + .meta-line__item::before separator rule',
       ],
-      [/\.list-item\s+\.meta-line\s*\{/, 'Homepage critical CSS is missing the .list-item .meta-line spacing rule'],
-      [/\.meta-line\s+\.tag\s*\{/, 'Homepage critical CSS is missing the .meta-line .tag color rule']
+      [
+        /\.list-item\s+\.meta-line\s*\{/,
+        'Homepage critical CSS is missing the .list-item .meta-line spacing rule',
+      ],
+      [
+        /\.meta-line\s+\.tag\s*\{/,
+        'Homepage critical CSS is missing the .meta-line .tag color rule',
+      ],
     ];
 
     for (const [pattern, message] of requiredHomeMetaRules) {
@@ -117,16 +160,22 @@ export const runProductionArtifactCheck = async (options = {}) => {
   }
   if (/class="list-item list-item--link"/.test(indexHtml)) {
     expect(
-      /@media\s*\(max-width:\s*900px\)\s*\{[\s\S]*?\.list-item\s*\{\s*padding:\s*16px\s+0;/.test(indexHtml),
+      /@media\s*\(max-width:\s*900px\)\s*\{[\s\S]*?\.list-item\s*\{\s*padding:\s*16px\s+0;/.test(
+        indexHtml
+      ),
       'Homepage critical CSS is missing the mobile .list-item spacing rule for above-the-fold entries'
     );
   }
   expect(
-    /<link(?=[^>]+rel="preload")(?=[^>]+href="[^"]*global[^"]*")(?=[^>]+as="style")[^>]*>/.test(indexHtml),
+    /<link(?=[^>]+rel="preload")(?=[^>]+href="[^"]*global[^"]*")(?=[^>]+as="style")[^>]*>/.test(
+      indexHtml
+    ),
     'Homepage is no longer preloading the deferred global stylesheet'
   );
   expect(
-    /<link(?=[^>]+rel="stylesheet")(?=[^>]+href="[^"]*global[^"]*")(?=[^>]+media="print")(?=[^>]+onload="this\.onload=null;this\.media='all'")[^>]*>/.test(indexHtml),
+    /<link(?=[^>]+rel="stylesheet")(?=[^>]+href="[^"]*global[^"]*")(?=[^>]+media="print")(?=[^>]+onload="this\.onload=null;this\.media='all'")[^>]*>/.test(
+      indexHtml
+    ),
     'Homepage is no longer using the deferGlobalStyles media-swap stylesheet path'
   );
 
@@ -134,13 +183,19 @@ export const runProductionArtifactCheck = async (options = {}) => {
     ? JSON.parse(readFileSync('src/data/settings/page.json', 'utf8'))
     : null;
   const { site } = await import('../site.config.mjs');
-  const rawAvatar = pageSettings?.bits?.defaultAuthor?.avatar ?? site.authorAvatar ?? 'author/avatar.webp';
+  const rawAvatar =
+    pageSettings?.bits?.defaultAuthor?.avatar ??
+    site.authorAvatar ??
+    'author/avatar.webp';
   expect(
     typeof rawAvatar === 'string' && rawAvatar.trim().length > 0,
     'Bits default author avatar is missing from page settings / site config'
   );
 
-  const normalizedAvatar = rawAvatar.trim().replace(/\\/g, '/').replace(/^\.\/+/, '');
+  const normalizedAvatar = rawAvatar
+    .trim()
+    .replace(/\\/g, '/')
+    .replace(/^\.\/+/, '');
   const hasInvalidAvatarPath =
     normalizedAvatar.startsWith('/') ||
     normalizedAvatar.startsWith('//') ||
@@ -166,13 +221,16 @@ export const runProductionArtifactCheck = async (options = {}) => {
   );
 
   const getRssItemLinks = (xml) =>
-    Array.from(xml.matchAll(/<item>[\s\S]*?<link>([^<]+)<\/link>/g), (match) => match[1].trim()).filter(Boolean);
+    Array.from(xml.matchAll(/<item>[\s\S]*?<link>([^<]+)<\/link>/g), (match) =>
+      match[1].trim()
+    ).filter(Boolean);
 
   const normalizeArchiveDetailPath = (href) => {
     const url = new URL(href);
     const normalizedPath = url.pathname.replace(/\/+$/, '').replace(/^\/+/, '');
     expect(
-      normalizedPath.startsWith('archive/') && normalizedPath.split('/').length >= 2,
+      normalizedPath.startsWith('archive/') &&
+        normalizedPath.split('/').length >= 2,
       `Archive RSS item did not resolve to an /archive/{slug}/ detail page: ${href}`
     );
     return path.join('dist', normalizedPath, 'index.html');
@@ -186,8 +244,14 @@ export const runProductionArtifactCheck = async (options = {}) => {
   const archiveRssLinks = getRssItemLinks(archiveRssXml);
   const essayRssLinks = getRssItemLinks(essayRssXml);
 
-  expect(archiveRssLinks.length > 0, 'Archive RSS does not contain any item links');
-  expect(defaultRssLinks.length > 0, 'Default RSS does not contain any item links');
+  expect(
+    archiveRssLinks.length > 0,
+    'Archive RSS does not contain any item links'
+  );
+  expect(
+    defaultRssLinks.length > 0,
+    'Default RSS does not contain any item links'
+  );
   expect(essayRssLinks.length > 0, 'Essay RSS does not contain any item links');
 
   const sampleArchiveLink = archiveRssLinks[0];
@@ -211,11 +275,15 @@ export const runProductionArtifactCheck = async (options = {}) => {
   const sampleArchiveHtmlPath = normalizeArchiveDetailPath(sampleArchiveLink);
   const sampleArchiveHtml = readText(sampleArchiveHtmlPath);
   expect(
-    sampleArchiveHtml.includes(`<link rel="canonical" href="${sampleArchiveLink}"`),
+    sampleArchiveHtml.includes(
+      `<link rel="canonical" href="${sampleArchiveLink}"`
+    ),
     `Archive detail page canonical does not match RSS item link: ${sampleArchiveLink}`
   );
   expect(
-    sampleArchiveHtml.includes(`<meta property="og:url" content="${sampleArchiveLink}"`),
+    sampleArchiveHtml.includes(
+      `<meta property="og:url" content="${sampleArchiveLink}"`
+    ),
     `Archive detail page og:url does not match RSS item link: ${sampleArchiveLink}`
   );
   expect(
@@ -245,7 +313,10 @@ export const runProductionArtifactCheck = async (options = {}) => {
   );
 
   const adminSettingsArtifact = readText('dist/api/admin/settings');
-  assertAdminSettingsStaticShell('dist/api/admin/settings', adminSettingsArtifact);
+  assertAdminSettingsStaticShell(
+    'dist/api/admin/settings',
+    adminSettingsArtifact
+  );
 
   console.log('Production artifact verification passed.');
 };

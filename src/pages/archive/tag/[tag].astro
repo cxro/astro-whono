@@ -1,7 +1,16 @@
 ---
 import ArchivePageView from '../../../components/ArchivePageView.astro';
-import { getArchiveEssays, getPageSlice, getTotalPages } from '../../../lib/content';
-import { collectTagSummary, filterEntriesByTag, findTagSummary, getTagPath } from '../../../lib/tags';
+import {
+  getArchiveEssays,
+  getPageSlice,
+  getTotalPages,
+} from '../../../lib/content';
+import {
+  collectTagSummary,
+  filterEntriesByTag,
+  findTagSummary,
+  getTagPath,
+} from '../../../lib/tags';
 import { PAGE_SIZE_ARCHIVE } from '../../../../site.config.mjs';
 
 export const prerender = true;
@@ -11,8 +20,8 @@ export async function getStaticPaths() {
   const tagSummaries = collectTagSummary(archiveItems);
   return tagSummaries.map((tagSummary) => ({
     params: {
-      tag: tagSummary.key
-    }
+      tag: tagSummary.key,
+    },
   }));
 }
 
@@ -37,7 +46,9 @@ const pageItems = getPageSlice(filteredItems, currentPage, PAGE_SIZE_ARCHIVE);
   totalPages={totalPages}
   currentPath={getTagPath('archive', currentTag.key)}
   prevPath={null}
-  nextPath={currentPage < totalPages ? getTagPath('archive', currentTag.key, currentPage + 1) : null}
+  nextPath={currentPage < totalPages
+    ? getTagPath('archive', currentTag.key, currentPage + 1)
+    : null}
   tagSummaries={tagSummaries}
   currentTag={currentTag}
 />

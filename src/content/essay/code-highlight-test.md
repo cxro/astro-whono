@@ -2,7 +2,7 @@
 title: Code Highlight Test
 description: Testing syntax highlighting for various programming languages
 date: 2026-01-05
-tags: ["Code", "Test"]
+tags: ['Code', 'Test']
 draft: false
 ---
 
@@ -46,11 +46,11 @@ import "fmt"
 
 func main() {
     messages := make(chan string)
-    
+
     go func() {
         messages <- "Hello, Goroutine!"
     }()
-    
+
     msg := <-messages
     fmt.Println(msg)
 }
@@ -59,7 +59,7 @@ func main() {
 ## SQL
 
 ```sql
-SELECT 
+SELECT
     u.name,
     COUNT(p.id) as post_count,
     MAX(p.created_at) as last_post

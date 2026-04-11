@@ -3,10 +3,12 @@ const { type = 'note', title, icon } = Astro.props;
 ---
 
 <div class={`callout ${type}`}>
-  {title ? (
-    <p class="callout-title" data-icon={icon}>
-      {title}
-    </p>
-  ) : null}
+  {
+    title ? (
+      <p class="callout-title" data-icon={icon}>
+        {title}
+      </p>
+    ) : null
+  }
   <slot />
 </div>

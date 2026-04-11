@@ -4,7 +4,7 @@ import {
   createDebouncedAsyncRunner,
   createJsonIndexLoader,
   createWithBase,
-  tokenizeSearchQuery
+  tokenizeSearchQuery,
 } from '../utils/format';
 
 type IndexItem = {
@@ -30,15 +30,34 @@ if (!root) {
   // Current page does not use entry search / tags.
 } else {
   const searchRoot = root.querySelector<HTMLElement>('[data-entry-search]');
-  const input = searchRoot?.querySelector<HTMLInputElement>('[data-entry-search-input]') ?? null;
-  const toggleBtn = searchRoot?.querySelector<HTMLButtonElement>('[data-entry-search-toggle]') ?? null;
-  const panel = searchRoot?.querySelector<HTMLElement>('[data-entry-search-panel]') ?? null;
-  const feedbackEl = searchRoot?.querySelector<HTMLParagraphElement>('[data-entry-search-feedback]') ?? null;
-  const liveEl = searchRoot?.querySelector<HTMLParagraphElement>('[data-entry-search-live]') ?? null;
-  const tagTrigger = root.querySelector<HTMLAnchorElement>('[data-entry-tag-trigger]');
-  const tagDialog = root.querySelector<HTMLDialogElement>('[data-entry-tag-dialog]');
-  const tagCloseBtn = root.querySelector<HTMLButtonElement>('[data-entry-tag-close]');
-  const tagDialogTitle = tagDialog?.querySelector<HTMLElement>('.entry-tags-dialog__title') ?? null;
+  const input =
+    searchRoot?.querySelector<HTMLInputElement>('[data-entry-search-input]') ??
+    null;
+  const toggleBtn =
+    searchRoot?.querySelector<HTMLButtonElement>(
+      '[data-entry-search-toggle]'
+    ) ?? null;
+  const panel =
+    searchRoot?.querySelector<HTMLElement>('[data-entry-search-panel]') ?? null;
+  const feedbackEl =
+    searchRoot?.querySelector<HTMLParagraphElement>(
+      '[data-entry-search-feedback]'
+    ) ?? null;
+  const liveEl =
+    searchRoot?.querySelector<HTMLParagraphElement>(
+      '[data-entry-search-live]'
+    ) ?? null;
+  const tagTrigger = root.querySelector<HTMLAnchorElement>(
+    '[data-entry-tag-trigger]'
+  );
+  const tagDialog = root.querySelector<HTMLDialogElement>(
+    '[data-entry-tag-dialog]'
+  );
+  const tagCloseBtn = root.querySelector<HTMLButtonElement>(
+    '[data-entry-tag-close]'
+  );
+  const tagDialogTitle =
+    tagDialog?.querySelector<HTMLElement>('.entry-tags-dialog__title') ?? null;
   const indexUrlRaw = (root.dataset.indexUrl ?? '').trim();
   const sectionSelector = (root.dataset.sectionSelector ?? '').trim();
   const tagScopeRaw = (root.dataset.tagScope ?? '').trim();
@@ -50,15 +69,18 @@ if (!root) {
   const indexUrl = indexUrlRaw ? withBase(indexUrlRaw) : '';
   const shouldBypassIndexCache = import.meta.env.DEV;
 
-  const items = Array.from(document.querySelectorAll<HTMLElement>('[data-entry-item]')).map((el) => ({
+  const items = Array.from(
+    document.querySelectorAll<HTMLElement>('[data-entry-item]')
+  ).map((el) => ({
     el,
-    slug: (el.getAttribute('data-slug') || '').trim()
+    slug: (el.getAttribute('data-slug') || '').trim(),
   })) as PageItem[];
 
   const sections = sectionSelector
     ? Array.from(document.querySelectorAll<HTMLElement>(sectionSelector))
     : [];
-  const tagScope: TagScope | null = tagScopeRaw === 'archive' ? 'archive' : null;
+  const tagScope: TagScope | null =
+    tagScopeRaw === 'archive' ? 'archive' : null;
   const availableTagKeys = new Set(
     Array.from(root.querySelectorAll<HTMLElement>('[data-entry-tag-key]'))
       .map((el) => (el.dataset.entryTagKey ?? '').trim())
@@ -69,7 +91,8 @@ if (!root) {
     if (!feedbackEl) return;
     const next = text.trim();
     const nextHidden = next === '';
-    if (feedbackEl.textContent === next && feedbackEl.hidden === nextHidden) return;
+    if (feedbackEl.textContent === next && feedbackEl.hidden === nextHidden)
+      return;
     feedbackEl.textContent = next;
     feedbackEl.hidden = nextHidden;
   };
@@ -118,7 +141,10 @@ if (!root) {
     const hash = url.hash || '';
     const current = `${window.location.pathname}${window.location.search}${window.location.hash}`;
 
-    if (!tagKey || (availableTagKeys.size > 0 && !availableTagKeys.has(tagKey))) {
+    if (
+      !tagKey ||
+      (availableTagKeys.size > 0 && !availableTagKeys.has(tagKey))
+    ) {
       const fallback = `${url.pathname}${search ? `?${search}` : ''}${hash}`;
       if (fallback !== current) {
         window.history.replaceState({}, '', fallback);
@@ -142,7 +168,9 @@ if (!root) {
   const syncSections = (hasActiveFilter: boolean) => {
     if (!sections.length) return;
     for (const section of sections) {
-      const sectionItems = Array.from(section.querySelectorAll<HTMLElement>('[data-entry-item]'));
+      const sectionItems = Array.from(
+        section.querySelectorAll<HTMLElement>('[data-entry-item]')
+      );
       const hasVisible = sectionItems.some((el) => !el.hidden);
       section.hidden = hasActiveFilter && !hasVisible;
     }
@@ -154,7 +182,10 @@ if (!root) {
   let hoverCloseTimer: number | null = null;
   let hoverPreviewActive = false;
   const hoverPreviewMedia = window.matchMedia(HOVER_PREVIEW_MEDIA_QUERY);
-  const filterRunner = createDebouncedAsyncRunner(() => applyFilter(), FILTER_DEBOUNCE_MS);
+  const filterRunner = createDebouncedAsyncRunner(
+    () => applyFilter(),
+    FILTER_DEBOUNCE_MS
+  );
 
   const isSearchOpen = () => searchRoot?.classList.contains('is-open') ?? false;
   const supportsHoverPreview = () => hoverPreviewMedia.matches;
@@ -186,7 +217,9 @@ if (!root) {
     setSearchOpen(false);
   };
 
-  const openSearchInteractive = (options: { focusInput?: boolean; preloadIndex?: boolean } = {}) => {
+  const openSearchInteractive = (
+    options: { focusInput?: boolean; preloadIndex?: boolean } = {}
+  ) => {
     clearHoverCloseTimer();
     hoverPreviewActive = false;
     setSearchOpen(true);
@@ -221,12 +254,18 @@ if (!root) {
       return `${totalMatches} matches under tag #${activeTagLabel}`;
     }
     if (query) {
-      return totalMatches === 0 ? 'No matches found' : `${totalMatches} matches total`;
+      return totalMatches === 0
+        ? 'No matches found'
+        : `${totalMatches} matches total`;
     }
     return '';
   };
 
-  const updateStatusForMatches = (query: string, totalMatches: number, visibleMatches: number) => {
+  const updateStatusForMatches = (
+    query: string,
+    totalMatches: number,
+    visibleMatches: number
+  ) => {
     const prefix = getStatusPrefix(query, totalMatches);
     if (!prefix) {
       setStatus('');
@@ -245,7 +284,9 @@ if (!root) {
       setStatus(`${prefix} (no results on current page, try other pages)`);
       return;
     }
-    setStatus(`${prefix} (${visibleMatches} on this page, more on other pages)`);
+    setStatus(
+      `${prefix} (${visibleMatches} on this page, more on other pages)`
+    );
   };
 
   const scheduleApplyFilter = (delay = FILTER_DEBOUNCE_MS) => {
@@ -278,15 +319,22 @@ if (!root) {
       indexHay = new Map(
         data.map((item) => [
           item.slug,
-          buildSearchHaystack([item.title, item.description, item.tags, item.text])
+          buildSearchHaystack([
+            item.title,
+            item.description,
+            item.tags,
+            item.text,
+          ]),
         ])
       );
-      indexTagKeys = new Map(data.map((item) => [item.slug, getTagKeys(item.tags)]));
+      indexTagKeys = new Map(
+        data.map((item) => [item.slug, getTagKeys(item.tags)])
+      );
       setStatus('');
     },
     onRejected: () => {
       setDegradedMode();
-    }
+    },
   });
 
   const loadIndex = () => indexLoader.load();
@@ -338,7 +386,11 @@ if (!root) {
     if (url.searchParams.get('picker') !== 'tag') return;
     url.searchParams.delete('picker');
     const next = `${url.pathname}${url.search}${url.hash}`;
-    if (`${window.location.pathname}${window.location.search}${window.location.hash}` === next) return;
+    if (
+      `${window.location.pathname}${window.location.search}${window.location.hash}` ===
+      next
+    )
+      return;
     window.history.replaceState({}, '', next);
   };
 

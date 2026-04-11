@@ -1,6 +1,6 @@
 ---
-title: "Life Notes"
-subtitle: "Light Never Wasted"
+title: 'Life Notes'
+subtitle: 'Light Never Wasted'
 date: 2026-01-10
 draft: false
 ---
@@ -46,6 +46,7 @@ Started night running after it turned cool, same long street every time. Streetl
 ### Evening by the River
 
 Sat by the river in the evening, someone playing music in the distance. Light wind, water surface with scattered light. Sat until dark before heading back.
+
 <figure class="figure">
   <img src="/images/memo/demo-memo-01.webp" alt="Figure caption example image 1" />
   <figcaption class="figure-caption">Figure caption example: This is the image description text.</figcaption>
@@ -64,7 +65,6 @@ Weekend trip to a nearby small town, had local breakfast. Brought back a few pos
 ### First Snow
 
 First snow fell very lightly, streets were very quiet. Stood by the window watching for a long time.
-
 
 ### Book Corner
 

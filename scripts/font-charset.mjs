@@ -7,7 +7,7 @@ const BASE_CHARSET_PATH = path.join(ROOT, 'tools', 'charset-base.txt');
 
 const ASCII_LETTERS = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
 const ASCII_DIGITS = '0123456789';
-const ASCII_PUNCT = "!\"#$%&'()*+,-./:;<=>?@[\\]^_`{|}~";
+const ASCII_PUNCT = '!"#$%&\'()*+,-./:;<=>?@[\\]^_`{|}~';
 const CJK_PUNCT = '，。！？；：、（）《》〈〉「」『』【】〔〕“”‘’—…·•';
 const EXTRA_SPACES = ' \u00A0\u3000';
 
@@ -16,19 +16,17 @@ const EXTRA_CHARS = [
   ASCII_DIGITS,
   ASCII_PUNCT,
   CJK_PUNCT,
-  EXTRA_SPACES
+  EXTRA_SPACES,
 ].join('');
 
 const SOURCE_DIRS = [
   { dir: path.join(ROOT, 'src', 'content'), exts: new Set(['.md']) },
   { dir: path.join(ROOT, 'src', 'pages'), exts: new Set(['.astro']) },
   { dir: path.join(ROOT, 'src', 'components'), exts: new Set(['.astro']) },
-  { dir: path.join(ROOT, 'src', 'layouts'), exts: new Set(['.astro']) }
+  { dir: path.join(ROOT, 'src', 'layouts'), exts: new Set(['.astro']) },
 ];
 
-const SOURCE_FILES = [
-  path.join(ROOT, 'site.config.mjs')
-];
+const SOURCE_FILES = [path.join(ROOT, 'site.config.mjs')];
 
 const charset = new Set();
 
@@ -57,7 +55,7 @@ const collectFiles = async () => {
   for (const source of SOURCE_DIRS) {
     try {
       await walk(source.dir, source.exts, files);
-    } catch (_) {
+    } catch {
       // Ignore missing directories to keep the script portable.
     }
   }
@@ -65,7 +63,7 @@ const collectFiles = async () => {
     try {
       await fs.access(filePath);
       files.push(filePath);
-    } catch (_) {
+    } catch {
       // Ignore missing files to keep the script portable.
     }
   }
@@ -76,7 +74,7 @@ const main = async () => {
   try {
     const baseText = await fs.readFile(BASE_CHARSET_PATH, 'utf8');
     addText(baseText);
-  } catch (_) {
+  } catch {
     // Optional base charset file; ignore if missing.
   }
 
@@ -88,7 +86,9 @@ const main = async () => {
 
   addText(EXTRA_CHARS);
 
-  const sorted = Array.from(charset).sort((a, b) => a.codePointAt(0) - b.codePointAt(0));
+  const sorted = Array.from(charset).sort(
+    (a, b) => a.codePointAt(0) - b.codePointAt(0)
+  );
   await fs.mkdir(path.dirname(OUTPUT_PATH), { recursive: true });
   await fs.writeFile(OUTPUT_PATH, `${sorted.join('')}\n`, 'utf8');
 

@@ -1,9 +1,9 @@
 /**
  * Site Configuration
- * 
+ *
  * This file contains the core site configuration. Edit these values to customize
  * your personal website.
- * 
+ *
  * NOTE: Many settings can also be managed via the Theme Console at /admin
  * when running in development mode (npm run dev).
  */
@@ -29,30 +29,31 @@ if (!hasSiteUrl && process.env.NODE_ENV === 'production') {
 export const site = {
   // Full URL for RSS and SEO
   url: hasSiteUrl ? siteUrl : fallbackSiteUrl,
-  
+
   // Site title (appears in browser tab, RSS, sharing)
   title: 'Astro Themes by Whono',
-  
+
   // Short brand name (appears in sidebar)
   brandTitle: 'Whono',
-  
+
   // Default author name
   author: 'Whono',
-  
+
   // Default author avatar path (relative to public/)
   authorAvatar: 'author/avatar.webp',
-  
+
   // Site description for SEO and social sharing
-  description: 'A minimal Astro theme for writing: lightweight, maintainable, reusable.'
+  description:
+    'A minimal Astro theme for writing: lightweight, maintainable, reusable.',
 };
 
 /**
  * Pagination settings
  * Number of items per page for each content type
  */
-export const PAGE_SIZE_ARCHIVE = 12;  // Items per archive page
-export const PAGE_SIZE_ESSAY = 12;    // Essays per page  
-export const PAGE_SIZE_BITS = 20;     // Bits per page
+export const PAGE_SIZE_ARCHIVE = 12; // Items per archive page
+export const PAGE_SIZE_ESSAY = 12; // Essays per page
+export const PAGE_SIZE_BITS = 20; // Bits per page
 
 // Export URL info for use in other modules
 export { hasSiteUrl, siteUrl };

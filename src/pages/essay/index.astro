@@ -1,6 +1,10 @@
 ---
 import EssayPageView from '../../components/EssayPageView.astro';
-import { getPageSlice, getTotalPages, getVisibleEssays } from '../../lib/content';
+import {
+  getPageSlice,
+  getTotalPages,
+  getVisibleEssays,
+} from '../../lib/content';
 import { PAGE_SIZE_ESSAY } from '../../../site.config.mjs';
 
 const visibleEssays = await getVisibleEssays();

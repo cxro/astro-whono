@@ -1,6 +1,11 @@
 ---
 import ArchivePageView from '../../../components/ArchivePageView.astro';
-import { buildPaginatedPaths, getArchiveEssays, getPageSlice, getTotalPages } from '../../../lib/content';
+import {
+  buildPaginatedPaths,
+  getArchiveEssays,
+  getPageSlice,
+  getTotalPages,
+} from '../../../lib/content';
 import { collectTagSummary } from '../../../lib/tags';
 import { PAGE_SIZE_ARCHIVE } from '../../../../site.config.mjs';
 
@@ -25,7 +30,11 @@ const pageItems = getPageSlice(archiveItems, currentPage, PAGE_SIZE_ARCHIVE);
   currentPage={currentPage}
   totalPages={totalPages}
   currentPath={`/archive/page/${currentPage}/`}
-  prevPath={currentPage === 2 ? '/archive/' : `/archive/page/${currentPage - 1}/`}
-  nextPath={currentPage < totalPages ? `/archive/page/${currentPage + 1}/` : null}
+  prevPath={currentPage === 2
+    ? '/archive/'
+    : `/archive/page/${currentPage - 1}/`}
+  nextPath={currentPage < totalPages
+    ? `/archive/page/${currentPage + 1}/`
+    : null}
   tagSummaries={tagSummaries}
 />

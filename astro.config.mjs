@@ -14,7 +14,15 @@ const getSchemaAttrs = (tagName) => {
 };
 
 const mergeAttrs = (...lists) => Array.from(new Set(lists.flat()));
-const SITEMAP_ROUTE_ROOTS = new Set(['about', 'admin', 'archive', 'bits', 'checks', 'essay', 'memo']);
+const SITEMAP_ROUTE_ROOTS = new Set([
+  'about',
+  'admin',
+  'archive',
+  'bits',
+  'checks',
+  'essay',
+  'memo',
+]);
 
 const normalizeSitemapPathname = (page) => {
   let pathname = '/';
@@ -27,7 +35,9 @@ const normalizeSitemapPathname = (page) => {
 
   const normalizedPathname = pathname.replace(/\/+$/, '') || '/';
   const segments = normalizedPathname.split('/').filter(Boolean);
-  const routeRootIndex = segments.findIndex((segment) => SITEMAP_ROUTE_ROOTS.has(segment));
+  const routeRootIndex = segments.findIndex((segment) =>
+    SITEMAP_ROUTE_ROOTS.has(segment)
+  );
 
   if (routeRootIndex > 0) {
     return `/${segments.slice(routeRootIndex).join('/')}`;
@@ -37,13 +47,14 @@ const normalizeSitemapPathname = (page) => {
 };
 
 const isExcludedSitemapPathname = (pathname) =>
-  pathname === '/admin'
-  || pathname === '/checks'
-  || pathname.startsWith('/checks/')
-  || pathname === '/bits/draft-dialog'
-  || /^\/essay\/[^/]+$/.test(pathname);
+  pathname === '/admin' ||
+  pathname === '/checks' ||
+  pathname.startsWith('/checks/') ||
+  pathname === '/bits/draft-dialog' ||
+  /^\/essay\/[^/]+$/.test(pathname);
 
-const isExcludedSitemapEntry = (page) => isExcludedSitemapPathname(normalizeSitemapPathname(page));
+const isExcludedSitemapEntry = (page) =>
+  isExcludedSitemapPathname(normalizeSitemapPathname(page));
 
 const sanitizeSchema = {
   ...defaultSchema,
@@ -60,12 +71,12 @@ const sanitizeSchema = {
     'button',
     'svg',
     'path',
-    'rect'
+    'rect',
   ],
   attributes: {
     ...(defaultSchema.attributes ?? {}),
     '*': [
-      ...((defaultSchema.attributes?.['*'] ?? [])),
+      ...(defaultSchema.attributes?.['*'] ?? []),
       'className',
       'class',
       'id',
@@ -83,17 +94,40 @@ const sanitizeSchema = {
       'data-icon',
       'data-lang',
       'data-lines',
-      'data-state'
+      'data-state',
     ],
     a: mergeAttrs(getSchemaAttrs('a'), ['target', 'rel']),
-    img: mergeAttrs(getSchemaAttrs('img'), ['loading', 'decoding', 'width', 'height']),
-    source: mergeAttrs(getSchemaAttrs('source'), ['srcset', 'srcSet', 'type', 'media', 'sizes']),
+    img: mergeAttrs(getSchemaAttrs('img'), [
+      'loading',
+      'decoding',
+      'width',
+      'height',
+    ]),
+    source: mergeAttrs(getSchemaAttrs('source'), [
+      'srcset',
+      'srcSet',
+      'type',
+      'media',
+      'sizes',
+    ]),
     ul: [['className', 'gallery', 'cols-2', 'cols-3', 'contains-task-list']],
     figure: [['className', 'figure']],
     figcaption: [['className', 'figure-caption']],
-    div: mergeAttrs(getSchemaAttrs('div'), ['dataIcon', 'dataLang', 'dataLines', 'data-icon', 'data-lang', 'data-lines']),
+    div: mergeAttrs(getSchemaAttrs('div'), [
+      'dataIcon',
+      'dataLang',
+      'dataLines',
+      'data-icon',
+      'data-lang',
+      'data-lines',
+    ]),
     p: mergeAttrs(getSchemaAttrs('p'), ['dataIcon', 'data-icon']),
-    pre: mergeAttrs(getSchemaAttrs('pre'), ['dataLang', 'dataLines', 'data-lang', 'data-lines']),
+    pre: mergeAttrs(getSchemaAttrs('pre'), [
+      'dataLang',
+      'dataLines',
+      'data-lang',
+      'data-lines',
+    ]),
     code: mergeAttrs(getSchemaAttrs('code'), ['dataLang', 'data-lang']),
     button: mergeAttrs(getSchemaAttrs('button'), [
       'type',
@@ -102,7 +136,7 @@ const sanitizeSchema = {
       'ariaLabel',
       'aria-label',
       'dataState',
-      'data-state'
+      'data-state',
     ]),
     svg: [
       ...getSchemaAttrs('svg'),
@@ -114,7 +148,7 @@ const sanitizeSchema = {
       'strokeWidth',
       'strokeLinecap',
       'strokeLinejoin',
-      'ariaHidden'
+      'ariaHidden',
     ],
     path: [
       ...getSchemaAttrs('path'),
@@ -123,29 +157,32 @@ const sanitizeSchema = {
       'stroke',
       'strokeWidth',
       'strokeLinecap',
-      'strokeLinejoin'
+      'strokeLinejoin',
     ],
-    rect: [...getSchemaAttrs('rect'), 'x', 'y', 'rx', 'ry', 'width', 'height']
-  }
+    rect: [...getSchemaAttrs('rect'), 'x', 'y', 'rx', 'ry', 'width', 'height'],
+  },
 };
 
 export default defineConfig({
   // Required for RSS generation. Prefer SITE_URL; fallback keeps build passing.
   site: site.url,
-  // DEV 使用 server output 允许 Theme Console 的 /api/admin/settings/ 处理读写；
-  // 构建阶段回到 static，让 /admin/ 保持只读提示，并避免把该路径当作生产公开 API。
+  // Development uses server output so the Theme Console /api/admin/settings/ route
+  // can handle reads and writes; production switches back to static so /admin/ is
+  // read-only and the route is not treated as a public production API.
   output: process.env.NODE_ENV === 'production' ? 'static' : 'server',
-  integrations: hasSiteUrl ? [sitemap({ filter: (page) => !isExcludedSitemapEntry(page) })] : [],
+  integrations: hasSiteUrl
+    ? [sitemap({ filter: (page) => !isExcludedSitemapEntry(page) })]
+    : [],
   trailingSlash: 'always',
   build: {
-    inlineStylesheets: 'auto'
+    inlineStylesheets: 'auto',
   },
   vite: {
     resolve: {
       alias: {
-        '@': fileURLToPath(new URL('./src', import.meta.url))
-      }
-    }
+        '@': fileURLToPath(new URL('./src', import.meta.url)),
+      },
+    },
   },
   markdown: {
     remarkPlugins: [remarkDirective, remarkCallout],
@@ -153,9 +190,9 @@ export default defineConfig({
     shikiConfig: {
       themes: {
         light: 'github-light',
-        dark: 'github-dark'
+        dark: 'github-dark',
       },
-      transformers: [shikiToolbar()]
-    }
-  }
+      transformers: [shikiToolbar()],
+    },
+  },
 });

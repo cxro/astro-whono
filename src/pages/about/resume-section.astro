@@ -13,16 +13,19 @@ const { pdfUrl } = Astro.props;
 
 <section class="resume-section" aria-labelledby="resume-heading">
   <h2 id="resume-heading" class="section-title">Resume</h2>
-  
+
   <div class="resume-intro">
-    <p>Download my resume: 
-      {pdfUrl ? (
-        <a href={pdfUrl} download class="resume-download">
-          <span>Download PDF</span>
-        </a>
-      ) : (
-        <span class="resume-download--placeholder">PDF coming soon</span>
-      )}
+    <p>
+      Download my resume:
+      {
+        pdfUrl ? (
+          <a href={pdfUrl} download class="resume-download">
+            <span>Download PDF</span>
+          </a>
+        ) : (
+          <span class="resume-download--placeholder">PDF coming soon</span>
+        )
+      }
     </p>
   </div>
 
@@ -40,7 +43,7 @@ const { pdfUrl } = Astro.props;
     <!-- Experience Section -->
     <section class="resume-block">
       <h3 class="resume-block__title">Experience</h3>
-      
+
       <div class="resume-item">
         <div class="resume-item__header">
           <h4 class="resume-item__title">Job Title</h4>
@@ -52,14 +55,14 @@ const { pdfUrl } = Astro.props;
           <li>Another achievement</li>
         </ul>
       </div>
-      
+
       <!-- Add more experience items as needed -->
     </section>
 
     <!-- Education Section -->
     <section class="resume-block">
       <h3 class="resume-block__title">Education</h3>
-      
+
       <div class="resume-item">
         <div class="resume-item__header">
           <h4 class="resume-item__title">Degree Name</h4>
@@ -72,7 +75,7 @@ const { pdfUrl } = Astro.props;
     <!-- Skills Section -->
     <section class="resume-block">
       <h3 class="resume-block__title">Skills</h3>
-      
+
       <div class="skills-list">
         <!-- Add your skills here -->
         <span class="skill-tag">Skill 1</span>
@@ -168,12 +171,12 @@ const { pdfUrl } = Astro.props;
   }
 
   /* Dark mode support */
-  :global([data-theme="dark"]) .resume-download,
-  :global([data-theme="dark"]) .skill-tag {
+  :global([data-theme='dark']) .resume-download,
+  :global([data-theme='dark']) .skill-tag {
     background: var(--color-bg-secondary-dark, #2a2a2a);
   }
 
-  :global([data-theme="dark"]) .resume-block__title {
+  :global([data-theme='dark']) .resume-block__title {
     border-color: var(--color-border-dark, #333);
   }
 </style>

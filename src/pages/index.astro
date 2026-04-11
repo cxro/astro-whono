@@ -5,19 +5,35 @@ import EntryListItem from '../components/EntryListItem.astro';
 import '../styles/home.css';
 import {
   ADMIN_HOME_INTRO_LINK_DEFAULT,
-  getAdminHomeIntroLinkOption
+  getAdminHomeIntroLinkOption,
 } from '../lib/admin-console/shared';
-import { getEssayDerivedText, getEssaySlug, getVisibleEssays } from '../lib/content';
-import { getThemeSettings, getVisibleArticleMetaTags } from '../lib/theme-settings';
+import {
+  getEssayDerivedText,
+  getEssaySlug,
+  getVisibleEssays,
+} from '../lib/content';
+import {
+  getThemeSettings,
+  getVisibleArticleMetaTags,
+} from '../lib/theme-settings';
 import { createWithBase } from '../utils/format';
 
 const base = import.meta.env.BASE_URL ?? '/';
 const withBase = createWithBase(base);
 const {
   settings: {
-    home: { introLead, introMore, introMoreLinks, showIntroLead, showIntroMore, heroPresetId, heroImageSrc, heroImageAlt },
-    ui: { articleMeta }
-  }
+    home: {
+      introLead,
+      introMore,
+      introMoreLinks,
+      showIntroLead,
+      showIntroMore,
+      heroPresetId,
+      heroImageSrc,
+      heroImageAlt,
+    },
+    ui: { articleMeta },
+  },
 } = getThemeSettings();
 const shouldShowHero = heroPresetId !== 'none';
 const shouldShowIntro = showIntroLead || showIntroMore;
@@ -25,13 +41,13 @@ const homeBodyClass = [
   'home',
   !shouldShowHero ? 'home--no-hero' : null,
   !shouldShowIntro ? 'home--no-intro' : null,
-  !shouldShowHero && !shouldShowIntro ? 'home--compact-start' : null
+  !shouldShowHero && !shouldShowIntro ? 'home--compact-start' : null,
 ]
   .filter(Boolean)
   .join(' ');
-const resolvedIntroMoreLinks = (introMoreLinks.length ? introMoreLinks : [...ADMIN_HOME_INTRO_LINK_DEFAULT]).map(
-  (linkKey) => getAdminHomeIntroLinkOption(linkKey)
-);
+const resolvedIntroMoreLinks = (
+  introMoreLinks.length ? introMoreLinks : [...ADMIN_HOME_INTRO_LINK_DEFAULT]
+).map((linkKey) => getAdminHomeIntroLinkOption(linkKey));
 
 const latest = (await getVisibleEssays()).slice(0, 12);
 
@@ -48,45 +64,45 @@ const HOME_HEAD_CRITICAL_FONT_FACES = [
     family: 'LXGW WenKai Lite',
     fileName: 'lxgw-wenkai-lite-latin.woff2',
     weight: 400,
-    unicodeRange: 'U+0000-00FF, U+2000-206F, U+3000-303F, U+FF00-FFEF'
+    unicodeRange: 'U+0000-00FF, U+2000-206F, U+3000-303F, U+FF00-FFEF',
   },
   {
     family: 'LXGW WenKai Lite',
     fileName: 'lxgw-wenkai-lite-cjk-common.woff2',
     weight: 400,
-    unicodeRange: 'U+4E00-9FFF'
+    unicodeRange: 'U+4E00-9FFF',
   },
   {
     family: 'Noto Serif SC',
     fileName: 'noto-serif-sc-400-latin.woff2',
     weight: 400,
-    unicodeRange: 'U+0000-00FF, U+2000-206F, U+3000-303F, U+FF00-FFEF'
+    unicodeRange: 'U+0000-00FF, U+2000-206F, U+3000-303F, U+FF00-FFEF',
   },
   {
     family: 'Noto Serif SC',
     fileName: 'noto-serif-sc-400-cjk-common.woff2',
     weight: 400,
-    unicodeRange: 'U+4E00-9FFF'
+    unicodeRange: 'U+4E00-9FFF',
   },
   {
     family: 'Noto Serif SC',
     fileName: 'noto-serif-sc-600-latin.woff2',
     weight: 600,
-    unicodeRange: 'U+0000-00FF, U+2000-206F, U+3000-303F, U+FF00-FFEF'
+    unicodeRange: 'U+0000-00FF, U+2000-206F, U+3000-303F, U+FF00-FFEF',
   },
   {
     family: 'Noto Serif SC',
     fileName: 'noto-serif-sc-600-cjk-common.woff2',
     weight: 600,
-    unicodeRange: 'U+4E00-9FFF'
-  }
+    unicodeRange: 'U+4E00-9FFF',
+  },
 ] as const satisfies readonly HomeHeadCriticalFontFace[];
 
 const renderHomeHeadCriticalFontFace = ({
   family,
   fileName,
   weight,
-  unicodeRange
+  unicodeRange,
 }: HomeHeadCriticalFontFace): string => String.raw`@font-face {
   font-family: "${family}";
   src: url("${withBase(`/fonts/${fileName}`)}") format("woff2");
@@ -97,7 +113,9 @@ const renderHomeHeadCriticalFontFace = ({
 }`;
 
 const homeHeadCriticalCss = [
-  HOME_HEAD_CRITICAL_FONT_FACES.map(renderHomeHeadCriticalFontFace).join('\n\n'),
+  HOME_HEAD_CRITICAL_FONT_FACES.map(renderHomeHeadCriticalFontFace).join(
+    '\n\n'
+  ),
   String.raw`
 
 :root {
@@ -612,7 +630,7 @@ body[data-reading="immersive"] .reader-toggle .icon-book-open {
       calc(36px + env(safe-area-inset-bottom)) calc(var(--pad-x) + env(safe-area-inset-left));
   }
 }
-`
+`,
 ].join('\n\n');
 ---
 
@@ -637,7 +655,7 @@ body[data-reading="immersive"] .reader-toggle .icon-book-open {
             {resolvedIntroMoreLinks.map((link, index) => (
               <>
                 {' '}
-                {index > 0 && <>或{' '}</>}
+                {index > 0 && <>或 </>}
                 {index === resolvedIntroMoreLinks.length - 1 ? (
                   <span class="intro__link-tail">
                     <a href={withBase(link.href)}>{link.label}</a>
@@ -657,20 +675,22 @@ body[data-reading="immersive"] .reader-toggle .icon-book-open {
   <h2 class="section-title section-title--index">索引</h2>
 
   <div class="list">
-    {latest.map((entry) => {
-      const slug = getEssaySlug(entry);
-      const href = withBase(`/archive/${slug}/`);
-      const visibleTags = getVisibleArticleMetaTags(entry.data.tags, 'home');
-      return (
-        <EntryListItem
-          href={href}
-          title={entry.data.title}
-          date={entry.data.date}
-          visibleTags={visibleTags}
-          articleMetaSettings={articleMeta}
-          excerpt={getEssayDerivedText(entry).excerpt}
-        />
-      );
-    })}
+    {
+      latest.map((entry) => {
+        const slug = getEssaySlug(entry);
+        const href = withBase(`/archive/${slug}/`);
+        const visibleTags = getVisibleArticleMetaTags(entry.data.tags, 'home');
+        return (
+          <EntryListItem
+            href={href}
+            title={entry.data.title}
+            date={entry.data.date}
+            visibleTags={visibleTags}
+            articleMetaSettings={articleMeta}
+            excerpt={getEssayDerivedText(entry).excerpt}
+          />
+        );
+      })
+    }
   </div>
 </BaseLayout>

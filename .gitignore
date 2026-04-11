@@ -26,6 +26,11 @@ Thumbs.db
 
 # Misc
 *.tsbuildinfo
+.eslintcache
+
+# Test outputs
+test-results/
+playwright-report/
 
 # Font sources (local only)
 tools/fonts-src/

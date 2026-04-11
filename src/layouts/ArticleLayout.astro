@@ -18,7 +18,7 @@ const {
   prev,
   next,
   articleMetaSettings,
-  visibleTags = []
+  visibleTags = [],
 } = Astro.props as {
   entry: EssayEntry;
   prev: ArticleNeighborLink | null;
@@ -34,22 +34,24 @@ const ogImage = coverImage ?? defaultImage;
 const derivedText = getEssayDerivedText(entry);
 const rawDescription = entry?.data?.description?.trim?.() ?? '';
 const description = rawDescription || truncateText(derivedText.excerpt, 90);
-const activeNavId: SidebarNavId = entry?.data?.archive === false ? 'essay' : 'archive';
-const articleReadingStats = articleMetaSettings.showWordCount || articleMetaSettings.showReadingTime
-  ? (() => {
-      const wordCount = derivedText.plainText.replace(/\s+/g, '').length;
-      return {
-        wordCount,
-        readingMinutes: Math.max(1, Math.ceil(wordCount / 320))
-      };
-    })()
-  : { wordCount: 0, readingMinutes: 0 };
+const activeNavId: SidebarNavId =
+  entry?.data?.archive === false ? 'essay' : 'archive';
+const articleReadingStats =
+  articleMetaSettings.showWordCount || articleMetaSettings.showReadingTime
+    ? (() => {
+        const wordCount = derivedText.plainText.replace(/\s+/g, '').length;
+        return {
+          wordCount,
+          readingMinutes: Math.max(1, Math.ceil(wordCount / 320)),
+        };
+      })()
+    : { wordCount: 0, readingMinutes: 0 };
 const numberFormatter = new Intl.NumberFormat('zh-CN');
-const shouldShowMetaLine = articleMetaSettings.showDate
-  || (articleMetaSettings.showTags && visibleTags.length > 0)
-  || articleMetaSettings.showWordCount
-  || articleMetaSettings.showReadingTime;
-
+const shouldShowMetaLine =
+  articleMetaSettings.showDate ||
+  (articleMetaSettings.showTags && visibleTags.length > 0) ||
+  articleMetaSettings.showWordCount ||
+  articleMetaSettings.showReadingTime;
 ---
 
 <BaseLayout
@@ -61,10 +63,15 @@ const shouldShowMetaLine = articleMetaSettings.showDate
   activeNavId={activeNavId}
 >
   <Fragment slot="head">
-    <meta property="article:published_time" content={entry.data.date.toISOString()} />
-    {entryTags.map((tag: string) => (
-      <meta property="article:tag" content={tag} />
-    ))}
+    <meta
+      property="article:published_time"
+      content={entry.data.date.toISOString()}
+    />
+    {
+      entryTags.map((tag: string) => (
+        <meta property="article:tag" content={tag} />
+      ))
+    }
   </Fragment>
   <div class="article-header reader-exit-anchor">
     <h1 class="page-title">{entry.data.title}</h1>
@@ -79,61 +86,77 @@ const shouldShowMetaLine = articleMetaSettings.showDate
     >
       <Icon name="reader-exit" class="icon" />
     </button>
-    {shouldShowMetaLine ? (
-      <div class="meta-line meta-line--items">
-        {articleMetaSettings.showDate ? (
-          <span class="meta-line__item">
-            {articleMetaSettings.dateLabel ? `${articleMetaSettings.dateLabel}` : ''}{formatISODateUtc(entry.data.date)}
-          </span>
-        ) : null}
-        {articleMetaSettings.showTags && visibleTags.length ? (
-          <span class="meta-line__item meta-line__item--tags">
-            {visibleTags.map((tag) => (
-              <span class="tag">#{tag}</span>
-            ))}
-          </span>
-        ) : null}
-        {articleMetaSettings.showWordCount ? (
-          <span class="meta-line__item meta-line__item--desktop-meta">
-            共 {numberFormatter.format(articleReadingStats.wordCount)} 字
-          </span>
-        ) : null}
-        {articleMetaSettings.showReadingTime ? (
-          <span class="meta-line__item meta-line__item--desktop-meta">
-            约 {numberFormatter.format(articleReadingStats.readingMinutes)} 分钟
-          </span>
-        ) : null}
-      </div>
-    ) : null}
+    {
+      shouldShowMetaLine ? (
+        <div class="meta-line meta-line--items">
+          {articleMetaSettings.showDate ? (
+            <span class="meta-line__item">
+              {articleMetaSettings.dateLabel
+                ? `${articleMetaSettings.dateLabel}`
+                : ''}
+              {formatISODateUtc(entry.data.date)}
+            </span>
+          ) : null}
+          {articleMetaSettings.showTags && visibleTags.length ? (
+            <span class="meta-line__item meta-line__item--tags">
+              {visibleTags.map((tag) => (
+                <span class="tag">#{tag}</span>
+              ))}
+            </span>
+          ) : null}
+          {articleMetaSettings.showWordCount ? (
+            <span class="meta-line__item meta-line__item--desktop-meta">
+              共 {numberFormatter.format(articleReadingStats.wordCount)} 字
+            </span>
+          ) : null}
+          {articleMetaSettings.showReadingTime ? (
+            <span class="meta-line__item meta-line__item--desktop-meta">
+              约 {numberFormatter.format(articleReadingStats.readingMinutes)}{' '}
+              分钟
+            </span>
+          ) : null}
+        </div>
+      ) : null
+    }
   </div>
 
   <div class="prose">
     <slot />
   </div>
-  {(prev || next) ? (
-    <nav class="prev-next" aria-label="上一篇/下一篇">
-      <div class="prev-next__item">
-        {prev ? (
-          <a class="prev-next__link prev-next__link--prev" href={prev.href} rel="prev">
-            <span class="prev-next__label">上一篇</span>
-            <span class="prev-next__title">{prev.title}</span>
-          </a>
-        ) : (
-          <span class="prev-next__placeholder" aria-hidden="true"></span>
-        )}
-      </div>
-      <div class="prev-next__item">
-        {next ? (
-          <a class="prev-next__link prev-next__link--next" href={next.href} rel="next">
-            <span class="prev-next__label">下一篇</span>
-            <span class="prev-next__title">{next.title}</span>
-          </a>
-        ) : (
-          <span class="prev-next__placeholder" aria-hidden="true"></span>
-        )}
-      </div>
-    </nav>
-  ) : null}
+  {
+    prev || next ? (
+      <nav class="prev-next" aria-label="上一篇/下一篇">
+        <div class="prev-next__item">
+          {prev ? (
+            <a
+              class="prev-next__link prev-next__link--prev"
+              href={prev.href}
+              rel="prev"
+            >
+              <span class="prev-next__label">上一篇</span>
+              <span class="prev-next__title">{prev.title}</span>
+            </a>
+          ) : (
+            <span class="prev-next__placeholder" aria-hidden="true" />
+          )}
+        </div>
+        <div class="prev-next__item">
+          {next ? (
+            <a
+              class="prev-next__link prev-next__link--next"
+              href={next.href}
+              rel="next"
+            >
+              <span class="prev-next__label">下一篇</span>
+              <span class="prev-next__title">{next.title}</span>
+            </a>
+          ) : (
+            <span class="prev-next__placeholder" aria-hidden="true" />
+          )}
+        </div>
+      </nav>
+    ) : null
+  }
 
   <Lightbox
     id="lightbox"
@@ -144,7 +167,10 @@ const shouldShowMetaLine = articleMetaSettings.showDate
   />
 
   <script>
-    import { initArticleLightbox, initCodeCopyButtons } from '../scripts/lightbox';
+    import {
+      initArticleLightbox,
+      initCodeCopyButtons,
+    } from '../scripts/lightbox';
 
     initCodeCopyButtons();
     initArticleLightbox({
@@ -152,7 +178,7 @@ const shouldShowMetaLine = articleMetaSettings.showDate
       containerSelector: '.prose',
       enableZoom: false,
       enablePan: false,
-      enableSwipeDownClose: false
+      enableSwipeDownClose: false,
     });
   </script>
 </BaseLayout>

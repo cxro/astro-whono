@@ -20,13 +20,15 @@ export default function remarkCallout() {
       node.data.hName = 'div';
       node.data.hProperties = {
         ...(node.data.hProperties || {}),
-        className: ['callout', type]
+        className: ['callout', type],
       };
 
       if (!Array.isArray(node.children) || node.children.length === 0) return;
 
       const labelIndex = node.children.findIndex((child) => {
-        return child?.type === 'paragraph' && child?.data?.directiveLabel === true;
+        return (
+          child?.type === 'paragraph' && child?.data?.directiveLabel === true
+        );
       });
 
       if (labelIndex === -1) return;
@@ -42,7 +44,7 @@ export default function remarkCallout() {
       labelNode.data.hName = 'p';
       labelNode.data.hProperties = {
         ...(labelNode.data.hProperties || {}),
-        className: ['callout-title']
+        className: ['callout-title'],
       };
     });
   };

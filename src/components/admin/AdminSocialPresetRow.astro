@@ -20,7 +20,11 @@ const visibilityLabel = `Hide ${row.label}`;
 const removeLabel = `${row.label} is a fixed item and cannot be removed`;
 ---
 
-<article class="admin-social-row admin-social-row--preset" data-social-preset-row data-social-preset-id={row.id}>
+<article
+  class="admin-social-row admin-social-row--preset"
+  data-social-preset-row
+  data-social-preset-id={row.id}
+>
   <label class="admin-field admin-social-field admin-social-field--order">
     <span class="admin-social-cell-label">Position</span>
     <span class="admin-social-order-frame">
@@ -39,7 +43,9 @@ const removeLabel = `${row.label} is a fixed item and cannot be removed`;
     </span>
   </label>
 
-  <div class="admin-field admin-social-field admin-social-field--platform admin-social-field--static">
+  <div
+    class="admin-field admin-social-field admin-social-field--platform admin-social-field--static"
+  >
     <span class="admin-social-cell-label">Platform</span>
     <input
       class="admin-social-static-input"
@@ -51,7 +57,9 @@ const removeLabel = `${row.label} is a fixed item and cannot be removed`;
     />
   </div>
 
-  <div class="admin-field admin-social-field admin-social-field--id admin-social-field--static">
+  <div
+    class="admin-field admin-social-field admin-social-field--id admin-social-field--static"
+  >
     <span class="admin-social-cell-label">Link ID</span>
     <input
       class="admin-social-static-input admin-social-static-input--code"
@@ -63,7 +71,9 @@ const removeLabel = `${row.label} is a fixed item and cannot be removed`;
     />
   </div>
 
-  <div class="admin-social-field admin-social-field--icon admin-social-field--static">
+  <div
+    class="admin-social-field admin-social-field--icon admin-social-field--static"
+  >
     <span class="admin-social-cell-label">Icon</span>
     <div class="admin-social-icon-preview">
       <span class="admin-social-icon-only">
@@ -73,7 +83,9 @@ const removeLabel = `${row.label} is a fixed item and cannot be removed`;
   </div>
 
   <label class="admin-field admin-social-field admin-social-field--href">
-    <span class="admin-social-cell-label">{row.id === 'email' ? 'Email Address' : 'Link URL'}</span>
+    <span class="admin-social-cell-label"
+      >{row.id === 'email' ? 'Email Address' : 'Link URL'}</span
+    >
     <input
       id={row.inputId}
       data-social-preset-field="href"
@@ -84,7 +96,9 @@ const removeLabel = `${row.label} is a fixed item and cannot be removed`;
     />
   </label>
 
-  <div class="admin-field admin-social-field admin-social-field--actions admin-social-field--static">
+  <div
+    class="admin-field admin-social-field admin-social-field--actions admin-social-field--static"
+  >
     <span class="admin-social-cell-label">Actions</span>
     <div class="admin-social-row-actions">
       <button

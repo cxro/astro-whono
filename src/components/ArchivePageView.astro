@@ -4,7 +4,12 @@ import TagFilterHeader from './TagFilterHeader.astro';
 import { createWithBase, getEssaySlug, type EssayEntry } from '../lib/content';
 import { getTagPath, type TagSummary } from '../lib/tags';
 import { getThemeSettings } from '../lib/theme-settings';
-import { formatISODateUtc, formatMonthDayUtc, groupByUtcYear, joinPageSubtitleText } from '../utils/format';
+import {
+  formatISODateUtc,
+  formatMonthDayUtc,
+  groupByUtcYear,
+  joinPageSubtitleText,
+} from '../utils/format';
 
 const {
   currentPage,
@@ -15,7 +20,7 @@ const {
   prevPath = null,
   resultCount,
   tagSummaries,
-  totalPages
+  totalPages,
 } = Astro.props as {
   currentPage: number;
   currentPath: string;
@@ -31,38 +36,44 @@ const {
 const base = import.meta.env.BASE_URL ?? '/';
 const withBase = createWithBase(base);
 const {
-  settings: {
-    page
-  }
+  settings: { page },
 } = getThemeSettings();
 
 const pageTitleText = page.archive.title || '归档';
-const pageTitleParts = [pageTitleText, currentTag ? `#${currentTag.label}` : null, currentPage > 1 ? `第 ${currentPage} 页` : null]
-  .filter(Boolean);
+const pageTitleParts = [
+  pageTitleText,
+  currentTag ? `#${currentTag.label}` : null,
+  currentPage > 1 ? `第 ${currentPage} 页` : null,
+].filter(Boolean);
 const pageTitle = pageTitleParts.join(' · ');
 const subtitleText = joinPageSubtitleText(
   page.archive.subtitle,
   `共 ${resultCount} 篇内容`,
   totalPages > 1 ? `第 ${currentPage} / ${totalPages} 页` : null
 );
-const pageDescription = joinPageSubtitleText(
-  currentTag ? `归档标签 #${currentTag.label}` : `${pageTitleText}列表`,
-  page.archive.subtitle,
-  `共 ${resultCount} 篇内容`,
-  totalPages > 1 ? `第 ${currentPage} / ${totalPages} 页` : null
-) ?? `${pageTitleText}列表`;
+const pageDescription =
+  joinPageSubtitleText(
+    currentTag ? `归档标签 #${currentTag.label}` : `${pageTitleText}列表`,
+    page.archive.subtitle,
+    `共 ${resultCount} 篇内容`,
+    totalPages > 1 ? `第 ${currentPage} / ${totalPages} 页` : null
+  ) ?? `${pageTitleText}列表`;
 const groups = groupByUtcYear(items, (entry) => entry.data.date);
 const scopeRootPath = '/archive/';
 const fallbackListId = 'archive-tag-list';
 const tagOptions = tagSummaries.map((tagSummary) => ({
   ...tagSummary,
-  href: withBase(currentTag?.key === tagSummary.key ? currentPath : getTagPath('archive', tagSummary.key)),
-  isActive: currentTag?.key === tagSummary.key
+  href: withBase(
+    currentTag?.key === tagSummary.key
+      ? currentPath
+      : getTagPath('archive', tagSummary.key)
+  ),
+  isActive: currentTag?.key === tagSummary.key,
 }));
 const currentTagState = currentTag
   ? {
       clearHref: withBase(scopeRootPath),
-      label: currentTag.label
+      label: currentTag.label,
     }
   : null;
 ---
@@ -90,43 +101,61 @@ const currentTagState = currentTag
     />
   </div>
 
-  {groups.map((group) => (
-    <section data-entry-section>
-      <h2 class="archive-year">{group.year}</h2>
-      <div class="archive-list">
-        {group.list.map((entry) => {
-          const slug = getEssaySlug(entry);
-          const href = withBase(`/archive/${slug}/`);
-          const tag = currentTag?.label ?? entry.data.tags?.[0];
-          return (
-            <div class="archive-row" data-entry-item data-slug={slug}>
-              <div class="archive-title">
-                <a href={href}>{entry.data.title}</a>
-              </div>
-              <div class="archive-meta">
-                <div class="archive-date">
-                  <span class="archive-date-md">{formatMonthDayUtc(entry.data.date)}</span>
-                  <span class="archive-date-full">{formatISODateUtc(entry.data.date)}</span>
+  {
+    groups.map((group) => (
+      <section data-entry-section>
+        <h2 class="archive-year">{group.year}</h2>
+        <div class="archive-list">
+          {group.list.map((entry) => {
+            const slug = getEssaySlug(entry);
+            const href = withBase(`/archive/${slug}/`);
+            const tag = currentTag?.label ?? entry.data.tags?.[0];
+            return (
+              <div class="archive-row" data-entry-item data-slug={slug}>
+                <div class="archive-title">
+                  <a href={href}>{entry.data.title}</a>
                 </div>
-                {tag ? <div class="archive-tag">#{tag}</div> : null}
+                <div class="archive-meta">
+                  <div class="archive-date">
+                    <span class="archive-date-md">
+                      {formatMonthDayUtc(entry.data.date)}
+                    </span>
+                    <span class="archive-date-full">
+                      {formatISODateUtc(entry.data.date)}
+                    </span>
+                  </div>
+                  {tag ? <div class="archive-tag">#{tag}</div> : null}
+                </div>
               </div>
-            </div>
-          );
-        })}
-      </div>
-    </section>
-  ))}
+            );
+          })}
+        </div>
+      </section>
+    ))
+  }
 
-  {totalPages > 1 ? (
-    <nav class="pagination" aria-label={`${pageTitleText}分页`}>
-      <div class="pagination__inner">
-        {prevPath ? <a class="pagination__link" rel="prev" href={withBase(prevPath)}>上一页</a> : null}
-        {nextPath ? (
-          <a class="pagination__link pagination__link--next" rel="next" href={withBase(nextPath)}>下一页</a>
-        ) : null}
-      </div>
-    </nav>
-  ) : null}
+  {
+    totalPages > 1 ? (
+      <nav class="pagination" aria-label={`${pageTitleText}分页`}>
+        <div class="pagination__inner">
+          {prevPath ? (
+            <a class="pagination__link" rel="prev" href={withBase(prevPath)}>
+              上一页
+            </a>
+          ) : null}
+          {nextPath ? (
+            <a
+              class="pagination__link pagination__link--next"
+              rel="next"
+              href={withBase(nextPath)}
+            >
+              下一页
+            </a>
+          ) : null}
+        </div>
+      </nav>
+    ) : null
+  }
 
   <script>
     import '../scripts/entry-search.ts';

@@ -10,11 +10,7 @@ interface Props {
   src?: string | null;
 }
 
-const {
-  alt = 'Whono theme preview',
-  isLCP = false,
-  src = null
-} = Astro.props;
+const { alt = 'Whono theme preview', isLCP = false, src = null } = Astro.props;
 
 const heroAssets = import.meta.glob<{ default: ImageMetadata }>(
   '../assets/**/*.{avif,gif,jpeg,jpg,png,webp}',
@@ -24,7 +20,8 @@ const heroAssets = import.meta.glob<{ default: ImageMetadata }>(
 const base = import.meta.env.BASE_URL ?? '/';
 const withBase = createWithBase(base);
 
-const normalizedAlt = typeof alt === 'string' && alt.trim() ? alt.trim() : 'Whono theme preview';
+const normalizedAlt =
+  typeof alt === 'string' && alt.trim() ? alt.trim() : 'Whono theme preview';
 const normalizedSrc = normalizeHeroImageSrc(src) ?? null;
 
 const resolveHeroAssetKey = (value: string | null): string | null => {
@@ -43,7 +40,6 @@ const resolvedImgSrc = normalizedSrc
       ? withBase(normalizedSrc)
       : normalizedSrc
   : null;
-
 ---
 
 {

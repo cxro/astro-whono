@@ -1,4 +1,8 @@
-import { createWithBase, normalizeBitsAvatarPath, toSafeHttpUrl } from '../utils/format';
+import {
+  createWithBase,
+  normalizeBitsAvatarPath,
+  toSafeHttpUrl,
+} from '../utils/format';
 
 type Tone = 'info' | 'error' | 'success';
 type ToolbarSnapshot = { value: string; start: number; end: number };
@@ -26,9 +30,12 @@ let cachedController: BitsDraftController | null = null;
 const base = import.meta.env.BASE_URL ?? '/';
 const withBase = createWithBase(base);
 
-const query = <T extends Element>(root: ParentNode | null, selector: string) => root?.querySelector<T>(selector) ?? null;
-const queryAll = <T extends Element>(root: ParentNode | null, selector: string) =>
-  Array.from(root?.querySelectorAll<T>(selector) ?? []);
+const query = <T extends Element>(root: ParentNode | null, selector: string) =>
+  root?.querySelector<T>(selector) ?? null;
+const queryAll = <T extends Element>(
+  root: ParentNode | null,
+  selector: string
+) => Array.from(root?.querySelectorAll<T>(selector) ?? []);
 
 const pad2 = (value: number) => String(value).padStart(2, '0');
 
@@ -61,7 +68,8 @@ const splitTags = (value: string) =>
     )
   );
 
-const squashTagSpaces = (value: string) => value.replace(/，/g, ',').replace(/\s{2,}/g, ' ');
+const squashTagSpaces = (value: string) =>
+  value.replace(/，/g, ',').replace(/\s{2,}/g, ' ');
 
 const escapeYamlDoubleQuoted = (value: string) =>
   value.replace(/[\n\r\t"\\]/g, (char) => {
@@ -82,9 +90,12 @@ const escapeYamlDoubleQuoted = (value: string) =>
   });
 
 const quoteYaml = (value: string) =>
-  /[:#\n\r\t\\]|^\s|\s$|^-/.test(value) ? `"${escapeYamlDoubleQuoted(value)}"` : value;
+  /[:#\n\r\t\\]|^\s|\s$|^-/.test(value)
+    ? `"${escapeYamlDoubleQuoted(value)}"`
+    : value;
 
-const toSafeDocumentHttpUrl = (value: string) => toSafeHttpUrl(value, window.location.href);
+const toSafeDocumentHttpUrl = (value: string) =>
+  toSafeHttpUrl(value, window.location.href);
 
 const normalizeImageSrc = (value: string) => {
   const trimmed = value.trim();
@@ -107,14 +118,17 @@ const resolvePreviewSrc = (value: string) => {
 };
 
 const normalizeAuthorName = (value: string) => value.trim();
-const normalizeAuthorAvatar = (value: string) => normalizeBitsAvatarPath(value) ?? '';
+const normalizeAuthorAvatar = (value: string) =>
+  normalizeBitsAvatarPath(value) ?? '';
 const resolveAuthorAvatarPreviewSrc = (value: string) => {
   const normalized = normalizeAuthorAvatar(value);
   return normalized ? toSafeDocumentHttpUrl(withBase(normalized)) : '';
 };
 
 export const initBitsDraft = (): BitsDraftController | null => {
-  const dialog = document.getElementById('bits-draft-dialog') as HTMLDialogElement | null;
+  const dialog = document.getElementById(
+    'bits-draft-dialog'
+  ) as HTMLDialogElement | null;
   if (!dialog) return null;
   if (cachedController?.dialog === dialog) return cachedController;
 
@@ -123,14 +137,29 @@ export const initBitsDraft = (): BitsDraftController | null => {
 
   const form = query<HTMLFormElement>(dialog, '[data-bits-draft-form]');
   const closeBtns = queryAll<HTMLElement>(dialog, '[data-bits-draft-close]');
-  const generateBtn = query<HTMLButtonElement>(dialog, '[data-bits-draft-generate]');
-  const downloadBtn = query<HTMLButtonElement>(dialog, '[data-bits-draft-download]');
+  const generateBtn = query<HTMLButtonElement>(
+    dialog,
+    '[data-bits-draft-generate]'
+  );
+  const downloadBtn = query<HTMLButtonElement>(
+    dialog,
+    '[data-bits-draft-download]'
+  );
   const statusEl = query<HTMLElement>(dialog, '[data-bits-draft-status]');
-  const manualOpenBtn = query<HTMLButtonElement>(dialog, '[data-bits-manual-open]');
+  const manualOpenBtn = query<HTMLButtonElement>(
+    dialog,
+    '[data-bits-manual-open]'
+  );
   const manualBox = query<HTMLElement>(dialog, '[data-bits-manual]');
-  const manualTextarea = query<HTMLTextAreaElement>(dialog, '[data-bits-manual-textarea]');
+  const manualTextarea = query<HTMLTextAreaElement>(
+    dialog,
+    '[data-bits-manual-textarea]'
+  );
   const manualNote = query<HTMLElement>(dialog, '[data-bits-manual-note]');
-  const manualCopyBtn = query<HTMLButtonElement>(dialog, '[data-bits-manual-copy]');
+  const manualCopyBtn = query<HTMLButtonElement>(
+    dialog,
+    '[data-bits-manual-copy]'
+  );
   const toolbar = query<HTMLElement>(dialog, '[data-bits-draft-toolbar]');
   const quoteBtn = query<HTMLButtonElement>(toolbar, '[data-action="quote"]');
   const listBtn = query<HTMLButtonElement>(toolbar, '[data-action="list"]');
@@ -142,21 +171,31 @@ export const initBitsDraft = (): BitsDraftController | null => {
   const tagsEl = query<HTMLInputElement>(dialog, '#bits-draft-tags');
   const placeEl = query<HTMLInputElement>(dialog, '#bits-draft-place');
   const authorNameEl = query<HTMLInputElement>(dialog, '[data-author-name]');
-  const authorAvatarEl = query<HTMLInputElement>(dialog, '[data-author-avatar]');
+  const authorAvatarEl = query<HTMLInputElement>(
+    dialog,
+    '[data-author-avatar]'
+  );
   const identityPanel = query<HTMLElement>(dialog, '[data-identity-panel]');
   const identityBar = query<HTMLElement>(dialog, '[data-identity-bar]');
   const identityPill = query<HTMLButtonElement>(dialog, '[data-identity-pill]');
   const identityNew = query<HTMLButtonElement>(dialog, '[data-identity-new]');
   const identityNameEl = query<HTMLElement>(dialog, '[data-identity-name]');
   const identityAvatarEl = query<HTMLElement>(dialog, '[data-identity-avatar]');
-  const authorResetBtn = query<HTMLButtonElement>(dialog, '[data-author-reset]');
+  const authorResetBtn = query<HTMLButtonElement>(
+    dialog,
+    '[data-author-reset]'
+  );
   const imagesWrap = query<HTMLElement>(dialog, '[data-bits-images]');
   const imageAddBtn = query<HTMLButtonElement>(dialog, '[data-bits-image-add]');
-  const imageTemplate = query<HTMLTemplateElement>(dialog, '[data-bits-image-template]');
+  const imageTemplate = query<HTMLTemplateElement>(
+    dialog,
+    '[data-bits-image-template]'
+  );
   const draftEl = query<HTMLInputElement>(dialog, '#bits-draft-draft');
 
   let lastOpenTrigger: HTMLElement | null = null;
-  let lastIdentityTrigger: HTMLButtonElement | null = identityPill ?? identityNew ?? null;
+  let lastIdentityTrigger: HTMLButtonElement | null =
+    identityPill ?? identityNew ?? null;
   let lastMarkdown = '';
   let hasGenerated = false;
   let lastEditSource: 'typing' | 'toolbar' = 'typing';
@@ -217,11 +256,16 @@ export const initBitsDraft = (): BitsDraftController | null => {
     return {
       line: value.slice(lineStart, lineEnd),
       lineStart,
-      lineEnd
+      lineEnd,
     };
   };
 
-  const isWrappedBy = (before: string, after: string, start: number, end: number) => {
+  const isWrappedBy = (
+    before: string,
+    after: string,
+    start: number,
+    end: number
+  ) => {
     if (!contentEl) return false;
     const value = contentEl.value;
     const left = value.lastIndexOf(before, start);
@@ -291,13 +335,19 @@ export const initBitsDraft = (): BitsDraftController | null => {
     listBtn?.classList.toggle('is-active', listActive);
   };
 
-  const wrapSelection = (before: string, after: string, placeholder: string) => {
+  const wrapSelection = (
+    before: string,
+    after: string,
+    placeholder: string
+  ) => {
     if (!contentEl) return;
     focusTextarea();
     const start = contentEl.selectionStart ?? 0;
     const end = contentEl.selectionEnd ?? 0;
     const hasSelection = start !== end;
-    const selected = hasSelection ? contentEl.value.slice(start, end) : placeholder;
+    const selected = hasSelection
+      ? contentEl.value.slice(start, end)
+      : placeholder;
     const next = `${before}${selected}${after}`;
     contentEl.setRangeText(next, start, end, 'select');
     const innerStart = start + before.length;
@@ -375,7 +425,10 @@ export const initBitsDraft = (): BitsDraftController | null => {
   };
 
   const setAuthorPlaceholders = () => {
-    if (authorNameEl) authorNameEl.placeholder = defaultAuthorName ? `Default: ${defaultAuthorName}` : 'Default: Anonymous';
+    if (authorNameEl)
+      authorNameEl.placeholder = defaultAuthorName
+        ? `Default: ${defaultAuthorName}`
+        : 'Default: Anonymous';
     if (authorAvatarEl) {
       authorAvatarEl.placeholder = defaultAuthorAvatar
         ? `Default: ${defaultAuthorAvatar}`
@@ -414,7 +467,8 @@ export const initBitsDraft = (): BitsDraftController | null => {
     const authorName = normalizeAuthorName(authorNameEl?.value ?? '');
     const authorAvatar = normalizeAuthorAvatar(authorAvatarEl?.value ?? '');
     const displayName = authorName || defaultAuthorName || 'Anonymous';
-    const label = !authorName && !authorAvatar ? `${displayName} (current)` : displayName;
+    const label =
+      !authorName && !authorAvatar ? `${displayName} (current)` : displayName;
     if (identityNameEl) identityNameEl.textContent = label;
     const avatarSrc = authorAvatar || defaultAuthorAvatar;
     const fallback = Array.from(displayName)[0] ?? 'A';
@@ -428,7 +482,10 @@ export const initBitsDraft = (): BitsDraftController | null => {
     identityNew?.setAttribute('aria-expanded', String(isOpen));
   };
 
-  const setIdentityPanelOpen = (open: boolean, trigger: HTMLButtonElement | null = null) => {
+  const setIdentityPanelOpen = (
+    open: boolean,
+    trigger: HTMLButtonElement | null = null
+  ) => {
     if (!identityPanel) return;
     if (trigger) lastIdentityTrigger = trigger;
     identityPanel.hidden = !open;
@@ -456,12 +513,14 @@ export const initBitsDraft = (): BitsDraftController | null => {
   };
 
   const handleIdentityToggleKey = (event: KeyboardEvent) => {
-    if (event.key !== 'Escape' || !identityPanel || identityPanel.hidden) return;
+    if (event.key !== 'Escape' || !identityPanel || identityPanel.hidden)
+      return;
     event.preventDefault();
     closeIdentityPanel();
   };
 
-  const getImageRows = () => queryAll<HTMLElement>(imagesWrap, '[data-bits-image-row]');
+  const getImageRows = () =>
+    queryAll<HTMLElement>(imagesWrap, '[data-bits-image-row]');
 
   const getImageRowRefs = (row: HTMLElement): ImageRowRefs | null => {
     const srcEl = query<HTMLInputElement>(row, '[data-bits-image-src]');
@@ -652,12 +711,17 @@ export const initBitsDraft = (): BitsDraftController | null => {
     const authorName = normalizeAuthorName(authorNameEl?.value ?? '');
     const authorAvatar = normalizeBitsAvatarPath(authorAvatarEl?.value ?? '');
     if (authorAvatar === undefined) {
-      setStatus('Author avatar only accepts relative image paths (e.g. author/avatar.webp), without public/, without leading /, and no URLs, .., ?, #.', 'error');
+      setStatus(
+        'Author avatar only accepts relative image paths (e.g. author/avatar.webp), without public/, without leading /, and no URLs, .., ?, #.',
+        'error'
+      );
       authorAvatarEl?.focus();
       return null;
     }
-    const customAuthorName = authorName && authorName !== defaultAuthorName ? authorName : '';
-    const customAuthorAvatar = authorAvatar && authorAvatar !== defaultAuthorAvatar ? authorAvatar : '';
+    const customAuthorName =
+      authorName && authorName !== defaultAuthorName ? authorName : '';
+    const customAuthorAvatar =
+      authorAvatar && authorAvatar !== defaultAuthorAvatar ? authorAvatar : '';
     const hasCustomAuthor = !!customAuthorName || !!customAuthorAvatar;
 
     const lines = ['---', `date: ${formatDateLocal()}`];
@@ -671,8 +735,10 @@ export const initBitsDraft = (): BitsDraftController | null => {
 
     if (hasCustomAuthor) {
       lines.push('author:');
-      if (customAuthorName) lines.push(`  name: ${quoteYaml(customAuthorName)}`);
-      if (customAuthorAvatar) lines.push(`  avatar: ${quoteYaml(customAuthorAvatar)}`);
+      if (customAuthorName)
+        lines.push(`  name: ${quoteYaml(customAuthorName)}`);
+      if (customAuthorAvatar)
+        lines.push(`  avatar: ${quoteYaml(customAuthorAvatar)}`);
     }
 
     if (draftEl?.checked) {
@@ -703,7 +769,10 @@ export const initBitsDraft = (): BitsDraftController | null => {
 
   const openDialog = (options: BitsDraftOpenOptions = {}) => {
     lastOpenTrigger =
-      options.opener ?? (document.activeElement instanceof HTMLElement ? document.activeElement : lastOpenTrigger);
+      options.opener ??
+      (document.activeElement instanceof HTMLElement
+        ? document.activeElement
+        : lastOpenTrigger);
     if (dialog.open) return;
     clearStatus();
     hideManualCopy();
@@ -823,7 +892,8 @@ export const initBitsDraft = (): BitsDraftController | null => {
   });
 
   contentEl?.addEventListener('keydown', (event) => {
-    const isUndo = (event.ctrlKey || event.metaKey) && event.key.toLowerCase() === 'z';
+    const isUndo =
+      (event.ctrlKey || event.metaKey) && event.key.toLowerCase() === 'z';
     if (!isUndo) return;
     if (lastEditSource !== 'toolbar' || toolbarUndoStack.length === 0) return;
     event.preventDefault();
@@ -864,7 +934,9 @@ export const initBitsDraft = (): BitsDraftController | null => {
     manualTextarea.select();
     const copied = await tryClipboardCopy(manualTextarea.value);
     if (manualNote) {
-      manualNote.textContent = copied ? 'Draft copied.' : 'Text selected, press ⌘C / Ctrl+C to copy.';
+      manualNote.textContent = copied
+        ? 'Draft copied.'
+        : 'Text selected, press ⌘C / Ctrl+C to copy.';
     }
   });
 
@@ -961,7 +1033,7 @@ export const initBitsDraft = (): BitsDraftController | null => {
   cachedController = {
     dialog,
     open: openDialog,
-    close: closeDialog
+    close: closeDialog,
   };
 
   return cachedController;

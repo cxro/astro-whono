@@ -16,16 +16,18 @@ pre:is(.astro-code, .shiki) span {
 }
 
 /* token 颜色映射（仅在存在 Shiki 变量时启用） */
-pre:is(.astro-code, .shiki) span[style*="--shiki-light"] {
+pre:is(.astro-code, .shiki) span[style*='--shiki-light'] {
   color: var(--shiki-light) !important;
 }
 
-:root[data-theme="dark"] pre:is(.astro-code, .shiki) span[style*="--shiki-dark"] {
+:root[data-theme='dark']
+  pre:is(.astro-code, .shiki)
+  span[style*='--shiki-dark'] {
   color: var(--shiki-dark) !important;
 }
 
 /* 暗色模式兜底：纯文本代码块可能无 token span，需强制基础文字色 */
-:root[data-theme="dark"] pre:is(.astro-code, .shiki) {
+:root[data-theme='dark'] pre:is(.astro-code, .shiki) {
   color: var(--shiki-dark, var(--text)) !important;
 }
 
@@ -85,11 +87,14 @@ pre:is(.astro-code, .shiki) span[style*="--shiki-light"] {
   pointer-events: none;
 }
 
-body[data-code-line-numbers="off"] .prose pre:is(.astro-code, .shiki) .line::before {
+body[data-code-line-numbers='off']
+  .prose
+  pre:is(.astro-code, .shiki)
+  .line::before {
   content: none;
 }
 
-body[data-code-line-numbers="off"] .prose pre:is(.astro-code, .shiki) .line {
+body[data-code-line-numbers='off'] .prose pre:is(.astro-code, .shiki) .line {
   padding-left: 0;
 }
 
@@ -151,7 +156,9 @@ body[data-code-line-numbers="off"] .prose pre:is(.astro-code, .shiki) .line {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  transition: color 0.2s ease, background-color 0.2s ease;
+  transition:
+    color 0.2s ease,
+    background-color 0.2s ease;
 }
 
 .code-block .code-copy:disabled {
@@ -179,11 +186,11 @@ body[data-code-line-numbers="off"] .prose pre:is(.astro-code, .shiki) .line {
   display: none;
 }
 
-.code-block .code-copy[data-state="copied"] .icon-copy {
+.code-block .code-copy[data-state='copied'] .icon-copy {
   display: none;
 }
 
-.code-block .code-copy[data-state="copied"] .icon-check {
+.code-block .code-copy[data-state='copied'] .icon-check {
   display: block;
 }
 
@@ -195,7 +202,10 @@ body[data-code-line-numbers="off"] .prose pre:is(.astro-code, .shiki) .line {
   display: inline-block;
   color: var(--muted);
   opacity: 0.8;
-  transition: color 0.2s ease, opacity 0.2s ease, filter 0.2s ease;
+  transition:
+    color 0.2s ease,
+    opacity 0.2s ease,
+    filter 0.2s ease;
 }
 
 /* 彩色图标：默认灰度化，hover 恢复 */

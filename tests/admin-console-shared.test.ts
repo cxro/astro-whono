@@ -4,7 +4,7 @@ import {
   createAdminThemeSettingsCanonicalMismatchIssues,
   getAdminNavOrderIssues,
   getAdminSocialOrderIssues,
-  validateAdminThemeSettings
+  validateAdminThemeSettings,
 } from '../src/lib/admin-console/shared';
 import { getEditableThemeSettingsPayload } from '../src/lib/theme-settings';
 import {
@@ -13,22 +13,22 @@ import {
   getHeroImageLocalFilePath,
   normalizeBitsAvatarPath,
   normalizeHeroImageSrc,
-  tokenizeSearchQuery
+  tokenizeSearchQuery,
 } from '../src/utils/format';
 
 describe('admin-console/shared', () => {
   it('reports duplicate and range issues for social orders', () => {
     expect(
-      getAdminSocialOrderIssues(
-        { github: 1, x: 1, email: 99 },
-        [{ key: 'custom-1', order: 2 }, { key: 'custom-2', order: 2 }]
-      )
+      getAdminSocialOrderIssues({ github: 1, x: 1, email: 99 }, [
+        { key: 'custom-1', order: 2 },
+        { key: 'custom-2', order: 2 },
+      ])
     ).toEqual([
       { type: 'duplicate', scope: 'preset', key: 'github', order: 1 },
       { type: 'duplicate', scope: 'preset', key: 'x', order: 1 },
       { type: 'range', scope: 'preset', key: 'email', order: 99 },
       { type: 'duplicate', scope: 'custom', key: 'custom-1', order: 2 },
-      { type: 'duplicate', scope: 'custom', key: 'custom-2', order: 2 }
+      { type: 'duplicate', scope: 'custom', key: 'custom-2', order: 2 },
     ]);
   });
 
@@ -37,44 +37,75 @@ describe('admin-console/shared', () => {
       getAdminNavOrderIssues([
         { key: 'essay', order: 1 },
         { key: 'bits', order: 1 },
-        { key: 'memo', order: 0 }
+        { key: 'memo', order: 0 },
       ])
     ).toEqual([
       { type: 'duplicate', key: 'essay', order: 1 },
       { type: 'duplicate', key: 'bits', order: 1 },
-      { type: 'range', key: 'memo', order: 0 }
+      { type: 'range', key: 'memo', order: 0 },
     ]);
   });
 
   it('normalizes valid hero image sources and rejects invalid local paths', () => {
-    expect(normalizeHeroImageSrc('@/assets/hero/cover.webp')).toBe('src/assets/hero/cover.webp');
-    expect(normalizeHeroImageSrc('public/images/hero.png')).toBe('/images/hero.png');
-    expect(normalizeHeroImageSrc('https://example.com/hero.avif')).toBe('https://example.com/hero.avif');
+    expect(normalizeHeroImageSrc('@/assets/hero/cover.webp')).toBe(
+      'src/assets/hero/cover.webp'
+    );
+    expect(normalizeHeroImageSrc('public/images/hero.png')).toBe(
+      '/images/hero.png'
+    );
+    expect(normalizeHeroImageSrc('https://example.com/hero.avif')).toBe(
+      'https://example.com/hero.avif'
+    );
     expect(normalizeHeroImageSrc('/images/hero.png?size=2')).toBeUndefined();
     expect(normalizeHeroImageSrc('../hero.png')).toBeUndefined();
-    expect(getHeroImageLocalFilePath('src/assets/hero/cover.webp')).toBe('src/assets/hero/cover.webp');
-    expect(getHeroImageLocalFilePath('/images/hero.png')).toBe('public/images/hero.png');
+    expect(getHeroImageLocalFilePath('src/assets/hero/cover.webp')).toBe(
+      'src/assets/hero/cover.webp'
+    );
+    expect(getHeroImageLocalFilePath('/images/hero.png')).toBe(
+      'public/images/hero.png'
+    );
   });
 
   it('normalizes bits avatar paths and rejects invalid values', () => {
-    expect(normalizeBitsAvatarPath(' author/avatar.webp ')).toBe('author/avatar.webp');
+    expect(normalizeBitsAvatarPath(' author/avatar.webp ')).toBe(
+      'author/avatar.webp'
+    );
     expect(normalizeBitsAvatarPath('')).toBe('');
     expect(normalizeBitsAvatarPath('/author/avatar.webp')).toBeUndefined();
-    expect(normalizeBitsAvatarPath('public/author/avatar.webp')).toBeUndefined();
-    expect(normalizeBitsAvatarPath('https://example.com/avatar.webp')).toBeUndefined();
+    expect(
+      normalizeBitsAvatarPath('public/author/avatar.webp')
+    ).toBeUndefined();
+    expect(
+      normalizeBitsAvatarPath('https://example.com/avatar.webp')
+    ).toBeUndefined();
     expect(normalizeBitsAvatarPath('author/avatar.webp?v=2')).toBeUndefined();
-    expect(getBitsAvatarLocalFilePath('author/avatar.webp')).toBe('public/author/avatar.webp');
+    expect(getBitsAvatarLocalFilePath('author/avatar.webp')).toBe(
+      'public/author/avatar.webp'
+    );
   });
 
   it('tokenizes search query and builds normalized haystack text', () => {
-    expect(tokenizeSearchQuery(' Astro   主题  astro ')).toEqual(['astro', '主题']);
+    expect(tokenizeSearchQuery(' Astro   主题  astro ')).toEqual([
+      'astro',
+      '主题',
+    ]);
     expect(
-      buildSearchHaystack([' Title ', ' Description ', ['TagA', ' TagB '], '', null, 'Body'])
+      buildSearchHaystack([
+        ' Title ',
+        ' Description ',
+        ['TagA', ' TagB '],
+        '',
+        null,
+        'Body',
+      ])
     ).toBe('title description taga tagb body');
   });
 
   it('canonicalizes admin settings snapshots and reports contract mismatches', () => {
-    const raw = structuredClone(getEditableThemeSettingsPayload().settings) as Record<string, any>;
+    const raw = structuredClone(
+      getEditableThemeSettingsPayload().settings
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    ) as unknown as Record<string, any>;
     raw.site.title = `  ${raw.site.title}  `;
     raw.site.footer.startYear = String(raw.site.footer.startYear);
     raw.site.socialLinks.email = `mailto:${raw.site.socialLinks.email}`;
@@ -85,28 +116,39 @@ describe('admin-console/shared', () => {
         href: 'https://example.com',
         iconKey: 'globe',
         visible: 1,
-        order: '4'
-      }
+        order: '4',
+      },
     ];
     delete raw.page.about.subtitle;
 
     const canonical = canonicalizeAdminThemeSettings(raw, {
       footerStartYearMax: 2030,
-      normalizeCustomSocialLabel: (value, iconKey) => String(value ?? '').trim() || iconKey
+      normalizeCustomSocialLabel: (value, iconKey) =>
+        String(value ?? '').trim() || iconKey,
     });
 
-    expect(canonical.site.title).toBe(getEditableThemeSettingsPayload().settings.site.title);
-    expect(canonical.site.footer.startYear).toBe(getEditableThemeSettingsPayload().settings.site.footer.startYear);
-    expect(canonical.site.socialLinks.email).toBe(getEditableThemeSettingsPayload().settings.site.socialLinks.email);
+    expect(canonical.site.title).toBe(
+      getEditableThemeSettingsPayload().settings.site.title
+    );
+    expect(canonical.site.footer.startYear).toBe(
+      getEditableThemeSettingsPayload().settings.site.footer.startYear
+    );
+    expect(canonical.site.socialLinks.email).toBe(
+      getEditableThemeSettingsPayload().settings.site.socialLinks.email
+    );
     expect(canonical.site.socialLinks.custom[0]).toMatchObject({
       iconKey: 'website',
       label: 'website',
       visible: true,
-      order: 4
+      order: 4,
     });
-    expect(validateAdminThemeSettings(canonical, { footerStartYearMax: 2030 })).toEqual([]);
     expect(
-      createAdminThemeSettingsCanonicalMismatchIssues(raw, canonical).map((issue) => issue.path)
+      validateAdminThemeSettings(canonical, { footerStartYearMax: 2030 })
+    ).toEqual([]);
+    expect(
+      createAdminThemeSettingsCanonicalMismatchIssues(raw, canonical).map(
+        (issue) => issue.path
+      )
     ).toEqual(
       expect.arrayContaining([
         'site.title',
@@ -116,7 +158,7 @@ describe('admin-console/shared', () => {
         'site.socialLinks.custom[0].label',
         'site.socialLinks.custom[0].visible',
         'site.socialLinks.custom[0].order',
-        'page.about.subtitle'
+        'page.about.subtitle',
       ])
     );
   });

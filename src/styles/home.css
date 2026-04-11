@@ -45,11 +45,12 @@
 }
 
 .intro--serif {
-  font-family: "Noto Serif SC", ui-serif, Georgia, "Times New Roman", "Songti SC", serif;
+  font-family:
+    'Noto Serif SC', ui-serif, Georgia, 'Times New Roman', 'Songti SC', serif;
 }
 
 .intro--serif a {
-  font-family: "LXGW WenKai Lite", "Kaiti SC", "STKaiti", serif;
+  font-family: 'LXGW WenKai Lite', 'Kaiti SC', 'STKaiti', serif;
 }
 
 .section-title--index {

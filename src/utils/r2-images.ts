@@ -1,6 +1,6 @@
 /**
  * Cloudflare R2 Image Utilities
- * 
+ *
  * Helper functions for working with images stored in Cloudflare R2.
  * These utilities help with URL building, dimension fetching, and optimization.
  */
@@ -11,7 +11,8 @@ const base = import.meta.env.BASE_URL ?? '/';
 const withBase = createWithBase(base);
 
 // R2 bucket base URL
-export const R2_BASE_URL = 'https://f3269be535874c84e13e71f0d70c37dd.r2.cloudflarestorage.com/shuhanluo-gallery';
+export const R2_BASE_URL =
+  'https://f3269be535874c84e13e71f0d70c37dd.r2.cloudflarestorage.com/shuhanluo-gallery';
 
 /**
  * Builds a full R2 URL from a relative path
@@ -30,12 +31,14 @@ export function buildR2Url(path: string): string {
  * @param url - Image URL
  * @returns Object with width and height, or null if not found
  */
-export function extractDimensionsFromUrl(url: string): { width: number; height: number } | null {
+export function extractDimensionsFromUrl(
+  url: string
+): { width: number; height: number } | null {
   const match = url.match(/[-_](\d+)[x_-](\d+)\.[a-z]+$/i);
   if (match) {
     return {
-      width: parseInt(match[1], 10),
-      height: parseInt(match[2], 10)
+      width: parseInt(match[1]!, 10),
+      height: parseInt(match[2]!, 10),
     };
   }
   return null;
@@ -63,12 +66,12 @@ export function normalizeImageSrc(src: string): string {
   if (src.startsWith('http://') || src.startsWith('https://')) {
     return src;
   }
-  
+
   // If it's an R2 path, build the full URL
   if (!src.startsWith('/')) {
     return buildR2Url(src);
   }
-  
+
   // Otherwise, treat as local path with base
   return withBase(src.replace(/^\/+/, ''));
 }
@@ -80,7 +83,9 @@ export function normalizeImageSrc(src: string): string {
  * @returns True if dimensions are valid
  */
 export function validateDimensions(width: number, height: number): boolean {
-  return Number.isFinite(width) && width > 0 && Number.isFinite(height) && height > 0;
+  return (
+    Number.isFinite(width) && width > 0 && Number.isFinite(height) && height > 0
+  );
 }
 
 /**
@@ -98,7 +103,9 @@ export interface ImageMetadata {
  * @param image - Image metadata object
  * @returns True if valid
  */
-export function validateImageMetadata(image: Partial<ImageMetadata>): image is ImageMetadata {
+export function validateImageMetadata(
+  image: Partial<ImageMetadata>
+): image is ImageMetadata {
   return !!(
     image.src &&
     typeof image.width === 'number' &&

@@ -2,12 +2,13 @@
 import Icon from './Icon.astro';
 import { ADMIN_NAV_ORNAMENT_DEFAULT } from '../lib/admin-console/shared';
 import { createWithBase } from '../utils/format';
-import { getSidebarHref, getThemeSettings, type SidebarNavId } from '../lib/theme-settings';
+import {
+  getSidebarHref,
+  getThemeSettings,
+  type SidebarNavId,
+} from '../lib/theme-settings';
 
-const {
-  siteTitle = 'Whono',
-  activeNavId
-} = Astro.props as {
+const { siteTitle = 'Whono', activeNavId } = Astro.props as {
   siteTitle?: string;
   activeNavId?: SidebarNavId;
 };
@@ -25,58 +26,75 @@ const nav = settings.shell.nav
     id: item.id,
     label: item.label,
     ornament: item.ornament,
-    href: withBase(getSidebarHref(item.id))
+    href: withBase(getSidebarHref(item.id)),
   }));
 const showReaderToggle = settings.ui.readingMode.showEntry;
 ---
 
 <aside class="sidebar">
-  <a class="sidebar__title" href={homeHref} aria-label={`${siteTitle} Home`}>{siteTitle}</a>
+  <a class="sidebar__title" href={homeHref} aria-label={`${siteTitle} Home`}
+    >{siteTitle}</a
+  >
 
   <div class="sidebar__quote">
-    {quote.split('\n').map((line) => (
-      <>
-        {line}<br />
-      </>
-    ))}
+    {
+      quote.split('\n').map((line) => (
+        <>
+          {line}
+          <br />
+        </>
+      ))
+    }
   </div>
 
   <ul class="nav">
-    {nav.map((item) => {
-      const isActive = activeNavId
-        ? item.id === activeNavId
-        : pathname === item.href || (item.href !== homeHref && pathname.startsWith(item.href));
-      return (
-        <li>
-          <a href={item.href} aria-current={isActive ? 'page' : undefined}>
-            <span>{item.label}</span>
-            {item.ornament === ADMIN_NAV_ORNAMENT_DEFAULT ? (
-              <span class="dot" aria-hidden="true"></span>
-            ) : item.ornament ? (
-              <span class="nav-ornament" aria-hidden="true">{item.ornament}</span>
-            ) : null}
-          </a>
-        </li>
-      );
-    })}
+    {
+      nav.map((item) => {
+        const isActive = activeNavId
+          ? item.id === activeNavId
+          : pathname === item.href ||
+            (item.href !== homeHref && pathname.startsWith(item.href));
+        return (
+          <li>
+            <a href={item.href} aria-current={isActive ? 'page' : undefined}>
+              <span>{item.label}</span>
+              {item.ornament === ADMIN_NAV_ORNAMENT_DEFAULT ? (
+                <span class="dot" aria-hidden="true" />
+              ) : item.ornament ? (
+                <span class="nav-ornament" aria-hidden="true">
+                  {item.ornament}
+                </span>
+              ) : null}
+            </a>
+          </li>
+        );
+      })
+    }
   </ul>
 
   <div class="sidebar-actions">
-    {showReaderToggle ? (
-      <button
-        id="reader-toggle"
-        class="icon-button reader-toggle"
-        type="button"
-        aria-label="Reading Mode"
-        aria-pressed="false"
-        title="Reading Mode"
-      >
-        <Icon name="book-open" class="icon icon-book-open" />
-        <Icon name="book-closed" class="icon icon-book-closed" />
-      </button>
-    ) : null}
+    {
+      showReaderToggle ? (
+        <button
+          id="reader-toggle"
+          class="icon-button reader-toggle"
+          type="button"
+          aria-label="Reading Mode"
+          aria-pressed="false"
+          title="Reading Mode"
+        >
+          <Icon name="book-open" class="icon icon-book-open" />
+          <Icon name="book-closed" class="icon icon-book-closed" />
+        </button>
+      ) : null
+    }
 
-    <a class="icon-button rss-link" href={withBase('/archive/rss.xml')} aria-label="RSS Feed" title="RSS Feed">
+    <a
+      class="icon-button rss-link"
+      href={withBase('/archive/rss.xml')}
+      aria-label="RSS Feed"
+      title="RSS Feed"
+    >
       <Icon name="rss" class="icon" />
     </a>
 
@@ -93,4 +111,3 @@ const showReaderToggle = settings.ui.readingMode.showEntry;
     </button>
   </div>
 </aside>
-

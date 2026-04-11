@@ -129,7 +129,11 @@
     padding: 12px 14px;
     border: 1px solid var(--border);
     border-radius: 18px;
-    background: linear-gradient(180deg, var(--bg) 0%, var(--code-content-bg) 100%);
+    background: linear-gradient(
+      180deg,
+      var(--bg) 0%,
+      var(--code-content-bg) 100%
+    );
     box-shadow: 0 20px 40px -34px var(--overlay-35);
   }
 
@@ -186,7 +190,8 @@
     grid-template-columns: 1fr;
   }
 
-  .admin-social-row[data-custom-label-visible='true'] .admin-social-link-inline {
+  .admin-social-row[data-custom-label-visible='true']
+    .admin-social-link-inline {
     grid-template-columns: 1fr;
   }
 

@@ -9,7 +9,7 @@ const { settings } = getThemeSettings();
 
 export async function GET(context) {
   const visibleEssays = await getVisibleEssays({
-    includeDraft: false
+    includeDraft: false,
   });
 
   return rss({
@@ -20,7 +20,7 @@ export async function GET(context) {
       title: entry.data.title,
       pubDate: entry.data.date,
       description: entry.data.description,
-      link: withBase(`/archive/${getEssaySlug(entry)}/`)
-    }))
+      link: withBase(`/archive/${getEssaySlug(entry)}/`),
+    })),
   });
 }

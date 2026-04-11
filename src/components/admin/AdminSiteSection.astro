@@ -7,7 +7,8 @@ interface Props {
   socialCustomLimit: number;
 }
 
-const { footerStartYearMin, footerStartYearMax, socialCustomLimit } = Astro.props;
+const { footerStartYearMin, footerStartYearMax, socialCustomLimit } =
+  Astro.props;
 ---
 
 <fieldset class="admin-group">
@@ -20,7 +21,9 @@ const { footerStartYearMin, footerStartYearMax, socialCustomLimit } = Astro.prop
     <label class="admin-field">
       <span class="admin-label">
         <span class="admin-label__main">Site Title</span>
-        <span class="admin-label__hint">(for browser title / RSS / sharing)</span>
+        <span class="admin-label__hint"
+          >(for browser title / RSS / sharing)</span
+        >
       </span>
       <input id="site-title" type="text" autocomplete="off" />
     </label>
@@ -34,14 +37,17 @@ const { footerStartYearMin, footerStartYearMax, socialCustomLimit } = Astro.prop
     <label class="admin-field admin-field--full">
       <span class="admin-label">
         <span class="admin-label__main">Default SEO Description</span>
-        <span class="admin-label__hint">(used for search results and sharing)</span>
+        <span class="admin-label__hint"
+          >(used for search results and sharing)</span
+        >
       </span>
       <textarea id="site-description" rows="3"></textarea>
     </label>
     <label class="admin-field">
       <span class="admin-label">
         <span class="admin-label__main">Footer Year</span>
-        <span class="admin-label__hint">(end year auto-updates to current)</span>
+        <span class="admin-label__hint">(end year auto-updates to current)</span
+        >
       </span>
       <span class="admin-year-range">
         <input
@@ -74,11 +80,18 @@ const { footerStartYearMin, footerStartYearMax, socialCustomLimit } = Astro.prop
       <span class="admin-label">
         <span class="admin-label__main">Footer Copyright Text</span>
       </span>
-      <input id="site-footer-copyright" type="text" autocomplete="off" aria-describedby="site-footer-preview" />
+      <input
+        id="site-footer-copyright"
+        type="text"
+        autocomplete="off"
+        aria-describedby="site-footer-preview"
+      />
     </label>
     <div class="admin-field admin-field--full">
       <p id="site-footer-preview" class="admin-help">
-        Footer Preview: <code id="site-footer-preview-value">© {footerStartYearMax} Whono · Theme Demo · by cxro</code>
+        Footer Preview: <code id="site-footer-preview-value"
+          >© {footerStartYearMax} Whono · Theme Demo · by cxro</code
+        >
       </p>
     </div>
   </div>

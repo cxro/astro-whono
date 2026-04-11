@@ -33,7 +33,7 @@
   max-width: min(100%, 32rem);
   margin-left: auto;
   margin-right: auto;
-  font-family: "LXGW WenKai Lite","Kaiti SC","STKaiti",serif;
+  font-family: 'LXGW WenKai Lite', 'Kaiti SC', 'STKaiti', serif;
   color: var(--muted);
 }
 

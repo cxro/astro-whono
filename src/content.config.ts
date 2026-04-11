@@ -4,7 +4,10 @@ import { defineCollection } from 'astro:content';
 import { glob } from 'astro/loaders';
 import { z } from 'astro/zod';
 import { ESSAY_PUBLIC_SLUG_RE } from './utils/slug-rules';
-import { getBitsAvatarLocalFilePath, normalizeBitsAvatarPath } from './utils/format';
+import {
+  getBitsAvatarLocalFilePath,
+  normalizeBitsAvatarPath,
+} from './utils/format';
 
 const slugRule = z
   .string()
@@ -19,14 +22,14 @@ const baseFields = {
   archive: z.boolean().default(true),
   // Optional custom permalink. If present, it overrides the default public slug
   // derived from the entry id / path.
-  slug: slugRule.optional()
+  slug: slugRule.optional(),
 };
 
 const bitsImage = z.object({
   src: z.string(),
   width: z.number().int().positive(),
   height: z.number().int().positive(),
-  alt: z.string().optional()
+  alt: z.string().optional(),
 });
 
 const hasProjectFile = (relativePath: string): boolean =>
@@ -39,7 +42,8 @@ const bitsAuthorAvatar = z
     if (normalized === undefined) {
       ctx.addIssue({
         code: 'custom',
-        message: 'author.avatar 只允许相对图片路径（例如 author/avatar.webp），不要带 public/、不要以 / 开头，也不要使用 URL、..、?、#'
+        message:
+          'author.avatar 只允许相对图片路径（例如 author/avatar.webp），不要带 public/、不要以 / 开头，也不要使用 URL、..、?、#',
       });
       return;
     }
@@ -48,7 +52,7 @@ const bitsAuthorAvatar = z
     if (localFilePath && !hasProjectFile(localFilePath)) {
       ctx.addIssue({
         code: 'custom',
-        message: `author.avatar 指向的本地文件不存在：${localFilePath}`
+        message: `author.avatar 指向的本地文件不存在：${localFilePath}`,
       });
     }
   })
@@ -56,7 +60,7 @@ const bitsAuthorAvatar = z
 
 const bitsAuthor = z.object({
   name: z.string().optional(),
-  avatar: bitsAuthorAvatar.optional()
+  avatar: bitsAuthorAvatar.optional(),
 });
 
 const essay = defineCollection({
@@ -64,8 +68,8 @@ const essay = defineCollection({
   schema: z.object({
     ...baseFields,
     cover: z.string().optional(),
-    badge: z.string().optional()
-  })
+    badge: z.string().optional(),
+  }),
 });
 
 const bits = defineCollection({
@@ -81,8 +85,8 @@ const bits = defineCollection({
 
     // Optional media for card display.
     images: z.array(bitsImage).optional(),
-    author: bitsAuthor.optional()
-  })
+    author: bitsAuthor.optional(),
+  }),
 });
 
 const memo = defineCollection({
@@ -92,8 +96,8 @@ const memo = defineCollection({
     subtitle: z.string().optional(),
     date: z.coerce.date().optional(),
     draft: z.boolean().default(false),
-    slug: z.string().optional()
-  })
+    slug: z.string().optional(),
+  }),
 });
 
 export const collections = { essay, bits, memo };

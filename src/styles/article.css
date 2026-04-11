@@ -1,6 +1,6 @@
 /* article.css 聚合正文页专用样式，供 ArticleLayout 与 memo 页面按需加载。 */
-@import "./components/prose.css";
-@import "./components/figure.css";
-@import "./components/callout.css";
-@import "./components/lightbox.css";
-@import "./components/code-block.css";
+@import './components/prose.css';
+@import './components/figure.css';
+@import './components/callout.css';
+@import './components/lightbox.css';
+@import './components/code-block.css';

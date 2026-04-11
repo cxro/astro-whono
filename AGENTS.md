@@ -22,13 +22,13 @@ This document serves as the comprehensive guide for working with this Astro-base
 
 ### Content Type Quick Links
 
-| Content Type | Location | Template | Frequency |
-|--------------|----------|----------|-----------|
-| Essays (thought pieces) | `src/content/essay/` | `src/content/templates/essay-template.md` | Multiple times/week |
-| Photography | `src/content/bits/` | `src/content/templates/bits-photo-template.md` | Multiple times/week |
-| Life notes | `src/content/memo/index.md` | Inline editing | As needed |
-| Projects | `src/data/projects.json` | JSON structure | As needed |
-| Resume | `src/pages/about/resume-section.astro` | Component-based | As needed |
+| Content Type            | Location                               | Template                                       | Frequency           |
+| ----------------------- | -------------------------------------- | ---------------------------------------------- | ------------------- |
+| Essays (thought pieces) | `src/content/essay/`                   | `src/content/templates/essay-template.md`      | Multiple times/week |
+| Photography             | `src/content/bits/`                    | `src/content/templates/bits-photo-template.md` | Multiple times/week |
+| Life notes              | `src/content/memo/index.md`            | Inline editing                                 | As needed           |
+| Projects                | `src/data/projects.json`               | JSON structure                                 | As needed           |
+| Resume                  | `src/pages/about/resume-section.astro` | Component-based                                | As needed           |
 
 ### Essential Commands
 
@@ -42,10 +42,25 @@ npm run build
 # Preview production build
 npm run preview
 
+# Type check
+npm run check
+
 # Run tests
 npm test
 
-# Full CI check
+# Run integration tests
+npm run test:integration
+
+# Run E2E tests
+npm run test:e2e
+
+# Run linter
+npm run lint
+
+# Run formatter
+npm run format
+
+# Full CI pipeline
 npm run ci
 ```
 
@@ -53,9 +68,10 @@ npm run ci
 
 - `site.config.mjs` - Site metadata, author info, page sizes
 - `src/data/settings/*.json` - Theme Console settings (managed via `/admin` in dev)
-- `src/content/config.ts` - Content collection schemas
+- `src/content.config.ts` - Content collection schemas
 - `astro.config.mjs` - Build configuration, integrations
 - `tsconfig.json` - TypeScript configuration
+- `.env.example` - Environment variable template (copy to `.env` for local production checks)
 
 ---
 
@@ -114,23 +130,25 @@ All content is written in Markdown with YAML frontmatter.
 **Steps:**
 
 1. **Create the file:**
+
    ```bash
    # Copy template
    cp src/content/templates/essay-template.md src/content/essay/my-post-title.md
-   
+
    # Or create directly
    touch src/content/essay/my-post-title.md
    ```
 
 2. **Add frontmatter:**
+
    ```yaml
    ---
-   title: "Your Thought Piece Title"
-   description: "Brief description for SEO and social sharing"
+   title: 'Your Thought Piece Title'
+   description: 'Brief description for SEO and social sharing'
    date: 2026-04-10
-   tags: ["career", "reflection", "tech"]
-   draft: false      # Set to true while writing
-   archive: true     # Include in archive listings
+   tags: ['career', 'reflection', 'tech']
+   draft: false # Set to true while writing
+   archive: true # Include in archive listings
    ---
    ```
 
@@ -140,6 +158,7 @@ All content is written in Markdown with YAML frontmatter.
    - See [Markdown Formatting Guide](#markdown-formatting-guide) below
 
 4. **Test locally:**
+
    ```bash
    npm run dev
    # Visit http://localhost:4321/essay/
@@ -153,16 +172,16 @@ All content is written in Markdown with YAML frontmatter.
 
 **Frontmatter Reference:**
 
-| Field | Type | Required | Description |
-|-------|------|----------|-------------|
-| `title` | string | Yes | Article title |
-| `description` | string | No | SEO/meta description |
-| `date` | string | Yes | ISO date (YYYY-MM-DD) |
-| `tags` | string[] | No | Array of tags |
-| `draft` | boolean | No | Hide in production (default: false) |
-| `archive` | boolean | No | Include in archive (default: true) |
-| `slug` | string | No | Custom URL slug |
-| `badge` | string | No | Badge text on list |
+| Field         | Type     | Required | Description                         |
+| ------------- | -------- | -------- | ----------------------------------- |
+| `title`       | string   | Yes      | Article title                       |
+| `description` | string   | No       | SEO/meta description                |
+| `date`        | string   | Yes      | ISO date (YYYY-MM-DD)               |
+| `tags`        | string[] | No       | Array of tags                       |
+| `draft`       | boolean  | No       | Hide in production (default: false) |
+| `archive`     | boolean  | No       | Include in archive (default: true)  |
+| `slug`        | string   | No       | Custom URL slug                     |
+| `badge`       | string   | No       | Badge text on list                  |
 
 ---
 
@@ -178,24 +197,26 @@ All content is written in Markdown with YAML frontmatter.
    - Note the image dimensions (width x height)
 
 2. **Create the Bits file:**
+
    ```bash
    # Filename format: bits-YYYY-MM-DD-HHMM.md
    touch src/content/bits/bits-$(date +%Y-%m-%d-%H%M).md
    ```
 
 3. **Add frontmatter with images:**
+
    ```yaml
    ---
    date: 2026-04-10T14:30:00+08:00
    tags:
-     - "loc:Brooklyn"
+     - 'loc:Brooklyn'
      - photography
      - sunset
    images:
      - src: https://f3269be535874c84e13e71f0d70c37dd.r2.cloudflarestorage.com/shuhanluo-gallery/sunset-brooklyn-2026-04-10.webp
        width: 1200
        height: 800
-       alt: "Sunset over Brooklyn Bridge"
+       alt: 'Sunset over Brooklyn Bridge'
    ---
    ```
 
@@ -214,21 +235,22 @@ All content is written in Markdown with YAML frontmatter.
 
 **Bits Frontmatter Reference:**
 
-| Field | Type | Required | Description |
-|-------|------|----------|-------------|
-| `date` | string | Yes | ISO datetime with timezone |
-| `tags` | string[] | No | Tags, use `loc:Location` for place |
-| `images` | Image[] | No | Array of image objects |
-| `author` | object | No | Override default author |
-| `draft` | boolean | No | Hide in production |
+| Field    | Type     | Required | Description                        |
+| -------- | -------- | -------- | ---------------------------------- |
+| `date`   | string   | Yes      | ISO datetime with timezone         |
+| `tags`   | string[] | No       | Tags, use `loc:Location` for place |
+| `images` | Image[]  | No       | Array of image objects             |
+| `author` | object   | No       | Override default author            |
+| `draft`  | boolean  | No       | Hide in production                 |
 
 **Image Object:**
+
 ```yaml
 images:
-  - src: "https://..."    # Full R2 URL or local path
-    width: 1200           # Required for CLS prevention
-    height: 800           # Required for CLS prevention
-    alt: "Description"    # Accessibility
+  - src: 'https://...' # Full R2 URL or local path
+    width: 1200 # Required for CLS prevention
+    height: 800 # Required for CLS prevention
+    alt: 'Description' # Accessibility
 ```
 
 ---
@@ -240,12 +262,14 @@ images:
 **Steps:**
 
 1. **Edit the projects file:**
+
    ```bash
    # Open in your editor
    code src/data/projects.json
    ```
 
 2. **Add project entry:**
+
    ```json
    {
      "projects": [
@@ -266,14 +290,14 @@ images:
 
 **Project Schema:**
 
-| Field | Type | Required | Description |
-|-------|------|----------|-------------|
-| `title` | string | Yes | Project name |
-| `description` | string | Yes | Short description |
-| `github` | string | Yes | "username/repo" format |
-| `url` | string | No | Live demo URL |
-| `tech` | string[] | No | Technology tags |
-| `featured` | boolean | No | Highlight on page |
+| Field         | Type     | Required | Description            |
+| ------------- | -------- | -------- | ---------------------- |
+| `title`       | string   | Yes      | Project name           |
+| `description` | string   | Yes      | Short description      |
+| `github`      | string   | Yes      | "username/repo" format |
+| `url`         | string   | No       | Live demo URL          |
+| `tech`        | string[] | No       | Technology tags        |
+| `featured`    | boolean  | No       | Highlight on page      |
 
 ---
 
@@ -284,11 +308,13 @@ images:
 **Location:** `src/pages/about/resume-section.astro`
 
 **Current Structure:**
+
 - Static content in the component
 - PDF download placeholder (add your PDF URL when ready)
 - Optional interactive elements
 
 **To Update:**
+
 1. Edit `src/pages/about/resume-section.astro`
 2. Modify sections: Experience, Education, Skills
 3. Add PDF link when available
@@ -305,10 +331,11 @@ images:
 **Location:** `src/content/memo/index.md`
 
 **Format:**
+
 ```markdown
 ---
-title: "Life Notes"
-subtitle: "Subtitle"
+title: 'Life Notes'
+subtitle: 'Subtitle'
 date: 2026-01-10
 draft: false
 ---
@@ -329,6 +356,7 @@ More content...
 ```
 
 **Structure:**
+
 - Use `##` for years
 - Use `###` for individual entries
 - Images work the same as essays
@@ -341,8 +369,8 @@ More content...
 
 ```markdown
 **Bold text**
-*Italic text*
-***Bold italic***
+_Italic text_
+**_Bold italic_**
 ~~Strikethrough~~
 `inline code`
 ```
@@ -351,14 +379,18 @@ More content...
 
 ```markdown
 # H1 (Use once per page - usually the title)
+
 ## H2 (Section headers)
+
 ### H3 (Subsections)
+
 #### H4 (Rarely needed)
 ```
 
 ### Lists
 
 **Unordered:**
+
 ```markdown
 - Item 1
 - Item 2
@@ -367,6 +399,7 @@ More content...
 ```
 
 **Ordered:**
+
 ```markdown
 1. First step
 2. Second step
@@ -374,6 +407,7 @@ More content...
 ```
 
 **Task List:**
+
 ```markdown
 - [x] Completed task
 - [ ] Pending task
@@ -389,11 +423,13 @@ More content...
 ### Images
 
 **Basic:**
+
 ```markdown
 ![Alt text](/path/to/image.webp)
 ```
 
 **With caption (Figure):**
+
 ```markdown
 <figure class="figure">
   <img src="/path/to/image.webp" alt="Description" />
@@ -402,6 +438,7 @@ More content...
 ```
 
 **Gallery:**
+
 ```markdown
 <ul class="gallery">
   <li>
@@ -421,11 +458,13 @@ More content...
 ### Code Blocks
 
 **Inline:**
+
 ```markdown
 Use `npm install` to install dependencies
 ```
 
 **Block with language:**
+
 ````markdown
 ```javascript
 function hello() {
@@ -448,6 +487,7 @@ Supported languages: All languages supported by Shiki (100+)
 ```
 
 **Pullquote variant:**
+
 ```markdown
 <blockquote class="pullquote">
   Standout quote text
@@ -489,7 +529,7 @@ Rest of content only visible on detail page...
 
 ```markdown
 | Column 1 | Column 2 | Column 3 |
-|----------|----------|----------|
+| -------- | -------- | -------- |
 | Cell 1   | Cell 2   | Cell 3   |
 | Cell 4   | Cell 5   | Cell 6   |
 ```
@@ -551,11 +591,13 @@ Rest of content only visible on detail page...
 ### Image URL Formats
 
 **Full R2 URL:**
+
 ```
 https://f3269be535874c84e13e71f0d70c37dd.r2.cloudflarestorage.com/shuhanluo-gallery/path/to/image.webp
 ```
 
 **In Bits frontmatter:**
+
 ```yaml
 images:
   - src: https://f3269be535874c84e13e71f0d70c37dd.r2.cloudflarestorage.com/shuhanluo-gallery/photo.webp
@@ -564,6 +606,7 @@ images:
 ```
 
 **In Essays (Markdown):**
+
 ```markdown
 ![Alt text](https://f3269be535874c84e13e71f0d70c37dd.r2.cloudflarestorage.com/shuhanluo-gallery/photo.webp)
 ```
@@ -571,12 +614,14 @@ images:
 ### Lightbox Feature
 
 Images automatically get lightbox functionality:
+
 - Click images to open full-screen preview
 - Swipe on mobile to navigate
 - Pinch to zoom
 - Keyboard navigation (arrow keys)
 
 Works for:
+
 - Essay inline images
 - Bits photo galleries
 - Memo images
@@ -593,14 +638,15 @@ Colors are defined in CSS custom properties. Main files:
 - `src/styles/theme.css` - Theme-specific overrides
 
 **Key Variables:**
+
 ```css
 :root {
-  --color-bg: #ffffff;           /* Background */
-  --color-text: #1a1a1a;         /* Primary text */
-  --color-text-secondary: #666;  /* Secondary text */
-  --color-link: #0066cc;         /* Links */
-  --color-accent: #ff6b6b;       /* Accent color */
-  
+  --color-bg: #ffffff; /* Background */
+  --color-text: #1a1a1a; /* Primary text */
+  --color-text-secondary: #666; /* Secondary text */
+  --color-link: #0066cc; /* Links */
+  --color-accent: #ff6b6b; /* Accent color */
+
   /* Dark mode */
   --color-bg-dark: #1a1a1a;
   --color-text-dark: #e4e4e4;
@@ -610,32 +656,38 @@ Colors are defined in CSS custom properties. Main files:
 ### Typography
 
 **Fonts:**
+
 - Body: Noto Serif SC (serif)
 - UI/Headings: System sans-serif stack
 - Monospace: System monospace
 
 **Customization:**
+
 - Font sizes: `src/styles/global.css`
 - Line heights: Component-specific CSS
 
 ### Sidebar
 
 Edit via Theme Console (`/admin` in dev) or directly in:
+
 - `src/data/settings/shell.json` - Navigation, quote, brand title
 
 ### Homepage
 
 Edit via Theme Console or:
+
 - `src/data/settings/home.json` - Hero, intro text
 
 ### Adding Motion Animations
 
 **Installation:**
+
 ```bash
 npm install motion
 ```
 
 **Basic Usage:**
+
 ```typescript
 // In a component or script
 import { animate } from 'motion';
@@ -652,23 +704,25 @@ scroll(animate('.progress-bar', { scaleX: [0, 1] }));
 **Common Animation Patterns:**
 
 1. **Page Transition:**
+
    ```typescript
    // src/scripts/page-transition.ts
    import { animate } from 'motion';
-   
+
    document.addEventListener('astro:page-load', () => {
      animate('main', { opacity: [0, 1] }, { duration: 0.3 });
    });
    ```
 
 2. **Scroll Reveal:**
+
    ```typescript
    import { scroll, animate } from 'motion';
-   
+
    document.querySelectorAll('.reveal').forEach((el) => {
      scroll(animate(el, { opacity: [0, 1], y: [20, 0] }), {
        target: el,
-       offset: ['start end', 'center center']
+       offset: ['start end', 'center center'],
      });
    });
    ```
@@ -707,9 +761,29 @@ npm run check
 # Run tests
 npm test
 
+# Run integration tests
+npm run test:integration
+
+# Run E2E tests
+npm run test:e2e
+
+# Run linter
+npm run lint
+
+# Run formatter
+npm run format
+
 # Full CI pipeline
 npm run ci
 ```
+
+### Testing Strategy
+
+The test suite is organized into three tiers:
+
+1. **Unit tests** (`npm test`) — Pure logic tests for tags, theme settings, and admin console utilities.
+2. **Integration tests** (`npm run test:integration`) — Post-build assertions against generated HTML and artifacts (markdown smoke checks, production artifact validation).
+3. **E2E tests** (`npm run test:e2e`) — Browser-level tests using Playwright to verify critical pages and the admin production boundary.
 
 ### Content Management Commands
 
@@ -724,17 +798,11 @@ npm run font:build
 ### Verification Commands
 
 ```bash
-# Check callout rendering
-npm run check:callout
+# Run integration tests (requires build first)
+npm run test:integration
 
-# Check code block rendering
-npm run check:codeblock
-
-# Check figure rendering
-npm run check:figure
-
-# Check gallery rendering
-npm run check:gallery
+# Run E2E tests (starts preview server automatically)
+npm run test:e2e
 
 # Check production artifacts
 SITE_URL=https://your-domain.com npm run check:prod-artifacts
@@ -747,6 +815,7 @@ SITE_URL=https://your-domain.com npm run check:prod-artifacts
 ### Task: Change Site Title
 
 1. Edit `site.config.mjs`:
+
    ```javascript
    export const site = {
      title: 'Your Name',
@@ -762,6 +831,7 @@ SITE_URL=https://your-domain.com npm run check:prod-artifacts
 ### Task: Modify Navigation
 
 1. Edit `src/data/settings/shell.json`:
+
    ```json
    {
      "nav": [
@@ -780,6 +850,7 @@ SITE_URL=https://your-domain.com npm run check:prod-artifacts
 ### Task: Update Footer Copyright
 
 1. Edit `src/data/settings/site.json`:
+
    ```json
    {
      "footer": {
@@ -800,6 +871,7 @@ SITE_URL=https://your-domain.com npm run check:prod-artifacts
 ### Task: Add Social Links
 
 1. Edit `src/data/settings/site.json`:
+
    ```json
    {
      "socialLinks": {
@@ -816,11 +888,12 @@ SITE_URL=https://your-domain.com npm run check:prod-artifacts
 
 1. Create file: `src/pages/page-name.astro`
 2. Use this template:
+
    ```astro
    ---
    import BaseLayout from '../layouts/BaseLayout.astro';
    ---
-   
+
    <BaseLayout title="Page Title">
      <h1>Page Title</h1>
      <p>Content here...</p>
@@ -832,6 +905,7 @@ SITE_URL=https://your-domain.com npm run check:prod-artifacts
 ### Task: Modify Essay List Page Size
 
 Edit `site.config.mjs`:
+
 ```javascript
 export const PAGE_SIZE_ESSAY = 12; // Change from default
 ```
@@ -868,8 +942,7 @@ src/
 ├── content/                    # Content collections
 │   ├── essay/                 # Long-form articles
 │   ├── bits/                  # Short posts/photos
-│   ├── memo/                  # Journal entries
-│   └── config.ts             # Collection schemas
+│   └── memo/                  # Journal entries
 ├── content.config.ts          # Content collection config
 ├── data/                      # JSON data files
 │   ├── settings/             # Theme settings
@@ -931,6 +1004,7 @@ public/
 ### Issue: Changes not showing in development
 
 **Solution:**
+
 - Astro dev server has hot reload, but sometimes needs manual refresh
 - Try: Stop server (`Ctrl+C`), run `npm run dev` again
 - Clear browser cache
@@ -938,6 +1012,7 @@ public/
 ### Issue: Images not loading
 
 **Check:**
+
 - URL is correct and accessible
 - Image exists in R2 bucket
 - Width/height specified in frontmatter
@@ -946,6 +1021,7 @@ public/
 ### Issue: Build fails
 
 **Common causes:**
+
 1. **Type errors:** Run `npm run check` to see TypeScript errors
 2. **Missing dependencies:** Run `npm install`
 3. **Node version:** Ensure Node >=22.12.0
@@ -958,6 +1034,7 @@ public/
 ### Issue: Fonts not loading
 
 **Check:**
+
 - Font files exist in `public/fonts/`
 - `@font-face` declarations in CSS
 - `unicode-range` properly set
@@ -965,6 +1042,7 @@ public/
 ### Issue: Site looks wrong on mobile
 
 **Check:**
+
 - Meta viewport tag present (in BaseLayout)
 - CSS responsive breakpoints
 - Images have proper sizing
@@ -983,6 +1061,7 @@ public/
 ### Content Creation Checklist
 
 **Essay:**
+
 - [ ] File in `src/content/essay/`
 - [ ] Frontmatter with title, date
 - [ ] Content written
@@ -992,6 +1071,7 @@ public/
 - [ ] draft: false
 
 **Bits:**
+
 - [ ] Images uploaded to R2
 - [ ] File in `src/content/bits/`
 - [ ] Frontmatter with date
@@ -999,11 +1079,13 @@ public/
 - [ ] Tags (use `loc:Location` for place)
 
 **Project:**
+
 - [ ] Entry added to `src/data/projects.json`
 - [ ] GitHub repo correct
 - [ ] Description concise
 
 **Build & Deploy:**
+
 - [ ] `npm run build` succeeds
 - [ ] Preview looks correct
 - [ ] Deploy `dist/` folder
@@ -1030,6 +1112,7 @@ public/
 ### Testing Changes
 
 Always test:
+
 1. Development server (`npm run dev`)
 2. Production build (`npm run build && npm run preview`)
 3. Both light and dark modes

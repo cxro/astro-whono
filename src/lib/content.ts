@@ -1,17 +1,20 @@
 import {
   getCollection,
   type CollectionEntry,
-  type CollectionKey
+  type CollectionKey,
 } from 'astro:content';
 import {
   ESSAY_PUBLIC_SLUG_RE,
   RESERVED_ESSAY_SLUGS,
-  flattenEntryIdToSlug
+  flattenEntryIdToSlug,
 } from '../utils/slug-rules';
 import { deriveMarkdownText, truncateText } from '../utils/excerpt';
 export { createWithBase } from '../utils/format';
 
-type OrderBy<K extends CollectionKey> = (a: CollectionEntry<K>, b: CollectionEntry<K>) => number;
+type OrderBy<K extends CollectionKey> = (
+  a: CollectionEntry<K>,
+  b: CollectionEntry<K>
+) => number;
 
 export type GetPublishedOptions<K extends CollectionKey> = {
   orderBy?: OrderBy<K>;
@@ -32,7 +35,11 @@ export const isReservedSlug = (slug: string) => RESERVED_ESSAY_SLUGS.has(slug);
 export const getTotalPages = (itemCount: number, pageSize: number) =>
   Math.ceil(itemCount / pageSize);
 
-export const getPageSlice = <T>(items: T[], currentPage: number, pageSize: number) => {
+export const getPageSlice = <T>(
+  items: T[],
+  currentPage: number,
+  pageSize: number
+) => {
   const start = (currentPage - 1) * pageSize;
   return items.slice(start, start + pageSize);
 };
@@ -40,7 +47,7 @@ export const getPageSlice = <T>(items: T[], currentPage: number, pageSize: numbe
 export const buildPaginatedPaths = (totalPages: number) => {
   if (totalPages <= 1) return [];
   return Array.from({ length: totalPages - 1 }, (_, i) => ({
-    params: { page: String(i + 2) }
+    params: { page: String(i + 2) },
   }));
 };
 
@@ -50,7 +57,9 @@ export async function getPublished<K extends CollectionKey>(
 ) {
   const prod = import.meta.env.PROD;
   const includeDraft = opts.includeDraft ?? !prod;
-  const filter = includeDraft ? undefined : ({ data }: CollectionEntry<K>) => data.draft !== true;
+  const filter = includeDraft
+    ? undefined
+    : ({ data }: CollectionEntry<K>) => data.draft !== true;
   const items = await getCollection(name, filter);
 
   if (!opts.orderBy) return items;
@@ -80,7 +89,9 @@ const assertUniqueEssaySlugs = (entries: readonly EssayEntry[]) => {
 
   for (const entry of entries) {
     const slug = getEssaySlug(entry);
-    const slugSource = entry.data.slug ? 'frontmatter.slug' : `entry.id (flattened from "${entry.id}")`;
+    const slugSource = entry.data.slug
+      ? 'frontmatter.slug'
+      : `entry.id (flattened from "${entry.id}")`;
 
     // --- reserved-word check (primary defence) ---
     if (isReservedSlug(slug)) {
@@ -91,7 +102,7 @@ const assertUniqueEssaySlugs = (entries: readonly EssayEntry[]) => {
           `  Public slug: ${slug}`,
           `  Source:      ${slugSource}`,
           `  Reason:      "${slug}" is reserved for sibling static routes under /archive/ and /essay/.`,
-          '  How to fix:  change frontmatter.slug, or rename the file/path so the final public slug is no longer reserved.'
+          '  How to fix:  change frontmatter.slug, or rename the file/path so the final public slug is no longer reserved.',
         ].join('\n')
       );
     }
@@ -105,7 +116,7 @@ const assertUniqueEssaySlugs = (entries: readonly EssayEntry[]) => {
           `  Public slug: ${slug}`,
           `  Source:      ${slugSource}`,
           '  Reason:      final public slug must be lowercase kebab-case.',
-          '  How to fix:  provide a valid frontmatter.slug, or rename files/folders to kebab-case.'
+          '  How to fix:  provide a valid frontmatter.slug, or rename files/folders to kebab-case.',
         ].join('\n')
       );
     }
@@ -133,7 +144,8 @@ const assertUniqueEssaySlugs = (entries: readonly EssayEntry[]) => {
   );
 };
 
-const orderByEssayDate = (a: EssayEntry, b: EssayEntry) => b.data.date.valueOf() - a.data.date.valueOf();
+const orderByEssayDate = (a: EssayEntry, b: EssayEntry) =>
+  b.data.date.valueOf() - a.data.date.valueOf();
 const shouldMemoizeEssayQueries = import.meta.env.PROD;
 const MAX_ESSAY_INDEX_TEXT = 600;
 
@@ -150,7 +162,7 @@ const shouldUseDefaultEssayCache = (includeDraft?: boolean) =>
 const loadSortedEssays = async ({ includeDraft }: EssayQueryOptions = {}) => {
   const essays = await getPublished('essay', {
     ...(includeDraft === undefined ? {} : { includeDraft }),
-    orderBy: orderByEssayDate
+    orderBy: orderByEssayDate,
   });
   assertUniqueEssaySlugs(essays);
   return essays;
@@ -161,8 +173,11 @@ const buildEssayDerivedText = (entry: EssayEntry): EssayDerivedText => {
 
   return {
     plainText,
-    text: plainText.length > MAX_ESSAY_INDEX_TEXT ? plainText.slice(0, MAX_ESSAY_INDEX_TEXT) : plainText,
-    excerpt: truncateText(excerptText, 120)
+    text:
+      plainText.length > MAX_ESSAY_INDEX_TEXT
+        ? plainText.slice(0, MAX_ESSAY_INDEX_TEXT)
+        : plainText,
+    excerpt: truncateText(excerptText, 120),
   };
 };
 
@@ -204,21 +219,29 @@ export async function getVisibleEssays(options: EssayQueryOptions = {}) {
 export async function getArchiveEssays(options: EssayQueryOptions = {}) {
   if (!shouldUseDefaultEssayCache(options.includeDraft)) {
     const essays = await getSortedEssays(options);
-    return essays.filter((entry) => entry.data.archive !== false && !isReservedSlug(getEssaySlug(entry)));
+    return essays.filter(
+      (entry) =>
+        entry.data.archive !== false && !isReservedSlug(getEssaySlug(entry))
+    );
   }
 
   archiveEssaysPromise ??= getSortedEssays().then((essays) =>
-    essays.filter((entry) => entry.data.archive !== false && !isReservedSlug(getEssaySlug(entry)))
+    essays.filter(
+      (entry) =>
+        entry.data.archive !== false && !isReservedSlug(getEssaySlug(entry))
+    )
   );
   return cloneEssayEntries(await archiveEssaysPromise);
 }
 
-export async function getVisibleEssayRouteEntries(options: EssayQueryOptions = {}) {
+export async function getVisibleEssayRouteEntries(
+  options: EssayQueryOptions = {}
+) {
   const essays = await getVisibleEssays(options);
   return essays.map((entry, index) => ({
     slug: getEssaySlug(entry),
     entry,
     prev: essays[index - 1] ?? null,
-    next: essays[index + 1] ?? null
+    next: essays[index + 1] ?? null,
   })) satisfies EssayRouteEntry[];
 }

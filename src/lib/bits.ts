@@ -40,7 +40,8 @@ export type BitsDerivedText = {
 const MAX_INDEX_TEXT = 600;
 const FULL_RENDER_LIMIT = 180;
 export const MAX_PRIMARY_BITS_FILTER_YEARS = 2;
-const orderByBitsDate = (a: BitsEntry, b: BitsEntry) => b.data.date.valueOf() - a.data.date.valueOf();
+const orderByBitsDate = (a: BitsEntry, b: BitsEntry) =>
+  b.data.date.valueOf() - a.data.date.valueOf();
 const shouldMemoizeBitQueries = import.meta.env.PROD;
 const base = import.meta.env.BASE_URL ?? '/';
 const withBase = createWithBase(base);
@@ -53,14 +54,15 @@ const cloneBitEntries = (entries: readonly BitsEntry[]) => entries.slice();
 
 const loadSortedBits = () =>
   getPublished('bits', {
-    orderBy: orderByBitsDate
+    orderBy: orderByBitsDate,
   });
 
 export const getBitSlug = (entry: BitsEntry) => entry.data.slug ?? entry.id;
 
 export const getBitAnchorId = (key: string) => `bit-${key}`;
 
-export const getBitsPagePath = (page: number) => (page <= 1 ? '/bits/' : `/bits/page/${page}/`);
+export const getBitsPagePath = (page: number) =>
+  page <= 1 ? '/bits/' : `/bits/page/${page}/`;
 
 const buildBitsYearOptions = (bits: readonly BitsEntry[]): BitsYearOption[] => {
   const yearCountMap = new Map<number, number>();
@@ -74,7 +76,7 @@ const buildBitsYearOptions = (bits: readonly BitsEntry[]): BitsYearOption[] => {
     .sort((a, b) => b[0] - a[0])
     .map(([value, count]) => ({
       value,
-      count
+      count,
     }));
 };
 
@@ -96,12 +98,14 @@ export async function getBitsPageData(currentPage: number, pageSize: number) {
     items: getPageSlice(bits, currentPage, pageSize),
     yearOptions: buildBitsYearOptions(bits),
     totalCount,
-    totalPages
+    totalPages,
   };
 }
 
 const getSearchIndexText = (plainText: string) =>
-  plainText.length > MAX_INDEX_TEXT ? plainText.slice(0, MAX_INDEX_TEXT) : plainText;
+  plainText.length > MAX_INDEX_TEXT
+    ? plainText.slice(0, MAX_INDEX_TEXT)
+    : plainText;
 
 const buildBitsDerivedText = (bit: BitsEntry): BitsDerivedText => {
   const { plainText, excerptText } = deriveMarkdownText(bit.body ?? '');
@@ -110,7 +114,7 @@ const buildBitsDerivedText = (bit: BitsEntry): BitsDerivedText => {
     plainText,
     text: getSearchIndexText(plainText),
     excerpt: truncateText(excerptText, FULL_RENDER_LIMIT),
-    shouldRenderFull: plainText.length <= FULL_RENDER_LIMIT
+    shouldRenderFull: plainText.length <= FULL_RENDER_LIMIT,
   };
 };
 
@@ -153,9 +157,9 @@ const buildBitsIndex = async (pageSize: number) => {
             src: withBase(firstImage.src),
             width: firstImage.width,
             height: firstImage.height,
-            alt: firstImage.alt ?? ''
+            alt: firstImage.alt ?? '',
           }
-        : null
+        : null,
     };
   });
 };
@@ -177,8 +181,8 @@ export async function getBitsSearchIndex(pageSize: number) {
     tags: item.tags.slice(),
     thumbnail: item.thumbnail
       ? {
-          ...item.thumbnail
+          ...item.thumbnail,
         }
-      : null
+      : null,
   }));
 }

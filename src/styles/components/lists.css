@@ -90,7 +90,9 @@
 .entry-search-panel {
   position: absolute;
   right: calc(100% + 8px);
-  top: calc(50% + var(--entry-search-shift-y) - (var(--entry-search-input-h) / 2));
+  top: calc(
+    50% + var(--entry-search-shift-y) - (var(--entry-search-input-h) / 2)
+  );
   width: min(196px, 32vw);
   display: flex;
   flex-direction: column;
@@ -98,17 +100,24 @@
   visibility: hidden;
   transform: translate(8px, 0);
   pointer-events: none;
-  transition: transform 0.2s ease, visibility 0s linear 0.2s;
+  transition:
+    transform 0.2s ease,
+    visibility 0s linear 0.2s;
   background: var(--bg);
   z-index: 2;
 }
 
 .entry-search-bridge {
   position: absolute;
-  top: calc(50% + var(--entry-search-shift-y) - (var(--entry-search-input-h) / 2));
+  top: calc(
+    50% + var(--entry-search-shift-y) - (var(--entry-search-input-h) / 2)
+  );
   right: 100%;
   width: 12px;
-  height: calc(var(--entry-search-input-h) + var(--entry-search-feedback-gap) + var(--entry-search-feedback-h));
+  height: calc(
+    var(--entry-search-input-h) + var(--entry-search-feedback-gap) +
+      var(--entry-search-feedback-h)
+  );
   pointer-events: none;
 }
 
@@ -151,7 +160,7 @@
   min-height: var(--entry-search-feedback-h);
   font-size: 12px;
   line-height: 1.45;
-  font-family: "LXGW WenKai Lite", "Kaiti SC", "STKaiti", serif;
+  font-family: 'LXGW WenKai Lite', 'Kaiti SC', 'STKaiti', serif;
   color: var(--muted);
   white-space: nowrap;
   overflow: hidden;
@@ -226,7 +235,7 @@
   -webkit-line-clamp: 3;
   line-clamp: 3;
   overflow: hidden;
-  font-family: "LXGW WenKai Lite", "Kaiti SC", "STKaiti", serif;
+  font-family: 'LXGW WenKai Lite', 'Kaiti SC', 'STKaiti', serif;
 }
 
 .badge {
@@ -244,7 +253,7 @@
   top: 1px;
 }
 
-:root[data-theme="dark"] .badge {
+:root[data-theme='dark'] .badge {
   background: #1f1f1f;
   border-color: #3f3f3f;
   color: var(--muted);
@@ -291,7 +300,7 @@
   grid-row: 1;
   color: var(--faint);
   font-size: 13px;
-  font-family: "LXGW WenKai Lite", "Kaiti SC", "STKaiti", serif;
+  font-family: 'LXGW WenKai Lite', 'Kaiti SC', 'STKaiti', serif;
 }
 
 .archive-date-full {
@@ -371,7 +380,7 @@
   }
 
   .archive-tag::before {
-    content: " - ";
+    content: ' - ';
     color: var(--faint);
   }
 }
@@ -399,7 +408,7 @@
 }
 
 .meta-line__item + .meta-line__item::before {
-  content: "·";
+  content: '·';
   margin: 0 0.45em;
   color: var(--faint);
 }
@@ -437,7 +446,7 @@
   background: var(--code-content-bg);
   color: var(--text);
   font-size: 13px;
-  font-family: "LXGW WenKai Lite", "Kaiti SC", "STKaiti", serif;
+  font-family: 'LXGW WenKai Lite', 'Kaiti SC', 'STKaiti', serif;
 }
 
 .pagination__link:hover,

@@ -6,13 +6,13 @@
    - bits-page.css：/bits/ 专用（bits / lightbox）
    - admin.css：/admin 页面按需引入
    断点变量覆盖仅保留共享层变量与跨页面公共规则。 */
-@import "./components/layout.css";
-@import "./components/lists.css";
-@import "./components/entry-tags.css";
+@import './components/layout.css';
+@import './components/lists.css';
+@import './components/entry-tags.css';
 
 @font-face {
-  font-family: "LXGW WenKai Lite";
-  src: url("/fonts/lxgw-wenkai-lite-latin.woff2") format("woff2");
+  font-family: 'LXGW WenKai Lite';
+  src: url('/fonts/lxgw-wenkai-lite-latin.woff2') format('woff2');
   font-weight: 400;
   font-style: normal;
   font-display: swap;
@@ -20,8 +20,8 @@
 }
 
 @font-face {
-  font-family: "LXGW WenKai Lite";
-  src: url("/fonts/lxgw-wenkai-lite-cjk-common.woff2") format("woff2");
+  font-family: 'LXGW WenKai Lite';
+  src: url('/fonts/lxgw-wenkai-lite-cjk-common.woff2') format('woff2');
   font-weight: 400;
   font-style: normal;
   font-display: swap;
@@ -29,8 +29,8 @@
 }
 
 @font-face {
-  font-family: "LXGW WenKai Lite";
-  src: url("/fonts/lxgw-wenkai-lite-cjk-ext.woff2") format("woff2");
+  font-family: 'LXGW WenKai Lite';
+  src: url('/fonts/lxgw-wenkai-lite-cjk-ext.woff2') format('woff2');
   font-weight: 400;
   font-style: normal;
   font-display: swap;
@@ -38,8 +38,8 @@
 }
 
 @font-face {
-  font-family: "Noto Serif SC";
-  src: url("/fonts/noto-serif-sc-400-latin.woff2") format("woff2");
+  font-family: 'Noto Serif SC';
+  src: url('/fonts/noto-serif-sc-400-latin.woff2') format('woff2');
   font-weight: 400;
   font-style: normal;
   font-display: swap;
@@ -47,8 +47,8 @@
 }
 
 @font-face {
-  font-family: "Noto Serif SC";
-  src: url("/fonts/noto-serif-sc-400-cjk-common.woff2") format("woff2");
+  font-family: 'Noto Serif SC';
+  src: url('/fonts/noto-serif-sc-400-cjk-common.woff2') format('woff2');
   font-weight: 400;
   font-style: normal;
   font-display: swap;
@@ -56,8 +56,8 @@
 }
 
 @font-face {
-  font-family: "Noto Serif SC";
-  src: url("/fonts/noto-serif-sc-400-cjk-ext.woff2") format("woff2");
+  font-family: 'Noto Serif SC';
+  src: url('/fonts/noto-serif-sc-400-cjk-ext.woff2') format('woff2');
   font-weight: 400;
   font-style: normal;
   font-display: swap;
@@ -65,8 +65,8 @@
 }
 
 @font-face {
-  font-family: "Noto Serif SC";
-  src: url("/fonts/noto-serif-sc-600-latin.woff2") format("woff2");
+  font-family: 'Noto Serif SC';
+  src: url('/fonts/noto-serif-sc-600-latin.woff2') format('woff2');
   font-weight: 600;
   font-style: normal;
   font-display: swap;
@@ -74,8 +74,8 @@
 }
 
 @font-face {
-  font-family: "Noto Serif SC";
-  src: url("/fonts/noto-serif-sc-600-cjk-common.woff2") format("woff2");
+  font-family: 'Noto Serif SC';
+  src: url('/fonts/noto-serif-sc-600-cjk-common.woff2') format('woff2');
   font-weight: 600;
   font-style: normal;
   font-display: swap;
@@ -83,8 +83,8 @@
 }
 
 @font-face {
-  font-family: "Noto Serif SC";
-  src: url("/fonts/noto-serif-sc-600-cjk-ext.woff2") format("woff2");
+  font-family: 'Noto Serif SC';
+  src: url('/fonts/noto-serif-sc-600-cjk-ext.woff2') format('woff2');
   font-weight: 600;
   font-style: normal;
   font-display: swap;
@@ -121,7 +121,9 @@
   --code-bg: var(--code-content-bg);
   --code-action-hover-bg: #e8e8e6;
   --panel: var(--code-header-bg);
-  --font-mono: "Sarasa Mono SC", "Noto Sans Mono CJK SC", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+  --font-mono:
+    'Sarasa Mono SC', 'Noto Sans Mono CJK SC', ui-monospace, SFMono-Regular,
+    Menlo, Monaco, Consolas, 'Liberation Mono', 'Courier New', monospace;
   --max: 900px;
   --sidebar: 320px;
   --tap-min-h: 44px;
@@ -131,7 +133,7 @@
   --header-gap: 12px;
 }
 
-:root[data-theme="dark"] {
+:root[data-theme='dark'] {
   color-scheme: dark;
   --bg: #1a1a1a;
   --text: #e5e5e5;
@@ -163,7 +165,8 @@ body {
   padding: 0;
   background: var(--bg);
   color: var(--text);
-  font-family: "Noto Serif SC", ui-serif, Georgia, "Times New Roman", "Songti SC", serif;
+  font-family:
+    'Noto Serif SC', ui-serif, Georgia, 'Times New Roman', 'Songti SC', serif;
   line-height: 1.75;
   font-size: 16px;
 }
@@ -179,7 +182,7 @@ time,
 .archive-date,
 .bit-meta,
 .meta-line {
-  font-family: "LXGW WenKai Lite", "Kaiti SC", "STKaiti", serif;
+  font-family: 'LXGW WenKai Lite', 'Kaiti SC', 'STKaiti', serif;
 }
 
 .page-subtitle,
@@ -191,7 +194,7 @@ time,
 .prose blockquote p,
 cite,
 q {
-  font-family: "LXGW WenKai Lite", "Kaiti SC", "STKaiti", serif;
+  font-family: 'LXGW WenKai Lite', 'Kaiti SC', 'STKaiti', serif;
 }
 
 pre,
@@ -283,7 +286,7 @@ hr {
 }
 
 .section-title::after {
-  content: "";
+  content: '';
   display: block;
   width: 32px;
   height: 1px;
@@ -305,7 +308,7 @@ hr {
     --header-gap: 4px;
   }
 
-  :root[data-theme="dark"] {
+  :root[data-theme='dark'] {
     color-scheme: dark;
     --bg: #1a1a1a;
     --text: #e5e5e5;
@@ -319,14 +322,12 @@ hr {
   .intro {
     margin: 16px 0 22px;
   }
-
 }
 
 @media (min-width: 641px) and (max-width: 900px) {
   :root {
     --pad-x: 28px;
   }
-
 }
 
 @media (max-width: 640px) {

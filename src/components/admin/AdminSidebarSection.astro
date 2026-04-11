@@ -3,7 +3,7 @@ import type { SidebarNavId } from '../../lib/theme-settings';
 import {
   ADMIN_NAV_ORNAMENT_DEFAULT,
   ADMIN_NAV_ORNAMENT_MAX_LENGTH,
-  ADMIN_SIDEBAR_DIVIDER_OPTIONS
+  ADMIN_SIDEBAR_DIVIDER_OPTIONS,
 } from '../../lib/admin-console/shared';
 
 interface Props {
@@ -30,12 +30,21 @@ const { navIdOrder } = Astro.props;
     <div class="admin-field admin-field--sidebar-divider">
       <span class="admin-label">
         <span class="admin-label__main">Sidebar Divider</span>
-        <span class="admin-label__hint">(controls divider strength between sidebar and content)</span>
+        <span class="admin-label__hint"
+          >(controls divider strength between sidebar and content)</span
+        >
       </span>
-      <div class="admin-segmented" role="radiogroup" aria-label="Sidebar Divider Style">
+      <div
+        class="admin-segmented"
+        role="radiogroup"
+        aria-label="Sidebar Divider Style"
+      >
         {
           ADMIN_SIDEBAR_DIVIDER_OPTIONS.map((option) => (
-            <label class="admin-segmented__option" for={`ui-layout-sidebar-divider-${option.id}`}>
+            <label
+              class="admin-segmented__option"
+              for={`ui-layout-sidebar-divider-${option.id}`}
+            >
               <input
                 id={`ui-layout-sidebar-divider-${option.id}`}
                 name="ui-layout-sidebar-divider"
@@ -62,7 +71,8 @@ const { navIdOrder } = Astro.props;
     <p class="admin-subtitle">
       <span class="admin-subtitle__main">Sidebar Navigation</span>
       <span id="admin-nav-ornament-hint" class="admin-subtitle__hint">
-        (navigation suffix supports short text or symbols; leave empty to hide; enter {ADMIN_NAV_ORNAMENT_DEFAULT} for default dot)
+        (navigation suffix supports short text or symbols; leave empty to hide;
+        enter {ADMIN_NAV_ORNAMENT_DEFAULT} for default dot)
       </span>
     </p>
     <div class="admin-nav-grid">
@@ -80,7 +90,9 @@ const { navIdOrder } = Astro.props;
               <span class="admin-nav-cell-label">Order</span>
               <span class="sr-only">{id} Order</span>
               <span class="admin-social-order-frame admin-nav-order-frame">
-                <span class="admin-social-order-frame__mark" aria-hidden="true">[</span>
+                <span class="admin-social-order-frame__mark" aria-hidden="true">
+                  [
+                </span>
                 <input
                   data-nav-field="order"
                   name={`shell-nav-${id}-order`}
@@ -90,7 +102,9 @@ const { navIdOrder } = Astro.props;
                   inputmode="numeric"
                   value={index + 1}
                 />
-                <span class="admin-social-order-frame__mark" aria-hidden="true">]</span>
+                <span class="admin-social-order-frame__mark" aria-hidden="true">
+                  ]
+                </span>
               </span>
             </label>
             <p class="admin-nav-id">
@@ -101,14 +115,25 @@ const { navIdOrder } = Astro.props;
               <span class="admin-nav-cell-label">Navigation Name</span>
               <span class="sr-only">{id} Navigation Name</span>
               <span class="admin-nav-name-frame">
-                <span class="admin-nav-name-frame__mark" aria-hidden="true">&lt;</span>
-                <input data-nav-field="label" name={`shell-nav-${id}-label`} type="text" autocomplete="off" />
-                <span class="admin-nav-name-frame__mark" aria-hidden="true">&gt;</span>
+                <span class="admin-nav-name-frame__mark" aria-hidden="true">
+                  &lt;
+                </span>
+                <input
+                  data-nav-field="label"
+                  name={`shell-nav-${id}-label`}
+                  type="text"
+                  autocomplete="off"
+                />
+                <span class="admin-nav-name-frame__mark" aria-hidden="true">
+                  &gt;
+                </span>
               </span>
             </label>
             <label class="admin-field admin-nav-field admin-nav-field--ornament">
               <span class="admin-nav-cell-label">Navigation Suffix</span>
-              <span class="sr-only">{id} Navigation Suffix, leave empty to hide</span>
+              <span class="sr-only">
+                {id} Navigation Suffix, leave empty to hide
+              </span>
               <input
                 data-nav-field="ornament"
                 name={`shell-nav-${id}-ornament`}

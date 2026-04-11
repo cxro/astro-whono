@@ -1,8 +1,8 @@
 ---
-title: "Your Post Title"
-description: "Brief description for SEO and social sharing"
+title: 'Your Post Title'
+description: 'Brief description for SEO and social sharing'
 date: 2026-04-10
-tags: ["tag1", "tag2"]
+tags: ['tag1', 'tag2']
 draft: true
 archive: true
 ---

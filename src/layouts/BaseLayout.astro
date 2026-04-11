@@ -13,7 +13,7 @@ const {
   ogType = 'website',
   bodyClass,
   deferGlobalStyles = false,
-  activeNavId
+  activeNavId,
 } = Astro.props as {
   title?: string;
   description?: string;
@@ -35,16 +35,20 @@ const footerShowCurrentYear = settings.site.footer.showCurrentYear;
 const footerCopyright = settings.site.footer.copyright;
 const showCodeLineNumbers = settings.ui.codeBlock.showLineNumbers;
 const sidebarDividerVariant = settings.ui.layout.sidebarDivider;
-const canonical = (hasSiteUrl && Astro.site)
-  ? new URL(Astro.url.pathname, Astro.site).toString()
-  : null;
+const canonical =
+  hasSiteUrl && Astro.site
+    ? new URL(Astro.url.pathname, Astro.site).toString()
+    : null;
 const ogImage = image
-  ? ((hasSiteUrl && Astro.site) ? new URL(image, Astro.site).toString() : image)
+  ? hasSiteUrl && Astro.site
+    ? new URL(image, Astro.site).toString()
+    : image
   : null;
 const currentYear = new Date().getFullYear();
-const yearRange = footerShowCurrentYear && currentYear > footerStartYear
-  ? `${footerStartYear}-${currentYear}`
-  : `${footerStartYear}`;
+const yearRange =
+  footerShowCurrentYear && currentYear > footerStartYear
+    ? `${footerStartYear}-${currentYear}`
+    : `${footerStartYear}`;
 const base = import.meta.env.BASE_URL ?? '/';
 const withBase = createWithBase(base);
 ---
@@ -56,29 +60,63 @@ const withBase = createWithBase(base);
       (() => {
         const key = 'theme';
         let stored = null;
-        try { stored = localStorage.getItem(key); } catch (_) {}
-        const prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
-        const theme = stored === 'dark' || stored === 'light' ? stored : (prefersDark ? 'dark' : 'light');
+        try {
+          stored = localStorage.getItem(key);
+        } catch (_) {}
+        const prefersDark =
+          window.matchMedia &&
+          window.matchMedia('(prefers-color-scheme: dark)').matches;
+        const theme =
+          stored === 'dark' || stored === 'light'
+            ? stored
+            : prefersDark
+              ? 'dark'
+              : 'light';
         document.documentElement.dataset.theme = theme;
       })();
     </script>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <link rel="icon" type="image/svg+xml" sizes="any" href={withBase('favicon.svg')} />
-    <link rel="icon" type="image/png" sizes="32x32" href={withBase('favicon-32x32.png')} />
-    <link rel="apple-touch-icon" sizes="180x180" href={withBase('apple-touch-icon.png')} />
+    <link
+      rel="icon"
+      type="image/svg+xml"
+      sizes="any"
+      href={withBase('favicon.svg')}
+    />
+    <link
+      rel="icon"
+      type="image/png"
+      sizes="32x32"
+      href={withBase('favicon-32x32.png')}
+    />
+    <link
+      rel="apple-touch-icon"
+      sizes="180x180"
+      href={withBase('apple-touch-icon.png')}
+    />
     <title>{fullTitle}</title>
     {metaDescription && <meta name="description" content={metaDescription} />}
     {canonical && <link rel="canonical" href={canonical} />}
     <meta property="og:site_name" content={siteTitle} />
     <meta property="og:title" content={fullTitle} />
-    {metaDescription && <meta property="og:description" content={metaDescription} />}
+    {
+      metaDescription && (
+        <meta property="og:description" content={metaDescription} />
+      )
+    }
     {canonical && <meta property="og:url" content={canonical} />}
     <meta property="og:type" content={ogType} />
     {ogImage && <meta property="og:image" content={ogImage} />}
-    <meta name="twitter:card" content={ogImage ? 'summary_large_image' : 'summary'} />
+    <meta
+      name="twitter:card"
+      content={ogImage ? 'summary_large_image' : 'summary'}
+    />
     <meta name="twitter:title" content={fullTitle} />
-    {metaDescription && <meta name="twitter:description" content={metaDescription} />}
+    {
+      metaDescription && (
+        <meta name="twitter:description" content={metaDescription} />
+      )
+    }
     {ogImage && <meta name="twitter:image" content={ogImage} />}
     {
       deferGlobalStyles ? (
@@ -90,7 +128,9 @@ const withBase = createWithBase(base);
             media="print"
             onload="this.onload=null;this.media='all'"
           />
-          <noscript><link rel="stylesheet" href={globalStylesHref} /></noscript>
+          <noscript>
+            <link rel="stylesheet" href={globalStylesHref} />
+          </noscript>
         </>
       ) : (
         <link rel="stylesheet" href={globalStylesHref} />

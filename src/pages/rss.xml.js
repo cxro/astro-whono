@@ -6,6 +6,6 @@ const { settings } = getThemeSettings();
 export async function GET(context) {
   return buildArchiveFeed(context, {
     title: settings.site.title,
-    description: settings.site.description
+    description: settings.site.description,
   });
 }

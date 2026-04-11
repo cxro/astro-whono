@@ -2,21 +2,27 @@ import type {
   SidebarNavId,
   ThemeSettingsEditableErrorState,
   ThemeSettingsEditablePayload,
-  ThemeSettingsReadDiagnostic
+  ThemeSettingsReadDiagnostic,
 } from '@/lib/theme-settings';
 import {
   ADMIN_NAV_IDS,
   ADMIN_SOCIAL_CUSTOM_LIMIT,
-  getAdminFooterStartYearMax
+  getAdminFooterStartYearMax,
 } from '@/lib/admin-console/shared';
 import { createFormCodec, type EditableSettings } from './form-codec';
 import { createSocialLinks } from './social-links';
 import { createValidation, type ValidationIssue } from './validation';
 
-type RequiredElements<T extends Record<string, Element | null>> = { [K in keyof T]: NonNullable<T[K]> };
+type RequiredElements<T extends Record<string, Element | null>> = {
+  [K in keyof T]: NonNullable<T[K]>;
+};
 type LoadSource = 'bootstrap' | 'remote';
 type LooseRecord = Record<string, unknown>;
-type AdminControl = HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement | HTMLButtonElement;
+type AdminControl =
+  | HTMLInputElement
+  | HTMLTextAreaElement
+  | HTMLSelectElement
+  | HTMLButtonElement;
 type ErrorBannerState = {
   title: string;
   message?: string;
@@ -34,19 +40,28 @@ const root = document.querySelector<HTMLElement>('[data-admin-root]');
 if (!root) {
   // Current page does not use admin console.
 } else {
-  const byId = <T extends Element>(id: string): T | null => document.getElementById(id) as T | null;
-  const query = <T extends Element>(parent: ParentNode, selector: string): T | null =>
-    parent.querySelector(selector) as T | null;
-  const queryAll = <T extends Element>(parent: ParentNode, selector: string): T[] =>
-    Array.from(parent.querySelectorAll(selector)) as T[];
-  const ensureElements = <T extends Record<string, Element | null>>(elements: T): RequiredElements<T> | null => {
-    if (Object.values(elements).some((element) => element === null)) return null;
+  const byId = <T extends Element>(id: string): T | null =>
+    document.getElementById(id) as T | null;
+  const query = <T extends Element>(
+    parent: ParentNode,
+    selector: string
+  ): T | null => parent.querySelector(selector) as T | null;
+  const queryAll = <T extends Element>(
+    parent: ParentNode,
+    selector: string
+  ): T[] => Array.from(parent.querySelectorAll(selector)) as T[];
+  const ensureElements = <T extends Record<string, Element | null>>(
+    elements: T
+  ): RequiredElements<T> | null => {
+    if (Object.values(elements).some((element) => element === null))
+      return null;
     return elements as RequiredElements<T>;
   };
   const isRecord = (value: unknown): value is LooseRecord =>
     typeof value === 'object' && value !== null && !Array.isArray(value);
 
-  const endpoint = root.getAttribute('data-settings-endpoint') || '/api/admin/settings/';
+  const endpoint =
+    root.getAttribute('data-settings-endpoint') || '/api/admin/settings/';
   const footerStartYearMax = getAdminFooterStartYearMax();
 
   const controls = ensureElements({
@@ -72,18 +87,26 @@ if (!root) {
     socialCustomHead: byId<HTMLElement>('site-social-custom-head'),
     socialCustomCountEl: byId<HTMLElement>('site-social-custom-count'),
     socialCustomAddBtn: byId<HTMLButtonElement>('site-social-custom-add'),
-    socialCustomTemplate: byId<HTMLTemplateElement>('site-social-custom-row-template'),
+    socialCustomTemplate: byId<HTMLTemplateElement>(
+      'site-social-custom-row-template'
+    ),
     inputSiteTitle: byId<HTMLInputElement>('site-title'),
     inputSiteDescription: byId<HTMLTextAreaElement>('site-description'),
     inputSiteDefaultLocale: byId<HTMLInputElement>('site-default-locale'),
     inputSiteFooterStartYear: byId<HTMLInputElement>('site-footer-start-year'),
-    inputSiteFooterShowCurrentYear: byId<HTMLInputElement>('site-footer-show-current-year'),
+    inputSiteFooterShowCurrentYear: byId<HTMLInputElement>(
+      'site-footer-show-current-year'
+    ),
     inputSiteFooterCopyright: byId<HTMLInputElement>('site-footer-copyright'),
-    inputSiteSocialGithubOrder: byId<HTMLInputElement>('site-social-github-order'),
+    inputSiteSocialGithubOrder: byId<HTMLInputElement>(
+      'site-social-github-order'
+    ),
     inputSiteSocialGithub: byId<HTMLInputElement>('site-social-github'),
     inputSiteSocialXOrder: byId<HTMLInputElement>('site-social-x-order'),
     inputSiteSocialX: byId<HTMLInputElement>('site-social-x'),
-    inputSiteSocialEmailOrder: byId<HTMLInputElement>('site-social-email-order'),
+    inputSiteSocialEmailOrder: byId<HTMLInputElement>(
+      'site-social-email-order'
+    ),
     inputSiteSocialEmail: byId<HTMLInputElement>('site-social-email'),
     inputShellBrandTitle: byId<HTMLInputElement>('shell-brand-title'),
     inputShellQuote: byId<HTMLTextAreaElement>('shell-quote'),
@@ -92,10 +115,18 @@ if (!root) {
     inputHomeIntroLead: byId<HTMLTextAreaElement>('home-intro-lead'),
     inputHomeIntroMore: byId<HTMLTextAreaElement>('home-intro-more'),
     homeIntroMorePreviewEl: byId<HTMLElement>('home-intro-more-preview'),
-    inputHomeIntroMoreLinkPrimary: byId<HTMLSelectElement>('home-intro-more-link-primary'),
-    inputHomeIntroMoreLinkSecondaryEnabled: byId<HTMLInputElement>('home-intro-more-link-secondary-enabled'),
-    homeIntroMoreLinkSecondaryGroupEl: byId<HTMLElement>('home-intro-more-link-secondary-group'),
-    inputHomeIntroMoreLinkSecondary: byId<HTMLSelectElement>('home-intro-more-link-secondary'),
+    inputHomeIntroMoreLinkPrimary: byId<HTMLSelectElement>(
+      'home-intro-more-link-primary'
+    ),
+    inputHomeIntroMoreLinkSecondaryEnabled: byId<HTMLInputElement>(
+      'home-intro-more-link-secondary-enabled'
+    ),
+    homeIntroMoreLinkSecondaryGroupEl: byId<HTMLElement>(
+      'home-intro-more-link-secondary-group'
+    ),
+    inputHomeIntroMoreLinkSecondary: byId<HTMLSelectElement>(
+      'home-intro-more-link-secondary'
+    ),
     inputPageEssayTitle: byId<HTMLInputElement>('page-essay-title'),
     inputPageEssaySubtitle: byId<HTMLInputElement>('page-essay-subtitle'),
     inputPageArchiveTitle: byId<HTMLInputElement>('page-archive-title'),
@@ -106,21 +137,39 @@ if (!root) {
     inputPageMemoSubtitle: byId<HTMLInputElement>('page-memo-subtitle'),
     inputPageAboutTitle: byId<HTMLInputElement>('page-about-title'),
     inputPageAboutSubtitle: byId<HTMLInputElement>('page-about-subtitle'),
-    inputArticleMetaShowDate: byId<HTMLInputElement>('ui-article-meta-show-date'),
-    inputArticleMetaDateLabel: byId<HTMLInputElement>('ui-article-meta-date-label'),
-    inputArticleMetaShowTags: byId<HTMLInputElement>('ui-article-meta-show-tags'),
-    inputArticleMetaShowWordCount: byId<HTMLInputElement>('ui-article-meta-show-word-count'),
-    inputArticleMetaShowReadingTime: byId<HTMLInputElement>('ui-article-meta-show-reading-time'),
+    inputArticleMetaShowDate: byId<HTMLInputElement>(
+      'ui-article-meta-show-date'
+    ),
+    inputArticleMetaDateLabel: byId<HTMLInputElement>(
+      'ui-article-meta-date-label'
+    ),
+    inputArticleMetaShowTags: byId<HTMLInputElement>(
+      'ui-article-meta-show-tags'
+    ),
+    inputArticleMetaShowWordCount: byId<HTMLInputElement>(
+      'ui-article-meta-show-word-count'
+    ),
+    inputArticleMetaShowReadingTime: byId<HTMLInputElement>(
+      'ui-article-meta-show-reading-time'
+    ),
     inputPageBitsAuthorName: byId<HTMLInputElement>('page-bits-author-name'),
-    inputPageBitsAuthorAvatar: byId<HTMLInputElement>('page-bits-author-avatar'),
+    inputPageBitsAuthorAvatar: byId<HTMLInputElement>(
+      'page-bits-author-avatar'
+    ),
     inputHomeShowHero: byId<HTMLInputElement>('home-show-hero'),
     inputHeroImageSrc: byId<HTMLInputElement>('home-hero-image-src'),
     inputHeroImageAlt: byId<HTMLInputElement>('home-hero-image-alt'),
     inputCodeLineNumbers: byId<HTMLInputElement>('ui-code-line-numbers'),
     inputReadingEntry: byId<HTMLInputElement>('ui-reading-entry'),
-    inputSidebarDividerDefault: byId<HTMLInputElement>('ui-layout-sidebar-divider-default'),
-    inputSidebarDividerSubtle: byId<HTMLInputElement>('ui-layout-sidebar-divider-subtle'),
-    inputSidebarDividerNone: byId<HTMLInputElement>('ui-layout-sidebar-divider-none')
+    inputSidebarDividerDefault: byId<HTMLInputElement>(
+      'ui-layout-sidebar-divider-default'
+    ),
+    inputSidebarDividerSubtle: byId<HTMLInputElement>(
+      'ui-layout-sidebar-divider-subtle'
+    ),
+    inputSidebarDividerNone: byId<HTMLInputElement>(
+      'ui-layout-sidebar-divider-none'
+    ),
   });
 
   if (!controls) {
@@ -197,11 +246,13 @@ if (!root) {
       inputReadingEntry,
       inputSidebarDividerDefault,
       inputSidebarDividerSubtle,
-      inputSidebarDividerNone
+      inputSidebarDividerNone,
     } = controls;
 
-    const getNavRows = (): HTMLElement[] => queryAll<HTMLElement>(root, '[data-nav-id]');
-    const deepClone = <T>(value: T): T => JSON.parse(JSON.stringify(value)) as T;
+    const getNavRows = (): HTMLElement[] =>
+      queryAll<HTMLElement>(root, '[data-nav-id]');
+    const deepClone = <T>(value: T): T =>
+      JSON.parse(JSON.stringify(value)) as T;
 
     const {
       defaultCustomSocialIconKey,
@@ -225,7 +276,7 @@ if (!root) {
       createCustomRow,
       finalizeCustomIdInput,
       finalizeCustomLabelInput,
-      replaceCustomRows
+      replaceCustomRows,
     } = createSocialLinks({
       query,
       queryAll,
@@ -236,7 +287,7 @@ if (!root) {
       socialCustomTemplate,
       inputSiteSocialGithubOrder,
       inputSiteSocialXOrder,
-      inputSiteSocialEmailOrder
+      inputSiteSocialEmailOrder,
     });
 
     const {
@@ -248,7 +299,7 @@ if (!root) {
       syncHomeIntroLinkControls,
       syncHeroControls,
       refreshFooterPreview,
-      syncFooterYearControls
+      syncFooterYearControls,
     } = createFormCodec({
       footerStartYearMax,
       query,
@@ -309,7 +360,7 @@ if (!root) {
       inputReadingEntry,
       inputSidebarDividerDefault,
       inputSidebarDividerSubtle,
-      inputSidebarDividerNone
+      inputSidebarDividerNone,
     });
 
     const finalizeAppliedSettings = (): void => {
@@ -320,13 +371,17 @@ if (!root) {
       });
     };
 
-    const getNavFieldTarget = (
-      id: SidebarNavId,
-      field: 'label' | 'ornament' | 'order' | 'visible'
-    ): (() => HTMLElement | null) => () => {
-      const row = query<HTMLElement>(root, `[data-nav-id="${id}"]`);
-      return row ? query<HTMLElement>(row, `[data-nav-field="${field}"]`) : null;
-    };
+    const getNavFieldTarget =
+      (
+        id: SidebarNavId,
+        field: 'label' | 'ornament' | 'order' | 'visible'
+      ): (() => HTMLElement | null) =>
+      () => {
+        const row = query<HTMLElement>(root, `[data-nav-id="${id}"]`);
+        return row
+          ? query<HTMLElement>(row, `[data-nav-field="${field}"]`)
+          : null;
+      };
 
     const getFirstNavLabelTarget = (): HTMLElement | null => {
       const firstNavId = ADMIN_NAV_IDS[0];
@@ -337,7 +392,7 @@ if (!root) {
       validateSettings,
       clearInvalidFields,
       markInvalidFields,
-      resolveIssueField
+      resolveIssueField,
     } = createValidation({
       form,
       queryAll,
@@ -384,7 +439,7 @@ if (!root) {
       getCustomFieldTarget,
       getCustomVisibilityTarget,
       getNavFieldTarget,
-      getFirstNavLabelTarget
+      getFirstNavLabelTarget,
     });
 
     let baseline: EditableSettings | null = null;
@@ -401,7 +456,9 @@ if (!root) {
       window.scrollTo({ top: Math.max(0, top), behavior: 'smooth' });
     };
 
-    const revealErrorState = (issues: readonly ValidationIssue[] = []): void => {
+    const revealErrorState = (
+      issues: readonly ValidationIssue[] = []
+    ): void => {
       const firstField = issues
         .map((issue) => resolveIssueField(issue))
         .find((field): field is HTMLElement => field !== null);
@@ -424,7 +481,11 @@ if (!root) {
     const STATUS_CLEAN = 'No unsaved changes';
     const STATUS_INVALID_SETTINGS = 'Settings Invalid';
 
-    const setStatus = (state: string, message: string, options: { announce?: boolean } = {}): void => {
+    const setStatus = (
+      state: string,
+      message: string,
+      options: { announce?: boolean } = {}
+    ): void => {
       const currentState = statusEl.dataset.state ?? '';
       const currentMessage = statusEl.textContent?.trim() || '';
       if (currentState !== state || currentMessage !== message) {
@@ -448,7 +509,10 @@ if (!root) {
       const currentMessage = statusEl.textContent?.trim() || '';
 
       if (next) {
-        if ((currentState === 'ready' || currentState === 'ok') && currentMessage !== STATUS_WAITING_SAVE) {
+        if (
+          (currentState === 'ready' || currentState === 'ok') &&
+          currentMessage !== STATUS_WAITING_SAVE
+        ) {
           setStatus('ready', STATUS_WAITING_SAVE);
         }
         return;
@@ -469,7 +533,12 @@ if (!root) {
       errorRetryBtn.hidden = true;
     };
 
-    const setErrorBanner = ({ title, message, items = [], retryable = false }: ErrorBannerState): void => {
+    const setErrorBanner = ({
+      title,
+      message,
+      items = [],
+      retryable = false,
+    }: ErrorBannerState): void => {
       errorBanner.hidden = false;
       errorTitleEl.textContent = title;
 
@@ -503,7 +572,10 @@ if (!root) {
       errorRetryBtn.hidden = !retryable;
     };
 
-    const setErrors = (errors: string[], options: ErrorBannerOptions = {}): void => {
+    const setErrors = (
+      errors: string[],
+      options: ErrorBannerOptions = {}
+    ): void => {
       if (!errors.length) {
         clearErrorBanner();
         return;
@@ -513,7 +585,7 @@ if (!root) {
         title: options.title ?? 'Please address the following issues',
         ...(options.message ? { message: options.message } : {}),
         items: errors,
-        retryable: options.retryable ?? false
+        retryable: options.retryable ?? false,
       });
     };
 
@@ -527,14 +599,16 @@ if (!root) {
 
     const syncInteractiveAvailability = (): void => {
       const isInteractionLocked = isConsoleLocked || isSaving || isValidating;
-      queryAll<AdminControl>(root, 'input, textarea, select, button').forEach((element) => {
-        if (element === errorRetryBtn) {
-          element.disabled = isSaving || isValidating;
-          return;
-        }
+      queryAll<AdminControl>(root, 'input, textarea, select, button').forEach(
+        (element) => {
+          if (element === errorRetryBtn) {
+            element.disabled = isSaving || isValidating;
+            return;
+          }
 
-        element.disabled = isInteractionLocked;
-      });
+          element.disabled = isInteractionLocked;
+        }
+      );
     };
 
     const setConsoleLocked = (next: boolean): void => {
@@ -566,14 +640,19 @@ if (!root) {
       setDirty(JSON.stringify(current) !== JSON.stringify(baseline));
     };
 
-    const validateCurrentSettings = (): { draft: EditableSettings; issues: ValidationIssue[] } => {
+    const validateCurrentSettings = (): {
+      draft: EditableSettings;
+      issues: ValidationIssue[];
+    } => {
       const draft = collectSettings();
       const issues = validateSettings(draft);
       setValidationIssues(issues);
       return { draft, issues };
     };
 
-    const extractSettingsPayload = (payload: unknown): ThemeSettingsEditablePayload | null => {
+    const extractSettingsPayload = (
+      payload: unknown
+    ): ThemeSettingsEditablePayload | null => {
       if (!isRecord(payload)) return null;
       if (typeof payload.revision === 'string' && isRecord(payload.settings)) {
         return payload as unknown as ThemeSettingsEditablePayload;
@@ -590,30 +669,47 @@ if (!root) {
       return null;
     };
 
-    const extractInvalidSettingsState = (payload: unknown): ThemeSettingsEditableErrorState | null => {
+    const extractInvalidSettingsState = (
+      payload: unknown
+    ): ThemeSettingsEditableErrorState | null => {
       if (!isRecord(payload)) return null;
-      if (payload.ok !== false || payload.mode !== 'invalid-settings') return null;
-      if (typeof payload.message !== 'string' || !Array.isArray(payload.errors)) return null;
+      if (payload.ok !== false || payload.mode !== 'invalid-settings')
+        return null;
+      if (typeof payload.message !== 'string' || !Array.isArray(payload.errors))
+        return null;
       return payload as unknown as ThemeSettingsEditableErrorState;
     };
 
     const getPayloadMessage = (payload: unknown): string | null =>
-      isRecord(payload) && typeof payload.message === 'string' ? payload.message : null;
+      isRecord(payload) && typeof payload.message === 'string'
+        ? payload.message
+        : null;
 
     const getPayloadErrors = (payload: unknown): string[] => {
       if (!isRecord(payload) || !Array.isArray(payload.errors)) return [];
-      return payload.errors.filter((error): error is string => typeof error === 'string' && error.length > 0);
+      return payload.errors.filter(
+        (error): error is string =>
+          typeof error === 'string' && error.length > 0
+      );
     };
 
-    const getDiagnosticHeadline = (diagnostic: ThemeSettingsReadDiagnostic): string => {
+    const getDiagnosticHeadline = (
+      diagnostic: ThemeSettingsReadDiagnostic
+    ): string => {
       const fileName = diagnostic.path.split('/').pop() || diagnostic.path;
       if (diagnostic.code === 'invalid-json') return `${fileName} Format Error`;
-      if (diagnostic.code === 'invalid-root') return `${fileName} Structure Error`;
-      if (diagnostic.code === 'schema-mismatch') return `${fileName} Schema Mismatch`;
+      if (diagnostic.code === 'invalid-root')
+        return `${fileName} Structure Error`;
+      if (diagnostic.code === 'schema-mismatch')
+        return `${fileName} Schema Mismatch`;
       return `${fileName} Read Failed`;
     };
 
-    const createDiagnosticMeta = (label: string, value: string, options: { mono?: boolean } = {}): HTMLElement => {
+    const createDiagnosticMeta = (
+      label: string,
+      value: string,
+      options: { mono?: boolean } = {}
+    ): HTMLElement => {
       const row = document.createElement('div');
       row.className = 'admin-banner__meta';
 
@@ -622,41 +718,65 @@ if (!root) {
       labelEl.textContent = label;
 
       const valueEl = document.createElement(options.mono ? 'code' : 'span');
-      valueEl.className = options.mono ? 'admin-banner__meta-value admin-banner__meta-value--mono' : 'admin-banner__meta-value';
+      valueEl.className = options.mono
+        ? 'admin-banner__meta-value admin-banner__meta-value--mono'
+        : 'admin-banner__meta-value';
       valueEl.textContent = value;
 
       row.append(labelEl, valueEl);
       return row;
     };
 
-    const createDiagnosticListItem = (diagnostic: ThemeSettingsReadDiagnostic): HTMLElement => {
+    const createDiagnosticListItem = (
+      diagnostic: ThemeSettingsReadDiagnostic
+    ): HTMLElement => {
       const item = document.createElement('li');
-      item.className = 'admin-banner__list-item admin-banner__list-item--diagnostic';
+      item.className =
+        'admin-banner__list-item admin-banner__list-item--diagnostic';
 
       const title = document.createElement('p');
       title.className = 'admin-banner__item-title';
       title.textContent = getDiagnosticHeadline(diagnostic);
       item.appendChild(title);
 
-      item.appendChild(createDiagnosticMeta('File', diagnostic.path, { mono: true }));
+      item.appendChild(
+        createDiagnosticMeta('File', diagnostic.path, { mono: true })
+      );
 
-      if (typeof diagnostic.line === 'number' && typeof diagnostic.column === 'number') {
-        item.appendChild(createDiagnosticMeta('Position', `Line ${diagnostic.line}, Column ${diagnostic.column}`));
+      if (
+        typeof diagnostic.line === 'number' &&
+        typeof diagnostic.column === 'number'
+      ) {
+        item.appendChild(
+          createDiagnosticMeta(
+            'Position',
+            `Line ${diagnostic.line}, Column ${diagnostic.column}`
+          )
+        );
       }
 
       if (diagnostic.detail) {
-        item.appendChild(createDiagnosticMeta('Technical Detail', diagnostic.detail, { mono: true }));
+        item.appendChild(
+          createDiagnosticMeta('Technical Detail', diagnostic.detail, {
+            mono: true,
+          })
+        );
       }
 
       return item;
     };
 
-    const setInvalidSettingsErrorBanner = (invalidState: ThemeSettingsEditableErrorState): void => {
+    const setInvalidSettingsErrorBanner = (
+      invalidState: ThemeSettingsEditableErrorState
+    ): void => {
       setErrorBanner({
         title: 'Switched to Read-Only Mode',
-        message: 'Settings configuration files are corrupted. Please fix the files, then click "Retry" or refresh the page.',
-        items: invalidState.diagnostics.map((diagnostic) => createDiagnosticListItem(diagnostic)),
-        retryable: true
+        message:
+          'Settings configuration files are corrupted. Please fix the files, then click "Retry" or refresh the page.',
+        items: invalidState.diagnostics.map((diagnostic) =>
+          createDiagnosticListItem(diagnostic)
+        ),
+        retryable: true,
       });
     };
 
@@ -676,7 +796,9 @@ if (!root) {
       setStatus(
         'error',
         STATUS_INVALID_SETTINGS,
-        options.announceStatus === undefined ? {} : { announce: options.announceStatus }
+        options.announceStatus === undefined
+          ? {}
+          : { announce: options.announceStatus }
       );
       if (options.revealError) {
         revealErrorState();
@@ -693,7 +815,9 @@ if (!root) {
       if (
         applyInvalidSettingsState(
           payload,
-          options.announceStatus === undefined ? {} : { announceStatus: options.announceStatus }
+          options.announceStatus === undefined
+            ? {}
+            : { announceStatus: options.announceStatus }
         )
       ) {
         return;
@@ -703,7 +827,10 @@ if (!root) {
       if (!resolvedPayload) {
         clearInvalidFields();
         setStatus('error', 'Invalid response format');
-        setErrors([getPayloadMessage(payload) || 'Config API returned invalid payload'], { title: 'Failed to load config' });
+        setErrors(
+          [getPayloadMessage(payload) || 'Config API returned invalid payload'],
+          { title: 'Failed to load config' }
+        );
         revealErrorState();
         return;
       }
@@ -743,17 +870,21 @@ if (!root) {
         const response = await fetch(endpoint, {
           method: 'GET',
           headers: { Accept: 'application/json' },
-          cache: 'no-store'
+          cache: 'no-store',
         });
         const payload = (await response.json().catch(() => null)) as unknown;
         if (applyInvalidSettingsState(payload, { announceStatus: false })) {
           return;
         }
         if (!response.ok) {
-          throw new Error(getPayloadMessage(payload) || `HTTP ${response.status}`);
+          throw new Error(
+            getPayloadMessage(payload) || `HTTP ${response.status}`
+          );
         }
         if (!extractSettingsPayload(payload)) {
-          throw new Error(getPayloadMessage(payload) || 'Invalid response format');
+          throw new Error(
+            getPayloadMessage(payload) || 'Invalid response format'
+          );
         }
         loadPayload(payload, 'remote');
       } catch (error) {
@@ -764,7 +895,9 @@ if (!root) {
       }
     };
 
-    const buildSettingsRequestUrl = (options: { dryRun?: boolean } = {}): string => {
+    const buildSettingsRequestUrl = (
+      options: { dryRun?: boolean } = {}
+    ): string => {
       const requestUrl = new URL(endpoint, window.location.href);
       if (options.dryRun) {
         requestUrl.searchParams.set('dryRun', '1');
@@ -774,11 +907,13 @@ if (!root) {
       return requestUrl.toString();
     };
 
-    const createSettingsRequestBody = (settings: EditableSettings): string | null => {
+    const createSettingsRequestBody = (
+      settings: EditableSettings
+    ): string | null => {
       if (!currentRevision) return null;
       return JSON.stringify({
         revision: currentRevision,
-        settings
+        settings,
       });
     };
 
@@ -795,10 +930,10 @@ if (!root) {
         method: 'POST',
         headers: {
           Accept: 'application/json',
-          'Content-Type': 'application/json; charset=utf-8'
+          'Content-Type': 'application/json; charset=utf-8',
         },
         cache: 'no-store',
-        body: requestBody
+        body: requestBody,
       });
 
       const payload = (await response.json().catch(() => null)) as unknown;
@@ -840,11 +975,26 @@ if (!root) {
       refreshFooterPreview();
     });
     inputSiteFooterCopyright.addEventListener('input', refreshFooterPreview);
-    inputArticleMetaDateLabel.addEventListener('input', refreshArticleMetaPreview);
-    inputArticleMetaShowDate.addEventListener('change', refreshArticleMetaPreview);
-    inputArticleMetaShowTags.addEventListener('change', refreshArticleMetaPreview);
-    inputArticleMetaShowWordCount.addEventListener('change', refreshArticleMetaPreview);
-    inputArticleMetaShowReadingTime.addEventListener('change', refreshArticleMetaPreview);
+    inputArticleMetaDateLabel.addEventListener(
+      'input',
+      refreshArticleMetaPreview
+    );
+    inputArticleMetaShowDate.addEventListener(
+      'change',
+      refreshArticleMetaPreview
+    );
+    inputArticleMetaShowTags.addEventListener(
+      'change',
+      refreshArticleMetaPreview
+    );
+    inputArticleMetaShowWordCount.addEventListener(
+      'change',
+      refreshArticleMetaPreview
+    );
+    inputArticleMetaShowReadingTime.addEventListener(
+      'change',
+      refreshArticleMetaPreview
+    );
     inputHomeIntroMore.addEventListener('input', refreshHomeIntroPreview);
     inputHomeShowIntroMore.addEventListener('change', refreshHomeIntroPreview);
     inputHomeIntroMoreLinkPrimary.addEventListener('change', () => {
@@ -867,13 +1017,17 @@ if (!root) {
     if ('IntersectionObserver' in window) {
       const adminActionsObserver = new IntersectionObserver(
         (entries) => {
-          isAdminActionsNearViewport = entries.some((entry) => entry.isIntersecting);
-          adminActions.dataset.sticky = String(isDirty && !isAdminActionsNearViewport);
+          isAdminActionsNearViewport = entries.some(
+            (entry) => entry.isIntersecting
+          );
+          adminActions.dataset.sticky = String(
+            isDirty && !isAdminActionsNearViewport
+          );
         },
         {
           root: null,
           threshold: 0,
-          rootMargin: '0px 0px -96px 0px'
+          rootMargin: '0px 0px -96px 0px',
         }
       );
       adminActionsObserver.observe(adminActionsSentinel);
@@ -888,7 +1042,7 @@ if (!root) {
         {
           href: '',
           order: getNextSocialOrder(),
-          visible: true
+          visible: true,
         },
         getCustomRows().length,
         { manualId: false }
@@ -897,7 +1051,10 @@ if (!root) {
       socialCustomList.appendChild(row);
       updateCustomRowsUi();
       refreshDirty();
-      query<HTMLSelectElement>(row, '[data-social-custom-field="iconKey"]')?.focus();
+      query<HTMLSelectElement>(
+        row,
+        '[data-social-custom-field="iconKey"]'
+      )?.focus();
     });
 
     socialCustomList.addEventListener('change', (event) => {
@@ -906,7 +1063,11 @@ if (!root) {
 
       const presetRow = target.closest('[data-social-preset-row]');
       if (presetRow) {
-        if (target.matches('[data-social-preset-field="order"], [data-social-preset-field="href"]')) {
+        if (
+          target.matches(
+            '[data-social-preset-field="order"], [data-social-preset-field="href"]'
+          )
+        ) {
           normalizeSocialOrders();
         }
         syncPresetRow(presetRow);
@@ -942,13 +1103,15 @@ if (!root) {
       if (target.matches('[data-social-custom-field="id"]')) {
         const trimmed = target.value.trim();
         const generatedId = getStoredGeneratedCustomId(row);
-        row.dataset.idManual = trimmed && trimmed !== generatedId ? 'true' : 'false';
+        row.dataset.idManual =
+          trimmed && trimmed !== generatedId ? 'true' : 'false';
         return;
       }
       if (target.matches('[data-social-custom-field="label"]')) {
         const trimmed = target.value.trim();
         const generatedLabel = getStoredGeneratedCustomLabel(row);
-        row.dataset.labelManual = trimmed && trimmed !== generatedLabel ? 'true' : 'false';
+        row.dataset.labelManual =
+          trimmed && trimmed !== generatedLabel ? 'true' : 'false';
       }
     });
 
@@ -977,12 +1140,18 @@ if (!root) {
       if (presetActionBtn instanceof HTMLButtonElement) {
         const presetRow = presetActionBtn.closest('[data-social-preset-row]');
         if (!(presetRow instanceof HTMLElement)) return;
-        const action = presetActionBtn.getAttribute('data-social-preset-action');
+        const action = presetActionBtn.getAttribute(
+          'data-social-preset-action'
+        );
 
         if (action === 'toggle-visible') {
           const hrefInput = getPresetRowHrefInput(presetRow);
           const orderInput = getPresetRowOrderInput(presetRow);
-          if (!(hrefInput instanceof HTMLInputElement) || !(orderInput instanceof HTMLInputElement)) return;
+          if (
+            !(hrefInput instanceof HTMLInputElement) ||
+            !(orderInput instanceof HTMLInputElement)
+          )
+            return;
 
           const visible = hrefInput.value.trim().length > 0;
           if (visible) {
@@ -991,7 +1160,8 @@ if (!root) {
             hrefInput.value = '';
           } else {
             hrefInput.value = presetRow.dataset.stashedHref || '';
-            orderInput.value = presetRow.dataset.stashedOrder || String(getNextSocialOrder());
+            orderInput.value =
+              presetRow.dataset.stashedOrder || String(getNextSocialOrder());
           }
 
           normalizeSocialOrders();
@@ -1017,7 +1187,10 @@ if (!root) {
       }
 
       if (action === 'toggle-visible') {
-        const visibleInput = query<HTMLInputElement>(row, '[data-social-custom-field="visible"]');
+        const visibleInput = query<HTMLInputElement>(
+          row,
+          '[data-social-custom-field="visible"]'
+        );
         if (!(visibleInput instanceof HTMLInputElement)) return;
         visibleInput.checked = !visibleInput.checked;
         syncCustomRow(row);
@@ -1043,16 +1216,28 @@ if (!root) {
       try {
         if (!currentRevision) {
           clearInvalidFields();
-          setErrors(['Current config is missing revision, please sync latest config first'], {
-            title: 'Re-sync required before check'
-          });
+          setErrors(
+            [
+              'Current config is missing revision, please sync latest config first',
+            ],
+            {
+              title: 'Re-sync required before check',
+            }
+          );
           setStatus('error', 'Config check failed', { announce: false });
           revealErrorState();
           return;
         }
 
-        const { response, payload } = await requestSettingsWrite(current, { dryRun: true });
-        if (applyInvalidSettingsState(payload, { announceStatus: false, revealError: true })) {
+        const { response, payload } = await requestSettingsWrite(current, {
+          dryRun: true,
+        });
+        if (
+          applyInvalidSettingsState(payload, {
+            announceStatus: false,
+            revealError: true,
+          })
+        ) {
           return;
         }
 
@@ -1064,17 +1249,26 @@ if (!root) {
             setErrors(
               serverErrors.length
                 ? serverErrors
-                : ['Config has been updated externally; draft is preserved, please sync before merging'],
+                : [
+                    'Config has been updated externally; draft is preserved, please sync before merging',
+                  ],
               { title: 'External update detected during check' }
             );
-            setStatus('warn', 'External update detected during check', { announce: false });
+            setStatus('warn', 'External update detected during check', {
+              announce: false,
+            });
             revealErrorState();
             return;
           }
 
-          setErrors(serverErrors.length ? serverErrors : ['Config check failed, please try again'], {
-            title: 'Config check failed'
-          });
+          setErrors(
+            serverErrors.length
+              ? serverErrors
+              : ['Config check failed, please try again'],
+            {
+              title: 'Config check failed',
+            }
+          );
           setStatus('error', 'Config check failed', { announce: false });
           revealErrorState();
           return;
@@ -1086,7 +1280,10 @@ if (!root) {
       } catch (error) {
         console.error(error);
         clearInvalidFields();
-        setErrors(['Config check request failed, please check local service logs'], { title: 'Config check failed' });
+        setErrors(
+          ['Config check request failed, please check local service logs'],
+          { title: 'Config check failed' }
+        );
         setStatus('error', 'Config check failed', { announce: false });
         revealErrorState();
       } finally {
@@ -1121,9 +1318,14 @@ if (!root) {
       try {
         if (!currentRevision) {
           clearInvalidFields();
-          setErrors(['Current config is missing revision, please sync latest config before saving'], {
-            title: 'Re-sync required before save'
-          });
+          setErrors(
+            [
+              'Current config is missing revision, please sync latest config before saving',
+            ],
+            {
+              title: 'Re-sync required before save',
+            }
+          );
           setStatus('error', 'Save failed', { announce: false });
           revealErrorState();
           return;
@@ -1132,24 +1334,49 @@ if (!root) {
         const { response, payload } = await requestSettingsWrite(current);
         if (!response.ok || !isRecord(payload) || payload.ok !== true) {
           clearInvalidFields();
-          if (applyInvalidSettingsState(payload, { announceStatus: false, revealError: true })) {
+          if (
+            applyInvalidSettingsState(payload, {
+              announceStatus: false,
+              revealError: true,
+            })
+          ) {
             return;
           }
 
           const serverErrors = getPayloadErrors(payload);
           if (response.status === 409 && extractSettingsPayload(payload)) {
             loadPayload(payload, 'remote', { announceStatus: false });
-            setErrors(serverErrors.length ? serverErrors : ['Config updated, synced latest, please review before saving'], {
-              title: 'External update detected'
-            });
-            setStatus('warn', 'External update detected, synced latest config', { announce: false });
+            setErrors(
+              serverErrors.length
+                ? serverErrors
+                : [
+                    'Config updated, synced latest, please review before saving',
+                  ],
+              {
+                title: 'External update detected',
+              }
+            );
+            setStatus(
+              'warn',
+              'External update detected, synced latest config',
+              { announce: false }
+            );
             revealErrorState();
             return;
           }
 
-          setErrors(serverErrors.length ? serverErrors : ['Save failed, please try again'], { title: 'Save failed' });
+          setErrors(
+            serverErrors.length
+              ? serverErrors
+              : ['Save failed, please try again'],
+            { title: 'Save failed' }
+          );
           if (response.status === 404) {
-            setStatus('error', 'Write not allowed in current environment (DEV only)', { announce: false });
+            setStatus(
+              'error',
+              'Write not allowed in current environment (DEV only)',
+              { announce: false }
+            );
           } else {
             setStatus('error', 'Save failed', { announce: false });
           }
@@ -1159,7 +1386,10 @@ if (!root) {
 
         if (extractSettingsPayload(payload)) {
           loadPayload(payload, 'remote', { announceStatus: false });
-          setStatus('ok', 'Save successful, refresh target page to see changes');
+          setStatus(
+            'ok',
+            'Save successful, refresh target page to see changes'
+          );
         } else {
           baseline = current;
           setDirty(false);
@@ -1170,7 +1400,9 @@ if (!root) {
       } catch (error) {
         console.error(error);
         clearInvalidFields();
-        setErrors(['Save request failed, please check local service logs'], { title: 'Save request failed' });
+        setErrors(['Save request failed, please check local service logs'], {
+          title: 'Save request failed',
+        });
         setStatus('error', 'Save failed', { announce: false });
         revealErrorState();
       } finally {

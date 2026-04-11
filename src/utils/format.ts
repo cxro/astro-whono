@@ -29,7 +29,8 @@ export function createWithBase(base: string) {
   const baseNormalized = base.endsWith('/') ? base : `${base}/`;
   return (path: string) => {
     if (!path || path === '/') return baseNormalized;
-    if (/^(?:[a-z]+:)?\/\//i.test(path) || path.startsWith('data:')) return path;
+    if (/^(?:[a-z]+:)?\/\//i.test(path) || path.startsWith('data:'))
+      return path;
     const clean = path.startsWith('/') ? path.slice(1) : path;
     return `${baseNormalized}${clean}`;
   };
@@ -52,7 +53,9 @@ const HERO_IMAGE_LOCAL_EXT_RE = /\.(?:avif|gif|jpe?g|png|webp)$/i;
 const BITS_AVATAR_LOCAL_EXT_RE = /\.(?:avif|gif|jpe?g|png|svg|webp)$/i;
 
 const hasInvalidLocalImagePathSegment = (value: string): boolean =>
-  /(^|\/)\.\.(?:\/|$)/.test(value) || value.includes('?') || value.includes('#');
+  /(^|\/)\.\.(?:\/|$)/.test(value) ||
+  value.includes('?') ||
+  value.includes('#');
 
 const toCanonicalHeroAssetPath = (value: string): string | null => {
   if (value.startsWith('@/assets/')) {
@@ -66,7 +69,9 @@ const toCanonicalHeroAssetPath = (value: string): string | null => {
   return value.startsWith('src/assets/') ? value : null;
 };
 
-export function normalizeHeroImageSrc(value: unknown): string | null | undefined {
+export function normalizeHeroImageSrc(
+  value: unknown
+): string | null | undefined {
   if (value === null) return null;
   if (typeof value !== 'string') return undefined;
 
@@ -77,21 +82,31 @@ export function normalizeHeroImageSrc(value: unknown): string | null | undefined
   if (safeRemoteUrl) return safeRemoteUrl;
 
   const normalized = trimmed.replace(/\\/g, '/').replace(/^\.\/+/, '');
-  if (!normalized || normalized.startsWith('//') || hasInvalidLocalImagePathSegment(normalized)) {
+  if (
+    !normalized ||
+    normalized.startsWith('//') ||
+    hasInvalidLocalImagePathSegment(normalized)
+  ) {
     return undefined;
   }
 
   if (normalized.startsWith('/')) {
-    return normalized !== '/' && HERO_IMAGE_LOCAL_EXT_RE.test(normalized) ? normalized : undefined;
+    return normalized !== '/' && HERO_IMAGE_LOCAL_EXT_RE.test(normalized)
+      ? normalized
+      : undefined;
   }
 
   if (normalized.startsWith('public/')) {
     const publicPath = `/${normalized.slice('public/'.length)}`;
-    return publicPath !== '/' && HERO_IMAGE_LOCAL_EXT_RE.test(publicPath) ? publicPath : undefined;
+    return publicPath !== '/' && HERO_IMAGE_LOCAL_EXT_RE.test(publicPath)
+      ? publicPath
+      : undefined;
   }
 
   const assetPath = toCanonicalHeroAssetPath(normalized);
-  return assetPath && HERO_IMAGE_LOCAL_EXT_RE.test(assetPath) ? assetPath : undefined;
+  return assetPath && HERO_IMAGE_LOCAL_EXT_RE.test(assetPath)
+    ? assetPath
+    : undefined;
 }
 
 export function getHeroImageLocalFilePath(value: string): string | null {
@@ -179,7 +194,7 @@ export function createJsonIndexLoader<T>(options: JsonIndexLoaderOptions<T>) {
     if (!indexPromise) {
       options.onPending?.();
       indexPromise = fetch(options.url, {
-        cache: options.shouldBypassCache ? 'no-store' : 'default'
+        cache: options.shouldBypassCache ? 'no-store' : 'default',
       })
         .then((response) => {
           if (!response.ok) throw new Error('index fetch failed');
@@ -204,7 +219,7 @@ export function createJsonIndexLoader<T>(options: JsonIndexLoaderOptions<T>) {
   return {
     load,
     getCached: () => indexCache,
-    hasFailed: () => indexFailed
+    hasFailed: () => indexFailed,
   };
 }
 
@@ -230,7 +245,7 @@ export function createDebouncedAsyncRunner(
 
   return {
     schedule,
-    cancel
+    cancel,
   };
 }
 
@@ -248,7 +263,7 @@ export function groupByYear<T>(items: T[], getDate: (item: T) => Date) {
     .sort((a, b) => b[0] - a[0])
     .map(([year, list]) => ({
       year,
-      list: list.sort((a, b) => getDate(b).valueOf() - getDate(a).valueOf())
+      list: list.sort((a, b) => getDate(b).valueOf() - getDate(a).valueOf()),
     }));
 }
 
@@ -265,7 +280,7 @@ export function groupByUtcYear<T>(items: T[], getDate: (item: T) => Date) {
     .sort((a, b) => b[0] - a[0])
     .map(([year, list]) => ({
       year,
-      list: list.sort((a, b) => getDate(b).valueOf() - getDate(a).valueOf())
+      list: list.sort((a, b) => getDate(b).valueOf() - getDate(a).valueOf()),
     }));
 }
 
@@ -276,7 +291,9 @@ export function formatDateTime(d: Date): string {
   return `${yyyyMmDd} ${hh}:${mm}`;
 }
 
-export function joinPageSubtitleText(...parts: Array<string | null | undefined>): string | null {
+export function joinPageSubtitleText(
+  ...parts: Array<string | null | undefined>
+): string | null {
   const normalized = parts
     .map((part) => (typeof part === 'string' ? part.trim() : ''))
     .filter(Boolean);

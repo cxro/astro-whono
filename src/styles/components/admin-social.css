@@ -66,7 +66,11 @@
   padding: 10px 12px;
   border: 1px solid var(--border);
   border-radius: 14px 14px 0 0;
-  background: linear-gradient(180deg, var(--panel) 0%, var(--code-header-bg) 100%);
+  background: linear-gradient(
+    180deg,
+    var(--panel) 0%,
+    var(--code-header-bg) 100%
+  );
   color: var(--muted);
   font-size: 12px;
 }
@@ -193,7 +197,7 @@
   gap: 4px;
   min-height: 36px;
   color: var(--muted);
-  font-family: "LXGW WenKai Lite", "Kaiti SC", "STKaiti", serif;
+  font-family: 'LXGW WenKai Lite', 'Kaiti SC', 'STKaiti', serif;
   font-size: 15px;
   line-height: 1;
 }
@@ -249,7 +253,11 @@
   width: min(100%, 116px);
   min-width: 0;
   margin-inline: auto;
-  background: linear-gradient(180deg, var(--code-content-bg) 0%, var(--panel) 100%);
+  background: linear-gradient(
+    180deg,
+    var(--code-content-bg) 0%,
+    var(--panel) 100%
+  );
   color: var(--muted);
   caret-color: var(--text);
   letter-spacing: 0.02em;
@@ -257,7 +265,11 @@
 }
 
 .admin-social-field--id input:hover {
-  background: linear-gradient(180deg, var(--code-content-bg) 0%, var(--panel) 100%);
+  background: linear-gradient(
+    180deg,
+    var(--code-content-bg) 0%,
+    var(--panel) 100%
+  );
 }
 
 .admin-social-field--id input:focus-visible {
@@ -386,7 +398,7 @@
   color: var(--faint);
   font-size: 11px;
   line-height: 1.4;
-  font-family: "LXGW WenKai Lite", "Kaiti SC", "STKaiti", serif;
+  font-family: 'LXGW WenKai Lite', 'Kaiti SC', 'STKaiti', serif;
 }
 
 .admin-social-actions {

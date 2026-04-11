@@ -26,7 +26,7 @@ export function cleanMarkdownToText(md: string): string {
   text = text.replace(/^\s*#{1,6}\s+/gm, '');
   text = text.replace(/^\s*>\s?/gm, '');
   text = text.replace(/^\s*[-*+]\s+/gm, '');
-  text = text.replace(/^\s*\d+[\.\)]\s+/gm, '');
+  text = text.replace(/^\s*\d+[.)]\s+/gm, '');
 
   text = text.replace(/<[^>]+>/g, ' ');
   text = text.replace(/\r?\n+/g, ' ');
@@ -44,7 +44,7 @@ export function deriveMarkdownText(md: string): DerivedMarkdownText {
   if (!md) {
     return {
       plainText: '',
-      excerptText: ''
+      excerptText: '',
     };
   }
 
@@ -53,6 +53,7 @@ export function deriveMarkdownText(md: string): DerivedMarkdownText {
 
   return {
     plainText,
-    excerptText: excerptMarkdown === md ? plainText : cleanMarkdownToText(excerptMarkdown)
+    excerptText:
+      excerptMarkdown === md ? plainText : cleanMarkdownToText(excerptMarkdown),
   };
 }

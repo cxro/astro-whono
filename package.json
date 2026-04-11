@@ -21,14 +21,15 @@
     "preview": "astro preview",
     "check": "astro check",
     "test": "vitest run --config ./vitest.config.ts",
+    "lint": "eslint .",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
     "audit:prod": "npm audit --omit=dev --audit-level=high --registry=https://registry.npmjs.org",
-    "check:callout": "node ./scripts/check-callout.mjs",
-    "check:codeblock": "node ./scripts/check-codeblock.mjs",
-    "check:figure": "node ./scripts/check-figure.mjs",
-    "check:gallery": "node ./scripts/check-gallery.mjs",
     "check:prod-artifacts": "node ./scripts/check-production-artifacts.mjs",
-    "check:preview-admin": "node ./scripts/check-preview-admin-boundary.mjs",
-    "ci:core": "npm run check && npm run test && npm run build && npm run check:callout && npm run check:codeblock && npm run check:gallery && npm run check:figure",
+    "test:integration": "vitest run --config ./vitest.integration.config.ts",
+    "test:e2e": "playwright test",
+    "test:e2e:ci": "npx playwright install --with-deps chromium && npm run test:e2e",
+    "ci:core": "npm run check && npm run test && npm run build && npm run test:integration",
     "ci": "npm run ci:core",
     "font:charset": "node ./scripts/font-charset.mjs",
     "font:subset": "node ./scripts/font-subset.mjs",
@@ -42,13 +43,22 @@
   },
   "devDependencies": {
     "@astrojs/check": "^0.9.8",
+    "@eslint/js": "^9.25.0",
     "@iconify-json/logos": "^1.2.0",
     "@iconify-json/simple-icons": "^1.2.0",
+    "@playwright/test": "^1.59.1",
     "@types/node": "^22.0.0",
+    "eslint": "^9.25.0",
+    "eslint-config-prettier": "^10.1.8",
+    "eslint-plugin-astro": "^1.7.0",
+    "globals": "^17.4.0",
+    "prettier": "^3.8.2",
+    "prettier-plugin-astro": "^0.14.1",
     "rehype-raw": "^7.0.0",
     "rehype-sanitize": "^6.0.0",
     "remark-directive": "^4.0.0",
     "typescript": "^5.9.3",
+    "typescript-eslint": "^8.58.1",
     "unist-util-visit": "^5.0.0",
     "vitest": "^4.1.0"
   },
@@ -60,6 +70,12 @@
     "rollup": "4.59.0",
     "svgo": "4.0.1",
     "volar-service-yaml": "0.0.70",
-    "yaml-language-server": "1.20.0"
+    "yaml-language-server": "1.20.0",
+    "eslint": {
+      "ajv": "6.12.6"
+    },
+    "@eslint/eslintrc": {
+      "ajv": "6.12.6"
+    }
   }
 }

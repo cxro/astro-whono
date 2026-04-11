@@ -1,5 +1,8 @@
 ---
-import type { SiteSocialIconKey, SiteSocialPresetId } from '../../lib/theme-settings';
+import type {
+  SiteSocialIconKey,
+  SiteSocialPresetId,
+} from '../../lib/theme-settings';
 import AdminSocialCustomRowTemplate from './AdminSocialCustomRowTemplate.astro';
 import AdminSocialPresetRow from './AdminSocialPresetRow.astro';
 
@@ -38,12 +41,16 @@ const socialIconOptions: readonly SocialIconOption[] = [
   { value: 'bilibili', optionLabel: 'Bilibili', defaultLabel: 'Bilibili' },
   { value: 'youtube', optionLabel: 'YouTube', defaultLabel: 'YouTube' },
   { value: 'linkedin', optionLabel: 'LinkedIn', defaultLabel: 'LinkedIn' },
-  { value: 'website', optionLabel: 'Website', defaultLabel: 'Website' }
+  { value: 'website', optionLabel: 'Website', defaultLabel: 'Website' },
 ];
 const customSocialIconOptions = socialIconOptions.filter(
-  (option) => option.value !== 'github' && option.value !== 'x' && option.value !== 'email'
+  (option) =>
+    option.value !== 'github' &&
+    option.value !== 'x' &&
+    option.value !== 'email'
 );
-const defaultCustomSocialIconKey: SiteSocialIconKey = customSocialIconOptions[0]?.value ?? 'website';
+const defaultCustomSocialIconKey: SiteSocialIconKey =
+  customSocialIconOptions[0]?.value ?? 'website';
 const socialPresetRows: readonly SocialPresetRow[] = [
   {
     id: 'github',
@@ -53,7 +60,7 @@ const socialPresetRows: readonly SocialPresetRow[] = [
     inputType: 'url',
     inputMode: 'url',
     autoComplete: 'url',
-    placeholder: 'https://github.com/username'
+    placeholder: 'https://github.com/username',
   },
   {
     id: 'x',
@@ -63,7 +70,7 @@ const socialPresetRows: readonly SocialPresetRow[] = [
     inputType: 'url',
     inputMode: 'url',
     autoComplete: 'url',
-    placeholder: 'https://x.com/username'
+    placeholder: 'https://x.com/username',
   },
   {
     id: 'email',
@@ -73,8 +80,8 @@ const socialPresetRows: readonly SocialPresetRow[] = [
     inputType: 'email',
     inputMode: 'email',
     autoComplete: 'email',
-    placeholder: 'name@example.com'
-  }
+    placeholder: 'name@example.com',
+  },
 ];
 ---
 
@@ -83,18 +90,29 @@ const socialPresetRows: readonly SocialPresetRow[] = [
     <div class="admin-social-panel__head">
       <p class="admin-subtitle admin-subtitle--compact">
         <span class="admin-subtitle__main">Social Links</span>
-        <span id="site-social-custom-count" class="admin-subtitle__hint admin-social-count">
+        <span
+          id="site-social-custom-count"
+          class="admin-subtitle__hint admin-social-count"
+        >
           (Add 0 / {socialCustomLimit})
         </span>
       </p>
       <div class="admin-social-actions">
-        <button id="site-social-custom-add" class="admin-btn admin-btn--ghost" type="button">
+        <button
+          id="site-social-custom-add"
+          class="admin-btn admin-btn--ghost"
+          type="button"
+        >
           Add Link
         </button>
       </div>
     </div>
     <div class="admin-social-table">
-      <div id="site-social-custom-head" class="admin-social-header" aria-hidden="true">
+      <div
+        id="site-social-custom-head"
+        class="admin-social-header"
+        aria-hidden="true"
+      >
         <span class="admin-social-header__order">Position</span>
         <span class="admin-social-header__platform">Platform</span>
         <span class="admin-social-header__id">Link ID</span>

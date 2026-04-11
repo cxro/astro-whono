@@ -3,7 +3,7 @@ title: Theme Console Guide
 description: Explains the scope, page groups, configuration targets, and save mechanism of astro-whono's local Theme Console in development environment.
 badge: Guide
 date: 2026-03-18
-tags: [ "Theme Console", "Guide"]
+tags: ['Theme Console', 'Guide']
 draft: false
 ---
 
@@ -57,7 +57,8 @@ src/data/settings/
   page.json
   ui.json
 ```
-> If src/data/settings/*.json doesn't exist yet, it will be auto-generated on first save in /admin
+
+> If src/data/settings/\*.json doesn't exist yet, it will be auto-generated on first save in /admin
 
 Theme Console manages theme configurations within the repository; changes can still be tracked and reverted via Git.
 
@@ -102,7 +103,6 @@ Social links support mixing fixed platforms with custom links, with unified orde
 
 Homepage intro more still uses fixed sentence structure; the backend only exposes text and entry selection to keep homepage structure stable. Currently selectable entries include `archive`, `essay`, `bits`, `memo`, `about`, and `tag`.
 
-
 ### Inner Pages
 
 `Inner Pages` handles unified copy and display strategy for inner pages:
@@ -117,12 +117,10 @@ Homepage intro more still uses fixed sentence structure; the backend only expose
 
 ![Inner Pages group screenshot](./theme-console/theme-console-inner-pages.webp)
 
-
 ### Reading / Code
 
 - Whether to show line numbers in code blocks
 - Whether to show reading mode entry in sidebar
-
 
 ## Save Mechanism
 

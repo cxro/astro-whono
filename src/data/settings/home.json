@@ -1,10 +1,7 @@
 {
   "introLead": "This is an open-source writing theme and sample content library: includes Essays, Memo, Archive, and Bits. For setup and configuration, see the README.",
   "introMore": "More articles at",
-  "introMoreLinks": [
-    "archive",
-    "tag"
-  ],
+  "introMoreLinks": ["archive", "tag"],
   "showIntroLead": true,
   "showIntroMore": true,
   "heroPresetId": "default",

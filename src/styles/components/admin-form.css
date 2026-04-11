@@ -95,7 +95,7 @@
   background: var(--panel);
   font-size: 13px;
   color: var(--text);
-  font-family: "LXGW WenKai Lite", "Kaiti SC", "STKaiti", serif;
+  font-family: 'LXGW WenKai Lite', 'Kaiti SC', 'STKaiti', serif;
   white-space: nowrap;
 }
 
@@ -223,7 +223,7 @@
   font-size: 12px;
   line-height: 1.55;
   letter-spacing: 0.01em;
-  font-family: "LXGW WenKai Lite", "Kaiti SC", "STKaiti", serif;
+  font-family: 'LXGW WenKai Lite', 'Kaiti SC', 'STKaiti', serif;
 }
 
 .admin-banner--error {
@@ -383,7 +383,9 @@
   background: var(--admin-error-code-bg);
   font-size: 12px;
   line-height: 1.6;
-  font-family: ui-monospace, "SFMono-Regular", "Cascadia Code", "Fira Code", Consolas, monospace;
+  font-family:
+    ui-monospace, 'SFMono-Regular', 'Cascadia Code', 'Fira Code', Consolas,
+    monospace;
   white-space: pre-wrap;
   word-break: break-word;
   color: var(--admin-error-text);
@@ -410,7 +412,11 @@
   padding: 16px 16px 18px;
   margin: 0;
   min-width: 0;
-  background: linear-gradient(180deg, var(--bg) 0%, var(--code-content-bg) 100%);
+  background: linear-gradient(
+    180deg,
+    var(--bg) 0%,
+    var(--code-content-bg) 100%
+  );
   box-shadow: 0 20px 40px -34px var(--overlay-35);
 }
 
@@ -440,7 +446,7 @@
   color: var(--text);
   font-size: 16px;
   font-weight: 400;
-  font-family: "LXGW WenKai Lite", "Kaiti SC", "STKaiti", serif;
+  font-family: 'LXGW WenKai Lite', 'Kaiti SC', 'STKaiti', serif;
 }
 
 .admin-grid {
@@ -505,7 +511,7 @@
 .admin-label__hint {
   color: var(--faint);
   font-weight: 400;
-  font-family: "LXGW WenKai Lite", "Kaiti SC", "STKaiti", serif;
+  font-family: 'LXGW WenKai Lite', 'Kaiti SC', 'STKaiti', serif;
 }
 
 .admin-label__toggle {
@@ -516,7 +522,7 @@
   min-height: 20px;
   color: var(--muted);
   font-weight: 400;
-  font-family: "LXGW WenKai Lite", "Kaiti SC", "STKaiti", serif;
+  font-family: 'LXGW WenKai Lite', 'Kaiti SC', 'STKaiti', serif;
   white-space: nowrap;
   cursor: pointer;
 }
@@ -545,7 +551,7 @@
 }
 
 .admin-help__preview-value {
-  font-family: "LXGW WenKai Lite", "Kaiti SC", "STKaiti", serif;
+  font-family: 'LXGW WenKai Lite', 'Kaiti SC', 'STKaiti', serif;
 }
 
 .admin-year-range {
@@ -574,7 +580,8 @@
   cursor: default;
 }
 
-.admin-year-range[data-current-year-enabled='true'] .admin-year-range__readonly {
+.admin-year-range[data-current-year-enabled='true']
+  .admin-year-range__readonly {
   color: var(--text) !important;
 }
 
@@ -606,7 +613,7 @@
   color: var(--text);
   padding: 8px 10px;
   font: inherit;
-  font-family: "LXGW WenKai Lite", "Kaiti SC", "STKaiti", serif;
+  font-family: 'LXGW WenKai Lite', 'Kaiti SC', 'STKaiti', serif;
   font-size: 14px;
   line-height: 1.4;
   transition:
@@ -664,7 +671,11 @@
   min-height: 38px;
   padding: 2px;
   border-radius: 14px;
-  background: linear-gradient(180deg, var(--bg) 0%, var(--code-content-bg) 100%);
+  background: linear-gradient(
+    180deg,
+    var(--bg) 0%,
+    var(--code-content-bg) 100%
+  );
   box-shadow:
     inset 0 0 0 1px var(--border),
     inset 0 1px 0 rgba(255, 255, 255, 0.35);
@@ -695,7 +706,7 @@
   border-radius: 11px;
   background: transparent;
   color: var(--muted);
-  font-family: "LXGW WenKai Lite", "Kaiti SC", "STKaiti", serif;
+  font-family: 'LXGW WenKai Lite', 'Kaiti SC', 'STKaiti', serif;
   font-size: 13px;
   line-height: 1.3;
   text-align: center;
@@ -709,12 +720,20 @@
 
 .admin-segmented__option:hover span {
   color: var(--text);
-  background: linear-gradient(180deg, var(--bg) 0%, var(--code-content-bg) 100%);
+  background: linear-gradient(
+    180deg,
+    var(--bg) 0%,
+    var(--code-content-bg) 100%
+  );
 }
 
 .admin-segmented__option input:checked + span {
   border-color: var(--border);
-  background: linear-gradient(180deg, var(--code-content-bg) 0%, var(--panel) 100%);
+  background: linear-gradient(
+    180deg,
+    var(--code-content-bg) 0%,
+    var(--panel) 100%
+  );
   color: var(--text);
   box-shadow:
     inset 0 1px 0 rgba(255, 255, 255, 0.45),
@@ -786,7 +805,7 @@
   color: var(--faint);
   font-size: 13px;
   line-height: 1;
-  font-family: "LXGW WenKai Lite", "Kaiti SC", "STKaiti", serif;
+  font-family: 'LXGW WenKai Lite', 'Kaiti SC', 'STKaiti', serif;
 }
 
 .admin-subgroup {
@@ -805,7 +824,7 @@
 
 .admin-subtitle__main,
 .admin-subtitle__hint {
-  font-family: "LXGW WenKai Lite", "Kaiti SC", "STKaiti", serif;
+  font-family: 'LXGW WenKai Lite', 'Kaiti SC', 'STKaiti', serif;
 }
 
 .admin-subtitle__main {
@@ -1043,7 +1062,7 @@
   color: var(--text);
   padding: 4px 8px;
   font: inherit;
-  font-family: "LXGW WenKai Lite", "Kaiti SC", "STKaiti", serif;
+  font-family: 'LXGW WenKai Lite', 'Kaiti SC', 'STKaiti', serif;
   font-size: 13px;
   line-height: 1.2;
   transition:
@@ -1089,7 +1108,11 @@
   padding: 12px 14px;
   border: 1px solid var(--border);
   border-radius: 18px;
-  background: linear-gradient(180deg, var(--bg) 0%, var(--code-content-bg) 100%);
+  background: linear-gradient(
+    180deg,
+    var(--bg) 0%,
+    var(--code-content-bg) 100%
+  );
   box-shadow: 0 20px 40px -34px var(--overlay-35);
 }
 
@@ -1122,7 +1145,7 @@
   border-radius: 10px;
   padding: 0 12px;
   font: inherit;
-  font-family: "LXGW WenKai Lite", "Kaiti SC", "STKaiti", serif;
+  font-family: 'LXGW WenKai Lite', 'Kaiti SC', 'STKaiti', serif;
   font-size: 13px;
   cursor: pointer;
 }

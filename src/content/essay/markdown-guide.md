@@ -3,19 +3,21 @@ title: Markdown Formatting Guide
 description: Demonstrates all Markdown formatting effects supported by this theme, including headings, lists, code, tables, quotes, and more
 date: 2026-01-15
 badge: Example
-tags: [ "Markdown", "Formatting"]
+tags: ['Markdown', 'Formatting']
 draft: false
 ---
 
 This article demonstrates all Markdown formatting effects supported by this theme.
 
 First paragraph... (for list preview)
+
 <!-- more -->
+
 Rest of the content...
 
 ## Text Formatting
 
-This is normal text. **This is bold text**, *this is italic text*, ***this is bold italic***. You can also use ~~strikethrough~~ to mark deprecated content.
+This is normal text. **This is bold text**, _this is italic text_, **_this is bold italic_**. You can also use ~~strikethrough~~ to mark deprecated content.
 
 Inline code uses backticks: `const hello = 'world'`, perfect for marking variable names or commands.
 
@@ -46,22 +48,23 @@ Pullquote (using `blockquote.pullquote` variant):
 
 Supports four types: `note / tip / info / warning`. Here's minimal syntax first; for finer control, you can also write HTML directly.
 
-~~~md
+```md
 :::note[Title]
 This is the content.
 :::
-~~~
+```
 
 To write HTML directly (more precise control):
 
-~~~html
+```html
 <div class="callout note">
   <p class="callout-title" data-icon="none">Title</p>
   <p>This is the content.</p>
 </div>
-~~~
+```
 
 Notes:
+
 - Default icon determined by type, no `<span class="callout-icon">` needed.
 - Hide icon with `data-icon="none"` on `.callout-title`.
 - Custom icon with `data-icon="✨"` (optional).
@@ -83,24 +86,27 @@ Can include inline code `npm run dev`, emphasized text, and [links](https://astr
 :::
 
 :::info[Info]
+
 ```ts
 const hello = 'world';
 ```
+
 :::
 
 :::warning[Warning]
+
 > Can also include quote blocks.
 >
 > Can be multiple paragraphs.
-:::
+> :::
 
 Basic syntax:
 
-~~~text
+```text
 :::type[Optional Title]
 Content text
 :::
-~~~
+```
 
 Only `note / tip / info / warning` supported; unsupported types (like `:::foo[...]`) fall back to `note`.
 
@@ -154,12 +160,12 @@ def quick_sort(arr):
     """Quick sort algorithm implementation"""
     if len(arr) <= 1:
         return arr
-    
+
     pivot = arr[len(arr) // 2]
     left = [x for x in arr if x < pivot]
     middle = [x for x in arr if x == pivot]
     right = [x for x in arr if x > pivot]
-    
+
     return quick_sort(left) + middle + quick_sort(right)
 
 # Usage example
@@ -193,12 +199,12 @@ npm run build
 
 ## Tables
 
-| Feature | Status | Description |
-|:----:|:----:|:----:|
-| Responsive Layout | ✅ | Perfect mobile adaptation |
-| Dark Mode | 🚧 | In development |
-| RSS Feed | ✅ | Multi-feed support |
-| Internationalization | ❌ | Planned |
+|       Feature        | Status |        Description        |
+| :------------------: | :----: | :-----------------------: |
+|  Responsive Layout   |   ✅   | Perfect mobile adaptation |
+|      Dark Mode       |   🚧   |      In development       |
+|       RSS Feed       |   ✅   |    Multi-feed support     |
+| Internationalization |   ❌   |          Planned          |
 
 ## Links and Images
 
@@ -272,7 +278,7 @@ Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor i
 
 ## Mixed Formatting
 
-This paragraph contains **bold**, *italic*, `code`, and [links](/). You can freely combine these elements to create rich reading experiences.
+This paragraph contains **bold**, _italic_, `code`, and [links](/). You can freely combine these elements to create rich reading experiences.
 
 ---
 

@@ -26,14 +26,14 @@
 }
 
 .page-subtitle--with-current-tag::before {
-  content: "·";
+  content: '·';
   margin: 0 0.55em 0 0;
   color: var(--faint);
 }
 
 .page-subtitle__text:not(:last-child)::after,
 .page-subtitle__item:not(:last-child)::after {
-  content: "·";
+  content: '·';
   margin: 0 0.55em;
   color: var(--faint);
 }
@@ -74,7 +74,7 @@
   font-weight: 400;
   letter-spacing: 0;
   line-height: 1.2;
-  font-family: "LXGW WenKai Lite", "Kaiti SC", "STKaiti", serif;
+  font-family: 'LXGW WenKai Lite', 'Kaiti SC', 'STKaiti', serif;
 }
 
 .entry-tags-dialog {
@@ -155,7 +155,7 @@
   color: var(--muted);
   font-size: 13px;
   line-height: 1.5;
-  font-family: "LXGW WenKai Lite", "Kaiti SC", "STKaiti", serif;
+  font-family: 'LXGW WenKai Lite', 'Kaiti SC', 'STKaiti', serif;
 }
 
 .entry-tags-dialog__actions {
@@ -178,7 +178,7 @@
   color: var(--faint);
   cursor: pointer;
   font: inherit;
-  font-family: "Segoe UI Symbol", "Segoe UI", sans-serif;
+  font-family: 'Segoe UI Symbol', 'Segoe UI', sans-serif;
   font-size: 18px;
   line-height: 1;
   transition: color 0.16s ease;
@@ -333,7 +333,7 @@
   white-space: nowrap;
   font-size: 13px;
   line-height: 1.35;
-  font-family: "LXGW WenKai Lite", "Kaiti SC", "STKaiti", serif;
+  font-family: 'LXGW WenKai Lite', 'Kaiti SC', 'STKaiti', serif;
 }
 
 .entry-tag-option__count {
@@ -384,7 +384,7 @@
   }
 }
 
-:root[data-theme="dark"] .entry-tags-dialog {
+:root[data-theme='dark'] .entry-tags-dialog {
   box-shadow: 0 24px 56px var(--overlay-60);
 }
 

@@ -17,7 +17,7 @@ const LANG_ALIASES = {
   conf: 'nginx',
   yml: 'yaml',
   md: 'markdown',
-  cs: 'csharp'
+  cs: 'csharp',
 };
 
 const LANG_LABELS = {
@@ -49,7 +49,7 @@ const LANG_LABELS = {
   sql: 'SQL',
   markdown: 'Markdown',
   nginx: 'Nginx',
-  text: 'Text'
+  text: 'Text',
 };
 
 const SIMPLE_ICON_KEYS = {
@@ -79,7 +79,7 @@ const SIMPLE_ICON_KEYS = {
   dockerfile: ['docker'],
   sql: ['postgresql', 'mysql', 'sqlite'],
   markdown: ['markdown'],
-  nginx: ['nginx']
+  nginx: ['nginx'],
 };
 
 const LOGO_ICON_KEYS = {
@@ -109,7 +109,7 @@ const LOGO_ICON_KEYS = {
   dockerfile: ['docker'],
   sql: ['postgresql', 'mysql', 'sqlite'],
   markdown: ['markdown'],
-  nginx: ['nginx']
+  nginx: ['nginx'],
 };
 
 const COLOR_PRIORITY_LANGS = new Set([
@@ -128,7 +128,7 @@ const COLOR_PRIORITY_LANGS = new Set([
   'svelte',
   'astro',
   'php',
-  'bash'
+  'bash',
 ]);
 
 const normalize = (value) => (value || '').trim().toLowerCase();
@@ -198,7 +198,7 @@ export const getLangIcon = (rawLang) => {
     if (logoIcon) {
       return {
         svg: buildSvg(logos, logoIcon, 'code-lang-icon', true),
-        isColored: true
+        isColored: true,
       };
     }
   }
@@ -207,7 +207,7 @@ export const getLangIcon = (rawLang) => {
   if (simpleIcon) {
     return {
       svg: buildSvg(simpleIcons, simpleIcon, 'code-lang-icon', false),
-      isColored: false
+      isColored: false,
     };
   }
 
@@ -216,7 +216,7 @@ export const getLangIcon = (rawLang) => {
     if (logoIcon) {
       return {
         svg: buildSvg(logos, logoIcon, 'code-lang-icon', true),
-        isColored: true
+        isColored: true,
       };
     }
   }

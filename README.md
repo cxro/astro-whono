@@ -1,6 +1,6 @@
 # astro-whono
 
-[![CI](https://img.shields.io/github/actions/workflow/status/cxro/astro-whono/ci.yml?style=flat&label=CI&labelColor=2E3440&color=A3BE8C&logo=githubactions&logoColor=ECEFF4)](https://github.com/cxro/astro-whono/actions/workflows/ci.yml)  [![Node](https://img.shields.io/badge/Node-%3E%3D22.12.0-81A1C1?style=flat&labelColor=2E3440&logo=nodedotjs&logoColor=ECEFF4)](README.en.md#requirements)  [![Astro](https://img.shields.io/github/package-json/dependency-version/cxro/astro-whono/astro?branch=main&style=flat&label=Astro&labelColor=2E3440&color=BC52EE&logo=astro&logoColor=ECEFF4)](https://docs.astro.build/)  [![License](https://img.shields.io/badge/License-MIT-4C566A?style=flat&labelColor=2E3440&logo=opensourceinitiative&logoColor=ECEFF4)](LICENSE)
+[![CI](https://img.shields.io/github/actions/workflow/status/cxro/astro-whono/ci.yml?style=flat&label=CI&labelColor=2E3440&color=A3BE8C&logo=githubactions&logoColor=ECEFF4)](https://github.com/cxro/astro-whono/actions/workflows/ci.yml) [![Node](https://img.shields.io/badge/Node-%3E%3D22.12.0-81A1C1?style=flat&labelColor=2E3440&logo=nodedotjs&logoColor=ECEFF4)](README.en.md#requirements) [![Astro](https://img.shields.io/github/package-json/dependency-version/cxro/astro-whono/astro?branch=main&style=flat&label=Astro&labelColor=2E3440&color=BC52EE&logo=astro&logoColor=ECEFF4)](https://docs.astro.build/) [![License](https://img.shields.io/badge/License-MIT-4C566A?style=flat&labelColor=2E3440&logo=opensourceinitiative&logoColor=ECEFF4)](LICENSE)
 
 **✨ astro-whono is now upgraded to Astro v6**
 
@@ -11,14 +11,12 @@ A minimal two-column Astro theme for personal writing and lightweight publishing
 - Live demo: <https://astro.whono.me>
 - Repository: <https://github.com/cxro/astro-whono>
 
-
 ## Preview
 
 <p align="center">
   <img src="public/preview-light.png" width="49%" alt="Light preview" />
   <img src="public/preview-dark.png" width="49%" alt="Dark preview" />
 </p>
-
 
 ## Features
 
@@ -30,13 +28,11 @@ A minimal two-column Astro theme for personal writing and lightweight publishing
 - RSS: default archive feed + section feeds
 - Light / dark theme + reading mode
 
-
 ## Getting Started
 
 ### Requirements
 
 - Node.js 22.12+ (`.nvmrc` recommended)
-
 
 ### Quick Start
 
@@ -57,13 +53,12 @@ If execution policy blocks `npm.ps1`, use one of the following:
 - Or use Git Bash / WSL
 </details>
 
-
 ### Common Commands
 
-  - npm run dev
-  - npm run build
-  - npm run ci
-  - npm run new:bit
+- npm run dev
+- npm run build
+- npm run ci
+- npm run new:bit
 
 <details>
   <summary>Check and regression commands</summary>
@@ -88,7 +83,6 @@ npm run check:preview-admin
 - Before release, if you need to verify absolute-link artifacts, set a real `SITE_URL` and run `npm run check:prod-artifacts`.
 </details>
 
-
 ## Deployment
 
 ### One-click Deploy
@@ -102,21 +96,26 @@ npm run check:preview-admin
   <summary><strong>Cloudflare Pages deployment (manual repository import)</strong></summary>
 
 **Build settings**
+
 - Framework preset: `Astro`
 - Build command: `npm run build`
 - Output directory: `dist`
 
 **Node.js version (usually not required)**
+
 - This project includes `.nvmrc`, and Cloudflare Pages reads it automatically.
 - If you need to set it manually, add `NODE_VERSION=22.22.0` in environment variables.
 
 **Environment variables (strongly recommended for production)**
+
 - In Pages project -> Settings -> Environment variables, add: `SITE_URL=https://your-domain` (for example `https://astro.whono.me`, without a trailing `/`).
 
 **Why set `SITE_URL`?**
+
 - Astro uses it to generate canonical, Open Graph `og:url`, RSS links, sitemap, and other fields that require absolute URLs. Without `SITE_URL`, deployment still works, but these links may fall back to relative paths or placeholder domains, which can hurt share previews and search indexing.
 
 **About sitemap / robots**
+
 - `sitemap` is generated only when `SITE_URL` is set, and `/robots.txt` includes a `Sitemap:` line only in that case (to avoid pointing to the wrong domain).
 
 </details>
@@ -130,7 +129,6 @@ npm run check:preview-admin
 - No network requests to demo-domain resources
 
 </details>
-
 
 ## Configuration and Entry Points
 
@@ -162,6 +160,7 @@ Home page, inner pages, and reading/code settings:
 </details>
 
 #### What you can configure
+
 Theme Console currently focuses on **site-level** and **page-level** settings, including:
 
 - Site title, description, brand name, and other basic metadata
@@ -197,18 +196,19 @@ Then open `http://localhost:4321/admin/` in your browser.
 - If `src/data/settings/*.json` does not exist yet, the frontend still reads config via `settings > legacy > default`
 - The JSON files are generated only after the first save in `/admin`, so no manual migration script is required
 
-
 ## Content and Writing
 
 ### Collections and Routes
 
 Content Collections:
+
 - Essay: `src/content/essay`
 - Bits: `src/content/bits`
 - Memo: `src/content/memo/index.md`
 - Archive: generated from essay entries via the `archive` field
 
 Main routes:
+
 - List pages: `/archive/`, `/essay/`, `/bits/`, `/memo/`, `/about/`
 - Canonical detail route: `/archive/[slug]` (`/essay/[slug]` remains as a compatibility redirect)
 
@@ -220,27 +220,28 @@ Main routes:
 - Home Hero: supports `src/assets/**`, `public/**`, and `https://` image URLs
 - If you need a public direct URL, or do not want Astro to process the asset, place it under `public/**`
 
-
 ### Core Frontmatter Fields
 
 Essay:
+
 ```yaml
 title: My Post
 date: 2026-01-01
-draft: false        # Draft: hidden from list/RSS in production (visible in local preview; default false, optional)
-archive: true       # Archive switch: false excludes it from /archive and /archive/rss.xml (default true; detail page and /essay remain available)
-slug: optional      # Custom URL slug (defaults to the flattened content path, e.g. 2024/my-post -> 2024-my-post)
-badge: optional     # List badge; if omitted, list shows "Essay"
+draft: false # Draft: hidden from list/RSS in production (visible in local preview; default false, optional)
+archive: true # Archive switch: false excludes it from /archive and /archive/rss.xml (default true; detail page and /essay remain available)
+slug: optional # Custom URL slug (defaults to the flattened content path, e.g. 2024/my-post -> 2024-my-post)
+badge: optional # List badge; if omitted, list shows "Essay"
 ```
 
 Bits:
+
 ```yaml
 date: 2026-01-01T12:00:00+08:00 # Example; generator outputs local timezone
-tags:                           # Optional tags (defaults to empty array)
-  - loc:Shenzhen                # Location tag format: loc:<place>; only the first one is displayed
+tags: # Optional tags (defaults to empty array)
+  - loc:Shenzhen # Location tag format: loc:<place>; only the first one is displayed
   - reading
-images:                         # Optional: multi-image list (dimensions reduce CLS)
-  - src: bits/demo-01.webp      # Supports relative path bits/... or absolute URL https://...
+images: # Optional: multi-image list (dimensions reduce CLS)
+  - src: bits/demo-01.webp # Supports relative path bits/... or absolute URL https://...
     width: 800
     height: 800
 # draft: true   # Optional draft; visible in `dev`, hidden by default in `build/preview` and production
@@ -259,17 +260,16 @@ author:
   name: Alice
   avatar: author/alice.webp
 ```
+
 - Per-bit `author.avatar` follows the same rule as the default avatar: it must be a relative image path pointing to an existing file under `public/**`
 
 - If the avatar is missing or fails to load, it automatically falls back to an initial-based avatar.
-
 
 ### Excerpt and Description (`description`)
 
 - List excerpt is generated from content by default (sanitized and truncated)
 - Use `<!-- more -->` to define excerpt split point
 - `description` is used for SEO/OG (meta description) only and does not affect list excerpts
-
 
 ### Writing Conventions (Content Blocks)
 
@@ -297,10 +297,10 @@ HTML example:
 </div>
 ```
 
-
 ## Fonts and Licensing
 
 This theme uses two typeface families (self-hosted + subsetted):
+
 - Noto Serif SC (400 / 600)
 - LXGW WenKai Lite (Regular)
 
@@ -308,6 +308,7 @@ The repository includes subsetted WOFF2 files (`latin` / `cjk-common` / `cjk-ext
 Subset charset is generated from repository text plus `tools/charset-base.txt` (3,500 common characters) to reduce missing-glyph cases.
 
 To regenerate font subsets:
+
 1. Install Python 3, then run `python -m pip install fonttools brotli zopfli`
 2. Make sure `pyftsubset --help` works; if it does not, add the Python Scripts directory to `PATH`
 3. Put the source fonts in `tools/fonts-src/`
@@ -319,6 +320,7 @@ To regenerate font subsets:
   <summary>Font file list (subsets + source files)</summary>
 
 Subset files (tracked in repository):
+
 - `public/fonts/lxgw-wenkai-lite-latin.woff2`
 - `public/fonts/lxgw-wenkai-lite-cjk-common.woff2`
 - `public/fonts/lxgw-wenkai-lite-cjk-ext.woff2`
@@ -330,13 +332,13 @@ Subset files (tracked in repository):
 - `public/fonts/noto-serif-sc-600-cjk-ext.woff2`
 
 Source files (not tracked in repository):
+
 - `tools/fonts-src/LXGWWenKaiLite-Regular.woff2`
 - `tools/fonts-src/NotoSerifSC-Regular.ttf`
 - `tools/fonts-src/NotoSerifSC-SemiBold.ttf`
 </details>
 
 Font license: SIL Open Font License 1.1 (see `public/fonts/OFL-LXGW-WenKai-Lite.txt` and `public/fonts/OFL-NotoSerifSC.txt`).
-
 
 ## RSS
 
@@ -345,7 +347,6 @@ Font license: SIL Open Font License 1.1 (see `public/fonts/OFL-LXGW-WenKai-Lite.
 - `/essay/rss.xml`
 
 Setting `SITE_URL` is recommended for deployment (affects absolute links in RSS/OG/canonical).
-
 
 ## Contributing
 
@@ -362,14 +363,10 @@ git merge upstream/main
 git push origin main --tags
 ```
 
-
 ## Acknowledgements
 
 - Thanks to [elizen/elizen-blog](https://github.com/elizen/elizen-blog), the starting point of this theme design, which is inspired by the Hugo theme [yihui/hugo-ivy](https://github.com/yihui/hugo-ivy)
 
-
 ## License
 
 License: MIT
-
-

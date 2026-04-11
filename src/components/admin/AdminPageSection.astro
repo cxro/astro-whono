@@ -12,7 +12,7 @@ const {
   pageTitleMaxLength,
   pageSubtitleMaxLength,
   memoTitlePlaceholder = '',
-  memoSubtitlePlaceholder = ''
+  memoSubtitlePlaceholder = '',
 } = Astro.props;
 ---
 
@@ -26,11 +26,19 @@ const {
     <label class="admin-field">
       <span class="admin-label">
         <span class="admin-label__main">
-          <code>/essay/</code> Page Title <span class="admin-label__pipe" aria-hidden="true">|</span> Subtitle
+          <code>/essay/</code> Page Title <span
+            class="admin-label__pipe"
+            aria-hidden="true">|</span
+          > Subtitle
         </span>
-        <span class="admin-label__hint">(dynamic count / RSS fixed output)</span>
+        <span class="admin-label__hint">(dynamic count / RSS fixed output)</span
+        >
       </span>
-      <span class="admin-title-pair" role="group" aria-label="/essay/ Page Title and Subtitle">
+      <span
+        class="admin-title-pair"
+        role="group"
+        aria-label="/essay/ Page Title and Subtitle"
+      >
         <input
           id="page-essay-title"
           class="admin-title-pair__input admin-title-pair__input--title"
@@ -55,10 +63,17 @@ const {
     <label class="admin-field">
       <span class="admin-label">
         <span class="admin-label__main">
-          <code>/bits/</code> Page Title <span class="admin-label__pipe" aria-hidden="true">|</span> Subtitle
+          <code>/bits/</code> Page Title <span
+            class="admin-label__pipe"
+            aria-hidden="true">|</span
+          > Subtitle
         </span>
       </span>
-      <span class="admin-title-pair" role="group" aria-label="/bits/ Page Title and Subtitle">
+      <span
+        class="admin-title-pair"
+        role="group"
+        aria-label="/bits/ Page Title and Subtitle"
+      >
         <input
           id="page-bits-title"
           class="admin-title-pair__input admin-title-pair__input--title"
@@ -83,11 +98,20 @@ const {
     <label class="admin-field admin-field--full admin-field--memo">
       <span class="admin-label">
         <span class="admin-label__main">
-          <code>/memo/</code> Page Title <span class="admin-label__pipe" aria-hidden="true">|</span> Subtitle
+          <code>/memo/</code> Page Title <span
+            class="admin-label__pipe"
+            aria-hidden="true">|</span
+          > Subtitle
         </span>
-        <span class="admin-label__hint">(overrides field when filled; empty uses src/content/memo/index.md)</span>
+        <span class="admin-label__hint"
+          >(overrides field when filled; empty uses src/content/memo/index.md)</span
+        >
       </span>
-      <span class="admin-title-pair" role="group" aria-label="/memo/ Page Title and Subtitle">
+      <span
+        class="admin-title-pair"
+        role="group"
+        aria-label="/memo/ Page Title and Subtitle"
+      >
         <input
           id="page-memo-title"
           class="admin-title-pair__input admin-title-pair__input--title"
@@ -112,11 +136,19 @@ const {
     <label class="admin-field">
       <span class="admin-label">
         <span class="admin-label__main">
-          <code>/archive/</code> Page Title <span class="admin-label__pipe" aria-hidden="true">|</span> Subtitle
+          <code>/archive/</code> Page Title <span
+            class="admin-label__pipe"
+            aria-hidden="true">|</span
+          > Subtitle
         </span>
-        <span class="admin-label__hint">(dynamic count / RSS fixed output)</span>
+        <span class="admin-label__hint">(dynamic count / RSS fixed output)</span
+        >
       </span>
-      <span class="admin-title-pair" role="group" aria-label="/archive/ Page Title and Subtitle">
+      <span
+        class="admin-title-pair"
+        role="group"
+        aria-label="/archive/ Page Title and Subtitle"
+      >
         <input
           id="page-archive-title"
           class="admin-title-pair__input admin-title-pair__input--title"
@@ -141,10 +173,17 @@ const {
     <label class="admin-field">
       <span class="admin-label">
         <span class="admin-label__main">
-          <code>/about/</code> Page Title <span class="admin-label__pipe" aria-hidden="true">|</span> Subtitle
+          <code>/about/</code> Page Title <span
+            class="admin-label__pipe"
+            aria-hidden="true">|</span
+          > Subtitle
         </span>
       </span>
-      <span class="admin-title-pair" role="group" aria-label="/about/ Page Title and Subtitle">
+      <span
+        class="admin-title-pair"
+        role="group"
+        aria-label="/about/ Page Title and Subtitle"
+      >
         <input
           id="page-about-title"
           class="admin-title-pair__input admin-title-pair__input--title"
@@ -170,11 +209,16 @@ const {
   <div class="admin-subgroup">
     <p class="admin-subtitle">
       <span class="admin-subtitle__main">Article Meta Info</span>
-      <span class="admin-subtitle__hint">(word count/time only on detail pages, hidden on mobile)</span>
+      <span class="admin-subtitle__hint"
+        >(word count/time only on detail pages, hidden on mobile)</span
+      >
     </p>
     <div class="admin-toggle-row-group admin-toggle-row-group--article-meta">
       <div class="admin-toggle-row admin-toggle-row--with-inline-field">
-        <label class="admin-toggle-row admin-toggle-row--compact" for="ui-article-meta-show-date">
+        <label
+          class="admin-toggle-row admin-toggle-row--compact"
+          for="ui-article-meta-show-date"
+        >
           <input id="ui-article-meta-show-date" type="checkbox" />
           <span>Show Publication Date</span>
         </label>
@@ -205,7 +249,13 @@ const {
       </label>
     </div>
     <p class="admin-help admin-help--article-meta-preview">
-      Preview: <code id="article-meta-preview-value" class="admin-help__preview-value">{'Published: 2026-03-18 · #Astro  #Writing · 2,416 words · ~6 min'}</code>
+      Preview: <code
+        id="article-meta-preview-value"
+        class="admin-help__preview-value"
+        >{
+          'Published: 2026-03-18 · #Astro  #Writing · 2,416 words · ~6 min'
+        }</code
+      >
     </p>
   </div>
 

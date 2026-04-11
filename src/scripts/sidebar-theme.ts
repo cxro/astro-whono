@@ -5,7 +5,9 @@ const body = document.body;
 const themeBtn = document.getElementById('theme-toggle');
 const readerBtn = document.getElementById('reader-toggle');
 const readerExit = document.getElementById('reader-exit');
-const readerExitAnchor = readerExit?.closest('.reader-exit-anchor') as HTMLElement | null;
+const readerExitAnchor = readerExit?.closest(
+  '.reader-exit-anchor'
+) as HTMLElement | null;
 const mobileMq = window.matchMedia('(max-width: 900px)');
 
 const prefersReducedMotion = () =>
@@ -37,7 +39,9 @@ const initTheme = () => {
     applyTheme(next);
     try {
       localStorage.setItem(KEY, next);
-    } catch (_) {}
+    } catch {
+      // ignore storage errors
+    }
   });
 };
 
@@ -49,8 +53,14 @@ const setReaderDisabled = (disabled: boolean) => {
   readerBtn.setAttribute('aria-pressed', 'false');
   readerBtn.setAttribute('aria-disabled', disabled ? 'true' : 'false');
   if (disabled) {
-    readerBtn.setAttribute('title', 'Reading mode (only available on article/memo pages)');
-    readerBtn.setAttribute('aria-label', 'Reading mode (only available on article/memo pages)');
+    readerBtn.setAttribute(
+      'title',
+      'Reading mode (only available on article/memo pages)'
+    );
+    readerBtn.setAttribute(
+      'aria-label',
+      'Reading mode (only available on article/memo pages)'
+    );
     readerBtn.tabIndex = -1;
   } else {
     readerBtn.setAttribute('title', 'Reading mode');
@@ -106,7 +116,10 @@ const setVisible = (el: HTMLElement | null, visible: boolean) => {
 
 const setReaderExitInline = (inlineVisible: boolean) => {
   if (!readerExitAnchor) return;
-  if (readerExitAnchor.hasAttribute('data-reader-exit-inline') === inlineVisible) return;
+  if (
+    readerExitAnchor.hasAttribute('data-reader-exit-inline') === inlineVisible
+  )
+    return;
   readerExitAnchor.toggleAttribute('data-reader-exit-inline', inlineVisible);
 };
 

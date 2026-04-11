@@ -2,8 +2,16 @@
 import BaseLayout from '../layouts/BaseLayout.astro';
 import TagFilterHeader from './TagFilterHeader.astro';
 import EssayCard from './EssayCard.astro';
-import { createWithBase, getEssayDerivedText, getEssaySlug, type EssayEntry } from '../lib/content';
-import { getThemeSettings, getVisibleArticleMetaTags } from '../lib/theme-settings';
+import {
+  createWithBase,
+  getEssayDerivedText,
+  getEssaySlug,
+  type EssayEntry,
+} from '../lib/content';
+import {
+  getThemeSettings,
+  getVisibleArticleMetaTags,
+} from '../lib/theme-settings';
 import { joinPageSubtitleText } from '../utils/format';
 
 const {
@@ -12,7 +20,7 @@ const {
   nextPath = null,
   prevPath = null,
   resultCount,
-  totalPages
+  totalPages,
 } = Astro.props as {
   currentPage: number;
   items: EssayEntry[];
@@ -27,28 +35,36 @@ const withBase = createWithBase(base);
 const {
   settings: {
     page,
-    ui: { articleMeta }
-  }
+    ui: { articleMeta },
+  },
 } = getThemeSettings();
 
 const pageTitleText = page.essay.title || '随笔';
-const pageTitleParts = [pageTitleText, currentPage > 1 ? `第 ${currentPage} 页` : null].filter(Boolean);
+const pageTitleParts = [
+  pageTitleText,
+  currentPage > 1 ? `第 ${currentPage} 页` : null,
+].filter(Boolean);
 const pageTitle = pageTitleParts.join(' · ');
 const subtitleText = joinPageSubtitleText(
   page.essay.subtitle,
   `共 ${resultCount} 篇`,
   totalPages > 1 ? `第 ${currentPage} / ${totalPages} 页` : null
 );
-const pageDescription = joinPageSubtitleText(
-  `${pageTitleText}列表`,
-  page.essay.subtitle,
-  `共 ${resultCount} 篇`,
-  totalPages > 1 ? `第 ${currentPage} / ${totalPages} 页` : null
-) ?? `${pageTitleText}列表`;
+const pageDescription =
+  joinPageSubtitleText(
+    `${pageTitleText}列表`,
+    page.essay.subtitle,
+    `共 ${resultCount} 篇`,
+    totalPages > 1 ? `第 ${currentPage} / ${totalPages} 页` : null
+  ) ?? `${pageTitleText}列表`;
 const fallbackListId = 'essay-tag-list';
 ---
 
-<BaseLayout title={pageTitle} description={pageDescription} bodyClass="essay-page">
+<BaseLayout
+  title={pageTitle}
+  description={pageDescription}
+  bodyClass="essay-page"
+>
   <div
     class="entry-filters"
     data-entry-filters
@@ -67,30 +83,44 @@ const fallbackListId = 'essay-tag-list';
   </div>
 
   <div class="list">
-    {items.map((entry) => (
-      <EssayCard
-        href={withBase(`/archive/${getEssaySlug(entry)}/`)}
-        slug={getEssaySlug(entry)}
-        title={entry.data.title}
-        excerpt={getEssayDerivedText(entry).excerpt}
-        date={entry.data.date}
-        visibleTags={getVisibleArticleMetaTags(entry.data.tags, 'list')}
-        articleMetaSettings={articleMeta}
-        badge={entry.data.badge}
-      />
-    ))}
+    {
+      items.map((entry) => (
+        <EssayCard
+          href={withBase(`/archive/${getEssaySlug(entry)}/`)}
+          slug={getEssaySlug(entry)}
+          title={entry.data.title}
+          excerpt={getEssayDerivedText(entry).excerpt}
+          date={entry.data.date}
+          visibleTags={getVisibleArticleMetaTags(entry.data.tags, 'list')}
+          articleMetaSettings={articleMeta}
+          badge={entry.data.badge}
+        />
+      ))
+    }
   </div>
 
-  {totalPages > 1 ? (
-    <nav class="pagination" aria-label={`${pageTitleText}分页`}>
-      <div class="pagination__inner">
-        {prevPath ? <a class="pagination__link" rel="prev" href={withBase(prevPath)}>上一页</a> : null}
-        {nextPath ? (
-          <a class="pagination__link pagination__link--next" rel="next" href={withBase(nextPath)}>下一页</a>
-        ) : null}
-      </div>
-    </nav>
-  ) : null}
+  {
+    totalPages > 1 ? (
+      <nav class="pagination" aria-label={`${pageTitleText}分页`}>
+        <div class="pagination__inner">
+          {prevPath ? (
+            <a class="pagination__link" rel="prev" href={withBase(prevPath)}>
+              上一页
+            </a>
+          ) : null}
+          {nextPath ? (
+            <a
+              class="pagination__link pagination__link--next"
+              rel="next"
+              href={withBase(nextPath)}
+            >
+              下一页
+            </a>
+          ) : null}
+        </div>
+      </nav>
+    ) : null
+  }
 
   <script>
     import '../scripts/entry-search.ts';

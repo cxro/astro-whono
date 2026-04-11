@@ -3,13 +3,17 @@ import { createServer } from 'node:net';
 import path from 'node:path';
 
 const distDir = path.resolve('dist');
-const smokeFixturePath = path.join(distDir, 'checks', 'markdown-smoke', 'index.html');
+const smokeFixturePath = path.join(
+  distDir,
+  'checks',
+  'markdown-smoke',
+  'index.html'
+);
 const ADMIN_SETTINGS_REDIRECT_TEXT = 'Redirecting to: /api/admin/settings/';
 
 export const expect = (condition, message) => {
   if (!condition) {
-    console.error(message);
-    process.exit(1);
+    throw new Error(message);
   }
 };
 
@@ -19,24 +23,20 @@ export const readSmokeFixtureHtml = async (label) => {
   try {
     return await readFile(smokeFixturePath, 'utf8');
   } catch {
-    console.error(`${label} failed: unable to read build output.`);
-    console.error(`Expected file: ${smokeFixturePath}`);
-    console.error('Run `npm run build` first.');
-    process.exit(1);
+    throw new Error(
+      `${label} failed: unable to read build output. Expected file: ${smokeFixturePath}. Run \`npm run build\` first.`
+    );
   }
 };
 
 export const reportSmokeCheckResult = (label, failedIds) => {
   if (!failedIds.length) {
-    console.log(`${label} passed.`);
     return;
   }
 
-  console.error(`${label} failed:`);
-  for (const id of failedIds) {
-    console.error(`- missing ${id}`);
-  }
-  process.exit(1);
+  throw new Error(
+    `${label} failed:\n${failedIds.map((id) => `- missing ${id}`).join('\n')}`
+  );
 };
 
 export const assertAdminSettingsStaticShell = (label, body) => {
@@ -71,7 +71,9 @@ export const waitForHttpReady = async (url, options = {}) => {
       if (response.ok) {
         return;
       }
-    } catch {}
+    } catch {
+      // ignore transient failures
+    }
 
     if (attempt === attempts - 1) {
       throw new Error(`Timed out waiting for ${url}`);
@@ -94,7 +96,10 @@ export const findAvailablePort = (host, preferredPort = 0) =>
 
       probe.once('error', (error) => {
         probe.close(() => {});
-        if ((error?.code === 'EADDRINUSE' || error?.code === 'EACCES') && port !== 0) {
+        if (
+          (error?.code === 'EADDRINUSE' || error?.code === 'EACCES') &&
+          port !== 0
+        ) {
           listen(0);
           return;
         }

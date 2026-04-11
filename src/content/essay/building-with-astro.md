@@ -3,7 +3,7 @@ title: Building a Modern Web Application with Astro
 description: A comprehensive guide to creating fast, content-focused websites
 date: 2026-01-10
 badge: Astro
-tags: ["Astro", "Web Development", "Tutorial"]
+tags: ['Astro', 'Web Development', 'Tutorial']
 draft: false
 ---
 
@@ -68,7 +68,7 @@ Astro components use the `.astro` extension and let you keep data loading, marku
 // Component script
 const { title, description } = Astro.props;
 const publishDate = new Intl.DateTimeFormat('en-US', {
-  dateStyle: 'long'
+  dateStyle: 'long',
 }).format(new Date());
 ---
 
@@ -135,8 +135,8 @@ export const GET: APIRoute = () => {
     JSON.stringify({ ok: true, updatedAt: new Date().toISOString() }),
     {
       headers: {
-        'Content-Type': 'application/json; charset=utf-8'
-      }
+        'Content-Type': 'application/json; charset=utf-8',
+      },
     }
   );
 };
@@ -161,4 +161,4 @@ Astro works best when you want a site to feel fast, stay maintainable, and let c
 
 ---
 
-*This article was written for demonstration purposes to showcase the Astro-Whono theme's typography.*
+_This article was written for demonstration purposes to showcase the Astro-Whono theme's typography._

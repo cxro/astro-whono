@@ -15,7 +15,11 @@ interface Props {
   defaultCustomSocialIconKey: SiteSocialIconKey;
 }
 
-const { socialIconOptions, customSocialIconOptions, defaultCustomSocialIconKey } = Astro.props;
+const {
+  socialIconOptions,
+  customSocialIconOptions,
+  defaultCustomSocialIconKey,
+} = Astro.props;
 ---
 
 <template id="site-social-custom-row-template">
@@ -39,10 +43,16 @@ const { socialIconOptions, customSocialIconOptions, defaultCustomSocialIconKey }
 
     <label class="admin-field admin-social-field admin-social-field--platform">
       <span class="admin-social-cell-label">Platform</span>
-      <select data-social-custom-field="iconKey" name="site-social-custom-icon-key[]">
+      <select
+        data-social-custom-field="iconKey"
+        name="site-social-custom-icon-key[]"
+      >
         {
           customSocialIconOptions.map((option) => (
-            <option value={option.value} data-social-default-label={option.defaultLabel}>
+            <option
+              value={option.value}
+              data-social-default-label={option.defaultLabel}
+            >
               {option.optionLabel}
             </option>
           ))
@@ -71,7 +81,11 @@ const { socialIconOptions, customSocialIconOptions, defaultCustomSocialIconKey }
               data-social-custom-icon-option={option.value}
               hidden={option.value !== defaultCustomSocialIconKey}
             >
-              <Icon name={option.value} class="admin-social-icon-only__icon" size={16} />
+              <Icon
+                name={option.value}
+                class="admin-social-icon-only__icon"
+                size={16}
+              />
             </span>
           ))
         }
@@ -113,9 +127,15 @@ const { socialIconOptions, customSocialIconOptions, defaultCustomSocialIconKey }
           type="checkbox"
           class="sr-only"
         />
-        <button class="admin-social-action" type="button" data-social-custom-action="toggle-visible" aria-pressed="true">
+        <button
+          class="admin-social-action"
+          type="button"
+          data-social-custom-action="toggle-visible"
+          aria-pressed="true"
+        >
           <Icon name="eye" class="admin-social-action__icon" size={15} />
-          <span class="sr-only" data-social-custom-visible-label>Hide Link</span>
+          <span class="sr-only" data-social-custom-visible-label>Hide Link</span
+          >
         </button>
         <button
           class="admin-social-action admin-social-action--danger"

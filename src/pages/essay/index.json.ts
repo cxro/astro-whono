@@ -1,5 +1,9 @@
 import type { APIRoute } from 'astro';
-import { getEssayDerivedText, getEssaySlug, getVisibleEssays } from '../../lib/content';
+import {
+  getEssayDerivedText,
+  getEssaySlug,
+  getVisibleEssays,
+} from '../../lib/content';
 
 export const prerender = true;
 
@@ -13,7 +17,7 @@ export const GET: APIRoute = async () => {
       description: entry.data.description ?? '',
       tags: entry.data.tags ?? [],
       text,
-      date: entry.data.date ? entry.data.date.toISOString() : null
+      date: entry.data.date ? entry.data.date.toISOString() : null,
     };
   });
   const cacheControl = import.meta.env.DEV
@@ -23,7 +27,7 @@ export const GET: APIRoute = async () => {
   return new Response(JSON.stringify(index), {
     headers: {
       'Content-Type': 'application/json; charset=utf-8',
-      'Cache-Control': cacheControl
-    }
+      'Cache-Control': cacheControl,
+    },
   });
 };

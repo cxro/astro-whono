@@ -19,10 +19,11 @@ const TRIM_DASH_RE = /^-+|-+$/g;
 const NON_ROUTABLE_TAG_KEY_RE = /[\s/\\?#%]/;
 const TAG_LABEL_COLLATOR = new Intl.Collator('zh-CN', {
   sensitivity: 'variant',
-  numeric: true
+  numeric: true,
 });
 
-const compareTagLabel = (a: string, b: string) => TAG_LABEL_COLLATOR.compare(a, b);
+const compareTagLabel = (a: string, b: string) =>
+  TAG_LABEL_COLLATOR.compare(a, b);
 
 const pickPreferredTagLabel = (current: string, candidate: string) =>
   compareTagLabel(candidate, current) < 0 ? candidate : current;
@@ -32,14 +33,26 @@ export function normalizeTagLabel(raw: string): string {
 }
 
 export function toTagKey(label: string): string {
-  return normalizeTagLabel(label).toLowerCase().replace(TAG_KEY_RE, '-').replace(TRIM_DASH_RE, '');
+  return normalizeTagLabel(label)
+    .toLowerCase()
+    .replace(TAG_KEY_RE, '-')
+    .replace(TRIM_DASH_RE, '');
 }
 
 export function isRoutableTagKey(key: string): boolean {
-  return key.length > 0 && key !== '.' && key !== '..' && !NON_ROUTABLE_TAG_KEY_RE.test(key);
+  return (
+    key.length > 0 &&
+    key !== '.' &&
+    key !== '..' &&
+    !NON_ROUTABLE_TAG_KEY_RE.test(key)
+  );
 }
 
-const assertRoutableTagKey = (entryId: string | undefined, label: string, key: string): void => {
+const assertRoutableTagKey = (
+  entryId: string | undefined,
+  label: string,
+  key: string
+): void => {
   if (isRoutableTagKey(key)) return;
 
   throw new Error(
@@ -49,12 +62,14 @@ const assertRoutableTagKey = (entryId: string | undefined, label: string, key: s
       `  Tag label:   ${JSON.stringify(label)}`,
       `  Route key:   ${key ? JSON.stringify(key) : '(empty)'}`,
       '  Reason:      archive tag keys must normalize to one routable segment and cannot be "." or "..".',
-      '  How to fix:  rename the tag so it does not collapse to an empty / reserved / non-routable route segment.'
+      '  How to fix:  rename the tag so it does not collapse to an empty / reserved / non-routable route segment.',
     ].join('\n')
   );
 };
 
-export function getTagKeys(tags: readonly string[] | null | undefined): string[] {
+export function getTagKeys(
+  tags: readonly string[] | null | undefined
+): string[] {
   if (!Array.isArray(tags) || tags.length === 0) return [];
 
   const keys: string[] = [];
@@ -73,7 +88,9 @@ export function getTagKeys(tags: readonly string[] | null | undefined): string[]
   return keys;
 }
 
-export function collectTagSummary<T extends TagContainer>(entries: readonly T[]): TagSummary[] {
+export function collectTagSummary<T extends TagContainer>(
+  entries: readonly T[]
+): TagSummary[] {
   const map = new Map<string, TagSummary>();
 
   for (const entry of entries) {
@@ -88,7 +105,10 @@ export function collectTagSummary<T extends TagContainer>(entries: readonly T[])
       const key = toTagKey(label);
       assertRoutableTagKey(entry.id, label, key);
       const entryLabel = entryLabels.get(key);
-      entryLabels.set(key, entryLabel ? pickPreferredTagLabel(entryLabel, label) : label);
+      entryLabels.set(
+        key,
+        entryLabel ? pickPreferredTagLabel(entryLabel, label) : label
+      );
     }
 
     for (const [key, label] of entryLabels) {
@@ -102,7 +122,7 @@ export function collectTagSummary<T extends TagContainer>(entries: readonly T[])
       map.set(key, {
         key,
         label,
-        count: 1
+        count: 1,
       });
     }
   }
@@ -113,17 +133,26 @@ export function collectTagSummary<T extends TagContainer>(entries: readonly T[])
   });
 }
 
-export function hasTagKey(tags: readonly string[] | null | undefined, key: string): boolean {
+export function hasTagKey(
+  tags: readonly string[] | null | undefined,
+  key: string
+): boolean {
   if (!isRoutableTagKey(key)) return false;
   return getTagKeys(tags).includes(key);
 }
 
-export function filterEntriesByTag<T extends TagContainer>(entries: readonly T[], key: string): T[] {
+export function filterEntriesByTag<T extends TagContainer>(
+  entries: readonly T[],
+  key: string
+): T[] {
   if (!isRoutableTagKey(key)) return [];
   return entries.filter((entry) => hasTagKey(entry.data?.tags, key));
 }
 
-export function findTagSummary(tagSummaries: readonly TagSummary[], rawKey: string): TagSummary | null {
+export function findTagSummary(
+  tagSummaries: readonly TagSummary[],
+  rawKey: string
+): TagSummary | null {
   const key = toTagKey(rawKey);
   if (!isRoutableTagKey(key)) return null;
   return tagSummaries.find((tagSummary) => tagSummary.key === key) ?? null;
@@ -132,5 +161,7 @@ export function findTagSummary(tagSummaries: readonly TagSummary[], rawKey: stri
 export function getTagPath(scope: TagScope, rawKey: string, page = 1): string {
   const key = toTagKey(rawKey);
   if (!isRoutableTagKey(key)) return `/${scope}/`;
-  return page <= 1 ? `/${scope}/tag/${key}/` : `/${scope}/tag/${key}/page/${page}/`;
+  return page <= 1
+    ? `/${scope}/tag/${key}/`
+    : `/${scope}/tag/${key}/page/${page}/`;
 }

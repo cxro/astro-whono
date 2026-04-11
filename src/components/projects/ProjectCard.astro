@@ -10,7 +10,14 @@ interface Props {
   featured?: boolean;
 }
 
-const { title, description, github, url, tech = [], featured = false } = Astro.props;
+const {
+  title,
+  description,
+  github,
+  url,
+  tech = [],
+  featured = false,
+} = Astro.props;
 
 // Determine the primary link (URL > GitHub > none)
 const primaryLink = url || (github ? `https://github.com/${github}` : null);
@@ -20,52 +27,60 @@ const displayUrl = url ? new URL(url).hostname.replace(/^www\./, '') : null;
 <article class={`project-card ${featured ? 'project-card--featured' : ''}`}>
   <div class="project-card__content">
     <h3 class="project-card__title">
-      {primaryLink ? (
-        <a href={primaryLink} target="_blank" rel="noopener noreferrer">
-          {title}
-        </a>
-      ) : (
-        title
-      )}
+      {
+        primaryLink ? (
+          <a href={primaryLink} target="_blank" rel="noopener noreferrer">
+            {title}
+          </a>
+        ) : (
+          title
+        )
+      }
     </h3>
-    
+
     <p class="project-card__description">{description}</p>
-    
-    {tech.length > 0 && (
-      <ul class="project-card__tech">
-        {tech.map((item) => (
-          <li class="project-card__tech-item">{item}</li>
-        ))}
-      </ul>
-    )}
+
+    {
+      tech.length > 0 && (
+        <ul class="project-card__tech">
+          {tech.map((item) => (
+            <li class="project-card__tech-item">{item}</li>
+          ))}
+        </ul>
+      )
+    }
   </div>
-  
+
   <div class="project-card__actions">
-    {github && (
-      <a 
-        href={`https://github.com/${github}`} 
-        class="project-card__link"
-        target="_blank"
-        rel="noopener noreferrer"
-        aria-label={`View ${title} on GitHub`}
-      >
-        <Icon name="github" size={18} />
-        <span>GitHub</span>
-      </a>
-    )}
-    
-    {url && (
-      <a 
-        href={url} 
-        class="project-card__link"
-        target="_blank"
-        rel="noopener noreferrer"
-        aria-label={`Visit ${title} website`}
-      >
-        <Icon name="globe" size={18} />
-        <span>{displayUrl}</span>
-      </a>
-    )}
+    {
+      github && (
+        <a
+          href={`https://github.com/${github}`}
+          class="project-card__link"
+          target="_blank"
+          rel="noopener noreferrer"
+          aria-label={`View ${title} on GitHub`}
+        >
+          <Icon name="github" size={18} />
+          <span>GitHub</span>
+        </a>
+      )
+    }
+
+    {
+      url && (
+        <a
+          href={url}
+          class="project-card__link"
+          target="_blank"
+          rel="noopener noreferrer"
+          aria-label={`Visit ${title} website`}
+        >
+          <Icon name="globe" size={18} />
+          <span>{displayUrl}</span>
+        </a>
+      )
+    }
   </div>
 </article>
 
@@ -146,12 +161,12 @@ const displayUrl = url ? new URL(url).hostname.replace(/^www\./, '') : null;
   }
 
   /* Dark mode support */
-  :global([data-theme="dark"]) .project-card {
+  :global([data-theme='dark']) .project-card {
     border-color: var(--color-border-dark, #333);
     background: var(--color-bg-dark, #1a1a1a);
   }
 
-  :global([data-theme="dark"]) .project-card__tech-item {
+  :global([data-theme='dark']) .project-card__tech-item {
     background: var(--color-bg-secondary-dark, #2a2a2a);
   }
 </style>

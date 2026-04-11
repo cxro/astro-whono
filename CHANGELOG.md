@@ -4,17 +4,18 @@ All notable changes to this project will be documented in this file.
 
 The format is based on Keep a Changelog, and this project aims to follow Semantic Versioning.
 
-
 ## [Unreleased]
 
 ## [0.3.1] - 2026-03-24
 
 ### Changed
+
 - Upgraded Astro to v6, synchronized updates to related official packages, maintaining existing theme, content collections, and build workflow.
 - Clarified Theme Console production environment boundaries: `/admin/` retains read-only notice, `/api/admin/settings/` for local development only.
 - Optimized code block interaction script loading scope: article and memo pages load copy and line number logic on demand, non-article pages no longer load related scripts.
 
 ### Fixed
+
 - Fixed mobile homepage whitespace and article/memo page title and metadata display issues, optimizing mobile browsing experience.
 - Fixed Windows `npm run check:preview-admin` execution failure.
 - Fixed Hero image and Bits avatar validation rule inconsistencies across different entry points; Theme Console, content configuration, and frontend display are now consistent.
@@ -27,12 +28,14 @@ The format is based on Keep a Changelog, and this project aims to follow Semanti
 This update focuses on tag browsing, list search, and `/bits/` browsing experience, further improving Theme Console stability in local maintenance scenarios.
 
 ### Added
+
 - Added tag entry to `/archive/` with paginated static tag result pages.
 - Homepage intro now supports direct entry to tag browsing; `/bits/` added year filtering with more complete search result display.
 - Theme Console added article metadata display options, controlling whether word count and reading time display on article pages.
 - `/bits/` added year filtering and enhanced search result display.
 
 ### Changed
+
 - List search now links with archive tag pages; year groups with no results automatically collapse.
 - `/archive/` and `/essay/` added clearer page descriptions, improving sharing and search engine recognition.
 - `/bits/` changed to paginated browsing; search supports highlighting, hit snippets, keyboard operations, and direct content jumping.
@@ -40,23 +43,26 @@ This update focuses on tag browsing, list search, and `/bits/` browsing experien
 - Adjusted testing and CI baseline: Markdown smoke check uses dedicated test page, added `npm test` and lightweight regression tests, reducing unrelated CI failures after forking or replacing example content.
 
 ### Fixed
+
 - Fixed `/archive/` tag entry unavailable without JavaScript, and tag display issues on tag result pages.
 - Fixed `/archive/` and `/essay/` list search filter failures, cross-timezone date display anomalies, and potential old index reads in development.
 - Fixed `/bits/` search and year filter desynchronization, image preview output anomalies with special characters, and slight search box interaction jitter.
 - Fixed multiple issues in Theme Console regarding configuration cache, validation prompts, and sort consistency after manually modifying settings JSON.
 - Fixed archive abnormal tags potentially generating wrong routes and statistics; build now aborts directly with prompt.
 
-
 ## [0.2.0] - 2026-03-13
+
 This update focuses on the local Theme Console, making it faster to take over site configuration after forking or cloning.
 
 ### Added
+
 - Added local Theme Console `/admin/`, enabling centralized management in development of site title, default description, footer copyright, homepage intro, sidebar navigation, social links, inner page main/subtitles, and Bits default author.
 - Added UI display options to control reading mode entry, code line numbers, and sidebar divider style.
 - Added fine-grained configuration for homepage intro and sidebar navigation, supporting independent visibility, sorting, and ornament character settings.
 - Added local configuration save mechanism; first save generates `src/data/settings/*.json`, old config remains compatible.
 
 ### Changed
+
 - Homepage, sidebar, footer, and about page site info unified to Theme Console configuration, backend changes directly reflect on frontend.
 - Homepage Hero and inner page title configuration enhanced, supporting custom Hero images and section main/subtitles.
 - Social links support unified sorting of fixed platforms and custom links, frontend display consistent with backend configuration.
@@ -70,6 +76,7 @@ This update focuses on the local Theme Console, making it faster to take over si
 - `/bits/` "Quick Note" draft generator changed to load on demand; draft dialog and related scripts no longer load on first paint, only on first click.
 
 ### Fixed
+
 - Fixed `/admin/` first load errors and occasional config save failures in development.
 - Fixed layout misalignment after hiding sidebar divider, and improved error prompts on save failure and interface validation feedback.
 - Fixed Theme Console social link sorting conflicts between fixed platforms and custom links; backend auto-organizes sorting and limits selectable range to avoid duplicate sort values.
@@ -82,11 +89,12 @@ This update focuses on the local Theme Console, making it faster to take over si
 - Fixed article page image preview unavailable to keyboard users; keyboard can now open Lightbox, focus returns to original trigger after close.
 - Fixed Theme Console default language potentially passing through when config file manually written with illegal values; now falls back to safe default, avoiding illegal `<html lang>` output.
 
-
 ## [0.1.1] - 2026-02-07
+
 This update focuses on search, image preview, bits multi-image display, and deployment security baseline, further improving reading experience and static site deployment details.
 
 ### Added
+
 - Added sitemap and build-time `robots.txt`, auto-enabled when `SITE_URL` is set.
 - Added unified Lightbox preview capability, article and `/bits/` share same image preview interaction.
 - Added static search to `/archive/` and `/essay/` list pages, index loads on demand for lighter search experience.
@@ -95,6 +103,7 @@ This update focuses on search, image preview, bits multi-image display, and depl
 - Added Cloudflare Pages and Netlify basic deployment configurations.
 
 ### Changed
+
 - Markdown rendering pipeline added security sanitization, enhancing XSS protection while preserving existing writing capabilities.
 - `/bits/` list changed to分流展示 by content length: short content retains original structure rendering, long content shows excerpt.
 - `/archive/` and `/essay/` list pages added search box and hit prompts.
@@ -104,21 +113,24 @@ This update focuses on search, image preview, bits multi-image display, and depl
 - Routes and content collections further converged: archive entry unified to `/archive/`, `/essay/` changed to redirect, `/memo/` replaces `/kids/`.
 
 ### Fixed
+
 - Fixed bits multi-image `+N` click unresponsive issue.
 - Fixed lightbox occlusion and default exposure issues.
 - Fixed list and detail page slug filtering inconsistencies potentially causing 404s.
 - Fixed misleading sitemap comment in `robots.txt`.
 
 ### Maintenance
+
 - Adjusted deployment and security baseline, including response headers, build parameters, and dependency governance.
 - Added `npm run audit:prod` and integrated into CI.
 - Unified some icons, path concatenation, and content utility implementations, reducing duplicate code.
 
-
 ## [0.1.0] - 2026-01-28 (Pre-release)
+
 This pre-release completes the theme's basic capabilities, including code blocks, Callout, search, mobile interaction, and reading experience.
 
 ### Added
+
 - Added code block toolbar supporting language, line numbers, and copy capability.
 - Added Callout writing support, unifying prompt block content structure and style.
 - Added Figure / Caption support, improving image-text writing scenarios.
@@ -129,6 +141,7 @@ This pre-release completes the theme's basic capabilities, including code blocks
 - Added local and CI aggregate commands.
 
 ### Changed
+
 - Refactored code block structure and variable system, enhancing line number and copy button experience.
 - Updated Markdown guide and README, supplementing Callout and Figure usage.
 - Adjusted global typography and style entry structure, organizing import order.
@@ -138,6 +151,7 @@ This pre-release completes the theme's basic capabilities, including code blocks
 - Adjusted icon usage strategy and documentation structure.
 
 ### Fixed
+
 - Fixed dark mode plain text code block readability issues.
 - Fixed code block language icon clipping issues.
 - Fixed reading mode exit button misalignment.
@@ -145,14 +159,16 @@ This pre-release completes the theme's basic capabilities, including code blocks
 - Fixed small-screen long content width overflow causing horizontal scroll.
 
 ### Maintenance
+
 - Added type checking support and dev dependencies.
 - Organized some style and script entries, converging structure for future iterations.
 
-
 ## Pre-release (Unpublished History)
+
 The following is early iteration record before `0.1.0`, archived by theme capability.
 
 ### Added
+
 - Established Astro theme basic skeleton, including fixed sidebar and content area layout.
 - Initially established content collections: `essay`, `bits`, `memo`.
 - Added basic routes: `/`, `/archive/`, `/essay/`, `/bits/`, `/memo/`, `/about/`.
@@ -161,6 +177,7 @@ The following is early iteration record before `0.1.0`, archived by theme capabi
 - Added thinnest Callout component, implementing unified output structure.
 
 ### Changed
+
 - Gradually converged Callout structure, icons, and style presentation.
 - Adjusted overall color scheme and quote, code block basic typography styles, improving dark mode adaptation.
 - Unified list page title structure, forming main title plus subtitle page header style.
@@ -168,6 +185,7 @@ The following is early iteration record before `0.1.0`, archived by theme capabi
 - Adjusted navigation and hover feedback, unifying overall interaction style.
 
 ### Fixed
+
 - Fixed early type checking, document path, and quote style issues.
 - Fixed dark mode code block background and highlighting anomalies.
 - Fixed some unused styles and detail遗留 issues.

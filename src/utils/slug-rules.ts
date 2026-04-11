@@ -17,7 +17,7 @@ export const ESSAY_PUBLIC_SLUG_RE = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
 export const RESERVED_ESSAY_SLUGS: ReadonlySet<string> = new Set([
   'page',
   'tag',
-  'rss.xml'
+  'rss.xml',
 ]);
 
 /**

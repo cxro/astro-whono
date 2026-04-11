@@ -4,6 +4,7 @@ import { getThemeSettings } from '../lib/theme-settings';
 
 const { settings } = getThemeSettings();
 ---
+
 <dialog
   class="bits-draft-dialog"
   id="bits-draft-dialog"
@@ -19,32 +20,84 @@ const { settings } = getThemeSettings();
         </span>
         Quick Note
       </h2>
-      <button class="bits-draft-close" type="button" data-bits-draft-close aria-label="Close">×</button>
+      <button
+        class="bits-draft-close"
+        type="button"
+        data-bits-draft-close
+        aria-label="Close">×</button
+      >
     </div>
 
     <div class="bits-draft-field">
       <div class="bits-draft-field-head">
         <label for="bits-draft-content">Content</label>
-        <div class="bits-draft-toolbar" data-bits-draft-toolbar role="toolbar" aria-label="Formatting">
-          <button type="button" class="bits-draft-tool" data-action="bold" data-tip="Bold" aria-label="Bold">
+        <div
+          class="bits-draft-toolbar"
+          data-bits-draft-toolbar
+          role="toolbar"
+          aria-label="Formatting"
+        >
+          <button
+            type="button"
+            class="bits-draft-tool"
+            data-action="bold"
+            data-tip="Bold"
+            aria-label="Bold"
+          >
             <Icon name="bold" />
           </button>
-          <button type="button" class="bits-draft-tool" data-action="italic" data-tip="Italic" aria-label="Italic">
+          <button
+            type="button"
+            class="bits-draft-tool"
+            data-action="italic"
+            data-tip="Italic"
+            aria-label="Italic"
+          >
             <Icon name="italic" />
           </button>
-          <button type="button" class="bits-draft-tool" data-action="code" data-tip="Inline Code" aria-label="Inline Code">
+          <button
+            type="button"
+            class="bits-draft-tool"
+            data-action="code"
+            data-tip="Inline Code"
+            aria-label="Inline Code"
+          >
             <Icon name="code" />
           </button>
-          <button type="button" class="bits-draft-tool" data-action="quote" data-tip="Quote" aria-label="Quote">
+          <button
+            type="button"
+            class="bits-draft-tool"
+            data-action="quote"
+            data-tip="Quote"
+            aria-label="Quote"
+          >
             <Icon name="quote" />
           </button>
-          <button type="button" class="bits-draft-tool" data-action="list" data-tip="List" aria-label="List">
+          <button
+            type="button"
+            class="bits-draft-tool"
+            data-action="list"
+            data-tip="List"
+            aria-label="List"
+          >
             <Icon name="list" />
           </button>
-          <button type="button" class="bits-draft-tool" data-action="link" data-tip="Link" aria-label="Link">
+          <button
+            type="button"
+            class="bits-draft-tool"
+            data-action="link"
+            data-tip="Link"
+            aria-label="Link"
+          >
             <Icon name="link" />
           </button>
-          <button type="button" class="bits-draft-tool" data-action="paragraph" data-tip="Paragraph" aria-label="Paragraph">
+          <button
+            type="button"
+            class="bits-draft-tool"
+            data-action="paragraph"
+            data-tip="Paragraph"
+            aria-label="Paragraph"
+          >
             <Icon name="paragraph" />
           </button>
         </div>
@@ -54,8 +107,7 @@ const { settings } = getThemeSettings();
         name="content"
         rows="6"
         required
-        placeholder="Write something..."
-      ></textarea>
+        placeholder="Write something..."></textarea>
     </div>
 
     <div class="bits-draft-row">
@@ -64,7 +116,13 @@ const { settings } = getThemeSettings();
           <span class="bits-draft-label-icon" aria-hidden="true">#</span>
           Tags
         </label>
-        <input id="bits-draft-tags" name="tags" type="text" inputmode="text" placeholder="Separate with commas or spaces" />
+        <input
+          id="bits-draft-tags"
+          name="tags"
+          type="text"
+          inputmode="text"
+          placeholder="Separate with commas or spaces"
+        />
         <div class="bits-draft-help">e.g. life reading / life reading</div>
       </div>
       <div class="bits-draft-field bits-draft-half">
@@ -74,8 +132,16 @@ const { settings } = getThemeSettings();
           </span>
           Location (optional)
         </label>
-        <input id="bits-draft-place" name="place" type="text" inputmode="text" placeholder="e.g. Shanghai" />
-        <div class="bits-draft-help">Generates loc:&lt;location&gt; in tags</div>
+        <input
+          id="bits-draft-place"
+          name="place"
+          type="text"
+          inputmode="text"
+          placeholder="e.g. Shanghai"
+        />
+        <div class="bits-draft-help">
+          Generates loc:&lt;location&gt; in tags
+        </div>
       </div>
     </div>
 
@@ -84,7 +150,11 @@ const { settings } = getThemeSettings();
         <div class="bits-draft-field-head bits-draft-image-head">
           <div class="bits-draft-field-title">
             <label>Add Images (optional)</label>
-            <button class="bits-draft-image-add" type="button" data-bits-image-add>+ Add</button>
+            <button
+              class="bits-draft-image-add"
+              type="button"
+              data-bits-image-add>+ Add</button
+            >
           </div>
           <div class="bits-draft-help">Auto-detects image dimensions</div>
         </div>
@@ -98,7 +168,12 @@ const { settings } = getThemeSettings();
                 inputmode="url"
                 placeholder="bits/xxx.jpg or https://..."
               />
-              <button class="bits-draft-image-clear" type="button" data-bits-image-remove aria-label="Remove image">x</button>
+              <button
+                class="bits-draft-image-clear"
+                type="button"
+                data-bits-image-remove
+                aria-label="Remove image">x</button
+              >
             </div>
             <input
               class="bits-draft-image-dim"
@@ -130,7 +205,12 @@ const { settings } = getThemeSettings();
                 inputmode="url"
                 placeholder="bits/xxx.jpg or https://..."
               />
-              <button class="bits-draft-image-clear" type="button" data-bits-image-remove aria-label="Remove image">x</button>
+              <button
+                class="bits-draft-image-clear"
+                type="button"
+                data-bits-image-remove
+                aria-label="Remove image">x</button
+              >
             </div>
             <input
               class="bits-draft-image-dim"
@@ -154,9 +234,20 @@ const { settings } = getThemeSettings();
         </template>
       </div>
 
-      <div class="bits-draft-status" data-bits-draft-status role="status" aria-live="polite"></div>
+      <div
+        class="bits-draft-status"
+        data-bits-draft-status
+        role="status"
+        aria-live="polite"
+      >
+      </div>
       <div class="bits-draft-link-row">
-        <button class="bits-draft-link" type="button" data-bits-manual-open hidden>
+        <button
+          class="bits-draft-link"
+          type="button"
+          data-bits-manual-open
+          hidden
+        >
           <span class="bits-draft-link-icon" aria-hidden="true">
             <Icon name="eye" />
           </span>
@@ -169,10 +260,18 @@ const { settings } = getThemeSettings();
 
       <div class="bits-draft-manual" data-bits-manual hidden>
         <div class="bits-draft-manual-title">Draft Content (Read-only)</div>
-        <textarea class="bits-draft-manual-textarea" data-bits-manual-textarea rows="6" readonly></textarea>
+        <textarea
+          class="bits-draft-manual-textarea"
+          data-bits-manual-textarea
+          rows="6"
+          readonly></textarea>
         <div class="bits-draft-manual-actions">
           <div class="bits-draft-manual-note" data-bits-manual-note></div>
-          <button class="bits-draft-secondary" type="button" data-bits-manual-copy>Copy Manually</button>
+          <button
+            class="bits-draft-secondary"
+            type="button"
+            data-bits-manual-copy>Copy Manually</button
+          >
         </div>
       </div>
 
@@ -192,7 +291,10 @@ const { settings } = getThemeSettings();
               aria-controls="bits-identity-panel"
               aria-expanded="false"
             >
-              <span class="bits-identity-avatar" data-identity-avatar aria-hidden="true"></span>
+              <span
+                class="bits-identity-avatar"
+                data-identity-avatar
+                aria-hidden="true"></span>
               <span class="bits-identity-name" data-identity-name></span>
             </button>
           </div>
@@ -219,21 +321,35 @@ const { settings } = getThemeSettings();
         <div class="bits-identity-fields">
           <label class="bits-identity-label">
             <span class="bits-identity-label-title">Author Name</span>
-            <input type="text" name="authorName" inputmode="text" data-author-name />
+            <input
+              type="text"
+              name="authorName"
+              inputmode="text"
+              data-author-name
+            />
           </label>
           <label class="bits-identity-label">
             <span class="bits-identity-label-row">
               <span class="bits-identity-label-title">Avatar Path (URL)</span>
-              <span class="bits-identity-label-hint">Leave empty for default; shows first character on error</span>
+              <span class="bits-identity-label-hint"
+                >Leave empty for default; shows first character on error</span
+              >
             </span>
-            <input type="text" name="authorAvatar" inputmode="url" data-author-avatar />
+            <input
+              type="text"
+              name="authorAvatar"
+              inputmode="url"
+              data-author-avatar
+            />
           </label>
         </div>
         <div class="bits-identity-meta">
           <p class="bits-identity-note">
             Leave empty to use current author; this item won't write author
           </p>
-          <button type="button" class="bits-identity-reset" data-author-reset>Reset to Default</button>
+          <button type="button" class="bits-identity-reset" data-author-reset
+            >Reset to Default</button
+          >
         </div>
       </div>
     </div>
@@ -242,11 +358,21 @@ const { settings } = getThemeSettings();
       <div class="bits-draft-check">
         <input id="bits-draft-draft" name="draft" type="checkbox" />
         <label for="bits-draft-draft">Mark as Draft</label>
-        <span class="bits-draft-check-help">Draft: hidden by default online/preview</span>
+        <span class="bits-draft-check-help"
+          >Draft: hidden by default online/preview</span
+        >
       </div>
       <div class="bits-draft-actions">
-        <button class="bits-draft-primary" type="button" data-bits-draft-generate>Generate & Copy</button>
-        <button class="bits-draft-secondary" type="button" data-bits-draft-download>Download .md</button>
+        <button
+          class="bits-draft-primary"
+          type="button"
+          data-bits-draft-generate>Generate & Copy</button
+        >
+        <button
+          class="bits-draft-secondary"
+          type="button"
+          data-bits-draft-download>Download .md</button
+        >
       </div>
     </div>
   </form>

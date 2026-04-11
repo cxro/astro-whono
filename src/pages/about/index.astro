@@ -2,9 +2,13 @@
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import Icon from '../../components/Icon.astro';
 import '../../styles/about.css';
-import { getThemeSettings, type SiteSocialIconKey } from '../../lib/theme-settings';
+import {
+  getThemeSettings,
+  type SiteSocialIconKey,
+} from '../../lib/theme-settings';
 const { settings } = getThemeSettings();
-const resolvedSocialItems = settings.site.socialLinks.resolvedSocialItems.filter((item) => item.visible);
+const resolvedSocialItems =
+  settings.site.socialLinks.resolvedSocialItems.filter((item) => item.visible);
 const aboutTitle = settings.page.about.title || 'About';
 const aboutSubtitle = settings.page.about.subtitle;
 
@@ -39,8 +43,8 @@ const socialItems: SocialActionItem[] = [
     href: item.href,
     label: item.label,
     title: item.label,
-    icon: item.iconKey
-  }))
+    icon: item.iconKey,
+  })),
 ];
 
 const contactItems: ContactItem[] = [
@@ -48,8 +52,11 @@ const contactItems: ContactItem[] = [
     key: item.id,
     href: item.href,
     icon: item.iconKey,
-    text: item.id === 'email' ? item.href.replace(/^mailto:/i, '') : formatExternalLabel(item.href)
-  }))
+    text:
+      item.id === 'email'
+        ? item.href.replace(/^mailto:/i, '')
+        : formatExternalLabel(item.href),
+  })),
 ];
 ---
 
@@ -57,13 +64,22 @@ const contactItems: ContactItem[] = [
   <div class="page-header page-header--about">
     <div class="page-heading">
       <h1 class="page-title">{aboutTitle}</h1>
-      {aboutSubtitle ? <span class="page-subtitle">{aboutSubtitle}</span> : null}
+      {
+        aboutSubtitle ? (
+          <span class="page-subtitle">{aboutSubtitle}</span>
+        ) : null
+      }
     </div>
     {
       socialItems.length ? (
         <div class="page-actions">
           {socialItems.map((item) => (
-            <a class="icon-link" href={item.href} aria-label={item.title} title={item.title}>
+            <a
+              class="icon-link"
+              href={item.href}
+              aria-label={item.title}
+              title={item.title}
+            >
               <Icon name={item.icon} class="icon" />
             </a>
           ))}
@@ -72,9 +88,15 @@ const contactItems: ContactItem[] = [
     }
   </div>
   <p class="about-intro-line">
-    Whono is a minimal two-column writing theme for Astro: clean, fast, designed for reading.<br />
-    Content is written in Markdown, supporting dark mode, code highlighting, RSS, and immersive reading. Perfect for personal writing and lightweight content publishing.<br />
-    The theme is open-source and actively maintained. If you have suggestions or want to contribute, feel free to open an <a href="https://github.com/cxro/astro-whono/issues">Issue</a>.
+    Whono is a minimal two-column writing theme for Astro: clean, fast, designed
+    for reading.<br />
+    Content is written in Markdown, supporting dark mode, code highlighting, RSS,
+    and immersive reading. Perfect for personal writing and lightweight content publishing.<br
+    />
+    The theme is open-source and actively maintained. If you have suggestions or want
+    to contribute, feel free to open an <a
+      href="https://github.com/cxro/astro-whono/issues">Issue</a
+    >.
   </p>
   <h2 class="section-title about-section-title">Site Guide</h2>
   <div class="site-guide">
@@ -83,21 +105,27 @@ const contactItems: ContactItem[] = [
         <h3 class="site-guide-title">Essays</h3>
         <span class="site-guide-link">/essay/</span>
       </div>
-      <p class="site-guide-desc">Article stream list (includes unarchived content).</p>
+      <p class="site-guide-desc">
+        Article stream list (includes unarchived content).
+      </p>
     </article>
     <article class="site-guide-item">
       <div class="site-guide-head">
         <h3 class="site-guide-title">Bits</h3>
         <span class="site-guide-link">/bits/</span>
       </div>
-      <p class="site-guide-desc">Short content stream, fragmented thoughts (supports multiple images).</p>
+      <p class="site-guide-desc">
+        Short content stream, fragmented thoughts (supports multiple images).
+      </p>
     </article>
     <article class="site-guide-item">
       <div class="site-guide-head">
         <h3 class="site-guide-title">Memo</h3>
         <span class="site-guide-link">/memo/</span>
       </div>
-      <p class="site-guide-desc">Collecting moments and memories worth keeping.</p>
+      <p class="site-guide-desc">
+        Collecting moments and memories worth keeping.
+      </p>
     </article>
     <article class="site-guide-item">
       <div class="site-guide-head">
@@ -140,30 +168,64 @@ const contactItems: ContactItem[] = [
           <div class="tech-item-head">
             <span class="tech-item-title">Markdown</span>
           </div>
-          <div class="tech-item-desc">Content writing and publishing workflow</div>
+          <div class="tech-item-desc">
+            Content writing and publishing workflow
+          </div>
         </li>
       </ul>
     </section>
-    
   </div>
 
   <h2 class="section-title about-section-title">FAQ</h2>
   <section class="qa-list" aria-label="Frequently Asked Questions">
     <details class="qa-item">
-      <summary class="qa-question"><span class="qa-icon" aria-hidden="true">Q</span>Why do I see "SITE_URL is not set" warning after deployment?</summary>
-      <p class="qa-answer">Because the production domain is not configured. Without it, a placeholder domain will be used, and <code>canonical</code>/<code>og:url</code>/<code>sitemap</code>/<code>robots</code> will be incomplete. Add <code>SITE_URL=https://your-domain</code> as an environment variable in your deployment platform and rebuild.</p>
+      <summary class="qa-question"
+        ><span class="qa-icon" aria-hidden="true">Q</span>Why do I see "SITE_URL
+        is not set" warning after deployment?</summary
+      >
+      <p class="qa-answer">
+        Because the production domain is not configured. Without it, a
+        placeholder domain will be used, and <code>canonical</code>/<code
+          >og:url</code
+        >/<code>sitemap</code>/<code>robots</code> will be incomplete. Add <code
+          >SITE_URL=https://your-domain</code
+        > as an environment variable in your deployment platform and rebuild.
+      </p>
     </details>
     <details class="qa-item">
-      <summary class="qa-question"><span class="qa-icon" aria-hidden="true">Q</span>Why don't some articles appear in the archive?</summary>
-      <p class="qa-answer">The archive filters out articles with <code>archive: false</code>. They remain published and accessible, but won't appear in archive lists or the archive RSS (for content you don't want cataloged).</p>
+      <summary class="qa-question"
+        ><span class="qa-icon" aria-hidden="true">Q</span>Why don't some
+        articles appear in the archive?</summary
+      >
+      <p class="qa-answer">
+        The archive filters out articles with <code>archive: false</code>. They
+        remain published and accessible, but won't appear in archive lists or
+        the archive RSS (for content you don't want cataloged).
+      </p>
     </details>
     <details class="qa-item">
-      <summary class="qa-question"><span class="qa-icon" aria-hidden="true">Q</span>Why does clicking an article in /essay/ jump to /archive/.../?</summary>
-      <p class="qa-answer">Article details are unified under <code>/archive/{'{'}slug{'}'}/</code>. <code>/essay/</code> serves as the article stream list entry to avoid duplicate detail routes and simplify long-term maintenance.</p>
+      <summary class="qa-question"
+        ><span class="qa-icon" aria-hidden="true">Q</span>Why does clicking an
+        article in /essay/ jump to /archive/.../?</summary
+      >
+      <p class="qa-answer">
+        Article details are unified under <code>/archive/{'{'}slug{'}'}/</code>. <code
+          >/essay/</code
+        > serves as the article stream list entry to avoid duplicate detail routes
+        and simplify long-term maintenance.
+      </p>
     </details>
     <details class="qa-item">
-      <summary class="qa-question"><span class="qa-icon" aria-hidden="true">Q</span>How do I report issues or contribute?</summary>
-      <p class="qa-answer">Create an <a href="https://github.com/cxro/astro-whono/issues">Issue</a> directly in the repository, or submit a <a href="https://github.com/cxro/astro-whono/pulls">Pull Request</a>.</p>
+      <summary class="qa-question"
+        ><span class="qa-icon" aria-hidden="true">Q</span>How do I report issues
+        or contribute?</summary
+      >
+      <p class="qa-answer">
+        Create an <a href="https://github.com/cxro/astro-whono/issues">Issue</a> directly
+        in the repository, or submit a <a
+          href="https://github.com/cxro/astro-whono/pulls">Pull Request</a
+        >.
+      </p>
     </details>
   </section>
 
@@ -172,7 +234,10 @@ const contactItems: ContactItem[] = [
       <>
         <h2 class="section-title about-section-title">Contact & Subscribe</h2>
         <section class="contact-block" aria-label="Contact Information">
-          <p class="contact-note">If you have questions, suggestions, or want to subscribe to updates, you can reach out through the following channels.</p>
+          <p class="contact-note">
+            If you have questions, suggestions, or want to subscribe to updates,
+            you can reach out through the following channels.
+          </p>
           <ul class="contact-list">
             {contactItems.map((item) => (
               <li>
@@ -187,5 +252,4 @@ const contactItems: ContactItem[] = [
       </>
     ) : null
   }
-
 </BaseLayout>

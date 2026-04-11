@@ -56,7 +56,6 @@
   border-left: 3px solid var(--border);
   color: var(--muted);
   font-size: 0.95em;
-
 }
 
 .prose blockquote.pullquote {
@@ -69,7 +68,7 @@
   font-size: 1.1em;
   font-weight: 500;
   font-style: normal;
-  padding: 1.0rem 1.6rem 0.5rem 1.8rem;
+  padding: 1rem 1.6rem 0.5rem 1.8rem;
   box-shadow: 0 1px 2px var(--border);
 }
 
@@ -85,17 +84,21 @@
 
 @supports (background: color-mix(in oklab, black, white)) {
   .prose blockquote.pullquote {
-    background-color: color-mix(in oklab, var(--code-content-bg) 88%, var(--border));
+    background-color: color-mix(
+      in oklab,
+      var(--code-content-bg) 88%,
+      var(--border)
+    );
     box-shadow: 0 2px 6px color-mix(in oklab, var(--border) 70%, transparent);
   }
 }
 
 .prose blockquote.pullquote::before {
-  content: "“";
+  content: '“';
   position: absolute;
   left: 0;
   top: -1.1rem;
-  font-family: Georgia, "Times New Roman", "Noto Serif SC", serif;
+  font-family: Georgia, 'Times New Roman', 'Noto Serif SC', serif;
   font-size: 6.6rem;
   line-height: 1;
   color: var(--border);
@@ -118,7 +121,6 @@
   color: var(--muted);
   text-align: right;
 }
-
 
 .prose code {
   font-size: 0.9em;

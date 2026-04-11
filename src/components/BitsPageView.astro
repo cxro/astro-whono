@@ -4,7 +4,12 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 import BitCard from './BitCard.astro';
 import Lightbox from './Lightbox.astro';
 import '../styles/bits-page.css';
-import { MAX_PRIMARY_BITS_FILTER_YEARS, getBitsDerivedText, type BitsEntry, type BitsYearOption } from '../lib/bits';
+import {
+  MAX_PRIMARY_BITS_FILTER_YEARS,
+  getBitsDerivedText,
+  type BitsEntry,
+  type BitsYearOption,
+} from '../lib/bits';
 import { createWithBase } from '../utils/format';
 import { getThemeSettings } from '../lib/theme-settings';
 import { joinPageSubtitleText } from '../utils/format';
@@ -16,7 +21,7 @@ const {
   prevPath = null,
   resultCount,
   totalPages,
-  yearOptions = []
+  yearOptions = [],
 } = Astro.props as {
   currentPage: number;
   items: BitsEntry[];
@@ -30,28 +35,31 @@ const {
 const base = import.meta.env.BASE_URL ?? '/';
 const withBase = createWithBase(base);
 const {
-  settings: {
-    page
-  }
+  settings: { page },
 } = getThemeSettings();
 
 const pageTitleText = page.bits.title || '絮语';
-const pageTitleParts = [pageTitleText, currentPage > 1 ? `第 ${currentPage} 页` : null].filter(Boolean);
+const pageTitleParts = [
+  pageTitleText,
+  currentPage > 1 ? `第 ${currentPage} 页` : null,
+].filter(Boolean);
 const pageTitle = pageTitleParts.join(' · ');
 const subtitleText = joinPageSubtitleText(
   page.bits.subtitle,
   totalPages > 1 ? `第 ${currentPage} / ${totalPages} 页` : null
 );
-const pageDescription = joinPageSubtitleText(
-  `${pageTitleText}列表`,
-  page.bits.subtitle,
-  `共 ${resultCount} 条絮语`,
-  totalPages > 1 ? `第 ${currentPage} / ${totalPages} 页` : null
-) ?? `${pageTitleText}列表`;
+const pageDescription =
+  joinPageSubtitleText(
+    `${pageTitleText}列表`,
+    page.bits.subtitle,
+    `共 ${resultCount} 条絮语`,
+    totalPages > 1 ? `第 ${currentPage} / ${totalPages} 页` : null
+  ) ?? `${pageTitleText}列表`;
 
 const primaryYearOptions = yearOptions.slice(0, MAX_PRIMARY_BITS_FILTER_YEARS);
 const overflowYearOptions = yearOptions.slice(MAX_PRIMARY_BITS_FILTER_YEARS);
-const priorityMediaBitId = items.find((bit) => (bit.data.images?.length ?? 0) > 0)?.id ?? null;
+const priorityMediaBitId =
+  items.find((bit) => (bit.data.images?.length ?? 0) > 0)?.id ?? null;
 
 const cards = await Promise.all(
   items.map(async (bit) => {
@@ -75,81 +83,99 @@ const cards = await Promise.all(
 
   <div class="bits-toolbar">
     <div class="bits-controls">
-      {yearOptions.length > 0 ? (
-        <div
-          class="bits-year-filter"
-          data-bits-year-filter
-          data-bits-client-control
-          role="group"
-          aria-label="按年份筛选絮语"
-        >
-          <span class="bits-year-filter__cursor" data-bits-year-cursor aria-hidden="true"></span>
-          <button
-            class="bits-year-filter__item bits-year-filter__item--all is-active"
-            type="button"
-            data-bits-year-item
-            data-bits-year=""
-            aria-label="显示全部絮语"
-            aria-pressed="true"
+      {
+        yearOptions.length > 0 ? (
+          <div
+            class="bits-year-filter"
+            data-bits-year-filter
+            data-bits-client-control
+            role="group"
+            aria-label="按年份筛选絮语"
           >
-            全部
-          </button>
-          {primaryYearOptions.map((option) => (
+            <span
+              class="bits-year-filter__cursor"
+              data-bits-year-cursor
+              aria-hidden="true"
+            />
             <button
-              class="bits-year-filter__item"
+              class="bits-year-filter__item bits-year-filter__item--all is-active"
               type="button"
               data-bits-year-item
-              data-bits-year={option.value}
-              aria-label={`筛选 ${option.value} 年絮语，共 ${option.count} 条`}
-              aria-pressed="false"
+              data-bits-year=""
+              aria-label="显示全部絮语"
+              aria-pressed="true"
             >
-              {option.value}
+              全部
             </button>
-          ))}
-          {overflowYearOptions.length > 0 ? (
-            <div class="bits-year-more" data-bits-year-more data-open="false">
+            {primaryYearOptions.map((option) => (
               <button
-                class="bits-year-filter__item bits-year-filter__item--more"
+                class="bits-year-filter__item"
                 type="button"
-                data-bits-year-more-trigger
-                aria-label="打开更多年份筛选"
-                aria-expanded="false"
-                aria-controls="bits-year-more-menu"
+                data-bits-year-item
+                data-bits-year={option.value}
+                aria-label={`筛选 ${option.value} 年絮语，共 ${option.count} 条`}
+                aria-pressed="false"
               >
-                <span data-bits-year-more-label>更多</span>
-                <span class="bits-year-filter__caret" aria-hidden="true"></span>
+                {option.value}
               </button>
-              <div
-                class="bits-year-menu"
-                id="bits-year-more-menu"
-                data-bits-year-menu
-                hidden
-                aria-label="更多年份筛选"
-              >
-                <div class="bits-year-menu__list">
-                  {overflowYearOptions.map((option) => (
-                    <button
-                      class="bits-year-menu__item"
-                      type="button"
-                      data-bits-year-menu-item
-                      data-bits-year={option.value}
-                      aria-label={`筛选 ${option.value} 年絮语，共 ${option.count} 条`}
-                      aria-pressed="false"
-                    >
-                      <span class="bits-year-menu__item-label">{option.value}</span>
-                      <span class="bits-year-menu__item-count">{option.count} 条</span>
-                    </button>
-                  ))}
+            ))}
+            {overflowYearOptions.length > 0 ? (
+              <div class="bits-year-more" data-bits-year-more data-open="false">
+                <button
+                  class="bits-year-filter__item bits-year-filter__item--more"
+                  type="button"
+                  data-bits-year-more-trigger
+                  aria-label="打开更多年份筛选"
+                  aria-expanded="false"
+                  aria-controls="bits-year-more-menu"
+                >
+                  <span data-bits-year-more-label>更多</span>
+                  <span class="bits-year-filter__caret" aria-hidden="true" />
+                </button>
+                <div
+                  class="bits-year-menu"
+                  id="bits-year-more-menu"
+                  data-bits-year-menu
+                  hidden
+                  aria-label="更多年份筛选"
+                >
+                  <div class="bits-year-menu__list">
+                    {overflowYearOptions.map((option) => (
+                      <button
+                        class="bits-year-menu__item"
+                        type="button"
+                        data-bits-year-menu-item
+                        data-bits-year={option.value}
+                        aria-label={`筛选 ${option.value} 年絮语，共 ${option.count} 条`}
+                        aria-pressed="false"
+                      >
+                        <span class="bits-year-menu__item-label">
+                          {option.value}
+                        </span>
+                        <span class="bits-year-menu__item-count">
+                          {option.count} 条
+                        </span>
+                      </button>
+                    ))}
+                  </div>
                 </div>
               </div>
-            </div>
-          ) : null}
-        </div>
-      ) : null}
+            ) : null}
+          </div>
+        ) : null
+      }
 
       <div class="bits-controls__actions">
-        <div class="bits-controls__search-cluster" data-has-year-filter={yearOptions.length > 0 ? 'true' : 'false'}>
-          <form class="bits-search" role="search" data-bits-search-form data-bits-client-control>
+        <div
+          class="bits-controls__search-cluster"
+          data-has-year-filter={yearOptions.length > 0 ? 'true' : 'false'}
+        >
+          <form
+            class="bits-search"
+            role="search"
+            data-bits-search-form
+            data-bits-client-control
+          >
             <label class="sr-only" for="bits-search">搜索絮语</label>
             <input
               id="bits-search"
@@ -159,26 +185,35 @@ const cards = await Promise.all(
               enterkeyhint="search"
               aria-controls="bits-search-results-panel"
             />
-            <button class="bits-search-btn" id="bits-search-btn" type="submit" aria-controls="bits-search-results-panel">
+            <button
+              class="bits-search-btn"
+              id="bits-search-btn"
+              type="submit"
+              aria-controls="bits-search-results-panel"
+            >
               搜索
             </button>
           </form>
-          {yearOptions.length > 0 ? (
-            <div class="bits-year-select-wrap" data-bits-client-control>
-              <label class="sr-only" for="bits-year-select">按年份筛选絮语</label>
-              <select
-                class="bits-year-select"
-                id="bits-year-select"
-                data-bits-year-select
-                aria-label="按年份筛选絮语"
-              >
-                <option value="">全部</option>
-                {yearOptions.map((option) => (
-                  <option value={option.value}>{option.value}</option>
-                ))}
-              </select>
-            </div>
-          ) : null}
+          {
+            yearOptions.length > 0 ? (
+              <div class="bits-year-select-wrap" data-bits-client-control>
+                <label class="sr-only" for="bits-year-select">
+                  按年份筛选絮语
+                </label>
+                <select
+                  class="bits-year-select"
+                  id="bits-year-select"
+                  data-bits-year-select
+                  aria-label="按年份筛选絮语"
+                >
+                  <option value="">全部</option>
+                  {yearOptions.map((option) => (
+                    <option value={option.value}>{option.value}</option>
+                  ))}
+                </select>
+              </div>
+            ) : null
+          }
         </div>
         <button
           class="new"
@@ -197,27 +232,59 @@ const cards = await Promise.all(
       </div>
     </div>
     <div class="bits-status" id="bits-search-status"></div>
-    <p class="sr-only" id="bits-search-live" role="status" aria-live="polite" aria-atomic="true"></p>
-    <div class="bits-draft-load-status" id="bits-draft-load-status" role="status" aria-live="polite"></div>
+    <p
+      class="sr-only"
+      id="bits-search-live"
+      role="status"
+      aria-live="polite"
+      aria-atomic="true"
+    >
+    </p>
+    <div
+      class="bits-draft-load-status"
+      id="bits-draft-load-status"
+      role="status"
+      aria-live="polite"
+    >
+    </div>
   </div>
 
   <div data-bits-browse>
     <div id="bits-list">
-      {cards.map(({ bit, excerpt, Content }) => (
-        <BitCard bit={bit} excerpt={excerpt} Content={Content} prioritizeLeadMedia={bit.id === priorityMediaBitId} />
-      ))}
+      {
+        cards.map(({ bit, excerpt, Content }) => (
+          <BitCard
+            bit={bit}
+            excerpt={excerpt}
+            Content={Content}
+            prioritizeLeadMedia={bit.id === priorityMediaBitId}
+          />
+        ))
+      }
     </div>
 
-    {totalPages > 1 ? (
-      <nav class="pagination" aria-label={`${pageTitleText}分页`}>
-        <div class="pagination__inner">
-          {prevPath ? <a class="pagination__link" rel="prev" href={withBase(prevPath)}>上一页</a> : null}
-          {nextPath ? (
-            <a class="pagination__link pagination__link--next" rel="next" href={withBase(nextPath)}>下一页</a>
-          ) : null}
-        </div>
-      </nav>
-    ) : null}
+    {
+      totalPages > 1 ? (
+        <nav class="pagination" aria-label={`${pageTitleText}分页`}>
+          <div class="pagination__inner">
+            {prevPath ? (
+              <a class="pagination__link" rel="prev" href={withBase(prevPath)}>
+                上一页
+              </a>
+            ) : null}
+            {nextPath ? (
+              <a
+                class="pagination__link pagination__link--next"
+                rel="next"
+                href={withBase(nextPath)}
+              >
+                下一页
+              </a>
+            ) : null}
+          </div>
+        </nav>
+      ) : null
+    }
   </div>
 
   <section
@@ -228,8 +295,19 @@ const cards = await Promise.all(
     aria-label="搜索结果"
   >
     <div class="bits-search-results__header">
-      <p class="bits-search-results__summary" data-bits-search-results-summary role="status" aria-live="polite">搜索结果</p>
-      <button class="bits-search-results__clear" type="button" data-bits-search-clear>重置筛选</button>
+      <p
+        class="bits-search-results__summary"
+        data-bits-search-results-summary
+        role="status"
+        aria-live="polite"
+      >
+        搜索结果
+      </p>
+      <button
+        class="bits-search-results__clear"
+        type="button"
+        data-bits-search-clear>重置筛选</button
+      >
     </div>
     <div class="bits-search-results__list" data-bits-search-results-list></div>
   </section>
@@ -240,7 +318,9 @@ const cards = await Promise.all(
         display: none !important;
       }
     </style>
-    <p class="bits-noscript-note">搜索、年份筛选与草稿生成功能需要 JavaScript，当前仅保留列表浏览。</p>
+    <p class="bits-noscript-note">
+      搜索、年份筛选与草稿生成功能需要 JavaScript，当前仅保留列表浏览。
+    </p>
   </noscript>
 
   <div id="bits-draft-root"></div>
@@ -269,7 +349,9 @@ const cards = await Promise.all(
     const defaultLabel = labelEl?.textContent?.trim() || '碎碎念';
 
     let fragmentPromise: Promise<void> | null = null;
-    let controllerPromise: Promise<{ open: (options?: { opener?: HTMLElement | null }) => void }> | null = null;
+    let controllerPromise: Promise<{
+      open: (options?: { opener?: HTMLElement | null }) => void;
+    }> | null = null;
 
     const setLoadStatus = (text: string, tone: 'info' | 'error' = 'info') => {
       if (!loadStatus) return;
@@ -297,7 +379,8 @@ const cards = await Promise.all(
       if (!fragmentPromise) {
         fragmentPromise = fetch(withBase(fragmentPath))
           .then((response) => {
-            if (!response.ok) throw new Error(`bits draft fragment ${response.status}`);
+            if (!response.ok)
+              throw new Error(`bits draft fragment ${response.status}`);
             return response.text();
           })
           .then((html) => {
@@ -317,10 +400,14 @@ const cards = await Promise.all(
 
     const loadDraftController = async () => {
       if (!controllerPromise) {
-        controllerPromise = Promise.all([ensureDraftFragment(), import('../scripts/bits-draft.ts')])
+        controllerPromise = Promise.all([
+          ensureDraftFragment(),
+          import('../scripts/bits-draft.ts'),
+        ])
           .then(([, mod]) => {
             const controller = mod.initBitsDraft();
-            if (!controller) throw new Error('bits draft controller init failed');
+            if (!controller)
+              throw new Error('bits draft controller init failed');
             return controller;
           })
           .catch((error) => {

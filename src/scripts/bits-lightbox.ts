@@ -5,5 +5,5 @@ initBitsLightbox({
   enableZoom: true,
   enablePan: true,
   enableSwipeDownClose: true,
-  enableSwipeNav: true
+  enableSwipeNav: true,
 });

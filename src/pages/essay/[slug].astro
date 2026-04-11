@@ -8,7 +8,7 @@ export async function getStaticPaths() {
   return routeEntries.map(({ slug }) => {
     return {
       params: { slug },
-      props: { slug }
+      props: { slug },
     };
   });
 }

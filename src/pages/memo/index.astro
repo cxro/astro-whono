@@ -20,13 +20,12 @@ if (prod && entry.data.draft) {
 }
 
 const {
-  settings: {
-    page
-  }
+  settings: { page },
 } = getThemeSettings();
 const { Content, headings } = await render(entry);
 const memoTitle = page.memo.title ?? entry.data.title ?? DEFAULT_MEMO_TITLE;
-const memoSubtitle = page.memo.subtitle ?? entry.data.subtitle ?? DEFAULT_MEMO_SUBTITLE;
+const memoSubtitle =
+  page.memo.subtitle ?? entry.data.subtitle ?? DEFAULT_MEMO_SUBTITLE;
 
 // Build a grouped TOC: H2 as section titles, H3 as items.
 type TocItem = { text: string; slug: string };
@@ -77,21 +76,23 @@ for (const h of headings) {
   </div>
 
   <nav class="memo-toc" aria-label="目录">
-    {groups.map((g) => (
-      <details open>
-        <summary>{g.title}</summary>
-        <ul class="toc-items">
-          {g.items.map((it, i) => (
-            <li>
-              <a href={`#${it.slug}`}>
-                <span class="toc-num">{i + 1}</span>
-                <span>{it.text}</span>
-              </a>
-            </li>
-          ))}
-        </ul>
-      </details>
-    ))}
+    {
+      groups.map((g) => (
+        <details open>
+          <summary>{g.title}</summary>
+          <ul class="toc-items">
+            {g.items.map((it, i) => (
+              <li>
+                <a href={`#${it.slug}`}>
+                  <span class="toc-num">{i + 1}</span>
+                  <span>{it.text}</span>
+                </a>
+              </li>
+            ))}
+          </ul>
+        </details>
+      ))
+    }
   </nav>
 
   <div class="memo-content prose">
@@ -107,9 +108,11 @@ for (const h of headings) {
             el.removeAttribute('open');
           });
         } else {
-          document.querySelectorAll('.memo-toc details:not([open])').forEach((el) => {
-            el.setAttribute('open', '');
-          });
+          document
+            .querySelectorAll('.memo-toc details:not([open])')
+            .forEach((el) => {
+              el.setAttribute('open', '');
+            });
         }
       };
       sync();
@@ -142,7 +145,10 @@ for (const h of headings) {
   />
 
   <script>
-    import { initArticleLightbox, initCodeCopyButtons } from '../../scripts/lightbox';
+    import {
+      initArticleLightbox,
+      initCodeCopyButtons,
+    } from '../../scripts/lightbox';
 
     initCodeCopyButtons();
     initArticleLightbox({
@@ -150,7 +156,7 @@ for (const h of headings) {
       containerSelector: '.memo-content.prose',
       enableZoom: false,
       enablePan: false,
-      enableSwipeDownClose: false
+      enableSwipeDownClose: false,
     });
   </script>
 </BaseLayout>

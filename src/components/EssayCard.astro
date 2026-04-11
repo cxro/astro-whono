@@ -10,7 +10,7 @@ const {
   visibleTags = [],
   badge = '随笔',
   slug = '',
-  articleMetaSettings
+  articleMetaSettings,
 } = Astro.props as {
   href: string;
   title: string;
@@ -22,7 +22,9 @@ const {
   articleMetaSettings: ArticleMetaSettings;
 };
 const displayBadge = badge.trim() ? badge : '随笔';
-const shouldShowMetaLine = articleMetaSettings.showDate || (articleMetaSettings.showTags && visibleTags.length > 0);
+const shouldShowMetaLine =
+  articleMetaSettings.showDate ||
+  (articleMetaSettings.showTags && visibleTags.length > 0);
 ---
 
 <a
@@ -38,18 +40,25 @@ const shouldShowMetaLine = articleMetaSettings.showDate || (articleMetaSettings.
     </div>
   </div>
   {excerpt ? <p class="list-item__excerpt">{excerpt}</p> : null}
-  {shouldShowMetaLine ? (
-    <div class="meta-line meta-line--items">
-      {articleMetaSettings.showDate ? (
-        <span class="meta-line__item">
-          {articleMetaSettings.dateLabel ? `${articleMetaSettings.dateLabel}` : ''}{formatISODateUtc(date)}
-        </span>
-      ) : null}
-      {articleMetaSettings.showTags && visibleTags.length ? (
-        <span class="meta-line__item meta-line__item--tags">
-          {visibleTags.map((tag) => <span class="tag">#{tag}</span>)}
-        </span>
-      ) : null}
-    </div>
-  ) : null}
+  {
+    shouldShowMetaLine ? (
+      <div class="meta-line meta-line--items">
+        {articleMetaSettings.showDate ? (
+          <span class="meta-line__item">
+            {articleMetaSettings.dateLabel
+              ? `${articleMetaSettings.dateLabel}`
+              : ''}
+            {formatISODateUtc(date)}
+          </span>
+        ) : null}
+        {articleMetaSettings.showTags && visibleTags.length ? (
+          <span class="meta-line__item meta-line__item--tags">
+            {visibleTags.map((tag) => (
+              <span class="tag">#{tag}</span>
+            ))}
+          </span>
+        ) : null}
+      </div>
+    ) : null
+  }
 </a>

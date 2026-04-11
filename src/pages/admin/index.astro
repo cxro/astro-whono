@@ -18,7 +18,7 @@ const loadAdminDevState = async () => {
       ADMIN_PAGE_TITLE_MAX_LENGTH,
       ADMIN_PAGE_SUBTITLE_MAX_LENGTH,
       ADMIN_SOCIAL_CUSTOM_LIMIT,
-      getAdminFooterStartYearMax
+      getAdminFooterStartYearMax,
     },
     { default: AdminHomeSection },
     { default: AdminPageSection },
@@ -26,7 +26,7 @@ const loadAdminDevState = async () => {
     { default: AdminSiteSection },
     { default: AdminUiSection },
     { default: adminConsoleScriptHref },
-    { default: adminStylesHref }
+    { default: adminStylesHref },
   ] = await Promise.all([
     import('astro:content'),
     import('../../lib/theme-settings'),
@@ -37,7 +37,7 @@ const loadAdminDevState = async () => {
     import('../../components/admin/AdminSiteSection.astro'),
     import('../../components/admin/AdminUiSection.astro'),
     import('../../scripts/admin-console/index.ts?url'),
-    import('../../styles/components/admin.css?url')
+    import('../../styles/components/admin.css?url'),
   ]);
 
   const settingsEndpoint = withBase('/api/admin/settings/');
@@ -47,7 +47,7 @@ const loadAdminDevState = async () => {
     bits: '絮语',
     memo: '小记',
     archive: '归档',
-    about: '关于'
+    about: '关于',
   } as const;
   const homeIntroMaxLength = ADMIN_HOME_INTRO_MAX_LENGTH;
   const pageTitleMaxLength = ADMIN_PAGE_TITLE_MAX_LENGTH;
@@ -56,9 +56,14 @@ const loadAdminDevState = async () => {
   const footerStartYearMax = getAdminFooterStartYearMax();
   const socialCustomLimit = ADMIN_SOCIAL_CUSTOM_LIMIT;
   const memoEntry = await getEntry('memo', 'index');
-  const memoTitlePlaceholder = typeof memoEntry?.data.title === 'string' ? memoEntry.data.title.trim() : '';
+  const memoTitlePlaceholder =
+    typeof memoEntry?.data.title === 'string'
+      ? memoEntry.data.title.trim()
+      : '';
   const memoSubtitlePlaceholder =
-    typeof memoEntry?.data.subtitle === 'string' ? memoEntry.data.subtitle.trim() : '';
+    typeof memoEntry?.data.subtitle === 'string'
+      ? memoEntry.data.subtitle.trim()
+      : '';
 
   const initialState = getEditableThemeSettingsState();
   const bootstrapState = initialState.ok
@@ -83,13 +88,13 @@ const loadAdminDevState = async () => {
                     label: navLabelFallback[id],
                     ornament: ADMIN_NAV_ORNAMENT_DEFAULT,
                     visible: true,
-                    order: index + 1
+                    order: index + 1,
                   };
-                })
-              }
+                }),
+              },
             },
-            sources: initialState.payload.sources
-          }
+            sources: initialState.payload.sources,
+          },
         };
       })()
     : initialState;
@@ -112,7 +117,7 @@ const loadAdminDevState = async () => {
     memoTitlePlaceholder,
     memoSubtitlePlaceholder,
     bootstrapText: JSON.stringify(bootstrapState),
-    navIdOrder
+    navIdOrder,
   };
 };
 
@@ -127,19 +132,41 @@ const AdminUiSection = adminDevState?.AdminUiSection;
 <BaseLayout title="Theme Console" bodyClass="admin-page">
   <Fragment slot="head">
     <meta name="robots" content="noindex,nofollow" />
-    {isDev && adminDevState?.adminStylesHref ? <link rel="stylesheet" href={adminDevState.adminStylesHref} /> : null}
+    {
+      isDev && adminDevState?.adminStylesHref ? (
+        <link rel="stylesheet" href={adminDevState.adminStylesHref} />
+      ) : null
+    }
   </Fragment>
 
   {
-    isDev && adminDevState && AdminHomeSection && AdminPageSection && AdminSidebarSection && AdminSiteSection && AdminUiSection ? (
-      <section class="admin-console" data-admin-root data-settings-endpoint={adminDevState.settingsEndpoint}>
+    isDev &&
+    adminDevState &&
+    AdminHomeSection &&
+    AdminPageSection &&
+    AdminSidebarSection &&
+    AdminSiteSection &&
+    AdminUiSection ? (
+      <section
+        class="admin-console"
+        data-admin-root
+        data-settings-endpoint={adminDevState.settingsEndpoint}
+      >
         <header class="page-header page-header--admin">
           <div class="admin-heading">
             <h1 class="page-title">Theme Console</h1>
             <span class="page-subtitle">主题设置</span>
           </div>
-          <p id="admin-status-live" class="admin-sr-only" role="status" aria-live="polite" aria-atomic="true"></p>
-          <p id="admin-status" class="admin-status" data-state="idle">等待加载</p>
+          <p
+            id="admin-status-live"
+            class="admin-sr-only"
+            role="status"
+            aria-live="polite"
+            aria-atomic="true"
+          />
+          <p id="admin-status" class="admin-status" data-state="idle">
+            等待加载
+          </p>
         </header>
 
         <section
@@ -152,10 +179,18 @@ const AdminUiSection = adminDevState?.AdminUiSection;
         >
           <div class="admin-banner__header">
             <div class="admin-banner__lead">
-              <span class="admin-banner__icon" aria-hidden="true">×</span>
+              <span class="admin-banner__icon" aria-hidden="true">
+                ×
+              </span>
               <div class="admin-banner__copy">
-                <p id="admin-error-title" class="admin-banner__title">操作未完成</p>
-                <p id="admin-error-message" class="admin-banner__message" hidden></p>
+                <p id="admin-error-title" class="admin-banner__title">
+                  操作未完成
+                </p>
+                <p
+                  id="admin-error-message"
+                  class="admin-banner__message"
+                  hidden
+                />
               </div>
             </div>
             <button
@@ -167,7 +202,7 @@ const AdminUiSection = adminDevState?.AdminUiSection;
               重新检查
             </button>
           </div>
-          <ul id="admin-error-list" class="admin-banner__list" hidden></ul>
+          <ul id="admin-error-list" class="admin-banner__list" hidden />
         </section>
 
         <form id="admin-form" class="admin-form" novalidate>
@@ -179,7 +214,9 @@ const AdminUiSection = adminDevState?.AdminUiSection;
 
           <AdminSidebarSection navIdOrder={adminDevState.navIdOrder} />
 
-          <AdminHomeSection homeIntroMaxLength={adminDevState.homeIntroMaxLength} />
+          <AdminHomeSection
+            homeIntroMaxLength={adminDevState.homeIntroMaxLength}
+          />
 
           <AdminPageSection
             pageTitleMaxLength={adminDevState.pageTitleMaxLength}
@@ -191,24 +228,58 @@ const AdminUiSection = adminDevState?.AdminUiSection;
           <AdminUiSection />
         </form>
 
-        <div id="admin-actions-sentinel" class="admin-actions__sentinel" aria-hidden="true"></div>
-        <div id="admin-actions" class="admin-actions" data-dirty="false" data-sticky="false">
+        <div
+          id="admin-actions-sentinel"
+          class="admin-actions__sentinel"
+          aria-hidden="true"
+        />
+        <div
+          id="admin-actions"
+          class="admin-actions"
+          data-dirty="false"
+          data-sticky="false"
+        >
           <div class="admin-actions__meta">
-            <p id="admin-dirty-banner" class="admin-banner admin-banner--dirty" hidden>
+            <p
+              id="admin-dirty-banner"
+              class="admin-banner admin-banner--dirty"
+              hidden
+            >
               * 你有未保存更改，离开页面会触发提醒。
             </p>
-            <p id="admin-status-inline" class="admin-status admin-status--inline" data-state="idle" aria-hidden="true">
+            <p
+              id="admin-status-inline"
+              class="admin-status admin-status--inline"
+              data-state="idle"
+              aria-hidden="true"
+            >
               等待加载
             </p>
           </div>
           <div class="admin-actions__buttons">
-            <button id="admin-validate" class="admin-btn" type="button">检查配置</button>
-            <button id="admin-reset" class="admin-btn admin-btn--ghost" type="button">重置更改</button>
-            <button id="admin-save" class="admin-btn admin-btn--muted" type="button">保存</button>
+            <button id="admin-validate" class="admin-btn" type="button">
+              检查配置
+            </button>
+            <button
+              id="admin-reset"
+              class="admin-btn admin-btn--ghost"
+              type="button"
+            >
+              重置更改
+            </button>
+            <button
+              id="admin-save"
+              class="admin-btn admin-btn--muted"
+              type="button"
+            >
+              保存
+            </button>
           </div>
         </div>
 
-        <div id="admin-bootstrap" hidden>{adminDevState.bootstrapText}</div>
+        <div id="admin-bootstrap" hidden>
+          {adminDevState.bootstrapText}
+        </div>
       </section>
     ) : (
       <section class="admin-console admin-console--readonly">
@@ -227,8 +298,11 @@ const AdminUiSection = adminDevState?.AdminUiSection;
 
   {
     isDev && adminDevState?.adminConsoleScriptHref ? (
-      <script is:inline type="module" src={adminDevState.adminConsoleScriptHref}></script>
+      <script
+        is:inline
+        type="module"
+        src={adminDevState.adminConsoleScriptHref}
+      />
     ) : null
   }
 </BaseLayout>
-

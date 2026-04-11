@@ -3,29 +3,60 @@ import {
   createDebouncedAsyncRunner,
   createJsonIndexLoader,
   createWithBase,
-  tokenizeSearchQuery
+  tokenizeSearchQuery,
 } from '../utils/format';
 
 const form = document.querySelector<HTMLFormElement>('[data-bits-search-form]');
 const input = document.getElementById('bits-search') as HTMLInputElement | null;
-const btn = document.getElementById('bits-search-btn') as HTMLButtonElement | null;
-const statusEl = document.getElementById('bits-search-status') as HTMLDivElement | null;
-const liveEl = document.getElementById('bits-search-live') as HTMLParagraphElement | null;
+const btn = document.getElementById(
+  'bits-search-btn'
+) as HTMLButtonElement | null;
+const statusEl = document.getElementById(
+  'bits-search-status'
+) as HTMLDivElement | null;
+const liveEl = document.getElementById(
+  'bits-search-live'
+) as HTMLParagraphElement | null;
 const browseRoot = document.querySelector<HTMLElement>('[data-bits-browse]');
-const resultsRoot = document.querySelector<HTMLElement>('[data-bits-search-results]');
-const resultsSummaryEl = document.querySelector<HTMLElement>('[data-bits-search-results-summary]');
-const resultsListEl = document.querySelector<HTMLElement>('[data-bits-search-results-list]');
-const clearBtn = document.querySelector<HTMLButtonElement>('[data-bits-search-clear]');
-const yearFilterRoot = document.querySelector<HTMLElement>('[data-bits-year-filter]');
-const yearCursor = document.querySelector<HTMLElement>('[data-bits-year-cursor]');
-const yearButtons = Array.from(document.querySelectorAll<HTMLButtonElement>('[data-bits-year-item]'));
-const yearMoreRoot = document.querySelector<HTMLElement>('[data-bits-year-more]');
-const yearMoreTrigger = document.querySelector<HTMLButtonElement>('[data-bits-year-more-trigger]');
-const yearMoreLabel = document.querySelector<HTMLElement>('[data-bits-year-more-label]');
+const resultsRoot = document.querySelector<HTMLElement>(
+  '[data-bits-search-results]'
+);
+const resultsSummaryEl = document.querySelector<HTMLElement>(
+  '[data-bits-search-results-summary]'
+);
+const resultsListEl = document.querySelector<HTMLElement>(
+  '[data-bits-search-results-list]'
+);
+const clearBtn = document.querySelector<HTMLButtonElement>(
+  '[data-bits-search-clear]'
+);
+const yearFilterRoot = document.querySelector<HTMLElement>(
+  '[data-bits-year-filter]'
+);
+const yearCursor = document.querySelector<HTMLElement>(
+  '[data-bits-year-cursor]'
+);
+const yearButtons = Array.from(
+  document.querySelectorAll<HTMLButtonElement>('[data-bits-year-item]')
+);
+const yearMoreRoot = document.querySelector<HTMLElement>(
+  '[data-bits-year-more]'
+);
+const yearMoreTrigger = document.querySelector<HTMLButtonElement>(
+  '[data-bits-year-more-trigger]'
+);
+const yearMoreLabel = document.querySelector<HTMLElement>(
+  '[data-bits-year-more-label]'
+);
 const yearMenu = document.querySelector<HTMLElement>('[data-bits-year-menu]');
-const yearMenuButtons = Array.from(document.querySelectorAll<HTMLButtonElement>('[data-bits-year-menu-item]'));
-const yearSelect = document.querySelector<HTMLSelectElement>('[data-bits-year-select]');
-const yearSelectWrap = yearSelect?.closest<HTMLElement>('.bits-year-select-wrap') ?? null;
+const yearMenuButtons = Array.from(
+  document.querySelectorAll<HTMLButtonElement>('[data-bits-year-menu-item]')
+);
+const yearSelect = document.querySelector<HTMLSelectElement>(
+  '[data-bits-year-select]'
+);
+const yearSelectWrap =
+  yearSelect?.closest<HTMLElement>('.bits-year-select-wrap') ?? null;
 
 const base = import.meta.env.BASE_URL ?? '/';
 const withBase = createWithBase(base);
@@ -57,7 +88,8 @@ type IndexItem = {
   } | null;
 };
 
-const getIndexKey = (item: Pick<IndexItem, 'key' | 'slug'>) => (item.key || item.slug || '').trim();
+const getIndexKey = (item: Pick<IndexItem, 'key' | 'slug'>) =>
+  (item.key || item.slug || '').trim();
 const getYearButtonValue = (button: HTMLButtonElement) => {
   const raw = (button.dataset.bitsYear ?? '').trim();
   if (raw === '') return null;
@@ -66,7 +98,7 @@ const getYearButtonValue = (button: HTMLButtonElement) => {
 };
 
 const availableYears = new Set(
-  (yearSelect
+  yearSelect
     ? Array.from(yearSelect.options)
         .map((option) => option.value.trim())
         .filter(Boolean)
@@ -74,10 +106,12 @@ const availableYears = new Set(
         .filter((year): year is number => Number.isFinite(year))
     : [...yearButtons, ...yearMenuButtons]
         .map((button) => getYearButtonValue(button))
-        .filter((year): year is number => year !== null))
+        .filter((year): year is number => year !== null)
 );
 const overflowYears = new Set(
-  yearMenuButtons.map((button) => getYearButtonValue(button)).filter((year): year is number => year !== null)
+  yearMenuButtons
+    .map((button) => getYearButtonValue(button))
+    .filter((year): year is number => year !== null)
 );
 const shouldBypassIndexCache = import.meta.env.DEV;
 
@@ -86,7 +120,10 @@ let filterRunId = 0;
 let activeYear: number | null = null;
 let isMoreMenuOpen = false;
 let statusTimer: number | null = null;
-const filterRunner = createDebouncedAsyncRunner(() => applyFilter(), FILTER_DEBOUNCE_MS);
+const filterRunner = createDebouncedAsyncRunner(
+  () => applyFilter(),
+  FILTER_DEBOUNCE_MS
+);
 
 const getTrimmedQuery = () => (input?.value || '').trim();
 const getNormalizedQuery = () => getTrimmedQuery().toLowerCase();
@@ -106,7 +143,8 @@ const escapeHtml = (value: string) =>
     .replaceAll('"', '&quot;')
     .replaceAll("'", '&#39;');
 
-const escapeRegExp = (value: string) => value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+const escapeRegExp = (value: string) =>
+  value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 const includesAnyTerm = (value: string, terms: string[]) => {
   if (!value.trim()) return false;
   if (!terms.length) return true;
@@ -126,7 +164,9 @@ const getContextSnippet = (value: string, terms: string[], maxLength = 120) => {
   const normalized = value.trim();
   if (!normalized) return '';
   if (!terms.length) {
-    return normalized.length > maxLength ? `${normalized.slice(0, maxLength)}…` : normalized;
+    return normalized.length > maxLength
+      ? `${normalized.slice(0, maxLength)}…`
+      : normalized;
   }
 
   const lower = normalized.toLowerCase();
@@ -142,10 +182,15 @@ const getContextSnippet = (value: string, terms: string[], maxLength = 120) => {
   }
 
   if (matchIndex < 0) {
-    return normalized.length > maxLength ? `${normalized.slice(0, maxLength)}…` : normalized;
+    return normalized.length > maxLength
+      ? `${normalized.slice(0, maxLength)}…`
+      : normalized;
   }
 
-  const before = Math.max(0, matchIndex - Math.floor((maxLength - matchedTerm.length) / 2));
+  const before = Math.max(
+    0,
+    matchIndex - Math.floor((maxLength - matchedTerm.length) / 2)
+  );
   const after = Math.min(normalized.length, before + maxLength);
   const snippet = normalized.slice(before, after).trim();
   const prefix = before > 0 ? '…' : '';
@@ -158,10 +203,12 @@ const getDisplaySnippet = (item: IndexItem, terms: string[]) => {
     item.description?.trim() ?? '',
     item.excerpt?.trim() ?? '',
     item.text?.trim() ?? '',
-    item.title?.trim() ?? ''
+    item.title?.trim() ?? '',
   ].filter(Boolean);
 
-  const matchedCandidate = candidates.find((value) => includesAnyTerm(value, terms));
+  const matchedCandidate = candidates.find((value) =>
+    includesAnyTerm(value, terms)
+  );
   const source = matchedCandidate || candidates[0] || '';
   if (!source) return '';
 
@@ -184,9 +231,13 @@ const highlightText = (value: string, terms: string[]) => {
   return parts
     .map((part) => {
       if (!part) return '';
-      const matched = validTerms.some((term) => part.toLowerCase() === term.toLowerCase());
+      const matched = validTerms.some(
+        (term) => part.toLowerCase() === term.toLowerCase()
+      );
       const escaped = escapeHtml(part);
-      return matched ? `<mark class="bit-search-result__mark">${escaped}</mark>` : escaped;
+      return matched
+        ? `<mark class="bit-search-result__mark">${escaped}</mark>`
+        : escaped;
     })
     .join('');
 };
@@ -195,13 +246,14 @@ const getDisplayTags = (tags: string[]) => {
   const visibleTags = Array.isArray(tags)
     ? tags.filter((tag) => typeof tag === 'string' && tag.trim() !== '')
     : [];
-  const placeTag = visibleTags.find((tag) => tag.toLowerCase().startsWith('loc:')) ?? '';
+  const placeTag =
+    visibleTags.find((tag) => tag.toLowerCase().startsWith('loc:')) ?? '';
   const placeText = placeTag ? placeTag.slice(4).trim() : '';
   const normalTags = visibleTags.filter((tag) => tag !== placeTag);
 
   return {
     placeText,
-    normalTags
+    normalTags,
   };
 };
 
@@ -249,13 +301,20 @@ const formatResultsSummary = (count: number, year: number | null) => {
 };
 
 const isResultsVisible = () => resultsRoot?.hasAttribute('hidden') === false;
-const getFirstResultLink = () => resultsListEl?.querySelector<HTMLAnchorElement>('.bit-search-result__link') ?? null;
-const isOverflowYear = (year: number | null): year is number => year !== null && overflowYears.has(year);
+const getFirstResultLink = () =>
+  resultsListEl?.querySelector<HTMLAnchorElement>('.bit-search-result__link') ??
+  null;
+const isOverflowYear = (year: number | null): year is number =>
+  year !== null && overflowYears.has(year);
 const getCursorTargetButton = () => {
   if ((isMoreMenuOpen || isOverflowYear(activeYear)) && yearMoreTrigger) {
     return yearMoreTrigger;
   }
-  return yearButtons.find((button) => button.classList.contains('is-active')) ?? yearMoreTrigger ?? null;
+  return (
+    yearButtons.find((button) => button.classList.contains('is-active')) ??
+    yearMoreTrigger ??
+    null
+  );
 };
 
 const updateYearCursor = () => {
@@ -267,15 +326,21 @@ const updateYearCursor = () => {
   const primaryCursorWidth = yearButtons
     .map((button) => ({
       button,
-      year: getYearButtonValue(button)
+      year: getYearButtonValue(button),
     }))
     .filter((item) => item.year !== null)
-    .reduce((width, item) => Math.max(width, item.button.offsetWidth), activeButton.offsetWidth);
+    .reduce(
+      (width, item) => Math.max(width, item.button.offsetWidth),
+      activeButton.offsetWidth
+    );
   const cursorWidth =
     (isMoreMenuOpen || isOverflowYear(activeYear)) && yearMoreTrigger
       ? Math.max(yearMoreTrigger.offsetWidth, primaryCursorWidth)
       : Math.max(activeButton.offsetWidth, primaryCursorWidth);
-  const centeredLeft = buttonRect.left - rootRect.left - (cursorWidth - activeButton.offsetWidth) / 2;
+  const centeredLeft =
+    buttonRect.left -
+    rootRect.left -
+    (cursorWidth - activeButton.offsetWidth) / 2;
   const maxLeft = Math.max(rootRect.width - cursorWidth, 0);
   const cursorLeft = Math.min(Math.max(centeredLeft, 0), maxLeft);
 
@@ -323,7 +388,12 @@ const setActiveYearState = (year: number | null) => {
     const isMoreActive = isOverflowYear(year);
     yearMoreRoot.dataset.active = String(isMoreActive);
     yearMoreTrigger.classList.toggle('is-active', isMoreActive);
-    yearMoreTrigger.setAttribute('aria-label', isMoreActive ? `Open more year filters, current ${year}` : 'Open more year filters');
+    yearMoreTrigger.setAttribute(
+      'aria-label',
+      isMoreActive
+        ? `Open more year filters, current ${year}`
+        : 'Open more year filters'
+    );
   }
   if (yearMoreLabel) {
     yearMoreLabel.textContent = isOverflowYear(year) ? String(year) : 'More';
@@ -379,7 +449,7 @@ const readInitialState = () => {
 
   return {
     query,
-    year: parsedYear
+    year: parsedYear,
   };
 };
 
@@ -418,23 +488,33 @@ const renderResults = (matchedItems: IndexItem[]) => {
       const queryTerms = tokenizeSearchQuery(query);
       const snippet = getDisplaySnippet(item, queryTerms);
       const dateLabel = item.dateLabel?.trim() ?? '';
-      const pageHint = item.page && item.page !== currentBitsPage ? `From page ${item.page}` : '';
+      const pageHint =
+        item.page && item.page !== currentBitsPage
+          ? `From page ${item.page}`
+          : '';
       const { placeText, normalTags } = getDisplayTags(item.tags ?? []);
       const place = placeText
         ? `<span class="bit-search-result__tag bit-search-result__tag--place">📍 ${highlightText(placeText, queryTerms)}</span>`
         : '';
       const tags = normalTags
         .slice(0, 3)
-        .map((tag) => `<span class="bit-search-result__tag">#${highlightText(tag.trim(), queryTerms)}</span>`)
+        .map(
+          (tag) =>
+            `<span class="bit-search-result__tag">#${highlightText(tag.trim(), queryTerms)}</span>`
+        )
         .join('');
       const metaTrail = [
         dateLabel
           ? `<time class="bit-search-result__date" datetime="${escapeHtml(item.date ?? '')}">${escapeHtml(dateLabel)}</time>`
           : '',
-        pageHint ? `<span class="bit-search-result__page">${escapeHtml(pageHint)}</span>` : ''
+        pageHint
+          ? `<span class="bit-search-result__page">${escapeHtml(pageHint)}</span>`
+          : '',
       ]
         .filter(Boolean)
-        .join('<span class="bit-search-result__sep" aria-hidden="true">·</span>');
+        .join(
+          '<span class="bit-search-result__sep" aria-hidden="true">·</span>'
+        );
       const href = item.href ? escapeHtml(item.href) : withBase('bits/');
       const thumbnail = item.thumbnail
         ? `
@@ -458,14 +538,16 @@ const renderResults = (matchedItems: IndexItem[]) => {
               ${thumbnail}
               <div class="bit-search-result__content">
                 ${snippet ? `<p class="bit-search-result__excerpt">${highlightText(snippet, queryTerms)}</p>` : ''}
-                ${place || tags || metaTrail
-                  ? `
+                ${
+                  place || tags || metaTrail
+                    ? `
                     <div class="bit-search-result__footer">
                       ${place || tags ? `<div class="bit-search-result__tags">${place}${tags}</div>` : '<div></div>'}
                       ${metaTrail ? `<div class="bit-search-result__meta-line">${metaTrail}</div>` : ''}
                     </div>
                   `
-                  : ''}
+                    : ''
+                }
               </div>
             </div>
           </a>
@@ -478,7 +560,11 @@ const renderResults = (matchedItems: IndexItem[]) => {
   resultsRoot.removeAttribute('hidden');
 };
 
-const filterIndexItems = (index: IndexItem[], queryTerms: string[], year: number | null) =>
+const filterIndexItems = (
+  index: IndexItem[],
+  queryTerms: string[],
+  year: number | null
+) =>
   index.filter((item) => {
     const key = getIndexKey(item);
     if (!key) return false;
@@ -546,17 +632,25 @@ const indexLoader = createJsonIndexLoader<IndexItem>({
   onResolved: (data) => {
     indexHay = new Map(
       data
-        .map((item) => [
-          getIndexKey(item),
-          buildSearchHaystack([item.title, item.description, item.tags, item.text])
-        ] as const)
+        .map(
+          (item) =>
+            [
+              getIndexKey(item),
+              buildSearchHaystack([
+                item.title,
+                item.description,
+                item.tags,
+                item.text,
+              ]),
+            ] as const
+        )
         .filter(([key]) => key !== '')
     );
     setStatus('');
   },
   onRejected: () => {
     setDegradedMode();
-  }
+  },
 });
 
 const loadIndex = () => indexLoader.load();
@@ -669,9 +763,12 @@ resultsListEl?.addEventListener('click', (event) => {
 resultsListEl?.addEventListener('keydown', (event) => {
   if (event.key !== 'ArrowUp') return;
   const target = event.target as HTMLElement | null;
-  const currentLink = target?.closest<HTMLAnchorElement>('.bit-search-result__link');
+  const currentLink = target?.closest<HTMLAnchorElement>(
+    '.bit-search-result__link'
+  );
   const firstResultLink = getFirstResultLink();
-  if (!currentLink || !firstResultLink || currentLink !== firstResultLink) return;
+  if (!currentLink || !firstResultLink || currentLink !== firstResultLink)
+    return;
   event.preventDefault();
   input?.focus();
 });
@@ -699,7 +796,11 @@ yearMoreTrigger?.addEventListener('keydown', (event) => {
   if (event.key === 'ArrowDown') {
     event.preventDefault();
     setMoreMenuOpen(true);
-    (yearMenuButtons.find((button) => button.classList.contains('is-active')) ?? yearMenuButtons[0])?.focus();
+    (
+      yearMenuButtons.find((button) =>
+        button.classList.contains('is-active')
+      ) ?? yearMenuButtons[0]
+    )?.focus();
     return;
   }
   if (event.key === 'Escape') {
@@ -732,14 +833,18 @@ yearMenu?.addEventListener('keydown', (event) => {
     return;
   }
 
-  const currentIndex = yearMenuButtons.findIndex((button) => button === document.activeElement);
+  const currentIndex = yearMenuButtons.findIndex(
+    (button) => button === document.activeElement
+  );
   if (currentIndex < 0) return;
 
   let nextIndex = currentIndex;
   if (event.key === 'ArrowDown') {
-    nextIndex = currentIndex >= yearMenuButtons.length - 1 ? 0 : currentIndex + 1;
+    nextIndex =
+      currentIndex >= yearMenuButtons.length - 1 ? 0 : currentIndex + 1;
   } else if (event.key === 'ArrowUp') {
-    nextIndex = currentIndex <= 0 ? yearMenuButtons.length - 1 : currentIndex - 1;
+    nextIndex =
+      currentIndex <= 0 ? yearMenuButtons.length - 1 : currentIndex - 1;
   } else if (event.key === 'Home') {
     nextIndex = 0;
   } else if (event.key === 'End') {
