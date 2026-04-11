@@ -260,6 +260,14 @@ export type AdminThemeSettingsValidationIssue = {
 };
 
 export type AdminThemeSettingsMismatchMode = 'exact' | 'subset';
+export type AdminThemeSettingsChangeKind = 'added' | 'removed' | 'updated';
+
+export type AdminThemeSettingsChangePreview = {
+  path: string;
+  kind: AdminThemeSettingsChangeKind;
+  before: string;
+  after: string;
+};
 
 export type AdminWritableThemeSettingsGroups = {
   site: EditableThemeSettings['site'];
@@ -968,6 +976,55 @@ const appendPathSegment = (basePath: string, segment: string): string => {
   return `${basePath}.${segment}`;
 };
 
+const MISSING_CHANGE_VALUE = Symbol('adminThemeSettingsMissingValue');
+
+const createChangePath = (basePath: string): string => basePath || 'root';
+
+const formatChangePreviewValue = (
+  value: unknown | typeof MISSING_CHANGE_VALUE
+): string => {
+  if (value === MISSING_CHANGE_VALUE) return '(missing)';
+  if (typeof value === 'undefined') return 'undefined';
+  if (value === null) return 'null';
+
+  if (typeof value === 'string') {
+    return value.length > 0 ? JSON.stringify(value) : '""';
+  }
+
+  if (typeof value === 'number' || typeof value === 'boolean' || typeof value === 'bigint') {
+    return String(value);
+  }
+
+  if (Array.isArray(value)) {
+    return `Array(${value.length})`;
+  }
+
+  if (isRecord(value)) {
+    return `Object(${Object.keys(value).length})`;
+  }
+
+  return String(value);
+};
+
+const createChangePreview = (
+  path: string,
+  before: unknown | typeof MISSING_CHANGE_VALUE,
+  after: unknown | typeof MISSING_CHANGE_VALUE
+): AdminThemeSettingsChangePreview => {
+  const kind: AdminThemeSettingsChangeKind = before === MISSING_CHANGE_VALUE
+    ? 'added'
+    : after === MISSING_CHANGE_VALUE
+      ? 'removed'
+      : 'updated';
+
+  return {
+    path,
+    kind,
+    before: formatChangePreviewValue(before),
+    after: formatChangePreviewValue(after)
+  };
+};
+
 const collectMismatchPaths = (
   actual: unknown,
   expected: unknown,
@@ -1019,6 +1076,75 @@ export const getAdminThemeSettingsMismatchPaths = (
   expected: unknown,
   mode: AdminThemeSettingsMismatchMode = 'exact'
 ): string[] => Array.from(new Set(collectMismatchPaths(actual, expected, mode)));
+
+const collectChangePreviews = (
+  actual: unknown,
+  expected: unknown,
+  mode: AdminThemeSettingsMismatchMode,
+  basePath = '',
+  changes: AdminThemeSettingsChangePreview[] = []
+): AdminThemeSettingsChangePreview[] => {
+  if (Array.isArray(actual) || Array.isArray(expected)) {
+    if (!Array.isArray(actual) || !Array.isArray(expected) || actual.length !== expected.length) {
+      changes.push(createChangePreview(createChangePath(basePath), actual, expected));
+      return changes;
+    }
+
+    actual.forEach((item, index) => {
+      collectChangePreviews(item, expected[index], mode, appendPathSegment(basePath, `[${index}]`), changes);
+    });
+    return changes;
+  }
+
+  if (isRecord(actual) || isRecord(expected)) {
+    if (!isRecord(actual) || !isRecord(expected)) {
+      changes.push(createChangePreview(createChangePath(basePath), actual, expected));
+      return changes;
+    }
+
+    const actualKeys = Object.keys(actual);
+    const expectedKeys = Object.keys(expected);
+    const keys = mode === 'exact' ? Array.from(new Set([...actualKeys, ...expectedKeys])) : actualKeys;
+
+    keys.forEach((key) => {
+      const path = appendPathSegment(basePath, key);
+      const hasActual = Object.prototype.hasOwnProperty.call(actual, key);
+      const hasExpected = Object.prototype.hasOwnProperty.call(expected, key);
+
+      if (!hasActual || !hasExpected) {
+        changes.push(createChangePreview(
+          path,
+          hasActual ? actual[key] : MISSING_CHANGE_VALUE,
+          hasExpected ? expected[key] : MISSING_CHANGE_VALUE
+        ));
+        return;
+      }
+
+      collectChangePreviews(actual[key], expected[key], mode, path, changes);
+    });
+    return changes;
+  }
+
+  if (!Object.is(actual, expected)) {
+    changes.push(createChangePreview(createChangePath(basePath), actual, expected));
+  }
+  return changes;
+};
+
+export const getAdminThemeSettingsChangePreviews = (
+  actual: unknown,
+  expected: unknown,
+  mode: AdminThemeSettingsMismatchMode = 'exact'
+): AdminThemeSettingsChangePreview[] => {
+  const changes = collectChangePreviews(actual, expected, mode);
+  const seenPaths = new Set<string>();
+
+  return changes.filter((change) => {
+    if (seenPaths.has(change.path)) return false;
+    seenPaths.add(change.path);
+    return true;
+  });
+};
 
 export const createAdminThemeSettingsCanonicalMismatchIssues = (
   actual: unknown,

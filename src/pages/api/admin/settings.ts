@@ -13,10 +13,13 @@ import {
 } from '../../../lib/theme-settings';
 import {
   canonicalizeAdminThemeSettings,
+  getAdminThemeSettingsChangePreviews,
   createAdminThemeSettingsCanonicalMismatchIssues,
   createAdminWritableThemeSettingsGroups,
   getAdminFooterStartYearMax,
-  validateAdminThemeSettings
+  getAdminThemeSettingsMismatchPaths,
+  validateAdminThemeSettings,
+  type AdminThemeSettingsChangePreview
 } from '../../../lib/admin-console/theme-shared';
 
 const WRITABLE_GROUPS = ['site', 'shell', 'home', 'page', 'ui'] as const satisfies readonly ThemeSettingsFileGroup[];
@@ -44,6 +47,9 @@ type WriteRequestValidation = {
 type WriteResult = {
   changed: boolean;
   written: boolean;
+  changedCount: number;
+  changedPaths: string[];
+  changes: AdminThemeSettingsChangePreview[];
 };
 
 type WriteInput = {
@@ -125,14 +131,29 @@ const isDryRunWriteRequest = (url: URL): boolean => {
   return rawValue === '1' || rawValue === 'true';
 };
 
-const createResults = (changedGroups: readonly WritableGroup[]): Record<WritableGroup, WriteResult> => {
-  const changedSet = new Set(changedGroups);
+type WriteResultDetail = {
+  changedCount: number;
+  changedPaths: string[];
+  changes: AdminThemeSettingsChangePreview[];
+};
+
+type WriteResultDetails = Record<WritableGroup, WriteResultDetail>;
+
+const createEmptyWriteResultDetails = (): WriteResultDetails => ({
+  site: { changedCount: 0, changedPaths: [], changes: [] },
+  shell: { changedCount: 0, changedPaths: [], changes: [] },
+  home: { changedCount: 0, changedPaths: [], changes: [] },
+  page: { changedCount: 0, changedPaths: [], changes: [] },
+  ui: { changedCount: 0, changedPaths: [], changes: [] }
+});
+
+const createResults = (details: WriteResultDetails = createEmptyWriteResultDetails()): Record<WritableGroup, WriteResult> => {
   return {
-    site: { changed: changedSet.has('site'), written: false },
-    shell: { changed: changedSet.has('shell'), written: false },
-    home: { changed: changedSet.has('home'), written: false },
-    page: { changed: changedSet.has('page'), written: false },
-    ui: { changed: changedSet.has('ui'), written: false }
+    site: { changed: details.site.changedCount > 0, written: false, ...details.site },
+    shell: { changed: details.shell.changedCount > 0, written: false, ...details.shell },
+    home: { changed: details.home.changedCount > 0, written: false, ...details.home },
+    page: { changed: details.page.changedCount > 0, written: false, ...details.page },
+    ui: { changed: details.ui.changedCount > 0, written: false, ...details.ui }
   };
 };
 
@@ -278,16 +299,28 @@ const getChangedGroups = (
   nextSettings: EditableThemeSettings
 ): {
   nextGroups: ReturnType<typeof createAdminWritableThemeSettingsGroups>;
+  details: WriteResultDetails;
   changedGroups: WritableGroup[];
 } => {
   const currentGroups = createAdminWritableThemeSettingsGroups(currentSettings);
   const nextGroups = createAdminWritableThemeSettingsGroups(nextSettings);
-  const changedGroups = WRITABLE_GROUPS.filter(
-    (group) => JSON.stringify(currentGroups[group]) !== JSON.stringify(nextGroups[group])
-  );
+  const details = WRITABLE_GROUPS.reduce<WriteResultDetails>((acc, group) => {
+    const changes = getAdminThemeSettingsChangePreviews(currentGroups[group], nextGroups[group], 'exact');
+    const changedPaths = changes.length > 0
+      ? changes.map((change) => change.path)
+      : getAdminThemeSettingsMismatchPaths(currentGroups[group], nextGroups[group], 'exact');
+    acc[group] = {
+      changedCount: changedPaths.length,
+      changedPaths,
+      changes
+    };
+    return acc;
+  }, createEmptyWriteResultDetails());
+  const changedGroups = WRITABLE_GROUPS.filter((group) => details[group].changedCount > 0);
 
   return {
     nextGroups,
+    details,
     changedGroups
   };
 };
@@ -317,7 +350,7 @@ export const POST: APIRoute = async ({ request, url }) => {
         {
           ok: false,
           errors: [requestError.error],
-          results: createResults([])
+          results: createResults()
         },
         null,
         2
@@ -357,12 +390,12 @@ export const POST: APIRoute = async ({ request, url }) => {
     return new Response(
       JSON.stringify(
         {
-          ok: false,
-          errors: writeInputErrors,
-          results: createResults([])
-        },
-        null,
-        2
+            ok: false,
+            errors: writeInputErrors,
+            results: createResults()
+          },
+          null,
+          2
       ),
       { status: 400, headers: JSON_HEADERS }
     );
@@ -394,7 +427,7 @@ export const POST: APIRoute = async ({ request, url }) => {
           {
             ok: false,
             errors: ['检测到配置已在外部更新，已拒绝覆盖并同步最新配置，请确认后再保存'],
-            results: createResults([]),
+            results: createResults(),
             payload: latestEditableState.payload
           },
           null,
@@ -411,7 +444,7 @@ export const POST: APIRoute = async ({ request, url }) => {
           {
             ok: false,
             errors,
-            results: createResults([])
+            results: createResults()
           },
           null,
           2
@@ -420,8 +453,8 @@ export const POST: APIRoute = async ({ request, url }) => {
       );
     }
 
-    const { nextGroups, changedGroups } = getChangedGroups(editableState.payload.settings, canonicalSettings);
-    const results = createResults(changedGroups);
+    const { nextGroups, details, changedGroups } = getChangedGroups(editableState.payload.settings, canonicalSettings);
+    const results = createResults(details);
 
     if (isDryRun) {
       return new Response(

@@ -1,23 +1,33 @@
 ---
+import Icon from '../../../components/Icon.astro';
 import AdminLayout from '../../../components/admin/AdminLayout.astro';
 import AdminShell from '../../../components/admin/AdminShell.astro';
 import { getEditableThemeSettingsState } from '../../../lib/theme-settings';
-import { ADMIN_SETTINGS_EXPORT_SCHEMA_VERSION } from '../../../lib/admin-console/settings-data';
+import {
+  ADMIN_SETTINGS_EXPORT_SCHEMA_VERSION,
+  ADMIN_SETTINGS_EXPORT_SCOPE
+} from '../../../lib/admin-console/settings-data';
 import { createWithBase } from '../../../utils/format';
 
 const isDev = import.meta.env.DEV;
 const base = import.meta.env.BASE_URL ?? '/';
 const withBase = createWithBase(base);
+const exportIncludedScopesLabel = `['${ADMIN_SETTINGS_EXPORT_SCOPE}']`;
 
 const loadDataDevState = async () => {
-  const [{ default: adminDataScriptHref }, { default: adminStylesHref }] = await Promise.all([
+  const [
+    { default: adminDataScriptHref },
+    { default: adminStylesHref },
+    { default: adminDataStylesHref }
+  ] = await Promise.all([
     import('../../../scripts/admin-data/index.ts?url'),
-    import('../../../styles/components/admin.css?url')
+    import('../../../styles/components/admin.css?url'),
+    import('../../../styles/components/admin-data.css?url')
   ]);
 
   return {
     adminDataScriptHref,
-    adminStylesHref,
+    stylesHref: [adminStylesHref, adminDataStylesHref],
     editableState: getEditableThemeSettingsState()
   };
 };
@@ -34,11 +44,11 @@ const bootstrapText =
     : null;
 ---
 
-<AdminLayout title="Data Console" stylesHref={dataDevState?.adminStylesHref ?? null}>
+<AdminLayout title="Data Console" stylesHref={dataDevState?.stylesHref ?? null}>
   <AdminShell
     currentRoute="data"
     title="Data Console"
-    subtitle="设置导入导出"
+    subtitle="配置快照"
     modeLabel={isDev ? 'DEV 可写' : '只读模式'}
   >
     {isDev ? (
@@ -50,7 +60,7 @@ const bootstrapText =
 
     {
       isDev && dataDevState && editableState?.ok && bootstrapText ? (
-        <section class="admin-overview admin-data-console" data-admin-data-root>
+        <section class="admin-data-console" data-admin-data-root>
           <section
             id="admin-data-error-banner"
             class="admin-banner admin-banner--error"
@@ -71,49 +81,208 @@ const bootstrapText =
             <ul id="admin-data-error-list" class="admin-banner__list" hidden></ul>
           </section>
 
-          <div class="admin-overview__grid">
-            <article class="admin-overview-card">
-              <p class="admin-overview-card__eyebrow">Export</p>
-              <h2 class="admin-overview-card__title">导出当前 settings 快照</h2>
-              <p class="admin-overview-card__body">
-                导出内容只包含 `src/data/settings/*.json` 的 canonical snapshot，并附带稳定 manifest 元数据，便于后续迁移或 dry-run 导入。
-              </p>
-              <ul class="admin-overview-card__list">
-                <li>`schemaVersion`: {ADMIN_SETTINGS_EXPORT_SCHEMA_VERSION}</li>
-                <li>`includedScopes`: `settings`</li>
-                <li>`locale`: {editableState.payload.settings.site.defaultLocale}</li>
-              </ul>
-              <div class="admin-overview-card__actions">
-                <button id="admin-data-export" class="admin-btn admin-btn--muted" type="button">导出 settings 快照</button>
+          <div class="admin-data-console__grid">
+            <article class="admin-data-panel admin-data-panel--export">
+              <div class="admin-data-panel__copy">
+                <h2 class="admin-data-panel__title">导出当前配置快照</h2>
+                <p class="admin-data-panel__body">
+                  导出当前 settings 快照
+                </p>
+                <p class="admin-data-panel__body admin-data-panel__body--subtle">
+                  用于迁移前比对或回滚前留档。
+                </p>
+                <div class="admin-data-panel__actions">
+                  <button
+                    id="admin-data-export"
+                    class="admin-btn admin-data-btn admin-data-btn--secondary"
+                    type="button"
+                  >
+                    <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                      <path d="M12 3v12"></path>
+                      <path d="m7 10 5 5 5-5"></path>
+                      <path d="M4 17v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2"></path>
+                    </svg>
+                    <span>导出 JSON 快照</span>
+                  </button>
+                </div>
+              </div>
+
+              <div class="admin-data-panel__side admin-data-manifest-card">
+                <dl class="admin-data-manifest" aria-label="导出 manifest 摘要">
+                  <div class="admin-data-manifest__row">
+                    <dt class="admin-data-manifest__label">schemaVersion</dt>
+                    <dd class="admin-data-manifest__value">v{ADMIN_SETTINGS_EXPORT_SCHEMA_VERSION}</dd>
+                  </div>
+                  <div class="admin-data-manifest__row">
+                    <dt class="admin-data-manifest__label">includedScopes</dt>
+                    <dd class="admin-data-manifest__value">{exportIncludedScopesLabel}</dd>
+                  </div>
+                  <div class="admin-data-manifest__row">
+                    <dt class="admin-data-manifest__label">locale</dt>
+                    <dd class="admin-data-manifest__value">{editableState.payload.settings.site.defaultLocale}</dd>
+                  </div>
+                </dl>
               </div>
             </article>
 
-            <article class="admin-overview-card">
-              <p class="admin-overview-card__eyebrow">Import</p>
-              <h2 class="admin-overview-card__title">从 JSON 快照导入 settings</h2>
-              <p class="admin-overview-card__body">
-                导入页面只解析导出包外层 manifest，真正的字段校验、dry-run、冲突保护与提交仍统一走现有 `/api/admin/settings/`。
-              </p>
-              <label class="admin-field admin-field--full">
-                <span class="admin-field__label">选择导出 JSON</span>
-                <input id="admin-data-file" type="file" accept=".json,application/json" />
-              </label>
-              <dl id="admin-data-file-meta" class="admin-data-meta" hidden></dl>
-              <div class="admin-overview-card__actions">
-                <button id="admin-data-dry-run" class="admin-btn" type="button" disabled>dry-run 校验</button>
-                <button id="admin-data-apply" class="admin-btn admin-btn--muted" type="button" disabled>确认写入</button>
+            <article class="admin-data-panel admin-data-panel--import">
+              <div class="admin-data-panel__drop">
+                <input
+                  id="admin-data-file"
+                  class="admin-data-file-input"
+                  type="file"
+                  accept=".json,application/json"
+                  tabindex="-1"
+                  aria-hidden="true"
+                />
+                <div
+                  id="admin-data-dropzone"
+                  class="admin-data-dropzone"
+                  data-has-file="false"
+                  data-disabled="false"
+                  role="group"
+                  aria-label="JSON 快照导入文件选择区"
+                  aria-disabled="false"
+                >
+                  <button
+                    id="admin-data-dropzone-empty"
+                    class="admin-data-dropzone__empty"
+                    type="button"
+                    aria-describedby="admin-data-dropzone-note"
+                  >
+                    <span class="admin-data-dropzone__icon" aria-hidden="true">
+                      <svg viewBox="0 0 24 24" focusable="false">
+                        <path d="M12 15V4"></path>
+                        <path d="m7 9 5-5 5 5"></path>
+                        <path d="M4 15v4a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-4"></path>
+                      </svg>
+                    </span>
+                    <span class="admin-data-dropzone__title">点击或拖拽 JSON 快照至此区域</span>
+                    <span id="admin-data-dropzone-note" class="admin-data-dropzone__note">
+                      校验通过后可执行 dry-run
+                    </span>
+                  </button>
+
+                  <section
+                    id="admin-data-dropzone-summary"
+                    class="admin-data-dropzone__summary"
+                    aria-labelledby="admin-data-dropzone-summary-title"
+                    hidden
+                  >
+                    <div class="admin-data-dropzone__summary-topline">
+                      <h3 id="admin-data-dropzone-summary-title" class="admin-data-dropzone__summary-heading">
+                        JSON 快照摘要
+                      </h3>
+                      <button
+                        id="admin-data-dropzone-reselect"
+                        class="admin-data-dropzone__summary-action"
+                        type="button"
+                        aria-label="重新选择 JSON 快照"
+                      >
+                        重新选择
+                      </button>
+                    </div>
+                    <div class="admin-data-dropzone__summary-file-row">
+                      <span class="admin-data-dropzone__summary-field-label">文件名称</span>
+                      <code
+                        id="admin-data-selected-file"
+                        class="admin-data-dropzone__summary-field-value admin-data-dropzone__summary-field-value--file"
+                        hidden
+                      ></code>
+                    </div>
+                    <dl id="admin-data-dropzone-meta" class="admin-data-dropzone__summary-meta" hidden></dl>
+                  </section>
+                </div>
+              </div>
+
+              <div class="admin-data-panel__copy admin-data-panel__copy--import">
+                <h2 class="admin-data-panel__title">导入 settings 快照</h2>
+                <p class="admin-data-panel__body">
+                  选择或拖拽导出的 JSON 快照。
+                </p>
+                <p class="admin-data-panel__body admin-data-panel__body--subtle">
+                  先解析校验，执行 dry-run，确认后写入。
+                </p>
+              </div>
+
+              <div class="admin-data-panel__actions admin-data-panel__actions--stack admin-data-panel__actions--import">
+                <button
+                  id="admin-data-dry-run"
+                  class="admin-btn admin-data-btn admin-data-btn--secondary"
+                  type="button"
+                  data-step-state="blocked"
+                  disabled
+                >
+                  1. Dry-run 模拟写入
+                </button>
+                <button
+                  id="admin-data-apply"
+                  class="admin-btn admin-data-btn admin-data-btn--primary"
+                  type="button"
+                  data-step-state="blocked"
+                  disabled
+                >
+                  2. 确认替换配置文件
+                </button>
+              </div>
+            </article>
+
+            <article id="admin-data-preview" class="admin-data-terminal" data-preview-state="idle">
+              <div class="admin-data-terminal__header">
+                <p class="admin-data-terminal__title">
+                  <span aria-hidden="true">&gt;_</span>
+                  <span>变更预览 (Dry-Run Diff / Log)</span>
+                </p>
+                <span
+                  id="admin-data-preview-badge"
+                  class="admin-data-terminal__badge"
+                  data-state="idle"
+                >
+                  AWAITING_INPUT
+                </span>
+              </div>
+
+              <div class="admin-data-terminal__body">
+                <div id="admin-data-preview-empty" class="admin-data-terminal__empty">
+                  <div class="admin-data-terminal__empty-heading">
+                    <span class="admin-data-terminal__empty-icon" aria-hidden="true">
+                      <svg viewBox="0 0 24 24" focusable="false">
+                        <rect x="3" y="4" width="18" height="12" rx="2"></rect>
+                        <path d="M8 20h8"></path>
+                        <path d="M12 16v4"></path>
+                      </svg>
+                    </span>
+                    <p id="admin-data-preview-empty-title" class="admin-data-terminal__empty-title">
+                      等待导入快照
+                    </p>
+                  </div>
+                  <p id="admin-data-preview-empty-body" class="admin-data-terminal__empty-body">
+                    选择 JSON 快照并执行 dry-run 后，此处显示预览结果
+                  </p>
+                </div>
+
+                <div id="admin-data-preview-content" class="admin-data-terminal__content" hidden>
+                  <h2 id="admin-data-preview-title" class="admin-data-terminal__section-title">变更预览</h2>
+                  <div class="admin-data-terminal__section-copy">
+                    <div class="admin-data-terminal__section-summary">
+                      <span class="admin-data-terminal__section-icon" aria-hidden="true">
+                        <Icon name="scan" size={18} />
+                      </span>
+                      <p id="admin-data-preview-body" class="admin-data-terminal__section-body">
+                        dry-run 完成后，会在这里展示将变更的 settings 分组。
+                      </p>
+                    </div>
+                    <p
+                      id="admin-data-preview-note"
+                      class="admin-data-terminal__section-note"
+                      hidden
+                    ></p>
+                  </div>
+                  <ul id="admin-data-result-list" class="admin-data-terminal__list"></ul>
+                </div>
               </div>
             </article>
           </div>
-
-          <article id="admin-data-preview" class="admin-overview-card" hidden>
-            <p class="admin-overview-card__eyebrow">Preview</p>
-            <h2 id="admin-data-preview-title" class="admin-overview-card__title">变更预览</h2>
-            <p id="admin-data-preview-body" class="admin-overview-card__body">
-              dry-run 完成后，会在这里展示将变更的 settings 分组。
-            </p>
-            <ul id="admin-data-result-list" class="admin-data-result-list"></ul>
-          </article>
 
           <div id="admin-data-bootstrap" hidden>{bootstrapText}</div>
         </section>

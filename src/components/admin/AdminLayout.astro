@@ -3,14 +3,20 @@ import BaseLayout from '../../layouts/BaseLayout.astro';
 
 const { title, stylesHref = null } = Astro.props as {
   title: string;
-  stylesHref?: string | null;
+  stylesHref?: string | readonly string[] | null;
 };
+
+const stylesheetHrefs = Array.isArray(stylesHref)
+  ? stylesHref.filter((href): href is string => typeof href === 'string' && href.length > 0)
+  : typeof stylesHref === 'string' && stylesHref.length > 0
+    ? [stylesHref]
+    : [];
 ---
 
 <BaseLayout title={title} bodyClass="admin-page">
   <Fragment slot="head">
     <meta name="robots" content="noindex,nofollow" />
-    {stylesHref ? <link rel="stylesheet" href={stylesHref} /> : null}
+    {stylesheetHrefs.map((href) => <link rel="stylesheet" href={href} />)}
     <slot name="head" />
   </Fragment>
   <slot />

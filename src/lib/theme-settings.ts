@@ -26,7 +26,9 @@ import {
   ADMIN_SOCIAL_ORDER_MAX,
   ADMIN_SOCIAL_ORDER_MIN,
   ADMIN_SOCIAL_PRESET_IDS,
+  canonicalizeAdminThemeSettings,
   createAdminWritableThemeSettingsGroups,
+  getAdminFooterStartYearMax,
   getAdminNavOrderIssues,
   getAdminThemeSettingsGroupFileName,
   getAdminThemeSettingsMismatchPaths,
@@ -1492,53 +1494,61 @@ export const toEditableThemeSettingsPayload = (
   };
 };
 
+const canonicalizeEditableThemeSettingsSnapshot = (
+  snapshot: EditableThemeSettingsSnapshot
+): EditableThemeSettingsSnapshot =>
+  canonicalizeAdminThemeSettings(snapshot, {
+    footerStartYearMax: getAdminFooterStartYearMax()
+  });
+
 const buildEditableThemeSettingsSnapshot = (
   resolved: ThemeSettingsResolved
-): EditableThemeSettingsSnapshot => ({
-  site: {
-    title: resolved.settings.site.title,
-    description: resolved.settings.site.description,
-    defaultLocale: resolved.settings.site.defaultLocale,
-    footer: {
-      ...resolved.settings.site.footer
-    },
-    socialLinks: {
-      github: resolved.settings.site.socialLinks.github,
-      x: resolved.settings.site.socialLinks.x,
-      email: resolved.settings.site.socialLinks.email,
-      presetOrder: clonePresetSocialOrder(resolved.settings.site.socialLinks.presetOrder),
-      custom: cloneSocialCustomItems(resolved.settings.site.socialLinks.custom)
-    }
-  },
-  shell: {
-    brandTitle: resolved.settings.shell.brandTitle,
-    quote: resolved.settings.shell.quote,
-    nav: cloneNavItems(resolved.settings.shell.nav)
-  },
-  home: {
-    ...resolved.settings.home,
-    introMoreLinks: cloneHomeIntroLinks(resolved.settings.home.introMoreLinks)
-  },
-  page: {
-    essay: { ...resolved.settings.page.essay },
-    archive: { ...resolved.settings.page.archive },
-    bits: {
-      title: resolved.settings.page.bits.title,
-      subtitle: resolved.settings.page.bits.subtitle,
-      defaultAuthor: {
-        ...resolved.settings.page.bits.defaultAuthor
+): EditableThemeSettingsSnapshot =>
+  canonicalizeEditableThemeSettingsSnapshot({
+    site: {
+      title: resolved.settings.site.title,
+      description: resolved.settings.site.description,
+      defaultLocale: resolved.settings.site.defaultLocale,
+      footer: {
+        ...resolved.settings.site.footer
+      },
+      socialLinks: {
+        github: resolved.settings.site.socialLinks.github,
+        x: resolved.settings.site.socialLinks.x,
+        email: resolved.settings.site.socialLinks.email,
+        presetOrder: clonePresetSocialOrder(resolved.settings.site.socialLinks.presetOrder),
+        custom: cloneSocialCustomItems(resolved.settings.site.socialLinks.custom)
       }
     },
-    memo: { ...resolved.settings.page.memo },
-    about: { ...resolved.settings.page.about }
-  },
-  ui: {
-    codeBlock: { ...resolved.settings.ui.codeBlock },
-    readingMode: { ...resolved.settings.ui.readingMode },
-    articleMeta: { ...resolved.settings.ui.articleMeta },
-    layout: { ...resolved.settings.ui.layout }
-  }
-});
+    shell: {
+      brandTitle: resolved.settings.shell.brandTitle,
+      quote: resolved.settings.shell.quote,
+      nav: cloneNavItems(resolved.settings.shell.nav)
+    },
+    home: {
+      ...resolved.settings.home,
+      introMoreLinks: cloneHomeIntroLinks(resolved.settings.home.introMoreLinks)
+    },
+    page: {
+      essay: { ...resolved.settings.page.essay },
+      archive: { ...resolved.settings.page.archive },
+      bits: {
+        title: resolved.settings.page.bits.title,
+        subtitle: resolved.settings.page.bits.subtitle,
+        defaultAuthor: {
+          ...resolved.settings.page.bits.defaultAuthor
+        }
+      },
+      memo: { ...resolved.settings.page.memo },
+      about: { ...resolved.settings.page.about }
+    },
+    ui: {
+      codeBlock: { ...resolved.settings.ui.codeBlock },
+      readingMode: { ...resolved.settings.ui.readingMode },
+      articleMeta: { ...resolved.settings.ui.articleMeta },
+      layout: { ...resolved.settings.ui.layout }
+    }
+  });
 
 const hashEditableThemeSettingsSnapshot = (snapshot: EditableThemeSettingsSnapshot): string => {
   const hash = createHash('sha1');

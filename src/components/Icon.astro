@@ -7,6 +7,7 @@ type IconName =
   | 'moon'
   | 'sun'
   | 'search'
+  | 'scan'
   | 'refresh'
   | 'copy'
   | 'pen'
@@ -314,6 +315,30 @@ const socialIconBody = Object.prototype.hasOwnProperty.call(socialIconBodies, no
   >
     <circle cx="11" cy="11" r="6.5" fill="none" stroke="currentColor" stroke-width="1.8"></circle>
     <path d="M16 16L20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"></path>
+  </svg>
+)}
+
+{name === 'scan' && (
+  <svg
+    class={className}
+    width={iconSize}
+    height={iconSize}
+    viewBox="2 2 20 20"
+    fill="none"
+    stroke="currentColor"
+    stroke-width="2"
+    stroke-linecap="round"
+    stroke-linejoin="round"
+    aria-hidden={ariaHidden}
+    aria-label={ariaLabel}
+    role={role}
+    focusable="false"
+  >
+    <path d="M7 3H5a2 2 0 0 0-2 2v2" />
+    <path d="M17 3h2a2 2 0 0 1 2 2v2" />
+    <path d="M21 17v2a2 2 0 0 1-2 2h-2" />
+    <path d="M7 21H5a2 2 0 0 1-2-2v-2" />
+    <path d="M7 12h10" />
   </svg>
 )}
 

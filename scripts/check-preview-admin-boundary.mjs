@@ -199,7 +199,7 @@ const assertAdminDataDevShell = (label, response) => {
   expect(response.body.includes('Data Console'), `${label} is missing the data heading`);
   expect(response.body.includes('data-admin-data-root'), `${label} is missing the data console root`);
   expect(response.body.includes('id="admin-data-bootstrap"'), `${label} is missing the data bootstrap payload`);
-  expect(response.body.includes('导出 settings 快照'), `${label} is missing the export action`);
+  expect(response.body.includes('id="admin-data-export"'), `${label} is missing the export action`);
 };
 
 const assertAdminChecksDevShell = (label, response) => {
@@ -209,7 +209,8 @@ const assertAdminChecksDevShell = (label, response) => {
     `${label} did not return HTML`
   );
   expect(response.body.includes('Checks Console'), `${label} is missing the checks heading`);
-  expect(response.body.includes('当前源文件诊断概览'), `${label} is missing the checks summary copy`);
+  expect(response.body.includes('admin-checks-console'), `${label} is missing the checks console root`);
+  expect(response.body.includes('data-admin-checks-refresh-form'), `${label} is missing the checks refresh form`);
   expect(response.body.includes('/admin/content/'), `${label} is missing the content route link`);
 };
 
