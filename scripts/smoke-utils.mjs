@@ -4,6 +4,11 @@ import path from 'node:path';
 
 const distDir = path.resolve('dist');
 const smokeFixturePath = path.join(distDir, 'checks', 'markdown-smoke', 'index.html');
+const ADMIN_OVERVIEW_HEADER_PATTERN = new RegExp([
+  '<h1\\b(?=[^>]*\\bclass="[^"]*\\bpage-title\\b[^"]*")[^>]*>\\s*Site Overview\\s*</h1>',
+  '<span\\b(?=[^>]*\\bclass="[^"]*\\bpage-subtitle\\b[^"]*")[^>]*>\\s*站点概览\\s*</span>'
+].join('\\s*'));
+
 export const expect = (condition, message) => {
   if (!condition) {
     console.error(message);
@@ -42,6 +47,24 @@ export const assertStaticRedirectShell = (label, body, expectedPath) => {
   expect(
     body.includes(expectedRedirectText),
     `${label} no longer matches the current static redirect shell`
+  );
+};
+
+export const assertAdminOverviewHeader = (label, body) => {
+  expect(
+    ADMIN_OVERVIEW_HEADER_PATTERN.test(body),
+    `${label} is missing the visible Site Overview heading and 站点概览 subtitle`
+  );
+};
+
+export const assertAdminOverviewSectionOrder = (label, body) => {
+  const recentIndex = body.indexOf('id="admin-overview-recent"');
+  const activityIndex = body.indexOf('id="admin-overview-activity"');
+  expect(recentIndex !== -1, `${label} is missing the recent publications section anchor`);
+  expect(activityIndex !== -1, `${label} is missing the writing activity section anchor`);
+  expect(
+    recentIndex < activityIndex,
+    `${label} should render recent publications before writing activity`
   );
 };
 

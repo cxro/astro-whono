@@ -22,12 +22,15 @@ import {
   ADMIN_NAV_ORDER_MIN,
   ADMIN_NAV_ORNAMENT_DEFAULT,
   ADMIN_NAV_ORNAMENT_MAX_LENGTH,
+  ADMIN_OVERVIEW_HIDDEN_MESSAGE_DEFAULT,
+  ADMIN_OVERVIEW_HIDDEN_MESSAGE_MAX_LENGTH,
   ADMIN_HERO_PRESET_SET,
   ADMIN_SOCIAL_ORDER_MAX,
   ADMIN_SOCIAL_ORDER_MIN,
   ADMIN_SOCIAL_PRESET_IDS,
   canonicalizeAdminThemeSettings,
   createAdminWritableThemeSettingsGroups,
+  fillAdminThemeSettingsGroupCompatibilityDefaults,
   getAdminFooterStartYearMax,
   getAdminNavOrderIssues,
   getAdminThemeSettingsGroupFileName,
@@ -111,11 +114,17 @@ export interface SiteSocialLinks {
   resolvedSocialItems: ResolvedSocialItem[];
 }
 
+export interface SiteAdminOverviewSettings {
+  publicVisible: boolean;
+  hiddenMessage: string;
+}
+
 export interface SiteSettings {
   title: string;
   description: string;
   defaultLocale: string;
   footer: SiteFooterSettings;
+  adminOverview: SiteAdminOverviewSettings;
   socialLinks: SiteSocialLinks;
 }
 
@@ -199,6 +208,8 @@ export interface ThemeSettingsSources {
     footerStartYear: SettingSource;
     footerShowCurrentYear: SettingSource;
     footerCopyright: SettingSource;
+    adminOverviewPublicVisible: SettingSource;
+    adminOverviewHiddenMessage: SettingSource;
     socialLinksGithub: SettingSource;
     socialLinksX: SettingSource;
     socialLinksEmail: SettingSource;
@@ -411,6 +422,10 @@ const DEFAULT_SITE: SiteSettings = {
     startYear: LEGACY_FOOTER_START_YEAR,
     showCurrentYear: LEGACY_FOOTER_SHOW_CURRENT_YEAR,
     copyright: LEGACY_FOOTER_COPYRIGHT
+  },
+  adminOverview: {
+    publicVisible: true,
+    hiddenMessage: ADMIN_OVERVIEW_HIDDEN_MESSAGE_DEFAULT
   },
   socialLinks: {
     github: null,
@@ -791,7 +806,8 @@ const collectThemeSettingsSchemaDiagnostics = (
     const rawGroup = rawSettings[group];
     if (!rawGroup) continue;
 
-    const mismatchPaths = getAdminThemeSettingsMismatchPaths(rawGroup, canonicalGroups[group], 'exact');
+    const comparableRawGroup = fillAdminThemeSettingsGroupCompatibilityDefaults(group, rawGroup, canonicalGroups[group]);
+    const mismatchPaths = getAdminThemeSettingsMismatchPaths(comparableRawGroup, canonicalGroups[group], 'exact');
     if (!mismatchPaths.length) continue;
 
     const summarizedPaths = mismatchPaths.slice(0, 6);
@@ -1077,6 +1093,7 @@ export const getThemeSettings = (): ThemeSettingsResolved => {
   const uiJson = readSettingsObject('ui');
 
   const siteFooterJson = isRecord(siteJson?.footer) ? siteJson.footer : undefined;
+  const siteAdminOverviewJson = isRecord(siteJson?.adminOverview) ? siteJson.adminOverview : undefined;
   const siteSocialLinksJson = isRecord(siteJson?.socialLinks) ? siteJson.socialLinks : undefined;
   const siteSocialPresetOrderJson = isRecord(siteSocialLinksJson?.presetOrder) ? siteSocialLinksJson.presetOrder : undefined;
   const pageEssayJson = isRecord(pageJson?.essay) ? pageJson.essay : undefined;
@@ -1115,6 +1132,16 @@ export const getThemeSettings = (): ThemeSettingsResolved => {
     asBoolean(siteFooterJson?.showCurrentYear),
     LEGACY_FOOTER_SHOW_CURRENT_YEAR,
     DEFAULT_SITE.footer.showCurrentYear
+  );
+  const adminOverviewPublicVisible = resolveValue(
+    asBoolean(siteAdminOverviewJson?.publicVisible),
+    undefined,
+    DEFAULT_SITE.adminOverview.publicVisible
+  );
+  const adminOverviewHiddenMessage = resolveValue(
+    asSingleLineString(siteAdminOverviewJson?.hiddenMessage, ADMIN_OVERVIEW_HIDDEN_MESSAGE_MAX_LENGTH),
+    undefined,
+    DEFAULT_SITE.adminOverview.hiddenMessage
   );
   const socialLinksGithub = resolveValue(
     asHttpsUrl(siteSocialLinksJson?.github, GITHUB_HOSTS),
@@ -1348,6 +1375,10 @@ export const getThemeSettings = (): ThemeSettingsResolved => {
           showCurrentYear: footerShowCurrentYear.value,
           copyright: footerCopyright.value
         },
+        adminOverview: {
+          publicVisible: adminOverviewPublicVisible.value,
+          hiddenMessage: adminOverviewHiddenMessage.value
+        },
         socialLinks: {
           github: socialLinksGithub.value,
           x: socialLinksX.value,
@@ -1425,6 +1456,8 @@ export const getThemeSettings = (): ThemeSettingsResolved => {
         footerStartYear: footerStartYear.source,
         footerShowCurrentYear: footerShowCurrentYear.source,
         footerCopyright: footerCopyright.source,
+        adminOverviewPublicVisible: adminOverviewPublicVisible.source,
+        adminOverviewHiddenMessage: adminOverviewHiddenMessage.source,
         socialLinksGithub: socialLinksGithub.source,
         socialLinksX: socialLinksX.source,
         socialLinksEmail: socialLinksEmail.source,
@@ -1511,6 +1544,9 @@ const buildEditableThemeSettingsSnapshot = (
       defaultLocale: resolved.settings.site.defaultLocale,
       footer: {
         ...resolved.settings.site.footer
+      },
+      adminOverview: {
+        ...resolved.settings.site.adminOverview
       },
       socialLinks: {
         github: resolved.settings.site.socialLinks.github,

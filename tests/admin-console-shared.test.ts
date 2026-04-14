@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest';
 import {
   canonicalizeAdminThemeSettings,
   createAdminThemeSettingsCanonicalMismatchIssues,
+  fillAdminThemeSettingsCompatibilityDefaults,
   getAdminNavOrderIssues,
   getAdminSocialOrderIssues,
   validateAdminThemeSettings
@@ -118,6 +119,34 @@ describe('admin-console/shared', () => {
         'site.socialLinks.custom[0].order',
         'page.about.subtitle'
       ])
+    );
+  });
+
+  it('fills the admin overview defaults for legacy settings snapshots', () => {
+    const canonical = getEditableThemeSettingsPayload().settings;
+    const legacySnapshot = structuredClone(canonical) as Record<string, any>;
+    delete legacySnapshot.site.adminOverview;
+
+    const compatible = fillAdminThemeSettingsCompatibilityDefaults(
+      legacySnapshot,
+      canonical
+    ) as Record<string, any>;
+
+    expect(
+      createAdminThemeSettingsCanonicalMismatchIssues(compatible, canonical).map((issue) => issue.path)
+    ).not.toContain('site.adminOverview');
+  });
+
+  it('validates admin overview public display settings', () => {
+    const settings = structuredClone(getEditableThemeSettingsPayload().settings);
+    settings.site.adminOverview.publicVisible = false;
+    settings.site.adminOverview.hiddenMessage = '暂未公开';
+
+    expect(validateAdminThemeSettings(settings)).toEqual([]);
+
+    settings.site.adminOverview.hiddenMessage = '';
+    expect(validateAdminThemeSettings(settings).map((issue) => issue.path)).toContain(
+      'site.adminOverview.hiddenMessage'
     );
   });
 });

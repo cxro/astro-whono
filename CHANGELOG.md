@@ -18,6 +18,7 @@ The format is based on Keep a Changelog, and this project aims to follow Semanti
 - 新增 Phase 4A 媒体共享层 `src/lib/admin-console/media-shared.ts`，以及 `GET /api/admin/media/list/`、`GET /api/admin/media/meta/` 两个 dev-only 媒体只读接口。
 - 新增后台共用 `AdminMediaPicker` dialog 与 Theme / Content 共享的 media picker 客户端控制器。
 - 新增 Media Console 显式“刷新媒体库”入口，以及次级“最近修改”快捷筛选；结果按本地文件最近修改时间派生。
+- 新增 Theme Console 的 `/admin/` Overview 公开展示开关与关闭态文案配置。
 
 ### Changed
 - Theme Console 的未保存离开提醒从单纯 `beforeunload` 扩展为路由级 dirty guard；切换后台真实路由时会先显式确认。
@@ -33,6 +34,7 @@ The format is based on Keep a Changelog, and this project aims to follow Semanti
 - `/api/admin/media/list/` 现支持 `dir` 目录参数，可按 `public/**`、`src/assets/**`、`src/content/**` 受控范围收窄扫描；Theme / Content 既有 picker 契约保持兼容。
 - `/admin/media/` 开发态现优先消费 SSR 注入的完整 browse 轻索引；一级分类、二级分类、搜索与分页切换在客户端本地完成，详情区仅在选中后按 `path` 请求 `/api/admin/media/meta/` 补齐尺寸、体积与 MIME。
 - 媒体共享层现对 content owner、asset list、本地 inspection meta 与 `recent` scope 索引使用短 TTL 进程内缓存，并支持通过刷新入口显式失效；整体仍保持 `list/meta` 只读 contract 不变。
+- `/admin/` Overview 现输出稳定 `data-admin-overview-mode`，preview/build 边界检查改为按 maintainer/public/hidden 模式验证页面契约。
 
 ### Fixed
 - 修正文档中的 Data Console manifest 协议说明，明确当前固定字段为 `schemaVersion / createdAt / includedScopes / excludes / locale`。

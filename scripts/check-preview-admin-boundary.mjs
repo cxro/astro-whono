@@ -7,6 +7,8 @@ import { preview } from 'astro';
 import {
   assertAdminContentStaticResponse,
   assertAdminMediaStaticResponse,
+  assertAdminOverviewHeader,
+  assertAdminOverviewSectionOrder,
   assertAdminSettingsStaticResponse,
   expect,
   findAvailablePort,
@@ -93,20 +95,67 @@ const createJsonRequestInit = (baseUrl, payload) => ({
 });
 
 const assertAdminOverviewShell = (label, response, options = {}) => {
-  const { expectDevChecksSummary = false } = options;
+  const { expectMaintainerView = false } = options;
   expect(response.status === 200, `${label} returned ${response.status}`);
   expect(
     response.contentType.toLowerCase().includes('text/html'),
     `${label} did not return HTML`
   );
-  expect(response.body.includes('Admin Console'), `${label} is missing the admin overview heading`);
-  expect(response.body.includes('/admin/theme/'), `${label} is missing the theme route link`);
-  expect(response.body.includes('/admin/media/'), `${label} is missing the media route link`);
+  assertAdminOverviewHeader(label, response.body);
+  expect(!response.body.includes('Published'), `${label} should not show the old English published metric`);
+  expect(!response.body.includes('Last Update'), `${label} should not show the old English last update metric`);
+  expect(!response.body.includes('Archive Years'), `${label} should not show the removed archive years metric`);
   expect(!response.body.includes('data-admin-root'), `${label} should not mount the theme form root`);
   expect(!response.body.includes('id="admin-bootstrap"'), `${label} should not emit theme bootstrap payload`);
-  if (expectDevChecksSummary) {
-    expect(response.body.includes('打开 Checks Console'), `${label} is missing the checks console action`);
-    expect(response.body.includes('check:preview-admin'), `${label} is missing the admin boundary command hint`);
+  expect(!response.body.includes('data-admin-content-root'), `${label} should not emit content console payload`);
+  expect(!response.body.includes('data-admin-media-root'), `${label} should not emit media console payload`);
+  expect(!response.body.includes('id="admin-media-bootstrap"'), `${label} should not emit media bootstrap payload`);
+  expect(!response.body.includes('data-admin-data-root'), `${label} should not emit data console payload`);
+  expect(!response.body.includes('id="admin-data-bootstrap"'), `${label} should not emit data bootstrap payload`);
+  expect(!response.body.includes('Readonly Boundary'), `${label} should not show the old readonly boundary card`);
+  expect(!response.body.includes('Phase 1'), `${label} should not show old phase copy`);
+  expect(!response.body.includes('Phase 2A'), `${label} should not show old phase copy`);
+  expect(!response.body.includes('打开 Checks Console'), `${label} should not show the old checks action`);
+  expect(!response.body.includes('check:preview-admin'), `${label} should not show the old boundary command hint`);
+
+  if (!expectMaintainerView && response.body.includes('data-admin-overview-mode="hidden"')) {
+    expect(response.body.includes('暂未公开'), `${label} is missing the hidden overview mode chip`);
+    expect(
+      response.body.includes('admin-site-overview__hidden-message'),
+      `${label} is missing the hidden overview message`
+    );
+    expect(!response.body.includes('文章数量'), `${label} should not show metrics while overview is hidden`);
+    expect(!response.body.includes('内容结构'), `${label} should not show structure while overview is hidden`);
+    expect(!response.body.includes('近期发布'), `${label} should not show recent publications while overview is hidden`);
+    expect(!response.body.includes('/admin/theme/'), `${label} should not show admin route nav while overview is hidden`);
+    return;
+  }
+
+  expect(response.body.includes('文章数量'), `${label} is missing the article count metric`);
+  expect(response.body.includes('标签数量'), `${label} is missing the tag count metric`);
+  expect(response.body.includes('文字统计'), `${label} is missing the word count metric`);
+  expect(response.body.includes('上次更新'), `${label} is missing the last update metric`);
+  expect(response.body.includes('内容结构'), `${label} is missing the content structure section`);
+  expect(response.body.includes('写作活动'), `${label} is missing the writing activity section`);
+  expect(response.body.includes('近期发布'), `${label} is missing the recent publications section`);
+  assertAdminOverviewSectionOrder(label, response.body);
+  expect(response.body.includes('/admin/theme/'), `${label} is missing the theme route link`);
+  expect(response.body.includes('/admin/media/'), `${label} is missing the media route link`);
+
+  if (expectMaintainerView) {
+    expect(
+      response.body.includes('data-admin-overview-mode="maintainer"'),
+      `${label} is missing the maintainer overview mode marker`
+    );
+    expect(response.body.includes('DEV 可写'), `${label} is missing the dev mode chip`);
+    expect(!response.body.includes('公开视图'), `${label} should not show the old public recent label`);
+  } else {
+    expect(
+      response.body.includes('data-admin-overview-mode="public"'),
+      `${label} is missing the public overview mode marker`
+    );
+    expect(response.body.includes('只读快照'), `${label} is missing the readonly snapshot mode chip`);
+    expect(!response.body.includes('公开视图'), `${label} should not show the old public recent label`);
   }
 };
 
@@ -478,7 +527,7 @@ export const runDevAdminSettingsSmokeCheck = async () => {
     const adminMediaResponse = await request(baseUrl, '/admin/media/');
     const adminDataResponse = await request(baseUrl, '/admin/data/');
     assertAdminOverviewShell('Dev GET /admin/', adminOverviewResponse, {
-      expectDevChecksSummary: true
+      expectMaintainerView: true
     });
     assertAdminThemeDevBootstrapSafe('Dev GET /admin/theme/', adminThemeResponse);
     assertAdminMediaDevShell('Dev GET /admin/media/', adminMediaResponse);

@@ -7,6 +7,10 @@
     "showCurrentYear": true,
     "copyright": "Whono · Theme Demo · by cxro"
   },
+  "adminOverview": {
+    "publicVisible": true,
+    "hiddenMessage": "Admin 页面作者暂未公开。"
+  },
   "socialLinks": {
     "github": "https://github.com/cxro/astro-whono",
     "x": "https://twitter.com/yourname",

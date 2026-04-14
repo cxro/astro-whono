@@ -2,6 +2,8 @@ import { existsSync, readFileSync } from 'node:fs';
 import path from 'node:path';
 import { pathToFileURL } from 'node:url';
 import {
+  assertAdminOverviewHeader,
+  assertAdminOverviewSectionOrder,
   assertAdminContentStaticShell,
   assertAdminMediaStaticShell,
   assertAdminSettingsStaticShell,
@@ -36,6 +38,7 @@ export const runProductionArtifactCheck = async (options = {}) => {
     'dist/essay/rss.xml',
     'dist/index.html',
     'dist/about/index.html',
+    'dist/admin/index.html',
     'dist/admin/content/index.html',
     'dist/admin/content/essay/index.html',
     'dist/admin/content/bits/index.html',
@@ -107,7 +110,6 @@ export const runProductionArtifactCheck = async (options = {}) => {
   const adminThemeHtml = readText('dist/admin/theme/index.html');
   const adminDataHtml = readText('dist/admin/data/index.html');
   const readonlyAdminHtmlChecks = [
-    ['dist/admin/index.html', adminHtml, 'Admin Console', '/admin/theme/'],
     ['dist/admin/content/index.html', adminContentHtml, 'Content Console', '/admin/'],
     ['dist/admin/content/essay/index.html', adminContentEssayHtml, 'Content Console', '/admin/content/'],
     ['dist/admin/content/bits/index.html', adminContentBitsHtml, 'Content Console', '/admin/content/'],
@@ -117,6 +119,52 @@ export const runProductionArtifactCheck = async (options = {}) => {
     ['dist/admin/theme/index.html', adminThemeHtml, 'Theme Console', '/admin/'],
     ['dist/admin/data/index.html', adminDataHtml, 'Data Console', '/admin/']
   ];
+
+  assertAdminOverviewHeader('dist/admin/index.html', adminHtml);
+  expect(!adminHtml.includes('Published'), 'dist/admin/index.html should not show the old English published metric');
+  expect(!adminHtml.includes('Last Update'), 'dist/admin/index.html should not show the old English last update metric');
+  expect(!adminHtml.includes('Archive Years'), 'dist/admin/index.html should not show the removed archive years metric');
+  if (adminHtml.includes('data-admin-overview-mode="hidden"')) {
+    expect(adminHtml.includes('暂未公开'), 'dist/admin/index.html is missing the hidden overview mode chip');
+    expect(
+      adminHtml.includes('admin-site-overview__hidden-message'),
+      'dist/admin/index.html is missing the hidden overview message'
+    );
+    expect(!adminHtml.includes('文章数量'), 'dist/admin/index.html should not show metrics while overview is hidden');
+    expect(!adminHtml.includes('内容结构'), 'dist/admin/index.html should not show structure while overview is hidden');
+    expect(!adminHtml.includes('近期发布'), 'dist/admin/index.html should not show recent publications while overview is hidden');
+    expect(!adminHtml.includes('/admin/theme/'), 'dist/admin/index.html should not show admin route nav while overview is hidden');
+  } else {
+    expect(adminHtml.includes('文章数量'), 'dist/admin/index.html is missing the article count metric');
+    expect(adminHtml.includes('标签数量'), 'dist/admin/index.html is missing the tag count metric');
+    expect(adminHtml.includes('文字统计'), 'dist/admin/index.html is missing the word count metric');
+    expect(adminHtml.includes('上次更新'), 'dist/admin/index.html is missing the last update metric');
+    expect(adminHtml.includes('内容结构'), 'dist/admin/index.html is missing the content structure section');
+    expect(adminHtml.includes('写作活动'), 'dist/admin/index.html is missing the writing activity section');
+    expect(adminHtml.includes('近期发布'), 'dist/admin/index.html is missing the recent publications section');
+    expect(adminHtml.includes('data-admin-overview-mode="public"'), 'dist/admin/index.html is missing the public overview mode marker');
+    expect(!adminHtml.includes('公开视图'), 'dist/admin/index.html should not show the old public recent label');
+    assertAdminOverviewSectionOrder('dist/admin/index.html', adminHtml);
+    expect(adminHtml.includes('/admin/theme/'), 'dist/admin/index.html is missing the admin route nav');
+  }
+  expect(adminHtml.includes('noindex,nofollow'), 'dist/admin/index.html is missing the noindex robots boundary');
+  expect(!adminHtml.includes('data-admin-root'), 'dist/admin/index.html should stay readonly outside dev');
+  expect(!adminHtml.includes('id="admin-bootstrap"'), 'dist/admin/index.html should not emit theme bootstrap payload');
+  expect(!adminHtml.includes('data-admin-content-root'), 'dist/admin/index.html should not emit content console payload');
+  expect(!adminHtml.includes('data-admin-media-root'), 'dist/admin/index.html should not emit media console payload');
+  expect(!adminHtml.includes('id="admin-media-bootstrap"'), 'dist/admin/index.html should not emit media bootstrap payload');
+  expect(!adminHtml.includes('data-admin-data-root'), 'dist/admin/index.html should not emit data console payload');
+  expect(!adminHtml.includes('id="admin-data-bootstrap"'), 'dist/admin/index.html should not emit data bootstrap payload');
+  expect(!adminHtml.includes('Readonly Boundary'), 'dist/admin/index.html should not keep the old readonly boundary card');
+  expect(!adminHtml.includes('Phase 1'), 'dist/admin/index.html should not keep old Phase 1 copy');
+  expect(!adminHtml.includes('Phase 2A'), 'dist/admin/index.html should not keep old Phase 2A copy');
+  expect(!adminHtml.includes('后台入口继续保留'), 'dist/admin/index.html should not keep old admin entry copy');
+  expect(!adminHtml.includes('打开 Checks Console'), 'dist/admin/index.html should not keep the old checks action');
+  expect(!adminHtml.includes('check:preview-admin'), 'dist/admin/index.html should not keep the old boundary command hint');
+  expect(
+    !/<script type="module" src="\/_astro\/[^"]+"><\/script>/.test(adminHtml),
+    'dist/admin/index.html still links an external _astro module script'
+  );
 
   for (const [filePath, html, heading, linkHref] of readonlyAdminHtmlChecks) {
     expect(html.includes(heading), `${filePath} is missing the expected readonly heading`);

@@ -15,6 +15,7 @@ import {
   ADMIN_HOME_INTRO_LINK_OPTIONS,
   ADMIN_NAV_IDS,
   ADMIN_NAV_ORNAMENT_DEFAULT,
+  ADMIN_OVERVIEW_HIDDEN_MESSAGE_DEFAULT,
   ADMIN_SIDEBAR_DIVIDER_DEFAULT,
   ADMIN_SOCIAL_PRESET_ORDER_DEFAULT,
   canonicalizeAdminThemeSettings,
@@ -51,6 +52,8 @@ type FormCodecContext = {
   inputSiteFooterStartYear: HTMLInputElement;
   inputSiteFooterShowCurrentYear: HTMLInputElement;
   inputSiteFooterCopyright: HTMLInputElement;
+  inputSiteAdminOverviewPublicVisible: HTMLInputElement;
+  inputSiteAdminOverviewHiddenMessage: HTMLInputElement;
   inputSiteSocialGithubOrder: HTMLInputElement;
   inputSiteSocialGithub: HTMLInputElement;
   inputSiteSocialXOrder: HTMLInputElement;
@@ -152,6 +155,8 @@ export const createFormCodec = ({
   inputSiteFooterStartYear,
   inputSiteFooterShowCurrentYear,
   inputSiteFooterCopyright,
+  inputSiteAdminOverviewPublicVisible,
+  inputSiteAdminOverviewHiddenMessage,
   inputSiteSocialGithubOrder,
   inputSiteSocialGithub,
   inputSiteSocialXOrder,
@@ -409,6 +414,13 @@ export const createFormCodec = ({
           showCurrentYear: Boolean(inputSiteFooterShowCurrentYear.checked),
           copyright: inputSiteFooterCopyright.value.trim()
         },
+        adminOverview: {
+          publicVisible: Boolean(inputSiteAdminOverviewPublicVisible.checked),
+          hiddenMessage: normalizeSingleLine(
+            inputSiteAdminOverviewHiddenMessage.value,
+            ADMIN_OVERVIEW_HIDDEN_MESSAGE_DEFAULT
+          )
+        },
         socialLinks: {
           github: inputSiteSocialGithub.value.trim() || null,
           x: inputSiteSocialX.value.trim() || null,
@@ -486,6 +498,9 @@ export const createFormCodec = ({
     inputSiteFooterStartYear.value = String(settings.site.footer?.startYear ?? '');
     inputSiteFooterShowCurrentYear.checked = Boolean(settings.site.footer?.showCurrentYear);
     inputSiteFooterCopyright.value = settings.site.footer?.copyright || '';
+    inputSiteAdminOverviewPublicVisible.checked = settings.site.adminOverview?.publicVisible !== false;
+    inputSiteAdminOverviewHiddenMessage.value =
+      settings.site.adminOverview?.hiddenMessage || ADMIN_OVERVIEW_HIDDEN_MESSAGE_DEFAULT;
     inputSiteSocialGithubOrder.value = String(
       settings.site.socialLinks?.presetOrder?.github ?? ADMIN_SOCIAL_PRESET_ORDER_DEFAULT.github
     );

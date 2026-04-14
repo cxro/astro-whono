@@ -1,161 +1,289 @@
 ---
 import AdminLayout from '../../components/admin/AdminLayout.astro';
 import AdminShell from '../../components/admin/AdminShell.astro';
-import { getAdminOverviewData } from '../../lib/admin-console/overview';
+import {
+  formatAdminOverviewWordMetric,
+  getAdminOverviewData,
+  type AdminOverviewData
+} from '../../lib/admin-console/overview';
+import { getThemeSettings } from '../../lib/theme-settings';
 import { createWithBase } from '../../utils/format';
 
 const isDev = import.meta.env.DEV;
 const base = import.meta.env.BASE_URL ?? '/';
 const withBase = createWithBase(base);
-
-const loadOverviewDevState = async () => {
-  const { default: adminStylesHref } = await import('../../styles/components/admin.css?url');
-
-  return {
-    adminStylesHref,
-    overview: await getAdminOverviewData()
-  };
-};
-
-const overviewDevState = isDev ? await loadOverviewDevState() : null;
-const adminStylesHref = overviewDevState?.adminStylesHref ?? null;
+const { default: adminStylesHref } = await import('../../styles/components/admin.css?url');
+const themeSettings = getThemeSettings().settings;
+const overviewMode = isDev
+  ? 'maintainer'
+  : themeSettings.site.adminOverview.publicVisible
+    ? 'public'
+    : 'hidden';
+const overviewHiddenMessage = themeSettings.site.adminOverview.hiddenMessage;
+const overview: AdminOverviewData | null = overviewMode === 'hidden'
+  ? null
+  : await getAdminOverviewData({
+      includeMaintainer: isDev,
+      includeDraftInRecent: isDev,
+      isDev
+    });
+const hasMaintainerDrafts = overviewMode === 'maintainer'
+  && overview?.maintainerSummary
+  && overview.maintainerSummary.draftCount > 0;
+const MS_PER_DAY = 24 * 60 * 60 * 1000;
+const getUtcDayStart = (date: Date) =>
+  Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate());
+const getDaysSinceUpdate = (date: Date) =>
+  Math.max(0, Math.floor((getUtcDayStart(new Date()) - getUtcDayStart(date)) / MS_PER_DAY));
+const lastUpdateDays = overview?.stats.lastUpdate
+  ? String(getDaysSinceUpdate(overview.stats.lastUpdate.date))
+  : '暂无';
+const wordMetric = overview ? formatAdminOverviewWordMetric(overview.stats.wordCount) : null;
+const articleCount = overview?.collections.find((summary) => summary.key === 'essay')?.count ?? 0;
+const statItems = overview && wordMetric
+  ? [
+      {
+        label: '文章数量',
+        value: String(articleCount),
+        suffix: '篇'
+      },
+      {
+        label: '标签数量',
+        value: String(overview.stats.tagCount),
+        suffix: '个'
+      },
+      {
+        label: '文字统计',
+        value: wordMetric.value,
+        suffix: wordMetric.suffix
+      },
+      {
+        label: '距上次更新',
+        value: lastUpdateDays,
+        suffix: overview.stats.lastUpdate ? '天' : ''
+      }
+    ]
+  : [];
 ---
 
-<AdminLayout title="Admin Console" stylesHref={adminStylesHref}>
+<AdminLayout title="Site Overview" stylesHref={adminStylesHref}>
   <AdminShell
     currentRoute="overview"
-    title="Admin Console"
-    subtitle="后台概览"
-    modeLabel={isDev ? 'DEV 可写' : '只读模式'}
+    title="Site Overview"
+    subtitle="站点概览"
+    modeLabel={overviewMode === 'hidden' ? '暂未公开' : isDev ? 'DEV 可写' : '只读快照'}
+    showNav={overviewMode !== 'hidden'}
   >
-    {
-      isDev && overviewDevState ? (
-        <section class="admin-overview">
-          <div class="admin-overview__grid">
-            <article class="admin-overview-card">
-              <p class="admin-overview-card__eyebrow">Collections</p>
-              <h2 class="admin-overview-card__title">内容总览</h2>
-              <p class="admin-overview-card__body">
-                当前后台按 collection 聚合 metadata，只展示总量、草稿量和最近内容，不把正文直接塞进概览首屏。
-              </p>
-              <div class="admin-metric-grid">
-                {
-                  overviewDevState.overview.collectionSummaries.map((summary) => (
-                    <section class="admin-metric-card">
-                      <p class="admin-metric-card__label">{summary.label}</p>
-                      <p class="admin-metric-card__value">{summary.totalCount}</p>
-                      <p class="admin-metric-card__meta">draft {summary.draftCount}</p>
-                    </section>
-                  ))
-                }
-              </div>
-            </article>
+    {overview ? (
+    <section class="admin-site-overview" aria-labelledby="admin-site-overview-title" data-admin-overview-mode={overviewMode}>
+      <h2 id="admin-site-overview-title" class="sr-only">站点概览</h2>
 
-            <article class="admin-overview-card">
-              <p class="admin-overview-card__eyebrow">Drafts</p>
-              <h2 class="admin-overview-card__title">草稿与维护密度</h2>
-              <p class="admin-overview-card__body">
-                当前内容库共 {overviewDevState.overview.totalCount} 条内容，其中草稿 {overviewDevState.overview.totalDraftCount} 条。
+      <div class="admin-site-overview__stats" aria-label="站点统计">
+        {
+          statItems.map((item) => (
+            <div class="admin-site-overview__stat">
+              <p class="admin-site-overview__label">{item.label}</p>
+              <p class="admin-site-overview__stat-value">
+                <span>{item.value}</span>
+                {item.suffix ? <small>{item.suffix}</small> : null}
               </p>
-              <ul class="admin-overview-card__list">
-                {
-                  overviewDevState.overview.collectionSummaries.map((summary) => (
-                    <li>{summary.label}: {summary.draftCount} / {summary.totalCount}</li>
-                  ))
-                }
-              </ul>
-              <div class="admin-overview-card__actions">
-                <a class="admin-btn" href={withBase('/admin/content/')}>进入 Content Console</a>
-                <a class="admin-btn admin-btn--ghost" href={withBase('/admin/media/')}>打开 Media Console</a>
-                <a class="admin-btn admin-btn--muted" href={withBase('/admin/theme/')}>进入 Theme Console</a>
-                <a class="admin-btn admin-btn--ghost" href={withBase('/admin/data/')}>打开 Data Console</a>
-              </div>
-            </article>
+            </div>
+          ))
+        }
+      </div>
 
-            <article class="admin-overview-card">
-              <p class="admin-overview-card__eyebrow">Recent</p>
-              <h2 class="admin-overview-card__title">最近内容</h2>
-              <p class="admin-overview-card__body">
-                当前按内容日期聚合最近条目；若条目未设置日期，会在列表尾部单独标明。
-              </p>
-              <ul class="admin-recent-list">
-                {
-                  overviewDevState.overview.recentEntries.map((entry) => (
-                    <li class="admin-recent-list__item">
-                      <a class="admin-recent-list__link" href={withBase(entry.href)}>{entry.title}</a>
-                      <p class="admin-recent-list__meta">
-                        <span>{entry.collectionLabel}</span>
-                        <span>{entry.dateLabel}</span>
-                        {entry.isDraft ? <span class="admin-badge">draft</span> : null}
-                      </p>
-                    </li>
-                  ))
-                }
-              </ul>
-            </article>
+      <div class="admin-site-overview__middle">
+        <section class="admin-site-overview__section" aria-labelledby="admin-overview-structure">
+          <div class="admin-site-overview__section-head">
+            <h3 id="admin-overview-structure">
+              <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="admin-site-overview__icon" aria-hidden="true"><polygon points="12 2 2 7 12 12 22 7 12 2"/><polyline points="2 12 12 17 22 12"/><polyline points="2 17 12 22 22 17"/></svg>
+              内容结构
+            </h3>
+          </div>
+          <div class="admin-site-overview__structure-list">
+            {
+              overview.collections.map((summary) => (
+                <div class="admin-site-overview__structure-row">
+                  <div class="admin-site-overview__structure-copy">
+                    <span>{summary.label}</span>
+                    <small>({summary.detail})</small>
+                  </div>
+                  <div
+                    class="admin-site-overview__structure-bar"
+                    style={`--share: ${summary.percentage}%;`}
+                    aria-hidden="true"
+                  >
+                    <span></span>
+                  </div>
+                  <span class="admin-site-overview__structure-count">
+                    {summary.count} / {summary.percentageLabel}
+                  </span>
+                </div>
+              ))
+            }
+          </div>
+        </section>
 
-            <article class="admin-overview-card">
-              <p class="admin-overview-card__eyebrow">Checks</p>
-              <h2 class="admin-overview-card__title">检查摘要</h2>
-              <p class="admin-overview-card__body">
-                {overviewDevState.overview.checksSummary.statusLine}
-              </p>
-              <ul class="admin-overview-card__list">
-                {
-                  overviewDevState.overview.checksSummary.items.map((item) => (
+        <div class="admin-site-overview__side">
+          <section class="admin-site-overview__section" aria-labelledby="admin-overview-tags">
+            <div class="admin-site-overview__section-head">
+              <h3 id="admin-overview-tags">
+                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="admin-site-overview__icon" aria-hidden="true"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg>
+                热门标签
+              </h3>
+            </div>
+            {
+              overview.topTags.length > 0 ? (
+                <div class="admin-site-overview__tag-list">
+                  {
+                    overview.topTags.map((tag) => (
+                      <a class="admin-site-overview__tag" href={withBase(tag.href)} title={`#${tag.label}`}>
+                        <span class="admin-site-overview__tag-name">
+                          <span class="admin-site-overview__tag-hash">#</span>{tag.label}
+                        </span>
+                        <span class="admin-site-overview__tag-count">{tag.count}</span>
+                      </a>
+                    ))
+                  }
+                </div>
+              ) : (
+                <p class="admin-site-overview__empty">暂无归档标签。</p>
+              )
+            }
+          </section>
+        </div>
+      </div>
+
+      <section
+        class="admin-site-overview__section admin-site-overview__section--recent"
+        aria-labelledby="admin-overview-recent"
+      >
+        <div class="admin-site-overview__section-head admin-site-overview__section-head--split">
+          <h3 id="admin-overview-recent">
+            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="admin-site-overview__icon" aria-hidden="true"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
+            近期发布
+          </h3>
+          {hasMaintainerDrafts ? (
+            <span class="admin-site-overview__recent-draft-note">草稿仅 DEV 可见</span>
+          ) : null}
+        </div>
+        {
+          overview.recentPublications.length > 0 ? (
+            <ol class="admin-site-overview__recent-list">
+              {
+                overview.recentPublications.map((entry) => {
+                  const Element = entry.href ? 'a' : 'div';
+                  const props = entry.href ? { href: withBase(entry.href) } : {};
+                  return (
                     <li>
-                      <strong>{item.label}</strong>
-                      {' '}[{item.statusLabel}]：{item.summary}
-                      {' '}{item.detail}
-                      {item.command ? <> 命令：<code>{item.command}</code></> : null}
+                      <Element class="admin-site-overview__recent-row" {...props}>
+                        <span class="admin-site-overview__recent-meta">
+                          <time datetime={entry.date ? entry.date.toISOString() : undefined}>
+                            {entry.shortDateLabel}
+                          </time>
+                          <span class="admin-site-overview__recent-type">{entry.collectionLabel}</span>
+                        </span>
+                        <span class="admin-site-overview__recent-title">{entry.title}</span>
+                        {entry.isDraft ? <span class="admin-site-overview__recent-badge">[draft]</span> : null}
+                      </Element>
                     </li>
-                  ))
-                }
-              </ul>
-              <p class="admin-overview-card__meta">{overviewDevState.overview.checksSummary.footer}</p>
-              <div class="admin-overview-card__actions">
-                <a class="admin-btn" href={withBase('/admin/checks/')}>打开 Checks Console</a>
-              </div>
-            </article>
-          </div>
-        </section>
-      ) : (
-        <section class="admin-overview">
-          <div class="admin-overview__grid">
-            <article class="admin-overview-card">
-              <p class="admin-overview-card__eyebrow">Readonly Boundary</p>
-              <h2 class="admin-overview-card__title">后台入口继续保留，但不开放写入</h2>
-              <p class="admin-overview-card__body">
-                当前环境仅保留后台稳定入口与子路由结构，不输出可写的 settings、导入导出或内容统计载荷。
-              </p>
-              <div class="admin-overview-card__actions">
-                <a class="admin-btn admin-btn--ghost" href={withBase('/admin/content/')}>查看 Content 子入口</a>
-                <a class="admin-btn admin-btn--ghost" href={withBase('/admin/media/')}>查看 Media 子入口</a>
-                <a class="admin-btn admin-btn--ghost" href={withBase('/admin/theme/')}>查看 Theme 子入口</a>
-                <a class="admin-btn admin-btn--ghost" href={withBase('/admin/data/')}>查看 Data 子入口</a>
-                <a class="admin-btn admin-btn--ghost" href={withBase('/admin/checks/')}>查看 Checks 子入口</a>
-              </div>
-            </article>
+                  );
+                })
+              }
+            </ol>
+          ) : (
+            <p class="admin-site-overview__empty">暂无近期内容。</p>
+          )
+        }
+      </section>
 
-            <article class="admin-overview-card">
-              <p class="admin-overview-card__eyebrow">Phase 1</p>
-              <h2 class="admin-overview-card__title">Data Console 已纳入路由壳层</h2>
-              <p class="admin-overview-card__body">
-                `/admin/data/` 负责 settings 快照导出与导入；实际写盘仍复用本地开发态的 Theme Console 服务端校验与事务链路。
-              </p>
-              <p class="admin-overview-card__meta">preview / production 下只保留只读提示，不导出后台数据。</p>
-            </article>
+      <section class="admin-site-overview__section" aria-labelledby="admin-overview-activity">
+        <div class="admin-site-overview__section-head admin-site-overview__section-head--split">
+          <h3 id="admin-overview-activity">
+            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="admin-site-overview__icon" aria-hidden="true"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+            写作活动
+          </h3>
+          <span class="admin-site-overview__activity-range">最近 90 天</span>
+        </div>
+        {
+          overview.writingActivity.length > 0 ? (
+            <div class="admin-site-overview__activity-grid" role="img" aria-label="最近 90 天写作活动">
+              {
+                overview.writingActivity.map((day) => (
+                  <span
+                    class={`admin-site-overview__activity-dot is-level-${day.level}`}
+                    title={`${day.dateLabel}: ${day.count} 项`}
+                    aria-hidden="true"
+                  ></span>
+                ))
+              }
+            </div>
+          ) : (
+            <p class="admin-site-overview__empty">暂无可用于活动统计的公开随笔或絮语。</p>
+          )
+        }
+      </section>
 
-            <article class="admin-overview-card">
-              <p class="admin-overview-card__eyebrow">Phase 2A</p>
-              <h2 class="admin-overview-card__title">Content Console 进入只读索引阶段</h2>
-              <p class="admin-overview-card__body">
-                `/admin/content/` 与 `/admin/content/:collection/` 只提供内容索引、筛选、分页与元数据查看；内容写盘继续留待后续阶段。
-              </p>
-            </article>
-          </div>
-        </section>
-      )
-    }
+      <section class="admin-site-overview__system" aria-labelledby="admin-overview-system">
+        <div class="admin-site-overview__system-head">
+          <h3 id="admin-overview-system">
+            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="admin-site-overview__icon" aria-hidden="true"><polyline points="4 17 10 11 4 5"/><line x1="12" y1="19" x2="20" y2="19"/></svg>
+            运行信息
+          </h3>
+          <span class="admin-site-overview__system-state">
+            <span aria-hidden="true"></span>
+            {overview.systemStatus.statusLabel}
+          </span>
+        </div>
+        <div class="admin-site-overview__system-body">
+          <dl class="admin-site-overview__system-grid">
+            {
+              overview.systemStatus.items.map((item) => (
+                <div class="admin-site-overview__system-item">
+                  <dt>{item.label}</dt>
+                  <dd>
+                    {
+                      item.dateTime ? (
+                        <time datetime={item.dateTime}>{item.value}</time>
+                      ) : (
+                        item.value
+                      )
+                    }
+                  </dd>
+                </div>
+              ))
+            }
+          </dl>
+          {
+            overview.systemStatus.activity.length > 0 ? (
+              <div class="admin-site-overview__system-pulse" role="group" aria-label="最近 14 天内容活动">
+                <span class="admin-site-overview__system-pulse-caption">Content Activity</span>
+                <div class="admin-site-overview__system-pulse-bars">
+                  {
+                    overview.systemStatus.activity.map((day) => (
+                      <span
+                        class={`admin-site-overview__system-pulse-bar is-level-${day.level}`}
+                        title={`${day.dateLabel}: ${day.count} 项`}
+                        aria-hidden="true"
+                      ></span>
+                    ))
+                  }
+                </div>
+              </div>
+            ) : null
+          }
+        </div>
+      </section>
+    </section>
+    ) : (
+      <section
+        class="admin-site-overview admin-site-overview--hidden"
+        aria-labelledby="admin-site-overview-title"
+        data-admin-overview-mode={overviewMode}
+      >
+        <h2 id="admin-site-overview-title" class="sr-only">站点概览</h2>
+        <p class="admin-site-overview__hidden-message">{overviewHiddenMessage}</p>
+      </section>
+    )}
   </AdminShell>
 </AdminLayout>

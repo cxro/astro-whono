@@ -135,6 +135,8 @@ export const ADMIN_NAV_ORNAMENT_DEFAULT = '·';
 export const ADMIN_NAV_ORNAMENT_MAX_LENGTH = 4;
 export const ADMIN_FOOTER_START_YEAR_MIN = 1900;
 export const ADMIN_FOOTER_COPYRIGHT_MAX_LENGTH = 120;
+export const ADMIN_OVERVIEW_HIDDEN_MESSAGE_DEFAULT = 'Admin 页面作者暂未公开。';
+export const ADMIN_OVERVIEW_HIDDEN_MESSAGE_MAX_LENGTH = 120;
 
 export const ADMIN_LOCALE_RE = /^[A-Za-z]{2,3}(?:-[A-Za-z0-9]{2,8})*$/;
 export const ADMIN_EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -376,6 +378,7 @@ export const canonicalizeAdminThemeSettings = (
   const page = isRecord(next.page) ? next.page : {};
   const ui = isRecord(next.ui) ? next.ui : {};
   const siteFooter = isRecord(site.footer) ? site.footer : {};
+  const adminOverview = isRecord(site.adminOverview) ? site.adminOverview : {};
   const socialLinks = isRecord(site.socialLinks) ? site.socialLinks : {};
   const customItems = Array.isArray(socialLinks.custom) ? socialLinks.custom : [];
   const bitsPage = isRecord(page.bits) ? page.bits : {};
@@ -452,6 +455,13 @@ export const canonicalizeAdminThemeSettings = (
         startYear: parseInteger(siteFooter.startYear as string | number | null | undefined) ?? footerStartYearMax,
         showCurrentYear: Boolean(siteFooter.showCurrentYear),
         copyright: normalizeTrimmed(siteFooter.copyright)
+      },
+      adminOverview: {
+        publicVisible: typeof adminOverview.publicVisible === 'boolean' ? adminOverview.publicVisible : true,
+        hiddenMessage: normalizeSingleLine(
+          adminOverview.hiddenMessage,
+          ADMIN_OVERVIEW_HIDDEN_MESSAGE_DEFAULT
+        )
       },
       socialLinks: {
         github: normalizeTrimmed(socialLinks.github) || null,
@@ -547,6 +557,9 @@ export const createAdminWritableThemeSettingsGroups = (
     footer: {
       ...settings.site.footer
     },
+    adminOverview: {
+      ...settings.site.adminOverview
+    },
     socialLinks: {
       github: settings.site.socialLinks.github,
       x: settings.site.socialLinks.x,
@@ -632,6 +645,24 @@ export const validateAdminThemeSettings = (
     pushIssue('site.footer.copyright', '页脚版权行只允许单行文本');
   } else if (settings.site.footer.copyright.length > ADMIN_FOOTER_COPYRIGHT_MAX_LENGTH) {
     pushIssue('site.footer.copyright', `页脚版权行不能超过 ${ADMIN_FOOTER_COPYRIGHT_MAX_LENGTH} 个字符`);
+  }
+
+  if (typeof settings.site.adminOverview?.publicVisible !== 'boolean') {
+    pushIssue('site.adminOverview.publicVisible', 'Admin Overview 公开展示开关必须是布尔值');
+  }
+
+  if (!settings.site.adminOverview?.hiddenMessage) {
+    pushIssue('site.adminOverview.hiddenMessage', 'Admin Overview 关闭态文案不能为空');
+  } else if (
+    settings.site.adminOverview.hiddenMessage.includes('\n') ||
+    settings.site.adminOverview.hiddenMessage.includes('\r')
+  ) {
+    pushIssue('site.adminOverview.hiddenMessage', 'Admin Overview 关闭态文案只允许单行文本');
+  } else if (settings.site.adminOverview.hiddenMessage.length > ADMIN_OVERVIEW_HIDDEN_MESSAGE_MAX_LENGTH) {
+    pushIssue(
+      'site.adminOverview.hiddenMessage',
+      `Admin Overview 关闭态文案不能超过 ${ADMIN_OVERVIEW_HIDDEN_MESSAGE_MAX_LENGTH} 个字符`
+    );
   }
 
   if (
@@ -1076,6 +1107,57 @@ export const getAdminThemeSettingsMismatchPaths = (
   expected: unknown,
   mode: AdminThemeSettingsMismatchMode = 'exact'
 ): string[] => Array.from(new Set(collectMismatchPaths(actual, expected, mode)));
+
+const fillAdminThemeSettingsSiteCompatibilityDefaults = (
+  rawSite: LooseRecord,
+  canonicalSite: LooseRecord
+): LooseRecord => {
+  const canonicalAdminOverview = canonicalSite.adminOverview;
+  if (!isRecord(canonicalAdminOverview)) return rawSite;
+
+  const rawAdminOverview = rawSite.adminOverview;
+  if (rawAdminOverview === undefined) {
+    return {
+      ...rawSite,
+      adminOverview: canonicalAdminOverview
+    };
+  }
+
+  if (!isRecord(rawAdminOverview)) return rawSite;
+
+  return {
+    ...rawSite,
+    adminOverview: {
+      publicVisible: canonicalAdminOverview.publicVisible,
+      hiddenMessage: canonicalAdminOverview.hiddenMessage,
+      ...rawAdminOverview
+    }
+  };
+};
+
+export const fillAdminThemeSettingsGroupCompatibilityDefaults = (
+  group: ThemeSettingsFileGroup,
+  rawGroup: unknown,
+  canonicalGroup: unknown
+): unknown => {
+  if (group !== 'site' || !isRecord(rawGroup) || !isRecord(canonicalGroup)) return rawGroup;
+  return fillAdminThemeSettingsSiteCompatibilityDefaults(rawGroup, canonicalGroup);
+};
+
+export const fillAdminThemeSettingsCompatibilityDefaults = (
+  settings: unknown,
+  canonicalSettings: EditableThemeSettings
+): unknown => {
+  if (!isRecord(settings) || !isRecord(settings.site)) return settings;
+
+  return {
+    ...settings,
+    site: fillAdminThemeSettingsSiteCompatibilityDefaults(
+      settings.site,
+      canonicalSettings.site as unknown as LooseRecord
+    )
+  };
+};
 
 const collectChangePreviews = (
   actual: unknown,

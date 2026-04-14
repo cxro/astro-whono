@@ -23,6 +23,8 @@ type ValidationContext = {
   inputSiteFooterStartYear: HTMLInputElement;
   inputSiteFooterShowCurrentYear: HTMLInputElement;
   inputSiteFooterCopyright: HTMLInputElement;
+  inputSiteAdminOverviewPublicVisible: HTMLInputElement;
+  inputSiteAdminOverviewHiddenMessage: HTMLInputElement;
   inputSiteSocialGithub: HTMLInputElement;
   inputSiteSocialX: HTMLInputElement;
   inputSiteSocialEmail: HTMLInputElement;
@@ -82,6 +84,8 @@ export const createValidation = ({
   inputSiteFooterStartYear,
   inputSiteFooterShowCurrentYear,
   inputSiteFooterCopyright,
+  inputSiteAdminOverviewPublicVisible,
+  inputSiteAdminOverviewHiddenMessage,
   inputSiteSocialGithub,
   inputSiteSocialX,
   inputSiteSocialEmail,
@@ -171,6 +175,10 @@ export const createValidation = ({
         return () => inputSiteFooterShowCurrentYear;
       case 'site.footer.copyright':
         return () => inputSiteFooterCopyright;
+      case 'site.adminOverview.publicVisible':
+        return () => inputSiteAdminOverviewPublicVisible;
+      case 'site.adminOverview.hiddenMessage':
+        return () => inputSiteAdminOverviewHiddenMessage;
       case 'site.socialLinks.github':
         return () => inputSiteSocialGithub;
       case 'site.socialLinks.x':

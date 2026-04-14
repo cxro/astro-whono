@@ -3,6 +3,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 vi.mock('../src/lib/content', () => ({
   getEssayDerivedText: vi.fn(),
   getEssaySlug: vi.fn(),
+  getMemoDerivedText: vi.fn(),
   getPageSlice: vi.fn(),
   getPublished: vi.fn(),
   getSortedEssays: vi.fn(),
@@ -29,6 +30,7 @@ const {
 type AdminContentIndexItem = import('../src/lib/admin-console/content').AdminContentIndexItem;
 
 const mockGetEssayDerivedText = vi.mocked(contentLib.getEssayDerivedText);
+const mockGetMemoDerivedText = vi.mocked(contentLib.getMemoDerivedText);
 const mockGetPublished = vi.mocked(contentLib.getPublished);
 const mockGetSortedEssays = vi.mocked(contentLib.getSortedEssays);
 const mockGetBitsDerivedText = vi.mocked(bitsLib.getBitsDerivedText);
@@ -229,6 +231,7 @@ describe('admin-console/content', () => {
     expect(summaryByKey.memo?.latestDateLabel).not.toBe('未设置日期');
 
     expect(mockGetEssayDerivedText).not.toHaveBeenCalled();
+    expect(mockGetMemoDerivedText).not.toHaveBeenCalled();
     expect(mockGetBitsDerivedText).not.toHaveBeenCalled();
     expect(mockGetBitsSearchIndex).not.toHaveBeenCalled();
   });

@@ -18,7 +18,7 @@ export const ADMIN_ROUTES = [
     id: 'overview',
     href: '/admin/',
     label: 'Overview',
-    description: '概览与快捷入口'
+    description: '站点快照'
   },
   {
     id: 'theme',

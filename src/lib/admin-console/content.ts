@@ -3,6 +3,7 @@ import { PAGE_SIZE_BITS } from '../../../site.config.mjs';
 import {
   getEssayDerivedText,
   getEssaySlug,
+  getMemoDerivedText,
   getPageSlice,
   getPublished,
   getSortedEssays,
@@ -17,7 +18,7 @@ import {
   getSortedBits,
   type BitsEntry
 } from '../bits';
-import { deriveMarkdownText, truncateText } from '../../utils/excerpt';
+import { truncateText } from '../../utils/excerpt';
 import {
   buildSearchHaystack,
   formatDateTime,
@@ -328,7 +329,7 @@ const createBitsIndexItem = (
 };
 
 const createMemoIndexItem = (entry: MemoEntry): AdminContentIndexItem => {
-  const derivedText = deriveMarkdownText(entry.body ?? '');
+  const derivedText = getMemoDerivedText(entry);
   const excerpt = truncateText(derivedText.excerptText, 160) || null;
   const title = normalizeFieldValue(entry.data.title, entry.id);
   const { label, value, year } = formatNullableDate(entry.data.date ?? null);

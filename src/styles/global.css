@@ -227,11 +227,11 @@ a:focus-visible {
 }
 
 /* 正文区域链接：默认虚线，悬停实线 */
-.content__inner :where(p, li, blockquote, figcaption) a {
+.content__inner :where(p, li, blockquote, figcaption) a:where(:not([class])) {
   border-bottom: 1px dashed currentColor;
 }
 
-.content__inner :where(p, li, blockquote, figcaption) a:hover {
+.content__inner :where(p, li, blockquote, figcaption) a:where(:not([class])):hover {
   border-bottom-style: solid;
 }
 

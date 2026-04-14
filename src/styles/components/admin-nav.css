@@ -230,43 +230,24 @@
   max-width: 100%;
 }
 
-.admin-route-nav__link {
+.admin-route-nav .admin-route-nav__link {
   position: relative;
   display: inline-flex;
   align-items: center;
   min-height: 36px;
   max-width: 100%;
   padding: 6px 2px 8px;
-  border-bottom: 1px dashed var(--admin-route-nav-link-rule-color);
+  border-bottom: 2px solid transparent;
   color: var(--admin-route-nav-link-color);
   text-decoration: none;
   transition:
     color 160ms ease,
-    border-bottom-color 160ms ease,
-    transform 160ms ease;
-}
-
-.admin-route-nav__link::after {
-  content: '';
-  position: absolute;
-  right: 0;
-  bottom: 0;
-  left: 0;
-  height: 2px;
-  border-radius: 999px;
-  background: color-mix(in srgb, var(--accent) 82%, transparent);
-  transform: scaleX(0.35);
-  transform-origin: center;
-  opacity: 0;
-  transition:
-    transform 160ms ease,
-    opacity 160ms ease;
+    border-bottom-color 160ms ease;
 }
 
 .admin-route-nav__link:hover {
   border-bottom-color: var(--admin-route-nav-link-rule-hover-color);
   color: var(--admin-route-nav-link-hover-color);
-  transform: translateY(-1px);
 }
 
 .admin-route-nav__link:focus-visible {
@@ -275,15 +256,9 @@
   border-radius: 6px;
 }
 
-.admin-route-nav__link.is-active {
+.admin-route-nav .admin-route-nav__link.is-active {
+  border-bottom-color: var(--accent);
   color: var(--text);
-  border-bottom-color: transparent;
-  transform: none;
-}
-
-.admin-route-nav__link.is-active::after {
-  transform: scaleX(1);
-  opacity: 1;
 }
 
 .admin-route-nav__label {

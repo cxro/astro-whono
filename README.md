@@ -168,6 +168,7 @@ astro-whono 内置本地 Admin Console，用于开发环境中可视化接管站
 Theme Console 主要面向**站点级**和**页面级**配置，目前支持：
 
 - 站点标题、描述、品牌名等基础信息
+- `/admin/` Overview 对外展示开关与关闭态文案
 - 首页导语与 Hero图片设置
 - 侧边栏导航的显示、顺序与文案
 - 社交链接与自定义社交项
@@ -199,7 +200,7 @@ npm run dev
 
 - Theme Console / Content Console / Data Console 仅在本地开发环境可用
 - `/admin/content/` 提供 collection 概览；`/admin/content/:collection/` 在开发态首批开放 `essay / bits` 的 frontmatter 编辑、dry-run 预检与 revision 冲突保护，`memo` 仍保持只读
-- 生产构建保持静态站点输出；`/admin/`、`/admin/theme/`、`/admin/content/` 与 `/admin/data/` 仅显示只读提示
+- 生产构建保持静态站点输出；`/admin/` 可按 Theme 设置显示只读公开 Overview 或关闭态文案，其他后台子路由仅显示只读提示
 - `/api/admin/settings/` 仅供本地开发使用，生产环境不要依赖该接口
 - `/api/admin/content/entry/` 仅供本地开发写入内容 frontmatter，生产环境不要依赖该接口
 - `/api/admin/data/settings/` 仅供本地开发导出 settings 快照，生产环境不要依赖该接口

@@ -16,6 +16,7 @@ import {
   getAdminThemeSettingsChangePreviews,
   createAdminThemeSettingsCanonicalMismatchIssues,
   createAdminWritableThemeSettingsGroups,
+  fillAdminThemeSettingsCompatibilityDefaults,
   getAdminFooterStartYearMax,
   getAdminThemeSettingsMismatchPaths,
   validateAdminThemeSettings,
@@ -277,12 +278,13 @@ const validateIncomingSettingsSnapshot = (
   const canonicalSettings = canonicalizeAdminThemeSettings(settingsInput, {
     footerStartYearMax: FOOTER_START_YEAR_MAX
   });
+  const compatibleSettingsInput = fillAdminThemeSettingsCompatibilityDefaults(settingsInput, canonicalSettings);
   const issues = [
     ...validateAdminThemeSettings(canonicalSettings, {
       footerStartYearMax: FOOTER_START_YEAR_MAX,
       localFileExists: hasProjectFile
     }),
-    ...createAdminThemeSettingsCanonicalMismatchIssues(settingsInput, canonicalSettings, {
+    ...createAdminThemeSettingsCanonicalMismatchIssues(compatibleSettingsInput, canonicalSettings, {
       mode: 'exact',
       messagePrefix: '配置必须以完整 canonical snapshot 提交'
     })

@@ -58,6 +58,7 @@ export async function getPublished<K extends CollectionKey>(
 }
 
 export type EssayEntry = CollectionEntry<'essay'>;
+export type MemoEntry = CollectionEntry<'memo'>;
 type EssayQueryOptions = Pick<GetPublishedOptions<'essay'>, 'includeDraft'>;
 export type EssayRouteEntry = {
   slug: string;
@@ -69,6 +70,10 @@ export type EssayDerivedText = {
   plainText: string;
   text: string;
   excerpt: string;
+};
+export type MemoDerivedText = {
+  plainText: string;
+  excerptText: string;
 };
 
 export const getEssaySlug = (entry: EssayEntry) =>
@@ -135,12 +140,14 @@ const assertUniqueEssaySlugs = (entries: readonly EssayEntry[]) => {
 
 const orderByEssayDate = (a: EssayEntry, b: EssayEntry) => b.data.date.valueOf() - a.data.date.valueOf();
 const shouldMemoizeEssayQueries = import.meta.env.PROD;
+const shouldMemoizeMemoQueries = import.meta.env.PROD;
 const MAX_ESSAY_INDEX_TEXT = 600;
 
 let sortedEssaysPromise: Promise<EssayEntry[]> | null = null;
 let visibleEssaysPromise: Promise<EssayEntry[]> | null = null;
 let archiveEssaysPromise: Promise<EssayEntry[]> | null = null;
 const essayDerivedTextById = new Map<string, EssayDerivedText>();
+const memoDerivedTextById = new Map<string, MemoDerivedText>();
 
 const cloneEssayEntries = (entries: readonly EssayEntry[]) => entries.slice();
 
@@ -175,6 +182,23 @@ export function getEssayDerivedText(entry: EssayEntry): EssayDerivedText {
   if (!derivedText) {
     derivedText = buildEssayDerivedText(entry);
     essayDerivedTextById.set(entry.id, derivedText);
+  }
+
+  return derivedText;
+}
+
+const buildMemoDerivedText = (entry: MemoEntry): MemoDerivedText =>
+  deriveMarkdownText(entry.body ?? '');
+
+export function getMemoDerivedText(entry: MemoEntry): MemoDerivedText {
+  if (!shouldMemoizeMemoQueries) {
+    return buildMemoDerivedText(entry);
+  }
+
+  let derivedText = memoDerivedTextById.get(entry.id);
+  if (!derivedText) {
+    derivedText = buildMemoDerivedText(entry);
+    memoDerivedTextById.set(entry.id, derivedText);
   }
 
   return derivedText;

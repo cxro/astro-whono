@@ -1,5 +1,6 @@
 ---
 import AdminSiteSocialSection from './AdminSiteSocialSection.astro';
+import { ADMIN_OVERVIEW_HIDDEN_MESSAGE_MAX_LENGTH } from '../../lib/admin-console/theme-shared';
 
 interface Props {
   footerStartYearMin: number;
@@ -79,6 +80,30 @@ const { footerStartYearMin, footerStartYearMax, socialCustomLimit } = Astro.prop
     <div class="admin-field admin-field--full">
       <p id="site-footer-preview" class="admin-help">
         页脚预览：<code id="site-footer-preview-value">© {footerStartYearMax} Whono · Theme Demo · by cxro</code>
+      </p>
+    </div>
+    <div class="admin-field admin-field--full">
+      <div class="admin-label admin-label--split">
+        <span class="admin-label__copy">
+          <label class="admin-label__main" for="site-admin-overview-hidden-message">
+            <code>/admin/</code> Overview 公开展示
+          </label>
+          <span class="admin-label__hint">（仅影响 preview / production；本地开发始终显示维护视图）</span>
+        </span>
+        <label class="admin-label__toggle" for="site-admin-overview-public-visible">
+          <input id="site-admin-overview-public-visible" type="checkbox" checked />
+          <span>展示</span>
+        </label>
+      </div>
+      <input
+        id="site-admin-overview-hidden-message"
+        type="text"
+        maxlength={ADMIN_OVERVIEW_HIDDEN_MESSAGE_MAX_LENGTH}
+        autocomplete="off"
+        aria-describedby="site-admin-overview-help"
+      />
+      <p id="site-admin-overview-help" class="admin-help">
+        关闭后，公开环境只显示 Admin 标题与这段文案，不输出站点统计、标签或近期内容。
       </p>
     </div>
   </div>
