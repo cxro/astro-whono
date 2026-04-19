@@ -1,5 +1,5 @@
 ---
-import Icon from '../Icon.astro';
+import AdminIcon from './AdminIcon.astro';
 import { ADMIN_ARTICLE_META_DATE_LABEL_MAX_LENGTH } from '../../lib/admin-console/theme-shared';
 
 interface Props {
@@ -19,7 +19,7 @@ const {
 
 <fieldset class="admin-group">
   <legend class="admin-group__legend">
-    <Icon name="admin-page" class="admin-group__legend-icon" size={14} />
+    <AdminIcon name="admin-page" class="admin-group__legend-icon" size={14} />
     <span class="admin-group__legend-copy">
       <span class="admin-group__legend-zh">内页设置</span>
       <span class="admin-group__legend-en">Inner pages</span>

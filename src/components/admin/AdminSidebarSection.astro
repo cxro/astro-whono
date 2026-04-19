@@ -1,5 +1,5 @@
 ---
-import Icon from '../Icon.astro';
+import AdminIcon from './AdminIcon.astro';
 import type { SidebarNavId } from '../../lib/theme-settings';
 import {
   ADMIN_NAV_ORNAMENT_DEFAULT,
@@ -16,7 +16,7 @@ const { navIdOrder } = Astro.props;
 
 <fieldset class="admin-group">
   <legend class="admin-group__legend">
-    <Icon name="admin-sidebar" class="admin-group__legend-icon" size={14} />
+    <AdminIcon name="admin-sidebar" class="admin-group__legend-icon" size={14} />
     <span class="admin-group__legend-copy">
       <span class="admin-group__legend-zh">侧栏设置</span>
       <span class="admin-group__legend-en">Sidebar</span>

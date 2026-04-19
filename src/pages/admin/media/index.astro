@@ -1,5 +1,5 @@
 ---
-import Icon from '../../../components/Icon.astro';
+import AdminIcon from '../../../components/admin/AdminIcon.astro';
 import AdminLayout from '../../../components/admin/AdminLayout.astro';
 import AdminReadonlyNotice from '../../../components/admin/AdminReadonlyNotice.astro';
 import AdminShell from '../../../components/admin/AdminShell.astro';
@@ -137,7 +137,7 @@ const bootstrapText = mediaDevState
                     data-active={hasInitialQuery ? 'true' : 'false'}
                     title="搜索图片"
                   >
-                    <Icon name="search" />
+                    <AdminIcon name="search" size={18} />
                   </button>
 
                   <button
@@ -147,7 +147,7 @@ const bootstrapText = mediaDevState
                     aria-label="刷新媒体库并重置筛选"
                     title="刷新媒体库并重置筛选"
                   >
-                    <Icon name="refresh" />
+                    <AdminIcon name="refresh" size={18} />
                   </button>
                 </div>
 
@@ -159,7 +159,7 @@ const bootstrapText = mediaDevState
               <div id="admin-media-groups-wrap" class="admin-media-browser__filter-group">
                 <div class="admin-media-browser__filter-head">
                   <p class="admin-media-browser__filter-label">
-                    <Icon name="grid-tiles" class="admin-media-browser__filter-label-icon" size={13} />
+                    <AdminIcon name="grid-tiles" class="admin-media-browser__filter-label-icon" size={13} />
                     <span>使用场景</span>
                   </p>
                   <button id="admin-media-show-uncategorized" class="admin-btn admin-btn--ghost" type="button" hidden>
@@ -171,7 +171,7 @@ const bootstrapText = mediaDevState
 
               <div id="admin-media-subgroups-wrap" class="admin-media-browser__filter-group" hidden>
                 <p class="admin-media-browser__filter-label">
-                  <Icon name="branch-nodes" class="admin-media-browser__filter-label-icon" size={13} />
+                  <AdminIcon name="branch-nodes" class="admin-media-browser__filter-label-icon" size={13} />
                   <span>应用位置</span>
                 </p>
                 <div id="admin-media-subgroups" class="admin-media-browser__chips"></div>
@@ -195,9 +195,9 @@ const bootstrapText = mediaDevState
           <article id="admin-media-detail" class="admin-overview-card admin-media-browser__detail" hidden></article>
 
           <div id="admin-media-icon-library" hidden aria-hidden="true">
-            <span data-icon="copy"><Icon name="copy" size={15} /></span>
-            <span data-icon="link"><Icon name="link" size={15} /></span>
-            <span data-icon="eye"><Icon name="eye" size={15} /></span>
+            <span data-icon="copy"><AdminIcon name="copy" size={15} /></span>
+            <span data-icon="link"><AdminIcon name="link" size={15} /></span>
+            <span data-icon="eye"><AdminIcon name="eye" size={15} /></span>
           </div>
 
           <div id="admin-media-bootstrap" hidden>{bootstrapText}</div>

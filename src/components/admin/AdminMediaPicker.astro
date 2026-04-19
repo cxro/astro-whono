@@ -1,5 +1,5 @@
 ---
-import Icon from '../Icon.astro';
+import AdminIcon from './AdminIcon.astro';
 
 interface Props {
   listEndpoint: string;
@@ -36,7 +36,7 @@ const { listEndpoint, metaEndpoint } = Astro.props;
         aria-label="关闭"
         title="关闭"
       >
-        <Icon name="x-mark" size={18} />
+        <AdminIcon name="x-mark" size={18} />
       </button>
     </div>
 
@@ -69,7 +69,7 @@ const { listEndpoint, metaEndpoint } = Astro.props;
           aria-label="列表视图"
           title="列表视图"
         >
-          <Icon name="list" size={18} />
+          <AdminIcon name="list" size={18} />
         </button>
         <button
           class="admin-media-picker__tool-btn"
@@ -78,7 +78,7 @@ const { listEndpoint, metaEndpoint } = Astro.props;
           aria-label="网格平铺视图"
           title="网格平铺视图"
         >
-          <Icon name="grid-tiles" size={18} />
+          <AdminIcon name="grid-tiles" size={18} />
         </button>
         <button
           class="admin-media-picker__filter-toggle"
@@ -87,7 +87,7 @@ const { listEndpoint, metaEndpoint } = Astro.props;
           aria-expanded="false"
           hidden
         >
-          <Icon name="funnel" size={16} />
+          <AdminIcon name="funnel" size={16} />
           <span>筛选</span>
         </button>
       </div>
@@ -107,9 +107,10 @@ const { listEndpoint, metaEndpoint } = Astro.props;
           aria-label="上一页"
           title="上一页"
         >
-          <Icon
+          <AdminIcon
             name="chevron-down"
             size={22}
+            strokeWidth={1.75}
             class="admin-media-picker__pager-icon admin-media-picker__pager-icon--prev"
           />
         </button>
@@ -121,9 +122,10 @@ const { listEndpoint, metaEndpoint } = Astro.props;
           aria-label="下一页"
           title="下一页"
         >
-          <Icon
+          <AdminIcon
             name="chevron-down"
             size={22}
+            strokeWidth={1.75}
             class="admin-media-picker__pager-icon admin-media-picker__pager-icon--next"
           />
         </button>

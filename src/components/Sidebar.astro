@@ -1,5 +1,5 @@
 ---
-import Icon from './Icon.astro';
+import UiIcon from './UiIcon.astro';
 import { ADMIN_NAV_ORNAMENT_DEFAULT } from '../lib/admin-console/theme-shared';
 import { createWithBase } from '../utils/format';
 import { getSidebarHref, getThemeSettings, type SidebarNavId } from '../lib/theme-settings';
@@ -71,13 +71,13 @@ const showReaderToggle = settings.ui.readingMode.showEntry;
         aria-pressed="false"
         title="阅读模式"
       >
-        <Icon name="book-open" class="icon icon-book-open" />
-        <Icon name="book-closed" class="icon icon-book-closed" />
+        <UiIcon name="book-open" class="icon icon-book-open" />
+        <UiIcon name="book-closed" class="icon icon-book-closed" />
       </button>
     ) : null}
 
     <a class="icon-button rss-link" href={withBase('/archive/rss.xml')} aria-label="RSS 订阅" title="RSS 订阅">
-      <Icon name="rss" class="icon" />
+      <UiIcon name="rss" class="icon" />
     </a>
 
     <button
@@ -88,9 +88,8 @@ const showReaderToggle = settings.ui.readingMode.showEntry;
       aria-pressed="false"
       title="夜间模式"
     >
-      <Icon name="moon" class="icon icon-moon" />
-      <Icon name="sun" class="icon icon-sun" />
+      <UiIcon name="moon" class="icon icon-moon" />
+      <UiIcon name="sun" class="icon icon-sun" />
     </button>
   </div>
 </aside>
-

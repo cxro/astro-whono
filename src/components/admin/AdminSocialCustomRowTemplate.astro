@@ -1,7 +1,8 @@
 ---
 import type { SiteSocialIconKey } from '../../lib/theme-settings';
 import { ADMIN_SOCIAL_ORDER_MAX } from '../../lib/admin-console/theme-shared';
-import Icon from '../Icon.astro';
+import BrandIcon from '../BrandIcon.astro';
+import AdminIcon from './AdminIcon.astro';
 
 interface SocialIconOption {
   value: SiteSocialIconKey;
@@ -71,7 +72,7 @@ const { socialIconOptions, customSocialIconOptions, defaultCustomSocialIconKey }
               data-social-custom-icon-option={option.value}
               hidden={option.value !== defaultCustomSocialIconKey}
             >
-              <Icon name={option.value} class="admin-social-icon-only__icon" size={16} />
+              <BrandIcon name={option.value} class="admin-social-icon-only__icon" size={16} />
             </span>
           ))
         }
@@ -114,7 +115,7 @@ const { socialIconOptions, customSocialIconOptions, defaultCustomSocialIconKey }
           class="sr-only"
         />
         <button class="admin-social-action" type="button" data-social-custom-action="toggle-visible" aria-pressed="true">
-          <Icon name="eye" class="admin-social-action__icon" size={15} />
+          <AdminIcon name="eye" class="admin-social-action__icon" size={15} />
           <span class="sr-only" data-social-custom-visible-label>隐藏链接</span>
         </button>
         <button
@@ -124,7 +125,7 @@ const { socialIconOptions, customSocialIconOptions, defaultCustomSocialIconKey }
           aria-label="删除链接"
           title="删除链接"
         >
-          <Icon name="trash" class="admin-social-action__icon" size={15} />
+          <AdminIcon name="trash" class="admin-social-action__icon" size={15} />
           <span class="sr-only">删除链接</span>
         </button>
       </div>

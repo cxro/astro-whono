@@ -1,6 +1,6 @@
 ---
 import BaseLayout from '../../layouts/BaseLayout.astro';
-import Icon from '../../components/Icon.astro';
+import BrandIcon from '../../components/BrandIcon.astro';
 import '../../styles/about.css';
 import { getThemeSettings, type SiteSocialIconKey } from '../../lib/theme-settings';
 const { settings } = getThemeSettings();
@@ -64,7 +64,7 @@ const contactItems: ContactItem[] = [
         <div class="page-actions">
           {socialItems.map((item) => (
             <a class="icon-link" href={item.href} aria-label={item.title} title={item.title}>
-              <Icon name={item.icon} class="icon" />
+              <BrandIcon name={item.icon} class="icon" />
             </a>
           ))}
         </div>
@@ -177,7 +177,7 @@ const contactItems: ContactItem[] = [
             {contactItems.map((item) => (
               <li>
                 <span class="contact-link-head" aria-hidden="true">
-                  <Icon name={item.icon} class="contact-icon" />
+                  <BrandIcon name={item.icon} class="contact-icon" />
                 </span>
                 <a href={item.href}>{item.text}</a>
               </li>

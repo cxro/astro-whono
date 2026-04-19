@@ -1,5 +1,5 @@
 ---
-import Icon from './Icon.astro';
+import UiIcon from './UiIcon.astro';
 
 type TagOption = {
   count: number;
@@ -48,7 +48,7 @@ const tagTriggerText = currentTag ? '切换标签' : '#标签';
       <h1 class="page-title">{pageTitleText}</h1>
       {currentTag ? (
         <span class="entry-tag-current__pill entry-tag-current__pill--inline">
-          <Icon name="tag" class="entry-tag-current__icon" size={14} />
+          <UiIcon name="tag" class="entry-tag-current__icon" size={14} />
           <strong class="entry-tag-current__label">#{currentTag.label}</strong>
         </span>
       ) : null}
@@ -106,7 +106,7 @@ const tagTriggerText = currentTag ? '切换标签' : '#标签';
         aria-label={searchAriaLabel}
         aria-expanded="false"
       >
-        <Icon name="search" class="icon" />
+        <UiIcon name="search" class="icon" />
       </button>
       <p class="sr-only" data-entry-search-live role="status" aria-live="polite" aria-atomic="true"></p>
     </div>

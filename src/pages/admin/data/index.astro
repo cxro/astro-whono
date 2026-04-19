@@ -1,6 +1,6 @@
 ---
-import Icon from '../../../components/Icon.astro';
 import AdminDiagnosticPanel from '../../../components/admin/AdminDiagnosticPanel.astro';
+import AdminIcon from '../../../components/admin/AdminIcon.astro';
 import AdminLayout from '../../../components/admin/AdminLayout.astro';
 import AdminReadonlyNotice from '../../../components/admin/AdminReadonlyNotice.astro';
 import AdminShell from '../../../components/admin/AdminShell.astro';
@@ -88,11 +88,7 @@ const bootstrapText =
                     class="admin-btn admin-btn--secondary admin-data-btn"
                     type="button"
                   >
-                    <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
-                      <path d="M12 3v12"></path>
-                      <path d="m7 10 5 5 5-5"></path>
-                      <path d="M4 17v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2"></path>
-                    </svg>
+                    <AdminIcon name="download" size={18} />
                     <span>导出 JSON 快照</span>
                   </button>
                 </div>
@@ -142,11 +138,7 @@ const bootstrapText =
                     aria-describedby="admin-data-dropzone-note"
                   >
                     <span class="admin-data-dropzone__icon" aria-hidden="true">
-                      <svg viewBox="0 0 24 24" focusable="false">
-                        <path d="M12 15V4"></path>
-                        <path d="m7 9 5-5 5 5"></path>
-                        <path d="M4 15v4a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-4"></path>
-                      </svg>
+                      <AdminIcon name="upload" size={21} strokeWidth={1.8} />
                     </span>
                     <span class="admin-data-dropzone__title">点击或拖拽 JSON 快照至此区域</span>
                     <span id="admin-data-dropzone-note" class="admin-data-dropzone__note">
@@ -237,11 +229,7 @@ const bootstrapText =
                 <div id="admin-data-preview-empty" class="admin-data-terminal__empty">
                   <div class="admin-data-terminal__empty-heading">
                     <span class="admin-data-terminal__empty-icon" aria-hidden="true">
-                      <svg viewBox="0 0 24 24" focusable="false">
-                        <rect x="3" y="4" width="18" height="12" rx="2"></rect>
-                        <path d="M8 20h8"></path>
-                        <path d="M12 16v4"></path>
-                      </svg>
+                      <AdminIcon name="monitor" size={30} strokeWidth={1.55} />
                     </span>
                     <p id="admin-data-preview-empty-title" class="admin-data-terminal__empty-title">
                       等待导入快照
@@ -257,7 +245,7 @@ const bootstrapText =
                   <div class="admin-data-terminal__section-copy">
                     <div class="admin-data-terminal__section-summary">
                       <span class="admin-data-terminal__section-icon" aria-hidden="true">
-                        <Icon name="scan" size={18} />
+                        <AdminIcon name="scan" size={18} />
                       </span>
                       <p id="admin-data-preview-body" class="admin-data-terminal__section-body">
                         dry-run 完成后，会在这里展示将变更的 settings 分组。

@@ -1,5 +1,5 @@
 ---
-import Icon from '../Icon.astro';
+import AdminIcon from './AdminIcon.astro';
 import AdminSiteSocialSection from './AdminSiteSocialSection.astro';
 import { ADMIN_OVERVIEW_HIDDEN_MESSAGE_MAX_LENGTH } from '../../lib/admin-console/theme-shared';
 
@@ -14,7 +14,7 @@ const { footerStartYearMin, footerStartYearMax, socialCustomLimit } = Astro.prop
 
 <fieldset class="admin-group">
   <legend class="admin-group__legend">
-    <Icon name="admin-site" class="admin-group__legend-icon" size={14} />
+    <AdminIcon name="admin-site" class="admin-group__legend-icon" size={14} />
     <span class="admin-group__legend-copy">
       <span class="admin-group__legend-zh">站点设置</span>
       <span class="admin-group__legend-en">Site</span>

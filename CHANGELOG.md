@@ -10,6 +10,7 @@ The format is based on Keep a Changelog, and this project aims to follow Semanti
 ### Added
 - 新增后台真实路由壳层：`/admin/` 现为后台稳定入口与概览页，`/admin/theme/` 承担 Theme Console 实际编辑工作流。
 - 新增 `AdminLayout / AdminShell / AdminNav` 共享后台壳层，以及 `theme-shared.ts` 作为 Theme Console 新共享入口。
+- 新增 `@lucide/astro` 依赖，以及 `AdminIcon`、`BrandIcon`、`UiIcon` 三个受控图标封装入口，用于收口 Admin、社交/联系与前台非品牌 UI 图标边界。
 - 新增 `/admin/data/` Data Console，以及 settings 导出包协议与对应导出接口。
 - 新增后台概览聚合数据读取层，`/admin/` 在开发态会展示内容统计与最近内容。
 - 新增 `/admin/content/` 与 `/admin/content/:collection/` 只读内容控制台，以及对应的服务端内容索引聚合层与复制路径脚本。
@@ -35,6 +36,8 @@ The format is based on Keep a Changelog, and this project aims to follow Semanti
 - `/admin/media/` 开发态现优先消费 SSR 注入的完整 browse 轻索引；一级分类、二级分类、搜索与分页切换在客户端本地完成，详情区仅在选中后按 `path` 请求 `/api/admin/media/meta/` 补齐尺寸、体积与 MIME。
 - 媒体共享层现对 content owner、asset list、本地 inspection meta 与 `recent` scope 索引使用短 TTL 进程内缓存，并支持通过刷新入口显式失效；整体仍保持 `list/meta` 只读 contract 不变。
 - `/admin/` Overview 现输出稳定 `data-admin-overview-mode`，preview/build 边界检查改为按 maintainer/public/hidden 模式验证页面契约。
+- `/admin/` Overview、Data、Media、Checks 以及 Theme Console 分组、Media Picker、Admin 社交行操作图标迁移到 `AdminIcon` / Lucide；公开站点非品牌 UI 图标迁移到 `UiIcon` / Lucide，社交 / 品牌 / 联系图标改走 `BrandIcon`，`Icon.astro` 仅保留 legacy 兼容入口。
+- 品牌 SVG body 现集中到 `src/lib/brand-icon-bodies.ts`；legacy `Icon.astro` 的品牌与联系类历史名称通过 `BrandIcon` 输出，避免继续维护第二份品牌 SVG。
 
 ### Fixed
 - 修正文档中的 Data Console manifest 协议说明，明确当前固定字段为 `schemaVersion / createdAt / includedScopes / excludes / locale`。

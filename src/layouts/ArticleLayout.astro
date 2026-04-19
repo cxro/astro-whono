@@ -1,6 +1,6 @@
 ---
 import BaseLayout from './BaseLayout.astro';
-import Icon from '../components/Icon.astro';
+import UiIcon from '../components/UiIcon.astro';
 import Lightbox from '../components/Lightbox.astro';
 import '../styles/article.css';
 import { getEssayDerivedText, type EssayEntry } from '../lib/content';
@@ -77,7 +77,7 @@ const shouldShowMetaLine = articleMetaSettings.showDate
       aria-hidden="true"
       tabindex="-1"
     >
-      <Icon name="reader-exit" class="icon" />
+      <UiIcon name="reader-exit" class="icon" />
     </button>
     {shouldShowMetaLine ? (
       <div class="meta-line meta-line--items">

@@ -1,5 +1,5 @@
 ---
-import Icon from '../../../components/Icon.astro';
+import AdminIcon from '../../../components/admin/AdminIcon.astro';
 import AdminLayout from '../../../components/admin/AdminLayout.astro';
 import AdminReadonlyNotice from '../../../components/admin/AdminReadonlyNotice.astro';
 import AdminShell from '../../../components/admin/AdminShell.astro';
@@ -160,7 +160,12 @@ const buildChecksHref = (category: AdminChecksFilterValue): string => {
                         category.issues.map((issue) => (
                           <li class="admin-checks-issue">
                             <span class="admin-checks-issue__icon" aria-hidden="true">
-                              <Icon name="x-mark" class="admin-checks-issue__icon-mark" size={10} />
+                              <AdminIcon
+                                name="x-mark"
+                                class="admin-checks-issue__icon-mark"
+                                size={10}
+                                strokeWidth={1.7}
+                              />
                             </span>
                             <div class="admin-checks-issue__body">
                               <div class="admin-checks-issue__head">
@@ -217,7 +222,9 @@ const buildChecksHref = (category: AdminChecksFilterValue): string => {
                     </ol>
                   ) : (
                     <p class="admin-checks-empty">
-                      <span class="admin-checks-empty__icon" aria-hidden="true">✓</span>
+                      <span class="admin-checks-empty__icon" aria-hidden="true">
+                        <AdminIcon name="check" class="admin-checks-empty__icon-mark" size={18} strokeWidth={2.6} />
+                      </span>
                       <span>当前分类未发现问题</span>
                     </p>
                   )

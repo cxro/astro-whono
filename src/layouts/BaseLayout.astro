@@ -1,6 +1,6 @@
 ---
 import Sidebar from '../components/Sidebar.astro';
-import Icon from '../components/Icon.astro';
+import UiIcon from '../components/UiIcon.astro';
 import globalStylesHref from '../styles/global.css?url';
 import { hasSiteUrl } from '../../site.config.mjs';
 import { createWithBase } from '../utils/format';
@@ -122,7 +122,7 @@ const withBase = createWithBase(base);
         aria-hidden="true"
         tabindex="-1"
       >
-        <Icon name="chevron-up" class="icon" />
+        <UiIcon name="chevron-up" class="icon" />
       </button>
     </template>
     <script>

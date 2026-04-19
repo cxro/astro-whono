@@ -450,11 +450,6 @@
   height: 22px;
 }
 
-.admin-media-picker__pager-icon polyline,
-.admin-media-picker__pager-icon path {
-  stroke-width: 1.75;
-}
-
 .admin-media-picker__pager-icon--prev {
   transform: rotate(90deg);
 }

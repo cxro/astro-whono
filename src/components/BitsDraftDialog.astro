@@ -1,5 +1,5 @@
 ---
-import Icon from './Icon.astro';
+import UiIcon from './UiIcon.astro';
 import { getThemeSettings } from '../lib/theme-settings';
 
 const { settings } = getThemeSettings();
@@ -15,7 +15,7 @@ const { settings } = getThemeSettings();
     <div class="bits-draft-head">
       <h2 id="bits-draft-title">
         <span class="bits-draft-title-icon" aria-hidden="true">
-          <Icon name="pen" />
+          <UiIcon name="pen" />
         </span>
         碎碎念
       </h2>
@@ -27,25 +27,25 @@ const { settings } = getThemeSettings();
         <label for="bits-draft-content">正文内容</label>
         <div class="bits-draft-toolbar" data-bits-draft-toolbar role="toolbar" aria-label="常用格式">
           <button type="button" class="bits-draft-tool" data-action="bold" data-tip="加粗" aria-label="加粗">
-            <Icon name="bold" />
+            <UiIcon name="bold" />
           </button>
           <button type="button" class="bits-draft-tool" data-action="italic" data-tip="斜体" aria-label="斜体">
-            <Icon name="italic" />
+            <UiIcon name="italic" />
           </button>
           <button type="button" class="bits-draft-tool" data-action="code" data-tip="行内代码" aria-label="行内代码">
-            <Icon name="code" />
+            <UiIcon name="code" />
           </button>
           <button type="button" class="bits-draft-tool" data-action="quote" data-tip="引用" aria-label="引用">
-            <Icon name="quote" />
+            <UiIcon name="quote" />
           </button>
           <button type="button" class="bits-draft-tool" data-action="list" data-tip="列表" aria-label="列表">
-            <Icon name="list" />
+            <UiIcon name="list" />
           </button>
           <button type="button" class="bits-draft-tool" data-action="link" data-tip="链接" aria-label="链接">
-            <Icon name="link" />
+            <UiIcon name="link" />
           </button>
           <button type="button" class="bits-draft-tool" data-action="paragraph" data-tip="段落" aria-label="段落">
-            <Icon name="paragraph" />
+            <UiIcon name="paragraph" />
           </button>
         </div>
       </div>
@@ -70,7 +70,7 @@ const { settings } = getThemeSettings();
       <div class="bits-draft-field bits-draft-half">
         <label for="bits-draft-place" class="bits-draft-label">
           <span class="bits-draft-label-icon" aria-hidden="true">
-            <Icon name="map-pin" />
+            <UiIcon name="map-pin" />
           </span>
           地点（可选）
         </label>
@@ -158,11 +158,11 @@ const { settings } = getThemeSettings();
       <div class="bits-draft-link-row">
         <button class="bits-draft-link" type="button" data-bits-manual-open hidden>
           <span class="bits-draft-link-icon" aria-hidden="true">
-            <Icon name="eye" />
+            <UiIcon name="eye" />
           </span>
           <span>预览草稿</span>
           <span class="bits-draft-link-caret" aria-hidden="true">
-            <Icon name="chevron-down" />
+            <UiIcon name="chevron-down" />
           </span>
         </button>
       </div>
@@ -179,7 +179,7 @@ const { settings } = getThemeSettings();
       <div class="bits-identity-bar" data-identity-bar>
         <div class="bits-identity-caption">
           <span class="bits-identity-label-icon" aria-hidden="true">
-            <Icon name="user-circle" />
+            <UiIcon name="user-circle" />
           </span>
           <span id="bits-identity-heading">作者（可选）</span>
         </div>

@@ -1,0 +1,102 @@
+---
+// 公开站点非品牌 UI 图标入口；只收录当前真实使用的项目语义名。
+import type { AstroComponent } from '@lucide/astro';
+import Bold from '@lucide/astro/icons/bold';
+import Book from '@lucide/astro/icons/book';
+import BookOpen from '@lucide/astro/icons/book-open';
+import ChevronDown from '@lucide/astro/icons/chevron-down';
+import ChevronUp from '@lucide/astro/icons/chevron-up';
+import CircleUserRound from '@lucide/astro/icons/circle-user-round';
+import CodeXml from '@lucide/astro/icons/code-xml';
+import Eye from '@lucide/astro/icons/eye';
+import Italic from '@lucide/astro/icons/italic';
+import Link from '@lucide/astro/icons/link';
+import List from '@lucide/astro/icons/list';
+import MapPin from '@lucide/astro/icons/map-pin';
+import Moon from '@lucide/astro/icons/moon';
+import PenLine from '@lucide/astro/icons/pen-line';
+import Pilcrow from '@lucide/astro/icons/pilcrow';
+import Quote from '@lucide/astro/icons/quote';
+import Rss from '@lucide/astro/icons/rss';
+import Search from '@lucide/astro/icons/search';
+import SquareArrowRightExit from '@lucide/astro/icons/square-arrow-right-exit';
+import Sun from '@lucide/astro/icons/sun';
+import Tag from '@lucide/astro/icons/tag';
+
+type UiIconName =
+  | 'bold'
+  | 'book-closed'
+  | 'book-open'
+  | 'chevron-down'
+  | 'chevron-up'
+  | 'code'
+  | 'eye'
+  | 'italic'
+  | 'link'
+  | 'list'
+  | 'map-pin'
+  | 'moon'
+  | 'paragraph'
+  | 'pen'
+  | 'quote'
+  | 'reader-exit'
+  | 'rss'
+  | 'search'
+  | 'sun'
+  | 'tag'
+  | 'user-circle';
+
+interface Props {
+  name: UiIconName;
+  size?: number | string;
+  strokeWidth?: number | string;
+  class?: string;
+  ariaLabel?: string;
+}
+
+const {
+  name,
+  size = 24,
+  strokeWidth = 2,
+  class: className = '',
+  ariaLabel
+} = Astro.props as Props;
+
+const uiIconComponents = {
+  bold: Bold,
+  'book-closed': Book,
+  'book-open': BookOpen,
+  'chevron-down': ChevronDown,
+  'chevron-up': ChevronUp,
+  code: CodeXml,
+  eye: Eye,
+  italic: Italic,
+  link: Link,
+  list: List,
+  'map-pin': MapPin,
+  moon: Moon,
+  paragraph: Pilcrow,
+  pen: PenLine,
+  quote: Quote,
+  'reader-exit': SquareArrowRightExit,
+  rss: Rss,
+  search: Search,
+  sun: Sun,
+  tag: Tag,
+  'user-circle': CircleUserRound
+} as const satisfies Record<UiIconName, AstroComponent>;
+
+const IconComponent = uiIconComponents[name];
+const ariaHidden = ariaLabel ? undefined : 'true';
+const role = ariaLabel ? 'img' : undefined;
+---
+
+<IconComponent
+  class={className}
+  size={size}
+  stroke-width={strokeWidth}
+  aria-hidden={ariaHidden}
+  aria-label={ariaLabel}
+  role={role}
+  focusable="false"
+/>

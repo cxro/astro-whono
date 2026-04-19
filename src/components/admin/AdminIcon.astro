@@ -1,0 +1,116 @@
+---
+import type { AstroComponent } from '@lucide/astro';
+import Activity from '@lucide/astro/icons/activity';
+import Check from '@lucide/astro/icons/check';
+import ChevronDown from '@lucide/astro/icons/chevron-down';
+import CodeXml from '@lucide/astro/icons/code-xml';
+import Copy from '@lucide/astro/icons/copy';
+import Download from '@lucide/astro/icons/download';
+import Eye from '@lucide/astro/icons/eye';
+import FileText from '@lucide/astro/icons/file-text';
+import Funnel from '@lucide/astro/icons/funnel';
+import GitBranch from '@lucide/astro/icons/git-branch';
+import Globe from '@lucide/astro/icons/globe';
+import House from '@lucide/astro/icons/house';
+import Layers from '@lucide/astro/icons/layers';
+import LayoutGrid from '@lucide/astro/icons/layout-grid';
+import Link from '@lucide/astro/icons/link';
+import List from '@lucide/astro/icons/list';
+import Monitor from '@lucide/astro/icons/monitor';
+import PanelLeft from '@lucide/astro/icons/panel-left';
+import RefreshCw from '@lucide/astro/icons/refresh-cw';
+import Scan from '@lucide/astro/icons/scan';
+import Search from '@lucide/astro/icons/search';
+import Tags from '@lucide/astro/icons/tags';
+import Terminal from '@lucide/astro/icons/terminal';
+import Trash2 from '@lucide/astro/icons/trash-2';
+import Upload from '@lucide/astro/icons/upload';
+import X from '@lucide/astro/icons/x';
+
+type AdminIconName =
+  | 'admin-code'
+  | 'admin-home'
+  | 'admin-page'
+  | 'admin-sidebar'
+  | 'admin-site'
+  | 'activity'
+  | 'branch-nodes'
+  | 'check'
+  | 'chevron-down'
+  | 'copy'
+  | 'download'
+  | 'eye'
+  | 'funnel'
+  | 'grid-tiles'
+  | 'layers'
+  | 'link'
+  | 'list'
+  | 'monitor'
+  | 'refresh'
+  | 'scan'
+  | 'search'
+  | 'tags'
+  | 'terminal'
+  | 'trash'
+  | 'upload'
+  | 'x-mark';
+
+interface Props {
+  name: AdminIconName;
+  size?: number | string;
+  strokeWidth?: number | string;
+  class?: string;
+  ariaLabel?: string;
+}
+
+const {
+  name,
+  size = 16,
+  strokeWidth = 2,
+  class: className = '',
+  ariaLabel
+} = Astro.props as Props;
+
+const adminIconComponents = {
+  'admin-code': CodeXml,
+  'admin-home': House,
+  'admin-page': FileText,
+  'admin-sidebar': PanelLeft,
+  'admin-site': Globe,
+  activity: Activity,
+  'branch-nodes': GitBranch,
+  check: Check,
+  'chevron-down': ChevronDown,
+  copy: Copy,
+  download: Download,
+  eye: Eye,
+  funnel: Funnel,
+  'grid-tiles': LayoutGrid,
+  layers: Layers,
+  link: Link,
+  list: List,
+  monitor: Monitor,
+  refresh: RefreshCw,
+  scan: Scan,
+  search: Search,
+  tags: Tags,
+  terminal: Terminal,
+  trash: Trash2,
+  upload: Upload,
+  'x-mark': X
+} as const satisfies Record<AdminIconName, AstroComponent>;
+
+const IconComponent = adminIconComponents[name];
+const ariaHidden = ariaLabel ? undefined : 'true';
+const role = ariaLabel ? 'img' : undefined;
+---
+
+<IconComponent
+  class:list={['admin-icon', className]}
+  size={size}
+  stroke-width={strokeWidth}
+  aria-hidden={ariaHidden}
+  aria-label={ariaLabel}
+  role={role}
+  focusable="false"
+/>

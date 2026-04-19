@@ -1,0 +1,79 @@
+---
+// 社交、品牌与联系类图标入口；品牌平台保留手写 SVG，非品牌联系图标走 Lucide。
+import type { AstroComponent } from '@lucide/astro';
+import Globe from '@lucide/astro/icons/globe';
+import Mail from '@lucide/astro/icons/mail';
+import { BRAND_SVG_ICON_BODIES, type BrandSvgIconName } from '../lib/brand-icon-bodies';
+import type { SiteSocialIconKey } from '../lib/theme-settings';
+
+type BrandIconAlias = 'x-twitter' | 'mail' | 'globe' | 'link';
+type BrandIconName = SiteSocialIconKey | BrandIconAlias;
+type BrandLucideIconName = Extract<SiteSocialIconKey, 'email' | 'website'>;
+
+interface Props {
+  name: BrandIconName;
+  size?: number | string;
+  strokeWidth?: number | string;
+  class?: string;
+  ariaLabel?: string;
+}
+
+const {
+  name,
+  size,
+  strokeWidth = 2,
+  class: className = '',
+  ariaLabel
+} = Astro.props as Props;
+
+const normalizeBrandIconName = (value: BrandIconName): SiteSocialIconKey => {
+  if (value === 'x-twitter') return 'x';
+  if (value === 'mail') return 'email';
+  if (value === 'globe' || value === 'link') return 'website';
+  return value as SiteSocialIconKey;
+};
+
+const iconSize = size ?? 24;
+const ariaHidden = ariaLabel ? undefined : 'true';
+const role = ariaLabel ? 'img' : undefined;
+const normalizedName = normalizeBrandIconName(name);
+
+const brandLucideIconComponents = {
+  email: Mail,
+  website: Globe
+} as const satisfies Record<BrandLucideIconName, AstroComponent>;
+
+const IconComponent = Object.prototype.hasOwnProperty.call(brandLucideIconComponents, normalizedName)
+  ? brandLucideIconComponents[normalizedName as BrandLucideIconName]
+  : null;
+const brandIconBody = Object.prototype.hasOwnProperty.call(BRAND_SVG_ICON_BODIES, normalizedName)
+  ? BRAND_SVG_ICON_BODIES[normalizedName as BrandSvgIconName]
+  : null;
+---
+
+{
+  IconComponent ? (
+    <IconComponent
+      class={className}
+      size={iconSize}
+      stroke-width={strokeWidth}
+      aria-hidden={ariaHidden}
+      aria-label={ariaLabel}
+      role={role}
+      focusable="false"
+    />
+  ) : brandIconBody ? (
+    <svg
+      class={className}
+      width={iconSize}
+      height={iconSize}
+      viewBox="0 0 24 24"
+      aria-hidden={ariaHidden}
+      aria-label={ariaLabel}
+      role={role}
+      focusable="false"
+    >
+      <Fragment set:html={brandIconBody} />
+    </svg>
+  ) : null
+}

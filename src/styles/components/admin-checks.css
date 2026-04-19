@@ -304,12 +304,6 @@
   display: block;
 }
 
-.admin-checks-issue__icon-mark path {
-  stroke: currentColor;
-  stroke-width: 1.7;
-  stroke-linecap: round;
-}
-
 .admin-checks-issue__body {
   min-width: 0;
   display: grid;
@@ -400,9 +394,13 @@
 }
 
 .admin-checks-empty__icon {
+  width: 18px;
+  height: 18px;
   color: var(--admin-status-success-accent);
-  font-size: 18px;
-  font-weight: 700;
+}
+
+.admin-checks-empty__icon-mark {
+  display: block;
 }
 
 @media (max-width: 900px) {
