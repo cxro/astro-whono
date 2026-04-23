@@ -103,7 +103,7 @@ const bootstrapText = imagesDevState
                   <div class="admin-images-browser__toolbar-search">
                     <button
                       id="admin-images-filter-toggle"
-                      class="admin-images-browser__filter-toggle"
+                      class="admin-btn admin-btn--tool admin-btn--compact admin-images-browser__filter-toggle"
                       type="button"
                       aria-label={hasInitialFilters ? '收起图片筛选' : '展开图片筛选'}
                       aria-controls="admin-images-filters"
@@ -116,7 +116,7 @@ const bootstrapText = imagesDevState
 
                     <button
                       id="admin-images-search-toggle"
-                      class="admin-images-browser__tool-btn admin-images-browser__search-toggle"
+                      class="admin-btn admin-btn--tool admin-btn--compact admin-images-browser__tool-btn admin-images-browser__search-toggle"
                       type="button"
                       aria-label="搜索图片"
                       aria-controls="admin-images-search-panel"
@@ -158,7 +158,7 @@ const bootstrapText = imagesDevState
                 <div class="admin-images-browser__view-switch" role="group" aria-label="图片浏览视图">
                   <button
                     id="admin-images-view-grid"
-                    class="admin-images-browser__tool-btn"
+                    class="admin-btn admin-btn--tool admin-btn--compact admin-btn--icon admin-images-browser__tool-btn"
                     type="button"
                     aria-label="网格视图"
                     aria-pressed="true"
@@ -169,7 +169,7 @@ const bootstrapText = imagesDevState
                   </button>
                   <button
                     id="admin-images-view-list"
-                    class="admin-images-browser__tool-btn"
+                    class="admin-btn admin-btn--tool admin-btn--compact admin-btn--icon admin-images-browser__tool-btn"
                     type="button"
                     aria-label="列表视图"
                     aria-pressed="false"
@@ -179,11 +179,17 @@ const bootstrapText = imagesDevState
                   </button>
                 </div>
 
-                <button id="admin-images-recent" class="admin-images-browser__recent-link" type="button">最新修改</button>
+                <button
+                  id="admin-images-recent"
+                  class="admin-btn admin-btn--tool admin-btn--compact admin-images-browser__recent-link"
+                  type="button"
+                >
+                  最新修改
+                </button>
 
                 <button
                   id="admin-images-refresh"
-                  class="admin-images-browser__tool-btn"
+                  class="admin-btn admin-btn--tool admin-btn--compact admin-btn--icon admin-images-browser__tool-btn"
                   type="button"
                   aria-label="刷新图库并重置筛选"
                   title="刷新图库并重置筛选"
@@ -227,7 +233,7 @@ const bootstrapText = imagesDevState
             <nav class="admin-images-browser__pager" aria-label="图库分页">
               <button
                 id="admin-images-prev"
-                class="admin-btn admin-btn--ghost admin-images-browser__pager-btn"
+                class="admin-btn admin-btn--tool admin-btn--compact admin-btn--icon admin-images-browser__pager-btn"
                 type="button"
                 aria-label="上一页"
                 title="上一页"
@@ -238,7 +244,7 @@ const bootstrapText = imagesDevState
               <p id="admin-images-page-meta" class="admin-images-browser__page-progress">1 / 1</p>
               <button
                 id="admin-images-next"
-                class="admin-btn admin-btn--ghost admin-images-browser__pager-btn"
+                class="admin-btn admin-btn--tool admin-btn--compact admin-btn--icon admin-images-browser__pager-btn"
                 type="button"
                 aria-label="下一页"
                 title="下一页"

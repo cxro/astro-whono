@@ -24,12 +24,24 @@
     inset 0 1px 0 color-mix(in srgb, var(--bg) 70%, transparent),
     0 1px 2px -1px var(--overlay-20);
   --admin-images-picker-copy-font: var(--admin-font-ui);
-  --admin-images-picker-toolbar-control-h: 38px;
-  --admin-images-picker-search-w: clamp(240px, 36vw, 360px);
+  --admin-images-picker-toolbar-control-h: var(--admin-control-height-compact);
+  --admin-images-picker-search-w: clamp(180px, 22vw, 240px);
   --admin-images-picker-results-scroll-gap: 12px;
+  --admin-btn-tool-border: var(--admin-images-picker-control-border);
+  --admin-btn-tool-bg: var(--admin-images-picker-control-surface);
+  --admin-btn-tool-color: var(--muted);
+  --admin-btn-tool-hover-border: var(--admin-images-picker-hover-border);
+  --admin-btn-tool-hover-bg: var(--admin-images-picker-hover-surface);
+  --admin-btn-tool-hover-color: var(--text);
+  --admin-btn-tool-active-border: var(--admin-images-picker-selected-border);
+  --admin-btn-tool-active-bg: var(--admin-images-picker-selected-surface);
+  --admin-btn-tool-active-color: var(--admin-images-picker-selected-color);
+  --admin-btn-tool-active-shadow: var(--admin-images-picker-selected-shadow);
+  --admin-btn-tool-disabled-border: color-mix(in srgb, var(--admin-images-picker-control-border) 48%, transparent);
+  --admin-btn-tool-disabled-bg: color-mix(in srgb, var(--admin-images-picker-control-surface) 88%, transparent);
+  --admin-btn-tool-disabled-color: color-mix(in srgb, var(--muted) 68%, transparent);
 
   width: min(920px, calc(100vw - 40px));
-  height: min(80vh, 860px);
   max-height: calc(100vh - 24px);
   padding: 0;
   border: 1px solid var(--admin-images-picker-border);
@@ -72,10 +84,9 @@
 }
 
 .admin-images-picker__surface {
-  display: grid;
-  grid-template-rows: auto auto minmax(0, 1fr) auto;
-  gap: 0;
-  height: 100%;
+  display: flex;
+  flex-direction: column;
+  max-height: calc(100vh - 24px);
   padding: 0;
   overflow: hidden;
   overscroll-behavior: contain;
@@ -83,15 +94,24 @@
 }
 
 .admin-images-picker__header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-  padding: 20px 22px 16px;
+  display: grid;
+  gap: 10px;
+  padding: 16px 22px;
+  border-bottom: 1px solid var(--admin-images-picker-divider);
   background: var(--admin-images-picker-surface);
 }
 
+.admin-images-picker__topbar {
+  display: grid;
+  grid-template-areas: "copy divider controls tools close";
+  grid-template-columns: minmax(0, max-content) auto minmax(0, 1fr) auto auto;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+}
+
 .admin-images-picker__copy {
+  grid-area: copy;
   display: grid;
   gap: 6px;
   min-width: 0;
@@ -109,9 +129,12 @@
 .admin-images-picker__title {
   margin: 0;
   font-family: var(--admin-images-picker-copy-font);
-  font-size: clamp(1.08rem, 1rem + 0.38vw, 1.28rem);
+  font-size: 1.125rem;
   font-weight: 600;
   line-height: 1.35;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .admin-images-picker__description {
@@ -121,51 +144,50 @@
   line-height: 1.55;
 }
 
-.admin-images-picker__toolbar {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) auto;
-  gap: 14px 16px;
-  align-items: start;
-  padding: 14px 22px;
-  border-block: 1px solid var(--admin-images-picker-divider);
-  background: var(--admin-images-picker-toolbar-surface);
+.admin-images-picker__header-divider {
+  grid-area: divider;
+  width: 1px;
+  height: 22px;
+  background: var(--admin-images-picker-divider);
 }
 
-.admin-images-picker__controls {
-  display: grid;
-  gap: 10px;
-  min-width: 0;
-}
-
-.admin-images-picker__search-row {
+.admin-images-picker__header-controls {
+  grid-area: controls;
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: 10px;
+  gap: 8px;
   min-width: 0;
+}
+
+.admin-images-picker__header > .admin-images-picker__description {
+  margin-top: -2px;
 }
 
 .admin-images-picker__search {
   margin: 0;
-  flex: 0 1 var(--admin-images-picker-search-w);
+  gap: 0;
+  flex: 1 1 var(--admin-images-picker-search-w);
+  min-width: 150px;
+  max-width: var(--admin-images-picker-search-w);
   width: min(100%, var(--admin-images-picker-search-w));
 }
 
-.admin-images-picker__search input {
+.admin-images-picker__search .admin-field__control {
   min-height: var(--admin-images-picker-toolbar-control-h);
+  padding-inline: var(--admin-field-padding-inline-compact);
   border-color: var(--admin-images-picker-control-border);
   background: var(--admin-images-picker-control-surface);
   font-family: var(--admin-images-picker-copy-font);
+  font-size: var(--admin-text-sm);
+  line-height: 1.2;
   box-shadow: 0 1px 0 color-mix(in srgb, var(--bg) 72%, transparent);
 }
 
-.admin-images-picker__search input::placeholder {
-  color: var(--faint);
-}
-
 .admin-images-picker__tool-actions {
+  grid-area: tools;
   display: inline-flex;
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
   align-items: center;
   justify-content: flex-end;
   gap: 6px;
@@ -175,37 +197,37 @@
 .admin-images-picker__filter-toggle,
 .admin-images-picker__filter-tab,
 .admin-images-picker__icon-btn {
-  border: 1px solid var(--admin-images-picker-control-border);
-  background: var(--admin-images-picker-control-surface);
-  color: var(--muted);
   font-family: var(--admin-images-picker-copy-font);
-  transition:
-    border-color 160ms ease,
-    background-color 160ms ease,
-    color 160ms ease,
-    box-shadow 160ms ease;
 }
 
 .admin-images-picker__tool-btn,
 .admin-images-picker__filter-toggle,
 .admin-images-picker__icon-btn {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
   min-height: var(--admin-images-picker-toolbar-control-h);
-  border-radius: 8px;
-  cursor: pointer;
 }
 
 .admin-images-picker__tool-btn,
 .admin-images-picker__icon-btn {
   width: var(--admin-images-picker-toolbar-control-h);
-  padding: 0;
+}
+
+.admin-images-picker__tool-btn,
+.admin-images-picker__filter-toggle,
+.admin-images-picker__icon-btn,
+.admin-images-picker__pager-btn {
+  --admin-btn-tool-bg: transparent;
+  --admin-btn-tool-border: transparent;
+  --admin-btn-tool-hover-bg: var(--admin-images-picker-hover-surface);
+  --admin-btn-tool-hover-border: transparent;
+  --admin-btn-tool-active-bg: var(--admin-images-picker-selected-surface);
+  --admin-btn-tool-active-border: transparent;
+  --admin-btn-tool-active-shadow: none;
+  --admin-btn-tool-disabled-border: transparent;
 }
 
 .admin-images-picker__filter-toggle {
+  flex: 0 0 auto;
   gap: 6px;
-  padding: 0 12px;
   font-size: var(--admin-text-sm);
   font-weight: 600;
 }
@@ -217,8 +239,9 @@
 }
 
 .admin-images-picker__header .admin-images-picker__icon-btn {
-  width: 34px;
-  min-height: 34px;
+  grid-area: close;
+  width: var(--admin-images-picker-toolbar-control-h);
+  min-height: var(--admin-images-picker-toolbar-control-h);
 }
 
 .admin-images-picker__header .admin-images-picker__icon-btn svg {
@@ -226,51 +249,28 @@
   height: 16px;
 }
 
-.admin-images-picker__tool-btn:hover,
-.admin-images-picker__filter-toggle:hover,
-.admin-images-picker__icon-btn:hover,
-.admin-images-picker__filter-tab:hover {
-  border-color: var(--admin-images-picker-hover-border);
-  background: var(--admin-images-picker-hover-surface);
-  color: var(--text);
-}
-
-.admin-images-picker__tool-btn:focus-visible,
-.admin-images-picker__filter-toggle:focus-visible,
-.admin-images-picker__filter-tab:focus-visible,
-.admin-images-picker__icon-btn:focus-visible {
-  outline: 2px solid var(--accent);
-  outline-offset: 2px;
-}
-
-.admin-images-picker__tool-btn[data-active='true'],
-.admin-images-picker__filter-toggle[data-active='true'],
-.admin-images-picker__filter-tab--active {
-  border-color: var(--admin-images-picker-selected-border);
-  background: var(--admin-images-picker-selected-surface);
-  color: var(--admin-images-picker-selected-color);
-  box-shadow: var(--admin-images-picker-selected-shadow);
-}
-
 .admin-images-picker__filters[hidden] {
   display: none;
 }
 
+.admin-images-picker__filters {
+  flex: 0 1 auto;
+  min-width: 0;
+}
+
 .admin-images-picker__filter-tabs {
   display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
+  flex-wrap: nowrap;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
 }
 
 .admin-images-picker__filter-tab {
-  display: inline-flex;
-  align-items: center;
-  min-height: 34px;
-  padding: 0 12px;
-  border-radius: 8px;
+  flex: 0 0 auto;
+  min-height: var(--admin-control-height-compact);
   font-size: var(--admin-text-sm);
   line-height: 1;
-  cursor: pointer;
 }
 
 .admin-images-picker__status {
@@ -287,6 +287,7 @@
 
 .admin-images-picker__results {
   display: grid;
+  flex: 0 1 auto;
   gap: 12px;
   min-height: 0;
   margin: 0 12px 0 22px;
@@ -294,7 +295,6 @@
   list-style: none;
   overflow-y: auto;
   overscroll-behavior: contain;
-  scrollbar-gutter: stable;
 }
 
 .admin-images-picker__empty {
@@ -433,21 +433,17 @@
 }
 
 .admin-images-picker__pager-btn {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 34px;
-  height: 34px;
-  min-height: 34px;
-  padding: 0;
+  --admin-btn-icon-glyph-size: 22px;
+
+  width: var(--admin-control-icon-size-compact);
+  height: var(--admin-control-icon-size-compact);
+  min-height: var(--admin-control-icon-size-compact);
   font-family: var(--admin-images-picker-copy-font);
   line-height: 1;
 }
 
 .admin-images-picker__pager-icon {
-  flex: 0 0 auto;
-  width: 22px;
-  height: 22px;
+  flex: 0 0 var(--admin-btn-icon-glyph-size);
 }
 
 .admin-images-picker__pager-icon--prev {
@@ -494,30 +490,6 @@
 
 .admin-images-picker__footer .admin-btn {
   white-space: nowrap;
-}
-
-.admin-images-picker__footer .admin-btn--ghost {
-  border-color: var(--admin-images-picker-control-border);
-  background: var(--admin-images-picker-control-surface);
-}
-
-.admin-images-picker__footer .admin-btn--ghost:hover {
-  border-color: var(--admin-images-picker-hover-border);
-  background: var(--admin-images-picker-hover-surface);
-}
-
-.admin-images-picker__pager-btn:disabled,
-.admin-images-picker__pager-btn:disabled:hover {
-  border-style: solid;
-  border-color: color-mix(in srgb, var(--admin-images-picker-control-border) 48%, transparent);
-  background: color-mix(in srgb, var(--admin-images-picker-control-surface) 88%, transparent);
-  color: color-mix(in srgb, var(--muted) 68%, transparent);
-}
-
-.admin-images-picker__actions .admin-btn:not(:disabled) {
-  border-color: var(--text);
-  background: var(--text);
-  color: var(--bg);
 }
 
 .admin-images-picker__results[data-view='grid'] {
@@ -634,16 +606,30 @@
 }
 
 @media (max-width: 900px) {
-  .admin-images-picker__toolbar {
-    grid-template-columns: 1fr;
+  .admin-images-picker__topbar {
+    grid-template-areas:
+      "copy tools close"
+      "controls controls controls";
+    grid-template-columns: minmax(0, 1fr) auto auto;
+    gap: 10px 8px;
+  }
+
+  .admin-images-picker__header-divider {
+    display: none;
   }
 
   .admin-images-picker__tool-actions {
-    justify-content: flex-start;
+    justify-content: flex-end;
+  }
+
+  .admin-images-picker__header-controls {
+    gap: 7px;
   }
 
   .admin-images-picker__search {
-    flex-basis: 100%;
+    flex: 1 1 auto;
+    min-width: 0;
+    max-width: none;
     width: 100%;
   }
 
@@ -659,11 +645,6 @@
     grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
   }
 
-  .admin-images-picker__header {
-    flex-direction: column;
-    align-items: stretch;
-  }
-
   .admin-images-picker {
     width: calc(100vw - 24px);
   }
@@ -674,8 +655,24 @@
     padding: 18px 16px 14px;
   }
 
-  .admin-images-picker__toolbar {
-    padding: 10px 16px;
+  .admin-images-picker__topbar {
+    gap: 8px 6px;
+  }
+
+  .admin-images-picker__header-controls {
+    gap: 6px;
+  }
+
+  .admin-images-picker__filter-toggle {
+    padding-inline: 7px;
+    font-size: var(--admin-text-xs);
+  }
+
+  .admin-images-picker__status {
+    max-width: 68px;
+    overflow: hidden;
+    font-size: var(--admin-text-xs);
+    text-overflow: ellipsis;
   }
 
   .admin-images-picker__results {
@@ -698,14 +695,11 @@
   }
 
   .admin-images-picker__pager-btn {
+    --admin-btn-icon-glyph-size: 20px;
+
     width: 30px;
     height: 30px;
     min-height: 30px;
-  }
-
-  .admin-images-picker__pager-icon {
-    width: 20px;
-    height: 20px;
   }
 
   .admin-images-picker__page {

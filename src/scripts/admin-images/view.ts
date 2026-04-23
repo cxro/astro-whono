@@ -411,7 +411,7 @@ export const renderDetail = ({
           <div class="admin-images-browser__code-wrapper">
             <code class="admin-images-browser__detail-code">${escapeHtml(fieldValue)}</code>
             <button
-              class="admin-images-copy-btn"
+              class="admin-btn admin-btn--tool admin-btn--compact admin-btn--icon admin-images-copy-btn"
               type="button"
               data-copy-value="${escapeHtml(fieldValue)}"
               data-copy-label="${escapeHtml(fieldCopyLabel)}"

@@ -218,12 +218,12 @@ const activeFilterCount = pageData
             <div class="admin-content-filter-grid">
               <label class="admin-field admin-content-field admin-content-field--query">
                 <span class="admin-field__label">搜索 title / entry.id / slug</span>
-                <input type="search" name="q" value={pageData.filterState.query} placeholder="支持空格分词" />
+                <input class="admin-field__control" type="search" name="q" value={pageData.filterState.query} placeholder="支持空格分词" />
               </label>
 
               <label class="admin-field admin-content-field">
                 <span class="admin-field__label">草稿筛选</span>
-                <select name="draft">
+                <select class="admin-field__control" name="draft">
                   {
                     ADMIN_CONTENT_DRAFT_OPTIONS.map((option) => (
                       <option value={option.value} selected={option.value === pageData.filterState.draft}>
@@ -236,7 +236,7 @@ const activeFilterCount = pageData
 
               <label class="admin-field admin-content-field">
                 <span class="admin-field__label">排序</span>
-                <select name="sort">
+                <select class="admin-field__control" name="sort">
                   {
                     ADMIN_CONTENT_SORT_OPTIONS.map((option) => (
                       <option value={option.value} selected={option.value === pageData.filterState.sort}>
@@ -251,7 +251,7 @@ const activeFilterCount = pageData
                 pageData.tagOptions.length > 0 ? (
                   <label class="admin-field admin-content-field">
                     <span class="admin-field__label">标签</span>
-                    <select name="tag">
+                    <select class="admin-field__control" name="tag">
                       <option value="">全部标签</option>
                       {
                         pageData.tagOptions.map((option) => (
@@ -269,7 +269,7 @@ const activeFilterCount = pageData
                 pageData.yearOptions.length > 0 ? (
                   <label class="admin-field admin-content-field">
                     <span class="admin-field__label">年份</span>
-                    <select name="year">
+                    <select class="admin-field__control" name="year">
                       <option value="">全部年份</option>
                       {
                         pageData.yearOptions.map((option) => (
@@ -294,7 +294,7 @@ const activeFilterCount = pageData
                   : '选择条目后会在下方显示索引详情；essay / bits 会补充 frontmatter 编辑卡片，memo 继续保持只读。'}
               </p>
               <div class="admin-overview-card__actions">
-                <button class="admin-btn" type="submit">应用筛选</button>
+                <button class="admin-btn admin-btn--secondary" type="submit">应用筛选</button>
                 <a class="admin-btn admin-btn--ghost" href={resetHref}>重置条件</a>
                 <a class="admin-btn admin-btn--ghost" href={withBase('/admin/content/')}>返回 Content 总入口</a>
               </div>
@@ -315,7 +315,7 @@ const activeFilterCount = pageData
                   <div class="admin-overview-card__actions">
                     <button
                       type="button"
-                      class="admin-btn"
+                      class="admin-btn admin-btn--secondary"
                       data-admin-copy-button
                       data-copy-label="相对路径"
                       data-copy-text={selectedEntryRelativePath}
@@ -424,43 +424,43 @@ const activeFilterCount = pageData
                           <>
                             <label class="admin-field admin-content-editor__field" data-field-path="title">
                               <span class="admin-field__label">title</span>
-                              <input id="admin-content-title" name="title" type="text" value={selectedEntryEditorPayload.values.title} />
+                              <input class="admin-field__control" id="admin-content-title" name="title" type="text" value={selectedEntryEditorPayload.values.title} />
                               <p class="admin-content-editor__error" data-field-error="title" hidden></p>
                             </label>
 
                             <label class="admin-field admin-content-editor__field" data-field-path="date">
                               <span class="admin-field__label">date</span>
-                              <input id="admin-content-date" name="date" type="date" value={selectedEntryEditorPayload.values.date} />
+                              <input class="admin-field__control" id="admin-content-date" name="date" type="date" value={selectedEntryEditorPayload.values.date} />
                               <p class="admin-content-editor__error" data-field-error="date" hidden></p>
                             </label>
 
                             <label class="admin-field admin-content-editor__field admin-field--full" data-field-path="description">
                               <span class="admin-field__label">description</span>
-                              <textarea id="admin-content-description" name="description">{selectedEntryEditorPayload.values.description}</textarea>
+                              <textarea class="admin-field__control" id="admin-content-description" name="description">{selectedEntryEditorPayload.values.description}</textarea>
                               <p class="admin-content-editor__error" data-field-error="description" hidden></p>
                             </label>
 
                             <label class="admin-field admin-content-editor__field admin-field--full" data-field-path="tags">
                               <span class="admin-field__label">tags（每行一个）</span>
-                              <textarea id="admin-content-tags" name="tagsText">{selectedEntryEditorPayload.values.tagsText}</textarea>
+                              <textarea class="admin-field__control" id="admin-content-tags" name="tagsText">{selectedEntryEditorPayload.values.tagsText}</textarea>
                               <p class="admin-content-editor__error" data-field-error="tags" hidden></p>
                             </label>
 
                             <label class="admin-field admin-content-editor__field" data-field-path="slug">
                               <span class="admin-field__label">slug</span>
-                              <input id="admin-content-slug" name="slug" type="text" value={selectedEntryEditorPayload.values.slug} />
+                              <input class="admin-field__control" id="admin-content-slug" name="slug" type="text" value={selectedEntryEditorPayload.values.slug} />
                               <p class="admin-content-editor__error" data-field-error="slug" hidden></p>
                             </label>
 
                             <label class="admin-field admin-content-editor__field" data-field-path="badge">
                               <span class="admin-field__label">badge</span>
-                              <input id="admin-content-badge" name="badge" type="text" value={selectedEntryEditorPayload.values.badge} />
+                              <input class="admin-field__control" id="admin-content-badge" name="badge" type="text" value={selectedEntryEditorPayload.values.badge} />
                               <p class="admin-content-editor__error" data-field-error="badge" hidden></p>
                             </label>
 
                             <label class="admin-field admin-content-editor__field admin-field--full" data-field-path="cover">
                               <span class="admin-field__label">cover</span>
-                              <input id="admin-content-cover" name="cover" type="text" value={selectedEntryEditorPayload.values.cover} />
+                              <input class="admin-field__control" id="admin-content-cover" name="cover" type="text" value={selectedEntryEditorPayload.values.cover} />
                               <p class="admin-content-editor__error" data-field-error="cover" hidden></p>
                             </label>
 
@@ -479,37 +479,37 @@ const activeFilterCount = pageData
                           <>
                             <label class="admin-field admin-content-editor__field" data-field-path="title">
                               <span class="admin-field__label">title（可选）</span>
-                              <input id="admin-content-title" name="title" type="text" value={selectedEntryEditorPayload.values.title} />
+                              <input class="admin-field__control" id="admin-content-title" name="title" type="text" value={selectedEntryEditorPayload.values.title} />
                               <p class="admin-content-editor__error" data-field-error="title" hidden></p>
                             </label>
 
                             <label class="admin-field admin-content-editor__field" data-field-path="date">
                               <span class="admin-field__label">date</span>
-                              <input id="admin-content-date" name="date" type="text" value={selectedEntryEditorPayload.values.date} />
+                              <input class="admin-field__control" id="admin-content-date" name="date" type="text" value={selectedEntryEditorPayload.values.date} />
                               <p class="admin-content-editor__error" data-field-error="date" hidden></p>
                             </label>
 
                             <label class="admin-field admin-content-editor__field admin-field--full" data-field-path="description">
                               <span class="admin-field__label">description</span>
-                              <textarea id="admin-content-description" name="description">{selectedEntryEditorPayload.values.description}</textarea>
+                              <textarea class="admin-field__control" id="admin-content-description" name="description">{selectedEntryEditorPayload.values.description}</textarea>
                               <p class="admin-content-editor__error" data-field-error="description" hidden></p>
                             </label>
 
                             <label class="admin-field admin-content-editor__field admin-field--full" data-field-path="tags">
                               <span class="admin-field__label">tags（每行一个）</span>
-                              <textarea id="admin-content-tags" name="tagsText">{selectedEntryEditorPayload.values.tagsText}</textarea>
+                              <textarea class="admin-field__control" id="admin-content-tags" name="tagsText">{selectedEntryEditorPayload.values.tagsText}</textarea>
                               <p class="admin-content-editor__error" data-field-error="tags" hidden></p>
                             </label>
 
                             <label class="admin-field admin-content-editor__field" data-field-path="authorName">
                               <span class="admin-field__label">author.name</span>
-                              <input id="admin-content-author-name" name="authorName" type="text" value={selectedEntryEditorPayload.values.authorName} />
+                              <input class="admin-field__control" id="admin-content-author-name" name="authorName" type="text" value={selectedEntryEditorPayload.values.authorName} />
                               <p class="admin-content-editor__error" data-field-error="authorName" hidden></p>
                             </label>
 
                             <label class="admin-field admin-content-editor__field" data-field-path="authorAvatar">
                               <span class="admin-field__label">author.avatar</span>
-                              <input id="admin-content-author-avatar" name="authorAvatar" type="text" value={selectedEntryEditorPayload.values.authorAvatar} />
+                              <input class="admin-field__control" id="admin-content-author-avatar" name="authorAvatar" type="text" value={selectedEntryEditorPayload.values.authorAvatar} />
                               <p class="admin-content-editor__error" data-field-error="authorAvatar" hidden></p>
                             </label>
 
@@ -537,7 +537,7 @@ const activeFilterCount = pageData
                               <div class="admin-content-image-editor" id="admin-content-image-editor">
                                 {
                                   bitsImageRows.map((image, index) => (
-                                    <div class="admin-content-image-row" data-admin-content-image-row>
+                                    <div class="admin-row admin-row--muted admin-row--interactive admin-content-image-row" data-admin-content-image-row>
                                       <div class="admin-content-image-row__head">
                                         <strong class="admin-content-image-row__title">图片 #{index + 1}</strong>
                                         <button
@@ -549,14 +549,15 @@ const activeFilterCount = pageData
                                         </button>
                                       </div>
                                       <div class="admin-content-image-row__grid">
-                                        <div class="admin-content-image-row__field admin-content-image-row__field--src" data-field-path={`images[${index}].src`}>
+                                        <div class="admin-field admin-content-image-row__field admin-content-image-row__field--src" data-field-path={`images[${index}].src`}>
                                           <span class="admin-field__label">src</span>
                                           <div class="admin-content-image-row__src-inputs">
                                             <input
+                                              class="admin-field__control"
                                               type="text"
                                               value={image.src}
                                               spellcheck="false"
-                                              placeholder="bits/demo.webp 或 https://..."
+                                              placeholder="bits/demo.webp 或 https://…"
                                               data-admin-content-image-src
                                             />
                                             <button
@@ -569,19 +570,19 @@ const activeFilterCount = pageData
                                           </div>
                                           <p class="admin-content-editor__error" data-field-error={`images[${index}].src`} hidden></p>
                                         </div>
-                                        <label class="admin-content-image-row__field" data-field-path={`images[${index}].width`}>
+                                        <label class="admin-field admin-content-image-row__field" data-field-path={`images[${index}].width`}>
                                           <span class="admin-field__label">width</span>
-                                          <input type="number" min="1" step="1" value={image.width} data-admin-content-image-width />
+                                          <input class="admin-field__control" type="number" min="1" step="1" value={image.width} data-admin-content-image-width />
                                           <p class="admin-content-editor__error" data-field-error={`images[${index}].width`} hidden></p>
                                         </label>
-                                        <label class="admin-content-image-row__field" data-field-path={`images[${index}].height`}>
+                                        <label class="admin-field admin-content-image-row__field" data-field-path={`images[${index}].height`}>
                                           <span class="admin-field__label">height</span>
-                                          <input type="number" min="1" step="1" value={image.height} data-admin-content-image-height />
+                                          <input class="admin-field__control" type="number" min="1" step="1" value={image.height} data-admin-content-image-height />
                                           <p class="admin-content-editor__error" data-field-error={`images[${index}].height`} hidden></p>
                                         </label>
-                                        <label class="admin-content-image-row__field admin-content-image-row__field--alt">
+                                        <label class="admin-field admin-content-image-row__field admin-content-image-row__field--alt">
                                           <span class="admin-field__label">alt（可选）</span>
-                                          <input type="text" value={image.alt} data-admin-content-image-alt />
+                                          <input class="admin-field__control" type="text" value={image.alt} data-admin-content-image-alt />
                                         </label>
                                       </div>
                                       <div class="admin-content-image-row__footer">
@@ -595,7 +596,7 @@ const activeFilterCount = pageData
                                 }
                               </div>
                               <template id="admin-content-image-row-template">
-                                <div class="admin-content-image-row" data-admin-content-image-row>
+                                <div class="admin-row admin-row--muted admin-row--interactive admin-content-image-row" data-admin-content-image-row>
                                   <div class="admin-content-image-row__head">
                                     <strong class="admin-content-image-row__title">图片</strong>
                                     <button
@@ -607,13 +608,14 @@ const activeFilterCount = pageData
                                     </button>
                                   </div>
                                   <div class="admin-content-image-row__grid">
-                                    <div class="admin-content-image-row__field admin-content-image-row__field--src" data-field-path="images[0].src">
+                                    <div class="admin-field admin-content-image-row__field admin-content-image-row__field--src" data-field-path="images[0].src">
                                       <span class="admin-field__label">src</span>
                                       <div class="admin-content-image-row__src-inputs">
                                         <input
+                                          class="admin-field__control"
                                           type="text"
                                           spellcheck="false"
-                                          placeholder="bits/demo.webp 或 https://..."
+                                          placeholder="bits/demo.webp 或 https://…"
                                           data-admin-content-image-src
                                         />
                                         <button
@@ -626,19 +628,19 @@ const activeFilterCount = pageData
                                       </div>
                                       <p class="admin-content-editor__error" data-field-error="images[0].src" hidden></p>
                                     </div>
-                                    <label class="admin-content-image-row__field" data-field-path="images[0].width">
+                                    <label class="admin-field admin-content-image-row__field" data-field-path="images[0].width">
                                       <span class="admin-field__label">width</span>
-                                      <input type="number" min="1" step="1" data-admin-content-image-width />
+                                      <input class="admin-field__control" type="number" min="1" step="1" data-admin-content-image-width />
                                       <p class="admin-content-editor__error" data-field-error="images[0].width" hidden></p>
                                     </label>
-                                    <label class="admin-content-image-row__field" data-field-path="images[0].height">
+                                    <label class="admin-field admin-content-image-row__field" data-field-path="images[0].height">
                                       <span class="admin-field__label">height</span>
-                                      <input type="number" min="1" step="1" data-admin-content-image-height />
+                                      <input class="admin-field__control" type="number" min="1" step="1" data-admin-content-image-height />
                                       <p class="admin-content-editor__error" data-field-error="images[0].height" hidden></p>
                                     </label>
-                                    <label class="admin-content-image-row__field admin-content-image-row__field--alt">
+                                    <label class="admin-field admin-content-image-row__field admin-content-image-row__field--alt">
                                       <span class="admin-field__label">alt（可选）</span>
-                                      <input type="text" data-admin-content-image-alt />
+                                      <input class="admin-field__control" type="text" data-admin-content-image-alt />
                                     </label>
                                   </div>
                                   <div class="admin-content-image-row__footer">
@@ -674,8 +676,8 @@ const activeFilterCount = pageData
                       真实写盘前会再次执行 revision 校验；若当前条目已被外部修改，后台会拒绝覆盖并要求刷新。
                     </p>
                     <div class="admin-overview-card__actions">
-                      <button id="admin-content-dry-run" class="admin-btn admin-btn--ghost" type="button">执行 dry-run</button>
-                      <button id="admin-content-save" class="admin-btn" type="button">保存 frontmatter</button>
+                      <button id="admin-content-dry-run" class="admin-btn admin-btn--secondary" type="button">执行 dry-run</button>
+                      <button id="admin-content-save" class="admin-btn admin-btn--primary" type="button">保存 frontmatter</button>
                     </div>
                   </div>
 
@@ -729,7 +731,7 @@ const activeFilterCount = pageData
                           entry: item.id
                         });
                         return (
-                          <li class:list={['admin-content-item', isActive && 'is-active']}>
+                          <li class:list={['admin-row', 'admin-row--interactive', 'admin-content-item', isActive && 'is-active']}>
                             <div class="admin-content-item__body">
                               <div class="admin-content-item__header">
                                 <p class="admin-content-item__eyebrow">
@@ -773,7 +775,7 @@ const activeFilterCount = pageData
                             </div>
 
                             <div class="admin-content-item__actions">
-                              <a class:list={['admin-btn', !isActive && 'admin-btn--ghost']} href={detailHref}>
+                              <a class:list={['admin-btn', isActive ? 'admin-btn--secondary' : 'admin-btn--ghost']} href={detailHref}>
                                 {isActive ? '当前条目' : '查看详情'}
                               </a>
                               {
@@ -811,7 +813,7 @@ const activeFilterCount = pageData
                           {
                             Array.from({ length: pageData.totalPages }, (_, index) => index + 1).map((page) => (
                               <a
-                                class:list={['admin-btn', page !== pageData.currentPage && 'admin-btn--ghost']}
+                                class:list={['admin-btn', page === pageData.currentPage ? 'admin-btn--secondary' : 'admin-btn--ghost']}
                                 href={buildCurrentCollectionHref({
                                   page: String(page),
                                   entry: ''

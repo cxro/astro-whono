@@ -26,21 +26,21 @@ const { footerStartYearMin, footerStartYearMax, socialCustomLimit } = Astro.prop
         <span class="admin-label__main">站点标题</span>
         <span class="admin-label__hint">（用于浏览器标题 / RSS / 分享）</span>
       </span>
-      <input id="site-title" type="text" autocomplete="off" />
+      <input class="admin-field__control" id="site-title" type="text" autocomplete="off" />
     </label>
     <label class="admin-field">
       <span class="admin-label">
         <span class="admin-label__main">站点语言</span>
         <span class="admin-label__hint">（默认值为 zh-CN）</span>
       </span>
-      <input id="site-default-locale" type="text" autocomplete="off" />
+      <input class="admin-field__control" id="site-default-locale" type="text" autocomplete="off" />
     </label>
     <label class="admin-field admin-field--full">
       <span class="admin-label">
         <span class="admin-label__main">默认 SEO 描述</span>
         <span class="admin-label__hint">（用于搜索结果和分享摘要）</span>
       </span>
-      <textarea id="site-description" rows="3"></textarea>
+      <textarea class="admin-field__control admin-field__control--singleline-textarea" id="site-description" rows="1"></textarea>
     </label>
     <label class="admin-field">
       <span class="admin-label">
@@ -49,6 +49,7 @@ const { footerStartYearMin, footerStartYearMax, socialCustomLimit } = Astro.prop
       </span>
       <span class="admin-year-range">
         <input
+          class="admin-field__control"
           id="site-footer-start-year"
           type="number"
           min={footerStartYearMin}
@@ -60,7 +61,7 @@ const { footerStartYearMin, footerStartYearMax, socialCustomLimit } = Astro.prop
         />
         <span class="admin-year-range__sep" aria-hidden="true">-</span>
         <input
-          class="admin-year-range__readonly"
+          class="admin-field__control admin-year-range__readonly"
           name="site-footer-current-year-display"
           type="text"
           value={String(footerStartYearMax)}
@@ -78,7 +79,7 @@ const { footerStartYearMin, footerStartYearMax, socialCustomLimit } = Astro.prop
       <span class="admin-label">
         <span class="admin-label__main">页脚版权文案</span>
       </span>
-      <input id="site-footer-copyright" type="text" autocomplete="off" aria-describedby="site-footer-preview" />
+      <input class="admin-field__control" id="site-footer-copyright" type="text" autocomplete="off" aria-describedby="site-footer-preview" />
     </label>
     <div class="admin-field admin-field--full">
       <p id="site-footer-preview" class="admin-help">
@@ -99,6 +100,7 @@ const { footerStartYearMin, footerStartYearMax, socialCustomLimit } = Astro.prop
         </label>
       </div>
       <input
+        class="admin-field__control"
         id="site-admin-overview-hidden-message"
         type="text"
         maxlength={ADMIN_OVERVIEW_HIDDEN_MESSAGE_MAX_LENGTH}

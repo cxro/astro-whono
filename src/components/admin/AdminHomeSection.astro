@@ -40,6 +40,7 @@ const { homeIntroMaxLength } = Astro.props;
             </div>
             <div class="admin-images-field-input">
               <input
+                class="admin-field__control"
                 id="home-hero-image-src"
                 type="text"
                 inputmode="url"
@@ -65,6 +66,7 @@ const { homeIntroMaxLength } = Astro.props;
               <span class="admin-label__hint">（用于图片替代文本，不在页面显示）</span>
             </span>
             <input
+              class="admin-field__control"
               id="home-hero-image-alt"
               type="text"
               maxlength={ADMIN_HERO_IMAGE_ALT_MAX_LENGTH}
@@ -99,7 +101,7 @@ const { homeIntroMaxLength } = Astro.props;
           <span>展示</span>
         </label>
       </div>
-      <textarea id="home-intro-lead" rows="3" maxlength={homeIntroMaxLength}></textarea>
+      <textarea class="admin-field__control admin-field__control--compact-textarea" id="home-intro-lead" rows="2" maxlength={homeIntroMaxLength}></textarea>
     </div>
     <div class="admin-field admin-field--full">
       <div class="admin-label admin-label--split">
@@ -115,7 +117,7 @@ const { homeIntroMaxLength } = Astro.props;
       <div class="admin-inline-builder admin-inline-builder--intro-more" role="group" aria-label="首页导语补充句式编辑器">
         <textarea
           id="home-intro-more"
-          class="admin-inline-builder__text"
+          class="admin-field__control admin-inline-builder__text"
           rows="1"
           maxlength={homeIntroMaxLength}
           aria-label="首页导语补充文案"
@@ -123,7 +125,7 @@ const { homeIntroMaxLength } = Astro.props;
         <span class="admin-inline-builder__select-group">
           <select
             id="home-intro-more-link-primary"
-            class="admin-inline-builder__select"
+            class="admin-field__control admin-inline-builder__select"
             aria-label="首页导语补充主链接"
           >
             {ADMIN_HOME_INTRO_LINK_OPTIONS.map((option) => (
@@ -150,7 +152,7 @@ const { homeIntroMaxLength } = Astro.props;
           <span class="admin-inline-builder__secondary-sep">或</span>
           <select
             id="home-intro-more-link-secondary"
-            class="admin-inline-builder__select"
+            class="admin-field__control admin-inline-builder__select"
             aria-label="首页导语补充第二链接"
             disabled
           >
@@ -168,3 +170,4 @@ const { homeIntroMaxLength } = Astro.props;
     </div>
   </div>
 </fieldset>
+

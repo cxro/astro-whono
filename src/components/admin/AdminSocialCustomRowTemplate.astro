@@ -20,12 +20,13 @@ const { socialIconOptions, customSocialIconOptions, defaultCustomSocialIconKey }
 ---
 
 <template id="site-social-custom-row-template">
-  <article class="admin-social-row" data-social-custom-row>
+  <article class="admin-row admin-row--interactive admin-row--table admin-social-row" data-social-custom-row>
     <label class="admin-field admin-social-field admin-social-field--order">
       <span class="admin-social-cell-label">位置</span>
       <span class="admin-social-order-frame">
         <span class="admin-social-order-frame__mark" aria-hidden="true">[</span>
         <input
+          class="admin-field__control"
           data-social-custom-field="order"
           name="site-social-custom-order[]"
           type="number"
@@ -40,7 +41,7 @@ const { socialIconOptions, customSocialIconOptions, defaultCustomSocialIconKey }
 
     <label class="admin-field admin-social-field admin-social-field--platform">
       <span class="admin-social-cell-label">平台</span>
-      <select data-social-custom-field="iconKey" name="site-social-custom-icon-key[]">
+      <select class="admin-field__control" data-social-custom-field="iconKey" name="site-social-custom-icon-key[]">
         {
           customSocialIconOptions.map((option) => (
             <option value={option.value} data-social-default-label={option.defaultLabel}>
@@ -51,16 +52,7 @@ const { socialIconOptions, customSocialIconOptions, defaultCustomSocialIconKey }
       </select>
     </label>
 
-    <label class="admin-field admin-social-field admin-social-field--id">
-      <span class="admin-social-cell-label">链接代号</span>
-      <input
-        data-social-custom-field="id"
-        name="site-social-custom-id[]"
-        type="text"
-        autocomplete="off"
-        spellcheck="false"
-      />
-    </label>
+    <input data-social-custom-field="id" name="site-social-custom-id[]" type="hidden" />
 
     <div class="admin-social-field admin-social-field--icon">
       <span class="admin-social-cell-label">图标</span>
@@ -84,7 +76,7 @@ const { socialIconOptions, customSocialIconOptions, defaultCustomSocialIconKey }
       <span class="admin-social-link-inline">
         <span class="admin-social-link-label" hidden>
           <input
-            class="admin-social-link-label__input"
+            class="admin-field__control admin-social-link-label__input"
             data-social-custom-field="label"
             name="site-social-custom-label[]"
             type="text"
@@ -94,7 +86,7 @@ const { socialIconOptions, customSocialIconOptions, defaultCustomSocialIconKey }
           />
         </span>
         <input
-          class="admin-social-link-inline__href"
+          class="admin-field__control admin-social-link-inline__href"
           data-social-custom-field="href"
           name="site-social-custom-href[]"
           type="url"
@@ -114,12 +106,17 @@ const { socialIconOptions, customSocialIconOptions, defaultCustomSocialIconKey }
           type="checkbox"
           class="sr-only"
         />
-        <button class="admin-social-action" type="button" data-social-custom-action="toggle-visible" aria-pressed="true">
+        <button
+          class="admin-btn admin-btn--tool admin-btn--compact admin-btn--icon admin-social-action"
+          type="button"
+          data-social-custom-action="toggle-visible"
+          aria-pressed="true"
+        >
           <AdminIcon name="eye" class="admin-social-action__icon" size={15} />
           <span class="sr-only" data-social-custom-visible-label>隐藏链接</span>
         </button>
         <button
-          class="admin-social-action admin-social-action--danger"
+          class="admin-btn admin-btn--tool admin-btn--compact admin-btn--icon admin-social-action admin-social-action--danger"
           type="button"
           data-social-custom-action="remove"
           aria-label="删除链接"

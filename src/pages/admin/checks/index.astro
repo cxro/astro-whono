@@ -72,59 +72,79 @@ const buildChecksHref = (category: AdminChecksFilterValue): string => {
     {
       isDev && checksDevState ? (
         <section class="admin-overview admin-checks-console">
-          <header class="admin-overview-card admin-checks-toolbar" aria-labelledby="admin-checks-title">
-            <div class="admin-checks-toolbar__summary">
-              <div class="admin-checks-toolbar__copy">
-                <h2 id="admin-checks-title" class="admin-overview-card__title admin-checks-toolbar__title">诊断概览</h2>
-                <p class="admin-checks-toolbar__body">
-                  {
-                    checksDevState.checks.totalIssueCount > 0
-                      ? `当前共发现 ${checksDevState.checks.totalIssueCount} 个问题，分布在 ${checksDevState.checks.blockedCategoryCount} 个分类，涉及 ${checksDevState.checks.affectedPathCount} 个文件。`
-                      : '当前检查范围内未发现问题'
-                  }
-                </p>
+          <header class="admin-checks-toolbar" aria-labelledby="admin-checks-title">
+            <div class="admin-checks-toolbar__head">
+              <div class="admin-checks-toolbar__lead">
+                <div class="admin-checks-toolbar__heading">
+                  <h2 id="admin-checks-title" class="admin-overview-card__title admin-checks-toolbar__title">诊断概览</h2>
+                </div>
+
+                <div class="admin-checks-toolbar__filters-wrap">
+                  <span class="admin-checks-toolbar__separator" aria-hidden="true">｜</span>
+
+                  <nav class="admin-checks-toolbar__filters" aria-label="检查分类筛选">
+                    <a
+                      href={buildChecksHref('all')}
+                      class:list={[
+                        'admin-checks-filter',
+                        selectedCategory === 'all' && 'is-active'
+                      ]}
+                      aria-current={selectedCategory === 'all' ? 'page' : undefined}
+                    >
+                      <span class="admin-checks-filter__label">全部</span>
+                      <span class="admin-checks-filter__count">{checksDevState.checks.totalIssueCount}</span>
+                    </a>
+                    {
+                      checksDevState.checks.categories.map((category) => (
+                        <a
+                          href={buildChecksHref(category.id as AdminChecksCategoryId)}
+                          class:list={[
+                            'admin-checks-filter',
+                            selectedCategory === category.id && 'is-active'
+                          ]}
+                          aria-current={selectedCategory === category.id ? 'page' : undefined}
+                        >
+                          <span class="admin-checks-filter__label">{category.label}</span>
+                          <span class="admin-checks-filter__count">{category.issueCount}</span>
+                        </a>
+                      ))
+                    }
+                  </nav>
+                </div>
               </div>
 
               <form
-                class="admin-checks-toolbar__action"
+                class="admin-checks-toolbar__action admin-checks-toolbar__action--head"
                 method="get"
                 action={withBase('/admin/checks/')}
                 data-admin-checks-refresh-form
               >
                 {selectedCategory !== 'all' ? <input type="hidden" name="category" value={selectedCategory} /> : null}
-                <button class="admin-checks-toolbar__refresh-link" type="submit" data-admin-checks-refresh-button>
+                <button
+                  class="admin-btn admin-btn--tool admin-btn--compact admin-checks-toolbar__refresh-link"
+                  type="submit"
+                  data-admin-checks-refresh-button
+                >
                   重新检测
                 </button>
               </form>
+            </div>
+
+            <div class="admin-checks-toolbar__summary">
+              <p class="admin-checks-toolbar__body">
+                {
+                  checksDevState.checks.totalIssueCount > 0
+                    ? `当前共发现 ${checksDevState.checks.totalIssueCount} 个问题，分布在 ${checksDevState.checks.blockedCategoryCount} 个分类，涉及 ${checksDevState.checks.affectedPathCount} 个文件。`
+                    : '当前检查范围内未发现问题'
+                }
+              </p>
+
             </div>
 
             <p class="admin-checks-toolbar__hint">
               注：提交前仍建议执行 <code>npm run check</code>、<code>npm test</code>、<code>npm run build</code>。
             </p>
           </header>
-
-          <nav class="admin-checks-toolbar__filters" aria-label="检查分类筛选">
-            <a
-              href={buildChecksHref('all')}
-              class:list={['admin-checks-filter', selectedCategory === 'all' && 'is-active']}
-              aria-current={selectedCategory === 'all' ? 'page' : undefined}
-            >
-              <span class="admin-checks-filter__label">全部</span>
-              <span class="admin-checks-filter__count">{checksDevState.checks.totalIssueCount}</span>
-            </a>
-            {
-              checksDevState.checks.categories.map((category) => (
-                <a
-                  href={buildChecksHref(category.id as AdminChecksCategoryId)}
-                  class:list={['admin-checks-filter', selectedCategory === category.id && 'is-active']}
-                  aria-current={selectedCategory === category.id ? 'page' : undefined}
-                >
-                  <span class="admin-checks-filter__label">{category.label}</span>
-                  <span class="admin-checks-filter__count">{category.issueCount}</span>
-                </a>
-              ))
-            }
-          </nav>
 
           {
             visibleCategories.map((category) => (
@@ -158,7 +178,7 @@ const buildChecksHref = (category: AdminChecksFilterValue): string => {
                     <ol class="admin-checks-issue-list">
                       {
                         category.issues.map((issue) => (
-                          <li class="admin-checks-issue">
+                          <li class="admin-row admin-row--plain admin-row--interactive admin-checks-issue">
                             <span class="admin-checks-issue__icon" aria-hidden="true">
                               <AdminIcon
                                 name="x-mark"

@@ -185,24 +185,6 @@
   z-index: 1;
   display: grid;
   place-items: center;
-  width: 26px;
-  height: 26px;
-  border: 1px solid transparent;
-  border-radius: 6px;
-  background: transparent;
-  color: var(--muted);
-  cursor: pointer;
-  transition:
-    background-color 180ms ease,
-    border-color 180ms ease,
-    color 180ms ease,
-    box-shadow 180ms ease;
-}
-
-.admin-images-copy-btn:hover {
-  border-color: var(--admin-control-border-hover);
-  background: color-mix(in srgb, var(--border) 30%, transparent 70%);
-  color: var(--text);
 }
 
 .admin-images-copy-btn::after {
@@ -226,13 +208,6 @@
   transition: opacity 0.18s ease, transform 0.18s ease;
 }
 
-.admin-images-copy-btn:focus-visible {
-  outline: none;
-  outline-offset: 1px;
-  border-color: var(--admin-focus-border);
-  box-shadow: 0 0 0 2px var(--admin-focus-ring);
-}
-
 .admin-images-copy-btn[data-state='copied'] {
   color: var(--admin-status-success-text);
   background: var(--admin-status-success-bg);
@@ -245,8 +220,8 @@
 }
 
 .admin-images-copy-btn svg {
-  width: 14px;
-  height: 14px;
+  width: 16px;
+  height: 16px;
 }
 
 /* Action button hierarchy */

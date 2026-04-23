@@ -3,6 +3,23 @@
 */
 
 .admin-social-panel {
+  --admin-social-column-gap: 10px;
+  --admin-social-column-order-width: 44px;
+  --admin-social-column-platform-width: 104px;
+  --admin-social-column-icon-width: 64px;
+  --admin-social-column-actions-width: 84px;
+  --admin-social-row-padding-inline: var(--admin-row-table-padding-inline);
+  --admin-social-header-font-size: var(--admin-text-xs);
+  --admin-social-field-font-size: var(--admin-text-base);
+  --admin-social-platform-padding-inline: 16px;
+  --admin-social-href-padding-inline: var(--admin-field-padding-inline);
+  --admin-social-order-gap: 4px;
+  --admin-social-order-font-size: 15px;
+  --admin-social-order-width: 2.8ch;
+  --admin-social-actions-gap: 6px;
+  --admin-social-action-glyph-size: 15px;
+  --admin-social-icon-size: 18px;
+
   margin-top: 0;
   padding: 0;
   border: 0;
@@ -22,23 +39,12 @@
   white-space: nowrap;
 }
 
-.admin-social-empty {
-  margin: 12px 0 0;
-  padding: 12px;
-  border: 1px dashed var(--border);
-  border-radius: 12px;
-  background: var(--bg);
-  color: var(--faint);
-  font-size: 13px;
-  line-height: 1.7;
-}
-
 .admin-social-list {
   display: grid;
   gap: 0;
-  border: 1px solid var(--border);
+  border: 1px solid var(--admin-row-border);
   border-top: 0;
-  border-radius: 0 0 14px 14px;
+  border-radius: 0 0 var(--admin-row-radius) var(--admin-row-radius);
   background: var(--bg);
   overflow: hidden;
 }
@@ -57,18 +63,23 @@
 .admin-social-header,
 .admin-social-row {
   display: grid;
-  gap: 10px;
-  grid-template-columns: 44px 84px minmax(0, 0.72fr) 40px minmax(0, 1.38fr) 84px;
+  gap: var(--admin-social-column-gap);
+  grid-template-columns:
+    var(--admin-social-column-order-width)
+    var(--admin-social-column-platform-width)
+    var(--admin-social-column-icon-width)
+    minmax(0, 1fr)
+    var(--admin-social-column-actions-width);
   align-items: center;
 }
 
 .admin-social-header {
-  padding: 10px 12px;
-  border: 1px solid var(--border);
-  border-radius: 14px 14px 0 0;
-  background: linear-gradient(180deg, var(--panel) 0%, var(--code-header-bg) 100%);
+  padding: 10px var(--admin-social-row-padding-inline);
+  border: 1px solid var(--admin-row-border);
+  border-radius: var(--admin-row-radius) var(--admin-row-radius) 0 0;
+  background: var(--admin-row-bg-muted);
   color: var(--muted);
-  font-size: 12px;
+  font-size: var(--admin-social-header-font-size);
 }
 
 .admin-social-header > span {
@@ -83,41 +94,28 @@
   grid-column: 2;
 }
 
-.admin-social-header__id {
+.admin-social-header__icon {
   grid-column: 3;
 }
 
-.admin-social-header__icon {
+.admin-social-header__href {
   grid-column: 4;
 }
 
-.admin-social-header__href {
+.admin-social-header__actions {
   grid-column: 5;
 }
 
-.admin-social-header__actions {
-  grid-column: 6;
-}
-
 .admin-social-row {
-  padding: 12px;
-  background: var(--bg);
-  border-top: 1px solid var(--border);
-  transition:
-    background-color 160ms ease,
-    box-shadow 160ms ease;
+  --admin-row-table-padding-inline: var(--admin-social-row-padding-inline);
+
+  border: 0;
+  border-top: 1px solid var(--admin-row-divider);
+  border-radius: 0;
 }
 
 .admin-social-row:first-child {
   border-top: 0;
-}
-
-.admin-social-row:hover {
-  background: var(--code-content-bg);
-}
-
-.admin-social-row:focus-within {
-  background: var(--code-content-bg);
 }
 
 .admin-social-field {
@@ -134,22 +132,17 @@
   justify-items: center;
 }
 
-.admin-social-field--id {
+.admin-social-field--icon {
   grid-column: 3;
   justify-items: center;
 }
 
-.admin-social-field--icon {
-  grid-column: 4;
-  justify-items: center;
-}
-
 .admin-social-field--href {
-  grid-column: 5;
+  grid-column: 4;
 }
 
 .admin-social-field--actions {
-  grid-column: 6;
+  grid-column: 5;
   display: grid;
   gap: 6px;
   justify-items: center;
@@ -190,11 +183,11 @@
   grid-template-columns: auto minmax(2ch, auto) auto;
   align-items: center;
   justify-items: center;
-  gap: 4px;
+  gap: var(--admin-social-order-gap);
   min-height: 36px;
   color: var(--muted);
-  font-family: "LXGW WenKai Lite", "Kaiti SC", "STKaiti", serif;
-  font-size: 15px;
+  font-family: var(--admin-font-copy);
+  font-size: var(--admin-social-order-font-size);
   line-height: 1;
 }
 
@@ -202,21 +195,12 @@
   color: var(--text);
 }
 
-.admin-social-order-frame--static {
-  min-width: 56px;
-}
-
-.admin-social-order-frame__value {
-  min-width: 2.6em;
-  text-align: center;
-}
-
 .admin-social-order-frame__mark {
   color: var(--faint);
 }
 
-.admin-social-field--order input {
-  width: 2.8ch;
+.admin-social-field--order .admin-field__control {
+  width: var(--admin-social-order-width);
   min-width: 0;
   margin-inline: 0;
   border: 0;
@@ -227,42 +211,41 @@
   box-shadow: none;
 }
 
-.admin-social-field--order input:hover {
+.admin-social-field--order .admin-field__control:hover {
   border-color: transparent;
 }
 
-.admin-social-field--order input:focus-visible {
+.admin-social-field--order .admin-field__control:focus-visible {
   outline: none;
   box-shadow: none;
 }
 
-.admin-social-field--platform select {
-  width: 84px;
+.admin-social-field--platform select.admin-field__control {
+  width: var(--admin-social-column-platform-width);
   min-width: 0;
   margin-inline: 0;
-  padding-inline: 10px 22px;
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  border-color: transparent;
+  background-color: transparent;
+  background-image:
+    linear-gradient(45deg, transparent 50%, var(--muted) 50%),
+    linear-gradient(135deg, var(--muted) 50%, transparent 50%);
+  background-repeat: no-repeat;
+  background-size: 4px 4px;
+  background-position:
+    calc(100% - 13px) calc(50% + 1px),
+    calc(100% - 9px) calc(50% + 1px);
+  box-shadow: none;
+  padding-inline: var(--admin-social-platform-padding-inline);
+  font-size: var(--admin-social-field-font-size);
   text-align: center;
   text-align-last: center;
 }
 
-.admin-social-field--id input {
-  width: min(100%, 116px);
-  min-width: 0;
-  margin-inline: auto;
-  background: linear-gradient(180deg, var(--code-content-bg) 0%, var(--panel) 100%);
-  color: var(--muted);
-  caret-color: var(--text);
-  letter-spacing: 0.02em;
+.admin-social-field--platform select.admin-field__control option {
   text-align: center;
-}
-
-.admin-social-field--id input:hover {
-  background: linear-gradient(180deg, var(--code-content-bg) 0%, var(--panel) 100%);
-}
-
-.admin-social-field--id input:focus-visible {
-  background: var(--bg);
-  color: var(--text);
 }
 
 .admin-social-static-input {
@@ -270,35 +253,54 @@
 }
 
 .admin-social-field--platform .admin-social-static-input {
-  width: 84px;
+  width: var(--admin-social-column-platform-width);
   min-width: 0;
   margin-inline: 0;
-  text-align: center;
-}
-
-.admin-social-static-input--code {
-  font-family: var(--font-mono);
-  letter-spacing: 0.02em;
-}
-
-.admin-social-static-action {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  min-height: 34px;
-  min-width: 56px;
-  padding: 0 10px;
-  border: 1px solid var(--border);
-  border-radius: 10px;
+  border-color: transparent;
   background: transparent;
-  color: var(--faint);
-  font-size: 11px;
-  line-height: 1;
+  box-shadow: none;
+  padding-inline: 0;
+  font-size: var(--admin-social-field-font-size);
+  text-align: center;
+  color: var(--muted);
+}
+
+.admin-social-field--platform select.admin-field__control:hover {
+  border-color: transparent;
+  background-color: color-mix(in srgb, var(--admin-row-bg-muted) 72%, transparent);
+}
+
+.admin-social-field--platform select.admin-field__control:focus-visible {
+  border-color: var(--admin-focus-border);
+  background-color: var(--bg);
+  box-shadow: 0 0 0 2px var(--admin-focus-ring);
+}
+
+.admin-social-field--href .admin-field__control {
+  padding-inline: var(--admin-social-href-padding-inline);
+  font-size: var(--admin-social-field-font-size);
+}
+
+.admin-social-field--href .admin-field__control:not([aria-invalid='true']) {
+  border-color: var(--admin-field-soft-border);
+  background: var(--admin-field-soft-bg);
+}
+
+.admin-social-field--href .admin-field__control:not([aria-invalid='true']):hover {
+  border-color: var(--admin-field-soft-hover-border);
+  background: var(--admin-field-soft-hover-bg);
+}
+
+.admin-social-field--href .admin-field__control:not([aria-invalid='true']):focus-visible {
+  border-color: var(--admin-focus-border);
+  background: var(--bg);
+  box-shadow: 0 0 0 2px var(--admin-focus-ring);
 }
 
 .admin-social-field--icon {
   justify-self: center;
-  padding-inline: 4px;
+  width: 100%;
+  padding-inline: 0;
 }
 
 .admin-social-icon-preview {
@@ -320,73 +322,53 @@
 }
 
 .admin-social-icon-only__icon {
-  width: 18px;
-  height: 18px;
+  width: var(--admin-social-icon-size);
+  height: var(--admin-social-icon-size);
   display: block;
 }
 
 .admin-social-row-actions {
   display: flex;
   flex-wrap: nowrap;
-  gap: 6px;
+  gap: var(--admin-social-actions-gap);
   justify-content: center;
 }
 
 .admin-social-action {
-  width: 34px;
-  min-width: 34px;
-  min-height: 34px;
-  padding: 0;
-  border: 1px solid var(--border);
-  border-radius: 10px;
-  background: transparent;
-  color: var(--text);
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-}
+  --admin-btn-icon-glyph-size: var(--admin-social-action-glyph-size);
 
-.admin-social-action:hover {
-  background: var(--code-content-bg);
+  color: var(--text);
 }
 
 .admin-social-action[data-state='hidden'] {
   color: var(--faint);
 }
 
-.admin-social-action--disabled,
-.admin-social-action--disabled:disabled {
+.admin-social-action--disabled {
   color: var(--faint);
   opacity: 0.55;
   cursor: not-allowed;
 }
 
-.admin-social-action--disabled:hover {
-  background: transparent;
-}
-
-.admin-social-action__icon {
-  width: 15px;
-  height: 15px;
-  flex: 0 0 15px;
-}
-
 .admin-social-action--danger {
-  color: #8a2e2e;
-}
+  --admin-btn-tool-color: var(--admin-status-danger-text);
+  --admin-btn-tool-hover-color: var(--admin-status-danger-text);
+  --admin-btn-tool-hover-bg: var(--admin-status-danger-bg);
+  --admin-btn-tool-hover-border: var(--admin-status-danger-border);
+  --admin-btn-tool-active-color: var(--admin-status-danger-text);
+  --admin-btn-tool-active-bg: var(--admin-status-danger-bg);
+  --admin-btn-tool-active-border: var(--admin-status-danger-border);
 
-:root[data-theme='dark'] .admin-social-action--danger {
-  color: #f2b8b8;
+  color: var(--admin-status-danger-text);
 }
 
 .admin-social-cell-label {
   display: none;
   margin: 0;
   color: var(--faint);
-  font-size: 11px;
+  font-size: var(--admin-text-2xs);
   line-height: 1.4;
-  font-family: "LXGW WenKai Lite", "Kaiti SC", "STKaiti", serif;
+  font-family: var(--admin-font-copy);
 }
 
 .admin-social-actions {
@@ -397,71 +379,45 @@
 }
 
 @media (max-width: 900px) {
+  .admin-social-panel {
+    --admin-social-column-gap: 8px;
+    --admin-social-column-order-width: 40px;
+    --admin-social-column-platform-width: 92px;
+    --admin-social-column-icon-width: 36px;
+    --admin-social-column-actions-width: 72px;
+    --admin-social-row-padding-inline: 10px;
+    --admin-social-header-font-size: var(--admin-text-2xs);
+    --admin-social-field-font-size: var(--admin-text-xs);
+    --admin-social-platform-padding-inline: 14px;
+    --admin-social-href-padding-inline: 8px;
+  }
+
   .admin-social-panel__head {
-    flex-direction: column;
-    align-items: flex-start;
+    flex-wrap: wrap;
+    align-items: center;
   }
+}
 
-  .admin-social-header {
-    display: none;
-  }
-
-  .admin-social-list {
-    gap: 8px;
-    border: 0;
-    border-radius: 0;
-    overflow: visible;
-    background: transparent;
-  }
-
-  .admin-social-row {
-    grid-template-columns: 1fr;
-    align-items: start;
-    border: 1px solid var(--border);
-    border-radius: 14px;
-    gap: 10px;
-    padding: 12px;
-  }
-
-  .admin-social-field--order,
-  .admin-social-field--platform,
-  .admin-social-field--id,
-  .admin-social-field--icon,
-  .admin-social-field--href,
-  .admin-social-field--actions {
-    grid-column: auto;
-  }
-
-  .admin-social-field--order input {
-    width: 100%;
-    max-width: 3ch;
-  }
-
-  .admin-social-field--platform,
-  .admin-social-field--icon {
-    justify-items: start;
+@media (max-width: 640px) {
+  .admin-social-panel {
+    --admin-social-column-gap: 6px;
+    --admin-social-column-platform-width: 84px;
+    --admin-social-column-icon-width: 32px;
+    --admin-social-column-actions-width: 68px;
+    --admin-social-row-padding-inline: 8px;
+    --admin-social-field-font-size: var(--admin-text-2xs);
+    --admin-social-platform-padding-inline: 12px;
+    --admin-social-href-padding-inline: 7px;
+    --admin-social-order-gap: 2px;
+    --admin-social-order-font-size: 13px;
+    --admin-social-order-width: 2.4ch;
+    --admin-social-actions-gap: 4px;
+    --admin-social-action-glyph-size: 14px;
+    --admin-social-icon-size: 16px;
   }
 
   .admin-social-link-inline,
   .admin-social-row[data-custom-label-visible='true'] .admin-social-link-inline {
     grid-template-columns: 1fr;
-  }
-
-  .admin-social-field--platform select,
-  .admin-social-field--platform .admin-social-static-input {
-    margin-inline: 0;
-  }
-
-  .admin-social-static-action {
-    min-width: 0;
-  }
-
-  .admin-social-row-actions,
-  .admin-social-actions {
-    justify-content: flex-start;
-  }
-
-  .admin-social-cell-label {
-    display: block;
   }
 }

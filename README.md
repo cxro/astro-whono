@@ -81,7 +81,7 @@ npm run ci
 SITE_URL=https://你的域名 npm run build
 SITE_URL=https://你的域名 npm run check:prod-artifacts
 
-# 仅在改动 Theme Console 或 /admin 边界时
+# 仅在改动 Admin Console 子路由、/api/admin/** 静态边界或 dev/prod 只读边界时
 npm run check:preview-admin
 ```
 
@@ -384,4 +384,3 @@ git push origin main --tags
 ## 许可证
 
 License：MIT
-

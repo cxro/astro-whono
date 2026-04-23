@@ -80,7 +80,7 @@ npm run ci
 SITE_URL=https://your-domain npm run build
 SITE_URL=https://your-domain npm run check:prod-artifacts
 
-# Only when changing Theme Console or /admin boundaries
+# Only when changing Admin Console subroutes, /api/admin/** static boundaries, or dev/prod read-only boundaries
 npm run check:preview-admin
 ```
 
@@ -373,5 +373,4 @@ git push origin main --tags
 ## License
 
 License: MIT
-
 

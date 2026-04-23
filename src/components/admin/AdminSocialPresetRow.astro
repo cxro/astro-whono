@@ -21,12 +21,13 @@ const visibilityLabel = `隐藏 ${row.label}`;
 const removeLabel = `${row.label} 为固定项，不可删除`;
 ---
 
-<article class="admin-social-row admin-social-row--preset" data-social-preset-row data-social-preset-id={row.id}>
+<article class="admin-row admin-row--interactive admin-row--table admin-social-row admin-social-row--preset" data-social-preset-row data-social-preset-id={row.id}>
   <label class="admin-field admin-social-field admin-social-field--order">
     <span class="admin-social-cell-label">位置</span>
     <span class="admin-social-order-frame">
       <span class="admin-social-order-frame__mark" aria-hidden="true">[</span>
       <input
+        class="admin-field__control"
         id={row.orderInputId}
         data-social-preset-field="order"
         type="number"
@@ -43,22 +44,10 @@ const removeLabel = `${row.label} 为固定项，不可删除`;
   <div class="admin-field admin-social-field admin-social-field--platform admin-social-field--static">
     <span class="admin-social-cell-label">平台</span>
     <input
-      class="admin-social-static-input"
+      class="admin-field__control admin-social-static-input"
       name={`site-social-${row.id}-platform-display`}
       type="text"
       value={row.label}
-      readonly
-      tabindex="-1"
-    />
-  </div>
-
-  <div class="admin-field admin-social-field admin-social-field--id admin-social-field--static">
-    <span class="admin-social-cell-label">链接代号</span>
-    <input
-      class="admin-social-static-input admin-social-static-input--code"
-      name={`site-social-${row.id}-id-display`}
-      type="text"
-      value={row.id}
       readonly
       tabindex="-1"
     />
@@ -76,6 +65,7 @@ const removeLabel = `${row.label} 为固定项，不可删除`;
   <label class="admin-field admin-social-field admin-social-field--href">
     <span class="admin-social-cell-label">{row.id === 'email' ? '邮箱地址' : '链接地址'}</span>
     <input
+      class="admin-field__control"
       id={row.inputId}
       data-social-preset-field="href"
       type={row.inputType}
@@ -89,7 +79,7 @@ const removeLabel = `${row.label} 为固定项，不可删除`;
     <span class="admin-social-cell-label">操作</span>
     <div class="admin-social-row-actions">
       <button
-        class="admin-social-action"
+        class="admin-btn admin-btn--tool admin-btn--compact admin-btn--icon admin-social-action"
         type="button"
         data-social-preset-action="toggle-visible"
         aria-pressed="true"
@@ -100,7 +90,7 @@ const removeLabel = `${row.label} 为固定项，不可删除`;
         <span class="sr-only">{visibilityLabel}</span>
       </button>
       <button
-        class="admin-social-action admin-social-action--disabled"
+        class="admin-btn admin-btn--tool admin-btn--compact admin-btn--icon admin-social-action admin-social-action--disabled"
         type="button"
         data-social-preset-action="remove"
         aria-label={removeLabel}

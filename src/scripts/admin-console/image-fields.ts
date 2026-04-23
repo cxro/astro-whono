@@ -40,7 +40,7 @@ const FIELD_CONFIGS: readonly ThemeImageFieldConfig[] = [
     inputId: 'home-hero-image-src',
     buttonSelector: '[data-admin-images-open="home.heroImageSrc"]',
     pickerTitle: '更换 Hero 图片',
-    pickerDescription: '支持 src/assets/** 与 public/**，保存后会写入当前主题配置。',
+    pickerDescription: '',
     pickerResetLabel: '恢复默认',
     pickerResetStatus: '已恢复 Hero 默认图',
     pickerFallbackCurrentValue: 'src/assets/hero.png',

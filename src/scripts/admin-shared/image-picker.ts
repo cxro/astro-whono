@@ -37,8 +37,8 @@ type AdminImagePickerOriginOption = {
 };
 
 const ADMIN_IMAGE_PICKER_PAGE_LIMITS = {
-  list: 12,
-  grid: 24
+  list: 6,
+  grid: 12
 } as const satisfies Record<AdminImagePickerViewMode, number>;
 
 const formatAdminImageGridMetaSummary = (
@@ -230,7 +230,7 @@ export const createAdminImagePicker = (root: ParentNode = document): AdminImageP
     currentOriginOptions.forEach((option) => {
       const button = document.createElement('button');
       button.type = 'button';
-      button.className = `admin-images-picker__filter-tab${currentOriginFilter === option.value ? ' admin-images-picker__filter-tab--active' : ''}`;
+      button.className = 'admin-btn admin-btn--tool admin-btn--compact admin-images-picker__filter-tab';
       button.dataset.origin = option.value;
       button.setAttribute('aria-pressed', String(currentOriginFilter === option.value));
       button.textContent = option.label;

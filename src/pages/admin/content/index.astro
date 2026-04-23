@@ -51,11 +51,11 @@ const contentOverviewTotals = contentOverviewDevState
               <h2 class="admin-overview-card__title">内容总览</h2>
               <p class="admin-overview-card__body">
                 当前共收口 {contentOverviewTotals?.totalCount ?? 0} 条内容，其中草稿 {contentOverviewTotals?.draftCount ?? 0} 条。
-                当前页面只负责 collection 概览与阶段边界说明；具体筛选、分页与只读详情放在各 collection 列表页。
+                当前页面只负责 collection 概览与能力分流；具体筛选、分页与编辑入口放在各 collection 列表页。
               </p>
             </div>
             <div class="admin-overview-card__actions admin-content-home__lead-actions">
-              <a class="admin-btn" href={withBase('/admin/content/essay/')}>进入 Essay 列表</a>
+              <a class="admin-btn admin-btn--primary" href={withBase('/admin/content/essay/')}>进入 Essay 列表</a>
               <a class="admin-btn admin-btn--ghost" href={withBase('/admin/')}>返回 Admin 首页</a>
             </div>
           </article>
@@ -73,7 +73,9 @@ const contentOverviewTotals = contentOverviewDevState
                     共 {summary.totalCount} 条内容，其中草稿 {summary.draftCount} 条；最近更新时间 {summary.latestDateLabel}。
                   </p>
                   <div class="admin-overview-card__actions">
-                    <a class="admin-btn" href={withBase(getAdminContentCollectionHref(summary.key))}>进入 {summary.label}</a>
+                    <a class="admin-btn admin-btn--secondary" href={withBase(getAdminContentCollectionHref(summary.key))}>
+                      进入 {summary.label}
+                    </a>
                   </div>
                 </article>
               ))
@@ -81,13 +83,14 @@ const contentOverviewTotals = contentOverviewDevState
           </div>
 
           <article class="admin-overview-card admin-content-home__boundary">
-            <p class="admin-overview-card__eyebrow">Phase 2A Boundary</p>
-            <h2 class="admin-overview-card__title">当前阶段仍是只读控制台</h2>
+            <p class="admin-overview-card__eyebrow">Current Boundary</p>
+            <h2 class="admin-overview-card__title">当前入口负责总览与分流</h2>
             <ul class="admin-overview-card__list">
               <li>真实路由：`/admin/content/` 与 `/admin/content/:collection/`。</li>
               <li>URL 次级状态：`q / draft / tag / year / sort / page / entry`。</li>
               <li>维护动作：公开页跳转、路径复制、`entry.id` 复制。</li>
-              <li>仍不包含：frontmatter 写回、正文编辑、内容写盘 API。</li>
+              <li>`essay / bits` 的 frontmatter dry-run 与保存已下沉到 collection 页；`memo` 继续只读。</li>
+              <li>正文编辑与正文写盘仍不在当前范围内。</li>
             </ul>
           </article>
         </section>

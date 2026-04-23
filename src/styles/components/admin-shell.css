@@ -8,8 +8,34 @@
   --admin-surface-muted: color-mix(in srgb, var(--panel) 88%, var(--text) 12%);
   --admin-border: color-mix(in srgb, var(--border) 88%, var(--text) 12%);
   --admin-border-strong: color-mix(in srgb, var(--border) 72%, var(--text) 28%);
+  --admin-row-radius: var(--admin-control-radius);
+  --admin-row-bg: var(--bg);
+  --admin-row-bg-muted: var(--admin-surface-soft);
+  --admin-row-hover-bg: color-mix(in srgb, var(--panel) 74%, var(--bg) 26%);
+  --admin-row-focus-bg: color-mix(in srgb, var(--panel) 78%, var(--bg) 22%);
+  --admin-row-active-bg: color-mix(in srgb, var(--admin-surface) 70%, var(--bg) 30%);
+  --admin-row-border: var(--border);
+  --admin-row-active-border: var(--admin-focus-border);
+  --admin-row-divider: color-mix(in srgb, var(--border) 68%, transparent);
+  --admin-row-table-padding-block: 6px;
+  --admin-row-table-padding-inline: 12px;
   --admin-control-height: 34px;
+  --admin-control-height-compact: 30px;
   --admin-control-radius: 8px;
+  --admin-field-padding-inline: 10px;
+  --admin-control-padding-compact: 9px;
+  --admin-field-padding-inline-compact: var(--admin-control-padding-compact);
+  --admin-control-icon-size-compact: 30px;
+  --admin-control-glyph-size-compact: 16px;
+  --admin-field-placeholder: color-mix(in srgb, var(--faint) 88%, var(--muted) 12%);
+  --admin-field-invalid-border: color-mix(in srgb, var(--admin-status-danger-border) 74%, var(--text) 26%);
+  --admin-field-invalid-bg: color-mix(in srgb, var(--admin-status-danger-bg) 34%, var(--bg) 66%);
+  --admin-field-invalid-label: color-mix(in srgb, var(--admin-status-danger-text) 72%, var(--text) 28%);
+  --admin-field-invalid-ring: color-mix(in srgb, var(--admin-status-danger-accent) 24%, transparent);
+  --admin-field-soft-border: color-mix(in srgb, var(--admin-control-border) 58%, transparent);
+  --admin-field-soft-hover-border: color-mix(in srgb, var(--admin-control-border-hover) 72%, transparent);
+  --admin-field-soft-bg: color-mix(in srgb, var(--bg) 90%, var(--panel) 10%);
+  --admin-field-soft-hover-bg: color-mix(in srgb, var(--bg) 84%, var(--panel) 16%);
   --admin-panel-radius: var(--admin-control-radius);
   --admin-panel-bg: var(--admin-surface);
   --admin-panel-bg-muted: var(--panel);
@@ -26,6 +52,16 @@
   --admin-button-primary-border: var(--text);
   --admin-button-primary-hover-border: color-mix(in srgb, var(--text) 82%, var(--bg) 18%);
   --admin-button-primary-text: var(--bg);
+  --admin-button-secondary-bg: var(--admin-control-bg);
+  --admin-button-secondary-hover-bg: var(--admin-control-bg-hover);
+  --admin-button-secondary-border: var(--admin-control-border);
+  --admin-button-secondary-hover-border: var(--admin-control-border-hover);
+  --admin-button-secondary-text: var(--text);
+  --admin-button-ghost-border: color-mix(in srgb, var(--admin-control-border) 72%, transparent);
+  --admin-button-ghost-hover-border: var(--admin-control-border-hover);
+  --admin-button-ghost-hover-bg: color-mix(in srgb, var(--code-content-bg) 58%, transparent);
+  --admin-button-ghost-text: var(--muted);
+  --admin-button-ghost-hover-text: var(--text);
   --admin-status-neutral-accent: #78716c;
   --admin-status-info-accent: #596f82;
   --admin-status-success-accent: #4f7354;
@@ -108,6 +144,9 @@
   --admin-error-shadow: rgba(0, 0, 0, 0.18);
   --admin-focus-border: color-mix(in srgb, var(--text) 72%, var(--border) 28%);
   --admin-focus-ring: color-mix(in srgb, var(--text) 24%, transparent);
+  --admin-field-placeholder: color-mix(in srgb, var(--faint) 82%, var(--muted) 18%);
+  --admin-field-invalid-bg: color-mix(in srgb, var(--admin-status-danger-bg) 42%, var(--bg) 58%);
+  --admin-field-invalid-ring: color-mix(in srgb, var(--admin-status-danger-accent) 34%, transparent);
 }
 
 .admin-console {
@@ -358,12 +397,6 @@
   gap: 16px;
 }
 
-.admin-overview__grid {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 16px;
-}
-
 .admin-overview-card {
   display: grid;
   gap: 10px;
@@ -389,16 +422,11 @@
   line-height: 1.35;
 }
 
-.admin-overview-card__body,
-.admin-overview-card__meta {
+.admin-overview-card__body {
   margin: 0;
   color: var(--muted);
   font-size: var(--admin-text-base);
   line-height: 1.7;
-}
-
-.admin-overview-card__meta {
-  color: var(--faint);
 }
 
 .admin-overview-card__list {
@@ -416,74 +444,54 @@
   margin-top: auto;
 }
 
-.admin-metric-grid {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 10px;
+.admin-row {
+  border: 1px solid var(--admin-row-border);
+  border-radius: var(--admin-row-radius);
+  background: var(--admin-row-bg);
+  transition:
+    border-color 160ms ease,
+    background-color 160ms ease,
+    box-shadow 160ms ease;
 }
 
-.admin-metric-card {
-  min-width: 0;
-  padding: 12px 14px;
-  border: 1px solid var(--admin-panel-border);
-  border-radius: var(--admin-panel-radius);
-  background: var(--admin-panel-bg-muted);
+.admin-row--muted {
+  background: var(--admin-row-bg-muted);
 }
 
-.admin-metric-card__label,
-.admin-metric-card__meta {
-  margin: 0;
+.admin-row--plain {
+  border-color: transparent;
+  background: transparent;
 }
 
-.admin-metric-card__label {
-  color: var(--faint);
-  font-size: var(--admin-text-xs);
-  letter-spacing: var(--admin-tracking-tight);
-  text-transform: uppercase;
+.admin-row--table {
+  padding-block: var(--admin-row-table-padding-block);
+  padding-inline: var(--admin-row-table-padding-inline);
 }
 
-.admin-metric-card__value {
-  margin: 8px 0 4px;
-  font-size: 28px;
-  line-height: 1.1;
+.admin-row--interactive:hover {
+  background: var(--admin-row-hover-bg);
 }
 
-.admin-metric-card__meta {
-  color: var(--muted);
-  font-size: var(--admin-text-sm);
+.admin-row--plain.admin-row--interactive:hover {
+  border-color: transparent;
 }
 
-.admin-recent-list {
-  margin: 0;
-  padding: 0;
-  list-style: none;
-  display: grid;
-  gap: 10px;
+.admin-row--interactive:focus-within {
+  background: var(--admin-row-focus-bg);
+  box-shadow: 0 0 0 1px var(--admin-focus-ring);
 }
 
-.admin-recent-list__item {
-  padding: 12px 14px;
-  border: 1px solid var(--admin-panel-border);
-  border-radius: var(--admin-panel-radius);
-  background: var(--admin-panel-bg-muted);
+.admin-row--plain.admin-row--interactive:focus-within {
+  border-color: transparent;
 }
 
-.admin-recent-list__link {
-  color: var(--text);
-  text-decoration: none;
-}
-
-.admin-recent-list__link:hover {
-  text-decoration: underline;
-}
-
-.admin-recent-list__meta {
-  margin: 6px 0 0;
-  display: flex;
-  flex-wrap: wrap;
-  gap: 6px 10px;
-  color: var(--muted);
-  font-size: 13px;
+.admin-row.is-active,
+.admin-row.is-selected,
+.admin-row[aria-current='true'],
+.admin-row[aria-selected='true'],
+.admin-row[data-selected='true'] {
+  border-color: var(--admin-row-active-border);
+  background: var(--admin-row-active-bg);
 }
 
 .admin-badge {
@@ -501,14 +509,12 @@
   text-transform: uppercase;
 }
 
-.admin-badge--neutral,
 .admin-badge[data-tone='neutral'] {
   background: var(--admin-status-neutral-bg);
   border-color: var(--admin-status-neutral-border);
   color: var(--admin-status-neutral-text);
 }
 
-.admin-badge--info,
 .admin-badge[data-tone='info'] {
   background: var(--admin-status-info-bg);
   border-color: var(--admin-status-info-border);
@@ -516,7 +522,6 @@
 }
 
 .admin-badge--success,
-.admin-badge--ok,
 .admin-badge[data-tone='success'],
 .admin-badge[data-tone='ok'] {
   background: var(--admin-status-success-bg);
@@ -524,8 +529,6 @@
   color: var(--admin-status-success-text);
 }
 
-.admin-badge--warning,
-.admin-badge--warn,
 .admin-badge[data-tone='warning'],
 .admin-badge[data-tone='warn'] {
   background: var(--admin-status-warning-bg);
@@ -534,7 +537,6 @@
 }
 
 .admin-badge--danger,
-.admin-badge--error,
 .admin-badge[data-tone='danger'],
 .admin-badge[data-tone='error'] {
   background: var(--admin-status-danger-bg);
@@ -584,51 +586,78 @@
   font-size: var(--admin-text-sm);
 }
 
-.admin-field input,
-.admin-field textarea,
-.admin-field select {
+.admin-field.is-invalid > .admin-field__label {
+  color: var(--admin-field-invalid-label);
+}
+
+.admin-field__control {
   width: 100%;
+  min-height: var(--admin-control-height);
   border: 1px solid var(--admin-control-border);
   border-radius: var(--admin-control-radius);
   background: var(--bg);
   color: var(--text);
-  padding: 8px 10px;
+  padding: 6px var(--admin-field-padding-inline);
   font: inherit;
   font-family: var(--admin-font-ui);
   font-size: var(--admin-text-base);
-  line-height: 1.4;
+  line-height: 1.35;
+  caret-color: var(--text);
   transition:
     border-color 160ms ease,
     background-color 160ms ease,
     box-shadow 160ms ease;
 }
 
-.admin-field input:hover,
-.admin-field textarea:hover,
-.admin-field select:hover {
+.admin-field__control::placeholder {
+  color: var(--admin-field-placeholder);
+}
+
+.admin-field--compact .admin-field__control {
+  min-height: var(--admin-control-height-compact);
+  padding-inline: var(--admin-field-padding-inline-compact);
+  font-size: var(--admin-text-sm);
+}
+
+.admin-field__control:hover {
   border-color: var(--admin-control-border-hover);
 }
 
-.admin-field input[type='number'] {
+.admin-field__control[aria-invalid='true'],
+.admin-field.is-invalid .admin-field__control {
+  border-color: var(--admin-field-invalid-border);
+  background: var(--admin-field-invalid-bg);
+}
+
+.admin-field__control[type='number'] {
   appearance: textfield;
   -moz-appearance: textfield;
 }
 
-.admin-field input[type='number']::-webkit-outer-spin-button,
-.admin-field input[type='number']::-webkit-inner-spin-button {
+.admin-field__control[type='number']::-webkit-outer-spin-button,
+.admin-field__control[type='number']::-webkit-inner-spin-button {
   appearance: none;
   -webkit-appearance: none;
   margin: 0;
 }
 
-.admin-field textarea {
+.admin-field textarea.admin-field__control {
   resize: vertical;
-  min-height: 74px;
+  min-height: 82px;
+  padding-block: 8px;
 }
 
-.admin-field input:disabled,
-.admin-field textarea:disabled,
-.admin-field select:disabled {
+.admin-field textarea.admin-field__control--singleline-textarea {
+  min-height: var(--admin-control-height);
+  padding-block: 6px;
+}
+
+.admin-field textarea.admin-field__control--compact-textarea {
+  min-height: 58px;
+  padding-block: 6px;
+}
+
+.admin-field__control:disabled {
   border-style: solid;
   background: var(--admin-control-bg-disabled);
   color: var(--admin-control-text-disabled);
@@ -636,12 +665,16 @@
   box-shadow: none;
 }
 
-.admin-field input:focus-visible,
-.admin-field textarea:focus-visible,
-.admin-field select:focus-visible {
+.admin-field__control:focus-visible {
   outline: none;
   border-color: var(--admin-focus-border);
   box-shadow: 0 0 0 2px var(--admin-focus-ring);
+}
+
+.admin-field__control[aria-invalid='true']:focus-visible,
+.admin-field.is-invalid .admin-field__control:focus-visible {
+  border-color: var(--admin-field-invalid-border);
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--admin-focus-ring) 56%, var(--admin-field-invalid-ring) 44%);
 }
 
 .admin-toggle-row {
@@ -698,17 +731,28 @@
   min-height: 36px;
   max-width: 100%;
   padding: 6px 2px 8px;
-  border-bottom: 2px solid transparent;
   color: var(--admin-route-nav-link-color);
   text-decoration: none;
-  transition:
-    color 160ms ease,
-    border-bottom-color 160ms ease;
+  transition: color 160ms ease;
+}
+
+.admin-route-nav .admin-route-nav__link::after {
+  content: '';
+  position: absolute;
+  inset-inline: 0;
+  bottom: 4px;
+  height: 2px;
+  border-radius: 999px;
+  background: transparent;
+  transition: background-color 160ms ease;
 }
 
 .admin-route-nav__link:hover {
-  border-bottom-color: var(--admin-route-nav-link-rule-hover-color);
   color: var(--admin-route-nav-link-hover-color);
+}
+
+.admin-route-nav__link:hover::after {
+  background: var(--admin-route-nav-link-rule-hover-color);
 }
 
 .admin-route-nav__link:focus-visible {
@@ -718,8 +762,11 @@
 }
 
 .admin-route-nav .admin-route-nav__link.is-active {
-  border-bottom-color: var(--accent);
   color: var(--text);
+}
+
+.admin-route-nav .admin-route-nav__link.is-active::after {
+  background: var(--accent);
 }
 
 .admin-route-nav__label {
@@ -1051,6 +1098,7 @@
 }
 
 .admin-btn:disabled {
+  border-color: color-mix(in srgb, var(--admin-control-border) 62%, transparent);
   border-style: solid;
   background: var(--admin-control-bg-disabled);
   color: var(--admin-control-text-disabled);
@@ -1065,34 +1113,102 @@
   box-shadow: 0 0 0 2px var(--admin-focus-ring);
 }
 
-.admin-btn--primary:not(:disabled),
-.admin-btn--muted:not(:disabled) {
+.admin-btn--primary:not(:disabled) {
   border-color: var(--admin-button-primary-border);
   background: var(--admin-button-primary-bg);
   color: var(--admin-button-primary-text);
 }
 
-.admin-btn--primary:not(:disabled):hover,
-.admin-btn--muted:not(:disabled):hover {
+.admin-btn--primary:not(:disabled):hover {
   border-color: var(--admin-button-primary-hover-border);
   background: var(--admin-button-primary-hover-bg);
   color: var(--admin-button-primary-text);
 }
 
 .admin-btn--secondary:not(:disabled) {
-  border-color: var(--admin-control-border);
-  background: var(--admin-control-bg);
-  color: var(--text);
+  border-color: var(--admin-button-secondary-border);
+  background: var(--admin-button-secondary-bg);
+  color: var(--admin-button-secondary-text);
+}
+
+.admin-btn--secondary:not(:disabled):hover {
+  border-color: var(--admin-button-secondary-hover-border);
+  background: var(--admin-button-secondary-hover-bg);
+  color: var(--admin-button-secondary-text);
 }
 
 .admin-btn--ghost:not(:disabled) {
+  border-color: var(--admin-button-ghost-border);
   background: transparent;
+  color: var(--admin-button-ghost-text);
+}
+
+.admin-btn--ghost:not(:disabled):hover {
+  border-color: var(--admin-button-ghost-hover-border);
+  background: var(--admin-button-ghost-hover-bg);
+  color: var(--admin-button-ghost-hover-text);
 }
 
 .admin-btn--danger:not(:disabled) {
   border-color: var(--admin-status-danger-border);
   background: var(--admin-status-danger-bg);
   color: var(--admin-status-danger-text);
+}
+
+.admin-btn--danger:not(:disabled):hover {
+  border-color: color-mix(in srgb, var(--admin-status-danger-border) 76%, var(--text) 24%);
+  background: color-mix(in srgb, var(--admin-status-danger-bg) 78%, var(--panel) 22%);
+  color: var(--admin-status-danger-text);
+}
+
+.admin-btn--compact {
+  min-height: var(--admin-control-height-compact);
+  padding-inline: var(--admin-control-padding-compact);
+}
+
+.admin-btn--icon {
+  --admin-btn-icon-glyph-size: var(--admin-control-glyph-size-compact);
+
+  width: var(--admin-control-icon-size-compact);
+  min-width: var(--admin-control-icon-size-compact);
+  padding-inline: 0;
+}
+
+.admin-btn--compact.admin-btn--icon {
+  gap: 0;
+}
+
+.admin-btn--icon :where(svg) {
+  width: var(--admin-btn-icon-glyph-size);
+  height: var(--admin-btn-icon-glyph-size);
+  flex: 0 0 var(--admin-btn-icon-glyph-size);
+}
+
+.admin-btn--tool:not(:disabled) {
+  border-color: var(--admin-btn-tool-border, var(--admin-control-border));
+  background: var(--admin-btn-tool-bg, transparent);
+  color: var(--admin-btn-tool-color, var(--muted));
+}
+
+.admin-btn--tool:not(:disabled):hover {
+  border-color: var(--admin-btn-tool-hover-border, var(--admin-control-border-hover));
+  background: var(--admin-btn-tool-hover-bg, var(--admin-control-bg-hover));
+  color: var(--admin-btn-tool-hover-color, var(--text));
+}
+
+.admin-btn--tool:disabled {
+  border-color: var(--admin-btn-tool-disabled-border, color-mix(in srgb, var(--admin-control-border) 56%, transparent));
+  background: var(--admin-btn-tool-disabled-bg, transparent);
+  color: var(--admin-btn-tool-disabled-color, var(--faint));
+}
+
+.admin-btn--tool[data-active='true']:not(:disabled),
+.admin-btn--tool[aria-pressed='true']:not(:disabled),
+.admin-btn--tool.is-active:not(:disabled) {
+  border-color: var(--admin-btn-tool-active-border, var(--admin-control-border-hover));
+  background: var(--admin-btn-tool-active-bg, var(--admin-control-bg-hover));
+  color: var(--admin-btn-tool-active-color, var(--text));
+  box-shadow: var(--admin-btn-tool-active-shadow, none);
 }
 
 @media (max-width: 900px) {
@@ -1138,11 +1254,4 @@
     padding-bottom: 10px;
   }
 
-  .admin-overview__grid {
-    grid-template-columns: 1fr;
-  }
-
-  .admin-metric-grid {
-    grid-template-columns: 1fr;
-  }
 }

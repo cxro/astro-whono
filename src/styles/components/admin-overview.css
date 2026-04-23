@@ -50,7 +50,6 @@
 .admin-site-overview__structure-count,
 .admin-site-overview__recent-type,
 .admin-site-overview__recent-badge,
-.admin-site-overview__badge,
 .admin-site-overview__tag-count {
   letter-spacing: 0;
 }
@@ -81,13 +80,6 @@
   color: var(--faint);
   font-size: var(--admin-text-xs);
   font-weight: 400;
-}
-
-.admin-site-overview__maintainer-note {
-  margin: -14px 0 0;
-  color: var(--muted);
-  font-size: var(--admin-text-sm);
-  line-height: 1.7;
 }
 
 .admin-site-overview--hidden {
