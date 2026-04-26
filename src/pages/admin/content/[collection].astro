@@ -34,6 +34,10 @@ if (!isAdminContentCollectionKey(collectionParam ?? '')) {
 const collection: AdminContentCollectionKey = collectionParam;
 
 const isDev = import.meta.env.DEV;
+// Content Console 暂停对 dev 环境开放，保留实现供后续前端技术栈重构恢复。
+const isAdminContentConsoleEnabled: boolean = false;
+const shouldShowContentConsole = isDev && isAdminContentConsoleEnabled;
+const shouldShowAdminNav = isDev;
 const base = import.meta.env.BASE_URL ?? '/';
 const withBase = createWithBase(base);
 const { default: adminShellStylesHref } = await import('../../../styles/components/admin-shell.css?url');
@@ -56,11 +60,11 @@ const loadContentDevState = async () => {
   };
 };
 
-const contentDevState = isDev ? await loadContentDevState() : null;
+const contentDevState = shouldShowContentConsole ? await loadContentDevState() : null;
 const pageData = contentDevState?.pageData ?? null;
 const adminStylesHref = contentDevState?.stylesHref ?? adminShellStylesHref;
 const currentCollectionHref = getAdminContentCollectionHref(collection);
-const selectedEntryEditorPayload = isDev && pageData?.selectedEntry
+const selectedEntryEditorPayload = shouldShowContentConsole && pageData?.selectedEntry
   ? await readAdminContentEntryEditorPayload(collection, pageData.selectedEntry.id)
   : null;
 const selectedEntryRelativePath = selectedEntryEditorPayload?.relativePath ?? pageData?.selectedEntry?.relativePath ?? '';
@@ -173,9 +177,9 @@ const activeFilterCount = pageData
     currentRoute="content"
     title="Content Console"
     subtitle={contentConsoleSubtitle}
-    showNav={isDev}
+    showNav={shouldShowAdminNav}
   >
-    {isDev ? (
+    {shouldShowContentConsole ? (
       <div slot="status" class="admin-status-slot">
         <p id="admin-content-status-live" class="admin-sr-only" role="status" aria-live="polite" aria-atomic="true"></p>
         <p id="admin-content-status" class="admin-status" data-state="idle">等待选择条目</p>
@@ -183,7 +187,7 @@ const activeFilterCount = pageData
     ) : null}
 
     {
-      isDev && pageData ? (
+      shouldShowContentConsole && pageData ? (
         <section class="admin-overview admin-content-console" data-admin-content-root>
           <form class="admin-overview-card admin-content-toolbar" method="get">
             <div class="admin-content-toolbar__bar">
@@ -853,15 +857,15 @@ const activeFilterCount = pageData
         </section>
       ) : (
         <AdminReadonlyNotice>
-          若需查看或编辑内容索引，请在本地运行 <code translate="no">npm run dev</code> 后从此入口进入。
+          后台文章管理与可视化写作正在开发中。
         </AdminReadonlyNotice>
       )
     }
   </AdminShell>
-  {isDev ? <AdminImagePicker listEndpoint={adminImageListEndpoint} metaEndpoint={adminImageMetaEndpoint} /> : null}
+  {shouldShowContentConsole ? <AdminImagePicker listEndpoint={adminImageListEndpoint} metaEndpoint={adminImageMetaEndpoint} /> : null}
 
   {
-    isDev && contentDevState?.adminContentScriptHref ? (
+    shouldShowContentConsole && contentDevState?.adminContentScriptHref ? (
       <script is:inline type="module" src={contentDevState.adminContentScriptHref}></script>
     ) : null
   }

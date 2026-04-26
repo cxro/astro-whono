@@ -173,14 +173,23 @@ const assertReadonlyAdminImageShell = (label, response) => {
   expect(!response.body.includes('id="admin-images-bootstrap"'), `${label} should not emit images bootstrap payload outside dev`);
 };
 
-const assertReadonlyAdminContentShell = (label, response) => {
+const assertAdminContentPlaceholderShell = (label, response, options = {}) => {
+  const { expectNav = false } = options;
   expect(response.status === 200, `${label} returned ${response.status}`);
   expect(
     response.contentType.toLowerCase().includes('text/html'),
     `${label} did not return HTML`
   );
   expect(response.body.includes('Content Console'), `${label} is missing the Content Console route heading`);
-  assertNoAdminRouteNav(label, response.body);
+  expect(
+    response.body.includes('后台文章管理与可视化写作正在开发中'),
+    `${label} is missing the Content Console development notice`
+  );
+  if (expectNav) {
+    assertHasAdminRouteNav(label, response.body);
+  } else {
+    assertNoAdminRouteNav(label, response.body);
+  }
   expect(!response.body.includes('data-admin-content-root'), `${label} should stay readonly outside dev`);
 };
 
@@ -205,15 +214,6 @@ const assertAdminThemeDevBootstrapSafe = (label, response) => {
     !response.body.includes(`<script>window.${ADMIN_BOOTSTRAP_XSS_SENTINEL}=1</script>`),
     `${label} bootstrap still emits an executable sentinel script tag`
   );
-};
-
-const assertDevAdminHtmlRoute = (label, response) => {
-  expect(response.status === 200, `${label} returned ${response.status}`);
-  expect(
-    response.contentType.toLowerCase().includes('text/html'),
-    `${label} did not return HTML`
-  );
-  assertHasAdminRouteNav(label, response.body);
 };
 
 const stopProcess = async (child) => {
@@ -286,8 +286,8 @@ export const runPreviewAdminBoundaryCheck = async () => {
 
     assertAdminOverviewShell('Preview GET /admin/', adminOverviewResponse);
     assertReadonlyAdminThemeShell('Preview GET /admin/theme/', adminThemeResponse);
-    assertReadonlyAdminContentShell('Preview GET /admin/content/', adminContentResponse);
-    assertReadonlyAdminContentShell('Preview GET /admin/content/essay/', adminEssayContentResponse);
+    assertAdminContentPlaceholderShell('Preview GET /admin/content/', adminContentResponse);
+    assertAdminContentPlaceholderShell('Preview GET /admin/content/essay/', adminEssayContentResponse);
     assertReadonlyAdminImageShell('Preview GET /admin/images/', adminImageResponse);
     assertReadonlyAdminChecksShell('Preview GET /admin/checks/', adminChecksResponse);
     assertReadonlyAdminDataShell('Preview GET /admin/data/', adminDataResponse);
@@ -346,7 +346,9 @@ export const runDevAdminSettingsSmokeCheck = async () => {
     expect(payload.settings && typeof payload.settings === 'object', 'Dev payload settings snapshot is missing');
 
     const contentOverviewResponse = await request(baseUrl, '/admin/content/');
-    assertDevAdminHtmlRoute('Dev GET /admin/content/', contentOverviewResponse);
+    const contentEssayResponse = await request(baseUrl, '/admin/content/essay/');
+    assertAdminContentPlaceholderShell('Dev GET /admin/content/', contentOverviewResponse, { expectNav: true });
+    assertAdminContentPlaceholderShell('Dev GET /admin/content/essay/', contentEssayResponse, { expectNav: true });
 
     const uiSettingsPath = path.join(fixture.settingsDir, 'ui.json');
     const beforeDryRun = await readFile(uiSettingsPath, 'utf8');

@@ -9,6 +9,10 @@ import {
 import { createWithBase } from '../../../utils/format';
 
 const isDev = import.meta.env.DEV;
+// Content Console 暂停对 dev 环境开放，保留实现供后续前端技术栈重构恢复。
+const isAdminContentConsoleEnabled: boolean = false;
+const shouldShowContentConsole = isDev && isAdminContentConsoleEnabled;
+const shouldShowAdminNav = isDev;
 const base = import.meta.env.BASE_URL ?? '/';
 const withBase = createWithBase(base);
 const { default: adminShellStylesHref } = await import('../../../styles/components/admin-shell.css?url');
@@ -22,7 +26,7 @@ const loadContentOverviewDevState = async () => {
   };
 };
 
-const contentOverviewDevState = isDev ? await loadContentOverviewDevState() : null;
+const contentOverviewDevState = shouldShowContentConsole ? await loadContentOverviewDevState() : null;
 const adminStylesHref = contentOverviewDevState?.stylesHref ?? adminShellStylesHref;
 const contentOverviewTotals = contentOverviewDevState
   ? contentOverviewDevState.overview.summaries.reduce(
@@ -39,11 +43,11 @@ const contentOverviewTotals = contentOverviewDevState
   <AdminShell
     currentRoute="content"
     title="Content Console"
-    subtitle="内容总入口"
-    showNav={isDev}
+    subtitle="内容管理"
+    showNav={shouldShowAdminNav}
   >
     {
-      isDev && contentOverviewDevState ? (
+      shouldShowContentConsole && contentOverviewDevState ? (
         <section class="admin-overview admin-content-home">
           <article class="admin-overview-card admin-content-home__lead">
             <div class="admin-content-home__lead-copy">
@@ -96,7 +100,7 @@ const contentOverviewTotals = contentOverviewDevState
         </section>
       ) : (
         <AdminReadonlyNotice>
-          若需查看或编辑内容索引，请在本地运行 <code translate="no">npm run dev</code> 后从此入口进入。
+          后台文章管理与可视化写作正在开发中。
         </AdminReadonlyNotice>
       )
     }
