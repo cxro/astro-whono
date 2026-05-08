@@ -151,6 +151,8 @@ type AdminEssayFrontmatter = {
   badge?: string;
 };
 
+type AdminEssayPublishedAtInputMode = 'missing' | 'present';
+
 type AdminBitsImage = {
   src: string;
   width?: number;
@@ -409,19 +411,27 @@ const isPositiveInteger = (value: number | undefined): boolean =>
 
 const parseAdminEssayEditorInput = (
   input: unknown
-): { values?: AdminEssayEditorValues; issues: AdminContentValidationIssue[] } => {
+): {
+  values?: AdminEssayEditorValues;
+  publishedAtInputMode: AdminEssayPublishedAtInputMode;
+  issues: AdminContentValidationIssue[];
+} => {
   if (!isRecord(input)) {
     return {
+      publishedAtInputMode: 'missing',
       issues: [createIssue('frontmatter', 'frontmatter 必须是对象')]
     };
   }
 
   const issues: AdminContentValidationIssue[] = [];
+  const rawPublishedAtInput = input.publishedAt;
+  const hasPublishedAtInput = Object.prototype.hasOwnProperty.call(input, 'publishedAt')
+    && typeof rawPublishedAtInput === 'string';
   const values: AdminEssayEditorValues = {
     title: getRequiredStringField(input, 'title', issues),
     description: getRequiredStringField(input, 'description', issues),
     date: getRequiredStringField(input, 'date', issues),
-    publishedAt: typeof input.publishedAt === 'string' ? input.publishedAt : '',
+    publishedAt: hasPublishedAtInput ? rawPublishedAtInput : '',
     tagsText: getRequiredStringField(input, 'tagsText', issues),
     draft: getRequiredBooleanField(input, 'draft', issues),
     archive: getRequiredBooleanField(input, 'archive', issues),
@@ -430,7 +440,9 @@ const parseAdminEssayEditorInput = (
     badge: getRequiredStringField(input, 'badge', issues)
   };
 
-  return issues.length > 0 ? { issues } : { values, issues };
+  return issues.length > 0
+    ? { publishedAtInputMode: hasPublishedAtInput ? 'present' : 'missing', issues }
+    : { values, publishedAtInputMode: hasPublishedAtInput ? 'present' : 'missing', issues };
 };
 
 const parseAdminBitsEditorInput = (
@@ -709,7 +721,10 @@ export const readAdminContentEntryEditorPayload = async (
 };
 
 const buildEssayFrontmatterFromValues = (
-  values: AdminEssayEditorValues
+  values: AdminEssayEditorValues,
+  options: {
+    preservedPublishedAt?: string;
+  } = {}
 ): { frontmatter?: AdminEssayFrontmatter; issues: AdminContentValidationIssue[] } => {
   const issues: AdminContentValidationIssue[] = [];
   const title = values.title.trim();
@@ -738,7 +753,10 @@ const buildEssayFrontmatterFromValues = (
 
   const slug = values.slug.trim();
   const date = dateResult.dateText;
-  const publishedAtText = hasExplicitPublishedAt ? explicitPublishedAt : dateResult.publishedAtText;
+  const preservedPublishedAt = normalizeOptionalText(options.preservedPublishedAt);
+  const publishedAtText = hasExplicitPublishedAt
+    ? explicitPublishedAt
+    : dateResult.publishedAtText || preservedPublishedAt;
 
   return {
     issues,
@@ -901,9 +919,18 @@ const isEqualJsonValue = (left: unknown, right: unknown): boolean =>
 const buildEssayWritePlan = async (
   state: AdminContentSourceState,
   values: AdminEssayEditorValues,
-  bodyInput?: string
+  bodyInput?: string,
+  options: {
+    publishedAtInputMode?: AdminEssayPublishedAtInputMode;
+  } = {}
 ): Promise<AdminWritePlan> => {
-  const next = buildEssayFrontmatterFromValues(values);
+  const current = buildEssayCurrentFrontmatter(state);
+  const shouldPreservePublishedAt = options.publishedAtInputMode === 'missing';
+  const next = buildEssayFrontmatterFromValues(values, {
+    ...(shouldPreservePublishedAt && current.publishedAt
+      ? { preservedPublishedAt: current.publishedAt }
+      : {})
+  });
   if (!next.frontmatter) {
     return { issues: next.issues, changedFields: [], patches: [] };
   }
@@ -913,7 +940,6 @@ const buildEssayWritePlan = async (
     return { issues: slugIssues, changedFields: [], patches: [] };
   }
 
-  const current = buildEssayCurrentFrontmatter(state);
   const currentDate = getDateString(state.rawFrontmatter, 'date', current.date);
   const currentPublishedAt = normalizeOptionalText(state.rawFrontmatter.publishedAt) || undefined;
   const fieldMatrix: Array<{
@@ -1018,7 +1044,9 @@ export const buildAdminContentWritePlan = async (
 
     return {
       state,
-      ...(await buildEssayWritePlan(state, parsed.values, bodyInput))
+      ...(await buildEssayWritePlan(state, parsed.values, bodyInput, {
+        publishedAtInputMode: parsed.publishedAtInputMode
+      }))
     };
   }
 

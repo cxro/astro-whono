@@ -208,6 +208,7 @@ if (!adminContentRoot) {
             title: getText('title'),
             description: getText('description'),
             date: getText('date'),
+            publishedAt: getText('publishedAt'),
             tagsText: getText('tagsText'),
             draft: formData.get('draft') !== null,
             archive: formData.get('archive') !== null,

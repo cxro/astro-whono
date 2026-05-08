@@ -13,6 +13,12 @@ const createJsonRequest = (url: string, payload: unknown) =>
     body: JSON.stringify(payload)
   });
 
+const omitPublishedAt = (values: Record<string, unknown>): Record<string, unknown> => {
+  const next = { ...values };
+  delete next.publishedAt;
+  return next;
+};
+
 describe('admin content write api', () => {
   let tempRoot = '';
 
@@ -331,6 +337,81 @@ describe('admin content write api', () => {
     expect(after).not.toContain('date: 2024-11-23T18:00:00+08:00');
   });
 
+  it('preserves derived publishedAt when older essay payloads omit the field', async () => {
+    const legacyPath = path.join(tempRoot, 'src', 'content', 'essay', 'legacy-datetime.md');
+    await writeFile(
+      legacyPath,
+      [
+        '---',
+        'title: Legacy Datetime',
+        'date: 2024-11-23T18:00:00+08:00',
+        'draft: false',
+        '---',
+        '',
+        'legacy body',
+        ''
+      ].join('\n'),
+      'utf8'
+    );
+
+    const { readAdminContentEntryEditorPayload } = await import('../src/lib/admin-console/content-shared');
+    const { POST } = await import('../src/pages/api/admin/content/entry');
+
+    const current = await readAdminContentEntryEditorPayload('essay', 'legacy-datetime');
+    const response = await POST({
+      request: createJsonRequest('http://127.0.0.1:4321/api/admin/content/entry', {
+        collection: 'essay',
+        entryId: 'legacy-datetime',
+        revision: current.revision,
+        frontmatter: {
+          ...omitPublishedAt(current.values),
+          title: 'Legacy Payload Updated'
+        }
+      }),
+      url: new URL('http://127.0.0.1:4321/api/admin/content/entry')
+    } as never);
+
+    expect(response.status).toBe(200);
+    const payload = JSON.parse(await response.text());
+    expect(payload.ok).toBe(true);
+    expect(payload.result.changedFields).toEqual(['title', 'date', 'publishedAt']);
+
+    const after = await readFile(legacyPath, 'utf8');
+    expect(after).toContain('title: Legacy Payload Updated');
+    expect(after).toContain('date: 2024-11-23');
+    expect(after).toContain('publishedAt: 2024-11-23T18:00:00+08:00');
+    expect(after).not.toContain('date: 2024-11-23T18:00:00+08:00');
+  });
+
+  it('does not create publishedAt when older essay payloads omit it for date-only entries', async () => {
+    const { readAdminContentEntryEditorPayload } = await import('../src/lib/admin-console/content-shared');
+    const { POST } = await import('../src/pages/api/admin/content/entry');
+
+    const current = await readAdminContentEntryEditorPayload('essay', 'demo');
+    const response = await POST({
+      request: createJsonRequest('http://127.0.0.1:4321/api/admin/content/entry', {
+        collection: 'essay',
+        entryId: 'demo',
+        revision: current.revision,
+        frontmatter: {
+          ...omitPublishedAt(current.values),
+          title: 'Date Only Legacy Payload'
+        }
+      }),
+      url: new URL('http://127.0.0.1:4321/api/admin/content/entry')
+    } as never);
+
+    expect(response.status).toBe(200);
+    const payload = JSON.parse(await response.text());
+    expect(payload.ok).toBe(true);
+    expect(payload.result.changedFields).toEqual(['title']);
+
+    const after = await readFile(path.join(tempRoot, 'src', 'content', 'essay', 'demo.md'), 'utf8');
+    expect(after).toContain('title: Date Only Legacy Payload');
+    expect(after).toContain('date: 2026-03-18');
+    expect(after).not.toContain('publishedAt:');
+  });
+
   it('writes explicit essay publishedAt without forcing date datetime syntax', async () => {
     const { readAdminContentEntryEditorPayload } = await import('../src/lib/admin-console/content-shared');
     const { POST } = await import('../src/pages/api/admin/content/entry');
@@ -357,6 +438,51 @@ describe('admin content write api', () => {
     const after = await readFile(path.join(tempRoot, 'src', 'content', 'essay', 'demo.md'), 'utf8');
     expect(after).toContain('date: 2026-03-18');
     expect(after).toContain('publishedAt: 2026-03-18T19:30:00+08:00');
+  });
+
+  it('allows essay authors to explicitly clear publishedAt', async () => {
+    const essayPath = path.join(tempRoot, 'src', 'content', 'essay', 'demo.md');
+    await writeFile(
+      essayPath,
+      [
+        '---',
+        'title: Demo Essay',
+        'date: 2026-03-18',
+        'publishedAt: 2026-03-18T19:30:00+08:00',
+        'draft: false',
+        '---',
+        '',
+        '# Essay',
+        ''
+      ].join('\n'),
+      'utf8'
+    );
+
+    const { readAdminContentEntryEditorPayload } = await import('../src/lib/admin-console/content-shared');
+    const { POST } = await import('../src/pages/api/admin/content/entry');
+
+    const current = await readAdminContentEntryEditorPayload('essay', 'demo');
+    const response = await POST({
+      request: createJsonRequest('http://127.0.0.1:4321/api/admin/content/entry', {
+        collection: 'essay',
+        entryId: 'demo',
+        revision: current.revision,
+        frontmatter: {
+          ...current.values,
+          publishedAt: ''
+        }
+      }),
+      url: new URL('http://127.0.0.1:4321/api/admin/content/entry')
+    } as never);
+
+    expect(response.status).toBe(200);
+    const payload = JSON.parse(await response.text());
+    expect(payload.ok).toBe(true);
+    expect(payload.result.changedFields).toEqual(['publishedAt']);
+
+    const after = await readFile(essayPath, 'utf8');
+    expect(after).toContain('date: 2026-03-18');
+    expect(after).not.toContain('publishedAt:');
   });
 
   it('rejects impossible essay publishedAt calendar dates before writing', async () => {
