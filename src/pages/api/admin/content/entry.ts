@@ -1,7 +1,6 @@
 import type { APIRoute } from 'astro';
 import {
   ADMIN_JSON_HEADERS,
-  createAdminWriteQueue,
   isAdminDryRunRequest,
   persistAdminFileTransaction,
   readAdminJsonRequestBody,
@@ -19,6 +18,7 @@ import {
   type AdminContentValidationIssue,
   type AdminContentWriteCollectionKey
 } from '../../../../lib/admin-console/content-shared';
+import { withAdminContentWriteLock } from '../../../../lib/admin-console/content-write-lock';
 
 type WriteInput = {
   collection?: AdminContentWriteCollectionKey;
@@ -148,8 +148,6 @@ const createEntryResolutionErrorResponse = (error: unknown): Response | null => 
     [{ path: 'entryId', message: error.message }]
   );
 };
-
-const withAdminContentWriteLock = createAdminWriteQueue();
 
 export const GET: APIRoute = async ({ url }) => {
   if (!import.meta.env.DEV && !process.env.VITEST) {

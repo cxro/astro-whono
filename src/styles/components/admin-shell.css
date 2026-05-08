@@ -157,6 +157,10 @@
   min-height: calc(100vh - 40px);
 }
 
+.admin-console [hidden] {
+  display: none;
+}
+
 .page-header--admin {
   align-items: flex-start;
   justify-content: space-between;

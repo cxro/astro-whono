@@ -443,6 +443,7 @@ export const runPreviewAdminBoundaryCheck = async () => {
     const getResponse = await request(baseUrl, '/api/admin/settings/');
     const exportResponse = await request(baseUrl, '/api/admin/data/settings/');
     const contentGetResponse = await request(baseUrl, '/api/admin/content/entry/');
+    const contentExportResponse = await request(baseUrl, '/api/admin/content/export/?collection=essay&entryId=admin-console-guide');
     const previewGetResponse = await request(baseUrl, '/api/admin/preview/');
     const imageListResponse = await request(baseUrl, '/api/admin/images/list/');
     const imageMetaResponse = await request(baseUrl, '/api/admin/images/meta/');
@@ -466,6 +467,19 @@ export const runPreviewAdminBoundaryCheck = async () => {
         entryId: 'preview-boundary-demo',
         revision: 'invalid',
         frontmatter: {}
+      })
+    });
+    const contentDeleteResponse = await request(baseUrl, '/api/admin/content/delete/', {
+      method: 'POST',
+      headers: {
+        'content-type': 'application/json',
+        origin: baseUrl
+      },
+      body: JSON.stringify({
+        collection: 'essay',
+        entryId: 'preview-boundary-demo',
+        revision: 'invalid',
+        expectedRelativePath: 'src/content/essay/preview-boundary-demo.md'
       })
     });
     const previewPostResponse = await request(baseUrl, '/api/admin/preview/', {
@@ -505,11 +519,13 @@ export const runPreviewAdminBoundaryCheck = async () => {
     assertAdminSettingsStaticResponse('GET /api/admin/settings/', getResponse);
     assertAdminSettingsStaticResponse('GET /api/admin/data/settings/', exportResponse, '/api/admin/data/settings/');
     assertAdminContentStaticResponse('GET /api/admin/content/entry/', contentGetResponse);
+    assertAdminContentStaticResponse('GET /api/admin/content/export/', contentExportResponse, '/api/admin/content/export/');
     assertAdminPreviewStaticResponse('GET /api/admin/preview/', previewGetResponse);
     assertAdminImageStaticResponse('GET /api/admin/images/list/', imageListResponse, '/api/admin/images/list/');
     assertAdminImageStaticResponse('GET /api/admin/images/meta/', imageMetaResponse, '/api/admin/images/meta/');
     assertAdminImageUploadStaticResponse('GET /api/admin/images/upload/', imageUploadGetResponse);
     assertAdminContentStaticResponse('POST /api/admin/content/entry/', contentPostResponse);
+    assertAdminContentStaticResponse('POST /api/admin/content/delete/', contentDeleteResponse, '/api/admin/content/delete/');
     assertAdminPreviewStaticResponse('POST /api/admin/preview/', previewPostResponse);
     assertAdminImageUploadStaticResponse('POST /api/admin/images/upload/', imageUploadPostResponse);
     assertAdminSettingsStaticResponse('POST /api/admin/settings/', postResponse);

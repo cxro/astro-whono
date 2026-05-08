@@ -70,6 +70,8 @@ export const runProductionArtifactCheck = async (options = {}) => {
     'dist/api/admin/settings',
     'dist/api/admin/data/settings',
     'dist/api/admin/content/entry',
+    'dist/api/admin/content/export',
+    'dist/api/admin/content/delete',
     'dist/api/admin/preview',
     'dist/api/admin/images/list',
     'dist/api/admin/images/meta',
@@ -317,6 +319,28 @@ export const runProductionArtifactCheck = async (options = {}) => {
     'dist/api/admin/content/entry',
     adminContentEntryArtifact,
     '/api/admin/content/entry/'
+  );
+  const adminContentExportArtifact = readText('dist/api/admin/content/export');
+  assertAdminContentStaticShell(
+    'dist/api/admin/content/export',
+    adminContentExportArtifact,
+    '/api/admin/content/export/'
+  );
+  expect(
+    !adminContentExportArtifact.includes('content-disposition')
+      && !adminContentExportArtifact.includes('# Admin Console'),
+    'dist/api/admin/content/export should not expose source download response data'
+  );
+  const adminContentDeleteArtifact = readText('dist/api/admin/content/delete');
+  assertAdminContentStaticShell(
+    'dist/api/admin/content/delete',
+    adminContentDeleteArtifact,
+    '/api/admin/content/delete/'
+  );
+  expect(
+    !adminContentDeleteArtifact.includes('"trashedPath"')
+      && !adminContentDeleteArtifact.includes('.trash/content'),
+    'dist/api/admin/content/delete should not expose delete response data'
   );
   const adminPreviewArtifact = readText('dist/api/admin/preview');
   assertAdminPreviewStaticShell(

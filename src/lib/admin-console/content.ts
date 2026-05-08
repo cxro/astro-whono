@@ -1,4 +1,9 @@
 import type { CollectionEntry } from 'astro:content';
+import {
+  listAdminCollectionSourceFiles,
+  resolveAdminContentEntryIdFromSourcePath,
+  toAdminContentRelativeProjectPath
+} from './content-shared';
 import { PAGE_SIZE_BITS } from '../../../site.config.mjs';
 import {
   getEssayDerivedText,
@@ -17,7 +22,6 @@ import {
   type BitsEntry
 } from '../bits';
 import { getTagKeys, isRoutableTagKey, normalizeTagLabel, toTagKey } from '../tags';
-import { listAdminCollectionSourceFiles } from './content-shared';
 import { truncateText } from '../../utils/excerpt';
 import {
   buildSearchHaystack,
@@ -41,6 +45,7 @@ export type AdminContentIndexItem = {
   collection: AdminContentCollectionKey;
   collectionLabel: string;
   id: string;
+  publicEntryId: string;
   title: string;
   slug: string | null;
   relativePath: string;
@@ -187,8 +192,32 @@ const formatNullableDate = (date: Date | null): { label: string; value: string |
   };
 };
 
-const buildRelativePath = (collection: AdminContentCollectionKey, entryId: string): string =>
-  `src/content/${collection}/${entryId}`;
+type ContentEntryWithSourcePath = {
+  id: string;
+  filePath?: string;
+};
+
+// Admin 操作使用源文件身份；Astro entry.id 仅作为公开 entry id / slug 来源。
+const resolveContentEntrySourceIdentity = (
+  collection: AdminContentCollectionKey,
+  entry: ContentEntryWithSourcePath
+): { entryId: string; publicEntryId: string; relativePath: string } => {
+  const filePath = typeof entry.filePath === 'string' ? entry.filePath.trim() : '';
+  if (!filePath) {
+    return {
+      entryId: entry.id,
+      publicEntryId: entry.id,
+      relativePath: `src/content/${collection}/${entry.id}`
+    };
+  }
+
+  const relativePath = toAdminContentRelativeProjectPath(filePath);
+  return {
+    entryId: resolveAdminContentEntryIdFromSourcePath(collection, relativePath),
+    publicEntryId: entry.id,
+    relativePath
+  };
+};
 
 const encodeEntryIdPath = (entryId: string): string =>
   entryId
@@ -295,20 +324,21 @@ const createEssayIndexItem = (
   entry: EssayEntry,
   options: CreateAdminContentIndexItemOptions
 ): AdminContentIndexItem => {
+  const sourceIdentity = resolveContentEntrySourceIdentity('essay', entry);
   const derivedText = options.includeSearchText ? getEssayDerivedText(entry) : null;
-  const title = normalizeFieldValue(entry.data.title, entry.id);
+  const title = normalizeFieldValue(entry.data.title, sourceIdentity.entryId);
   const { label, year } = formatNullableDate(entry.data.date);
   const slug = getEssaySlug(entry);
-  const relativePath = buildRelativePath('essay', entry.id);
   const publicHref = entry.data.draft === true ? null : `/archive/${slug}/`;
 
   return {
     collection: 'essay',
     collectionLabel: COLLECTION_LABELS.essay,
-    id: entry.id,
+    id: sourceIdentity.entryId,
+    publicEntryId: sourceIdentity.publicEntryId,
     title,
     slug,
-    relativePath,
+    relativePath: sourceIdentity.relativePath,
     publicHref,
     isDraft: entry.data.draft === true,
     archive: entry.data.archive !== false,
@@ -318,7 +348,8 @@ const createEssayIndexItem = (
     tags: entry.data.tags.slice(),
     searchHaystack: buildSearchHaystack([
       title,
-      entry.id,
+      sourceIdentity.entryId,
+      sourceIdentity.publicEntryId,
       slug,
       entry.data.description,
       entry.data.tags,
@@ -332,15 +363,15 @@ const createBitsIndexItem = (
   publicHrefById: ReadonlyMap<string, string>,
   options: CreateAdminContentIndexItemOptions
 ): AdminContentIndexItem => {
+  const sourceIdentity = resolveContentEntrySourceIdentity('bits', entry);
   const shouldLoadDerivedText = options.includeSearchText || normalizeOptionalText(entry.data.title).length === 0;
   const derivedText = shouldLoadDerivedText ? getBitsDerivedText(entry) : null;
   const fallbackTitle = derivedText
-    ? truncateText(derivedText.excerpt || derivedText.plainText, 48) || entry.id
-    : entry.id;
+    ? truncateText(derivedText.excerpt || derivedText.plainText, 48) || sourceIdentity.entryId
+    : sourceIdentity.entryId;
   const title = normalizeFieldValue(entry.data.title, fallbackTitle);
   const { label, year } = formatNullableDate(entry.data.date);
   const slug = getBitSlug(entry);
-  const relativePath = buildRelativePath('bits', entry.id);
   const publicHref = entry.data.draft === true ? null : publicHrefById.get(entry.id) ?? null;
   const authorName = normalizeOptionalText(entry.data.author?.name);
   const authorAvatar = normalizeOptionalText(entry.data.author?.avatar);
@@ -348,10 +379,11 @@ const createBitsIndexItem = (
   return {
     collection: 'bits',
     collectionLabel: COLLECTION_LABELS.bits,
-    id: entry.id,
+    id: sourceIdentity.entryId,
+    publicEntryId: sourceIdentity.publicEntryId,
     title,
     slug,
-    relativePath,
+    relativePath: sourceIdentity.relativePath,
     publicHref,
     isDraft: entry.data.draft === true,
     archive: null,
@@ -361,7 +393,8 @@ const createBitsIndexItem = (
     tags: entry.data.tags.slice(),
     searchHaystack: buildSearchHaystack([
       title,
-      entry.id,
+      sourceIdentity.entryId,
+      sourceIdentity.publicEntryId,
       slug,
       entry.data.description,
       entry.data.tags,
@@ -376,21 +409,22 @@ const createMemoIndexItem = (
   entry: MemoEntry,
   options: CreateAdminContentIndexItemOptions
 ): AdminContentIndexItem => {
+  const sourceIdentity = resolveContentEntrySourceIdentity('memo', entry);
   const derivedText = options.includeSearchText ? getMemoDerivedText(entry) : null;
-  const title = normalizeFieldValue(entry.data.title, entry.id);
+  const title = normalizeFieldValue(entry.data.title, sourceIdentity.entryId);
   const { label, year } = formatNullableDate(entry.data.date ?? null);
   const slug = normalizeOptionalText(entry.data.slug) || null;
-  const relativePath = buildRelativePath('memo', entry.id);
   const publicHref = entry.data.draft === true ? null : '/memo/';
   const subtitle = normalizeOptionalText(entry.data.subtitle);
 
   return {
     collection: 'memo',
     collectionLabel: COLLECTION_LABELS.memo,
-    id: entry.id,
+    id: sourceIdentity.entryId,
+    publicEntryId: sourceIdentity.publicEntryId,
     title,
     slug,
-    relativePath,
+    relativePath: sourceIdentity.relativePath,
     publicHref,
     isDraft: entry.data.draft === true,
     archive: null,
@@ -400,7 +434,8 @@ const createMemoIndexItem = (
     tags: [],
     searchHaystack: buildSearchHaystack([
       title,
-      entry.id,
+      sourceIdentity.entryId,
+      sourceIdentity.publicEntryId,
       slug,
       subtitle,
       derivedText?.plainText

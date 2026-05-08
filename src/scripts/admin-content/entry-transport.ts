@@ -12,6 +12,14 @@ export type AdminContentWriteResult = {
   relativePath: string;
 };
 
+export type AdminContentDeleteResult = {
+  collection: string;
+  entryId: string;
+  deleted: boolean;
+  relativePath: string;
+  trashedPath: string;
+};
+
 export type AdminContentPreviewResult = {
   html: string;
   warnings: string[];
@@ -74,6 +82,17 @@ export const getPayloadResult = (value: unknown): AdminContentWriteResult | null
   };
 };
 
+export const getPayloadDeleteResult = (value: unknown): AdminContentDeleteResult | null => {
+  if (!isRecord(value) || !isRecord(value.result)) return null;
+  return {
+    collection: typeof value.result.collection === 'string' ? value.result.collection.trim() : '',
+    entryId: typeof value.result.entryId === 'string' ? value.result.entryId.trim() : '',
+    deleted: value.result.deleted === true,
+    relativePath: typeof value.result.relativePath === 'string' ? value.result.relativePath.trim() : '',
+    trashedPath: typeof value.result.trashedPath === 'string' ? value.result.trashedPath.trim() : ''
+  };
+};
+
 export const getPayloadPreviewResult = (value: unknown): AdminContentPreviewResult | null => {
   if (!isRecord(value) || !isRecord(value.result)) return null;
 
@@ -102,6 +121,8 @@ const isAdminEssayEditorPayload = (value: unknown): value is AdminEssayEditorPay
   isRecord(value)
   && value.collection === 'essay'
   && typeof value.entryId === 'string'
+  && typeof value.publicEntryId === 'string'
+  && typeof value.defaultPublicSlug === 'string'
   && typeof value.revision === 'string'
   && typeof value.relativePath === 'string'
   && value.writable === true

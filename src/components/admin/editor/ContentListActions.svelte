@@ -1,7 +1,16 @@
 <script lang="ts">
 import { tick } from 'svelte';
-import type { AdminEssayEditorValues } from '../../../lib/admin-console/content-shared';
+import type {
+  AdminContentEditorPayload,
+  AdminEssayEditorValues
+} from '../../../lib/admin-console/content-shared';
 import {
+  isAdminContentDeletableCollectionKey,
+  type AdminContentDeletableCollectionKey
+} from '../../../lib/admin-console/content-delete-contract';
+import {
+  getPayloadDeleteResult,
+  getPayloadEditorPayload,
   getPayloadErrors,
   getPayloadEssayPayload,
   getPayloadIssues,
@@ -21,9 +30,10 @@ type StatusState = 'idle' | 'loading' | 'ready' | 'ok' | 'warn' | 'error';
 type Props = {
   base?: string;
   endpoint: string;
+  deleteEndpoint: string;
 };
 
-let { base = '/', endpoint }: Props = $props();
+let { base = '/', endpoint, deleteEndpoint }: Props = $props();
 
 let dialog = $state<ArticleInfoDialog | null>(null);
 let open = $state(false);
@@ -31,6 +41,7 @@ let busy = $state(false);
 let loadingEntry = $state(false);
 let loadRequestId = 0;
 let selectedEntryId = $state('');
+let selectedDefaultPublicSlug = $state('');
 let selectedTrigger = $state<HTMLElement | null>(null);
 let revision = $state('');
 let baselineFrontmatter = $state<AdminEssayEditorValues | null>(null);
@@ -71,7 +82,7 @@ const isEqualFrontmatter = (left: AdminEssayEditorValues | null, right: AdminEss
 
 const dirty = $derived(!isEqualFrontmatter(frontmatter, baselineFrontmatter));
 const canSave = $derived(Boolean(frontmatter) && dirty && !busy);
-const slugPlaceholder = $derived(selectedEntryId ? flattenEntryIdToSlug(selectedEntryId) : '');
+const slugPlaceholder = $derived(selectedDefaultPublicSlug || (selectedEntryId ? flattenEntryIdToSlug(selectedEntryId) : ''));
 const withBase = $derived(createWithBase(base));
 
 const setStatus = (state: StatusState, text: string) => {
@@ -79,9 +90,9 @@ const setStatus = (state: StatusState, text: string) => {
   statusText = text;
 };
 
-const buildEntryEndpoint = (entryId: string): string => {
+const buildEntryEndpoint = (collection: AdminContentDeletableCollectionKey, entryId: string): string => {
   const url = new URL(endpoint, window.location.href);
-  url.searchParams.set('collection', 'essay');
+  url.searchParams.set('collection', collection);
   url.searchParams.set('entryId', entryId);
   return url.toString();
 };
@@ -129,9 +140,25 @@ const closeActionMenu = (trigger: HTMLElement) => {
   if (details) details.open = false;
 };
 
+const getRowTitle = (trigger: HTMLElement, entryId: string): string => {
+  const row = trigger.closest<HTMLElement>('[data-admin-content-item]');
+  return row?.querySelector<HTMLElement>('[data-admin-content-row-title]')?.textContent?.trim() || entryId;
+};
+
+const getDeletePayload = (
+  payload: unknown,
+  collection: AdminContentDeletableCollectionKey,
+  entryId: string
+): AdminContentEditorPayload | null => {
+  const entryPayload = getPayloadEditorPayload(payload);
+  if (!entryPayload || entryPayload.collection !== collection || entryPayload.entryId !== entryId) return null;
+  if (typeof entryPayload.revision !== 'string' || typeof entryPayload.relativePath !== 'string') return null;
+  return entryPayload;
+};
+
 const getEssayPublicHref = (value: AdminEssayEditorValues): string | null => {
   if (value.draft === true) return null;
-  const slug = value.slug.trim() || flattenEntryIdToSlug(selectedEntryId);
+  const slug = value.slug.trim() || selectedDefaultPublicSlug || flattenEntryIdToSlug(selectedEntryId);
   return withBase(`/archive/${slug}/`);
 };
 
@@ -144,7 +171,6 @@ const syncSelectedRow = (result: AdminContentWriteResult) => {
   const draftEl = row?.querySelector<HTMLElement>('[data-admin-content-row-draft]');
   const archiveEl = row?.querySelector<HTMLElement>('[data-admin-content-row-archive]');
   const publicLinkEl = row?.querySelector<HTMLAnchorElement>('[data-admin-content-row-public-link]');
-  const publicDisabledEl = row?.querySelector<HTMLElement>('[data-admin-content-row-public-disabled]');
   const publicHref = getEssayPublicHref(frontmatter);
 
   if (titleEl) titleEl.textContent = frontmatter.title || selectedEntryId;
@@ -152,14 +178,18 @@ const syncSelectedRow = (result: AdminContentWriteResult) => {
   if (draftEl) draftEl.hidden = frontmatter.draft !== true;
   if (archiveEl) archiveEl.hidden = frontmatter.archive !== false;
   if (publicLinkEl) {
-    publicLinkEl.hidden = !publicHref;
-    publicLinkEl.href = publicHref ?? '#';
+    if (publicHref) {
+      publicLinkEl.href = publicHref;
+      publicLinkEl.classList.remove('is-disabled');
+      publicLinkEl.removeAttribute('aria-disabled');
+      publicLinkEl.removeAttribute('title');
+    } else {
+      publicLinkEl.removeAttribute('href');
+      publicLinkEl.classList.add('is-disabled');
+      publicLinkEl.setAttribute('aria-disabled', 'true');
+      publicLinkEl.title = frontmatter.draft === true ? 'draft 条目默认不暴露公开页' : '当前条目未生成公开页链接';
+    }
     publicLinkEl.tabIndex = publicHref ? 0 : -1;
-    publicLinkEl.setAttribute('aria-hidden', publicHref ? 'false' : 'true');
-  }
-  if (publicDisabledEl) {
-    publicDisabledEl.hidden = Boolean(publicHref);
-    publicDisabledEl.title = frontmatter.draft === true ? 'draft 条目默认不暴露公开页' : '当前条目未生成公开页链接';
   }
 };
 
@@ -170,6 +200,7 @@ const openEditor = async (entryId: string, trigger: HTMLElement) => {
   loadingEntry = true;
   open = false;
   selectedEntryId = entryId;
+  selectedDefaultPublicSlug = '';
   selectedTrigger = trigger;
   revision = '';
   baselineFrontmatter = null;
@@ -184,7 +215,7 @@ const openEditor = async (entryId: string, trigger: HTMLElement) => {
   open = true;
 
   try {
-    const response = await fetch(buildEntryEndpoint(entryId), {
+    const response = await fetch(buildEntryEndpoint('essay', entryId), {
       method: 'GET',
       headers: {
         Accept: 'application/json'
@@ -209,6 +240,7 @@ const openEditor = async (entryId: string, trigger: HTMLElement) => {
     }
 
     revision = essayPayload.revision;
+    selectedDefaultPublicSlug = essayPayload.defaultPublicSlug;
     baselineFrontmatter = cloneFrontmatter(essayPayload.values);
     frontmatter = cloneFrontmatter(essayPayload.values);
     loadingEntry = false;
@@ -291,6 +323,115 @@ const saveEditor = async () => {
   }
 };
 
+const deleteEntry = async (trigger: HTMLElement) => {
+  if (busy) {
+    setStatus('warn', '当前有操作进行中');
+    return;
+  }
+
+  const rawCollection = trigger.dataset.collection?.trim() ?? '';
+  const entryId = trigger.dataset.entryId?.trim() ?? '';
+  const expectedRelativePath = trigger.dataset.relativePath?.trim() ?? '';
+
+  if (!isAdminContentDeletableCollectionKey(rawCollection) || !entryId || !expectedRelativePath) {
+    errors = ['删除动作缺少必要的条目信息，请刷新列表后重试'];
+    setStatus('error', '删除初始化失败');
+    return;
+  }
+
+  busy = true;
+  errors = [];
+  issues = [];
+  setStatus('loading', '正在读取删除确认信息');
+
+  try {
+    // 列表中的 revision 可能已经过期，确认前先读取一次最新文件状态。
+    const loadResponse = await fetch(buildEntryEndpoint(rawCollection, entryId), {
+      method: 'GET',
+      headers: {
+        Accept: 'application/json'
+      },
+      cache: 'no-store'
+    });
+    const loadPayload = await parseResponseBody(loadResponse);
+    const entryPayload = getDeletePayload(loadPayload, rawCollection, entryId);
+
+    if (!loadResponse.ok || !isRecord(loadPayload) || loadPayload.ok !== true || !entryPayload) {
+      errors = getPayloadErrors(loadPayload).length > 0
+        ? getPayloadErrors(loadPayload)
+        : ['删除确认信息加载失败，请刷新列表后重试'];
+      issues = getPayloadIssues(loadPayload);
+      setStatus('error', '删除确认失败');
+      return;
+    }
+
+    if (entryPayload.relativePath !== expectedRelativePath) {
+      errors = ['当前列表中的文件路径已过期，请刷新后再删除'];
+      setStatus('warn', '列表状态已过期');
+      return;
+    }
+
+    const title = getRowTitle(trigger, entryId);
+    const confirmed = window.confirm([
+      `确认删除「${title}」？`,
+      '',
+      `Collection: ${rawCollection}`,
+      `Entry: ${entryId}`,
+      `文件: ${entryPayload.relativePath}`,
+      '',
+      '文件会移动到 .trash/content/ 下，可从回收站手动恢复。'
+    ].join('\n'));
+
+    if (!confirmed) {
+      setStatus('ready', '已取消删除');
+      return;
+    }
+
+    setStatus('loading', '正在移动到回收站');
+    const deleteResponse = await fetch(deleteEndpoint, {
+      method: 'POST',
+      headers: {
+        Accept: 'application/json',
+        'Content-Type': 'application/json; charset=utf-8'
+      },
+      cache: 'no-store',
+      body: JSON.stringify({
+        collection: rawCollection,
+        entryId,
+        revision: entryPayload.revision,
+        expectedRelativePath: entryPayload.relativePath
+      })
+    });
+    const deletePayload = await parseResponseBody(deleteResponse);
+
+    if (!deleteResponse.ok || !isRecord(deletePayload) || deletePayload.ok !== true) {
+      errors = getPayloadErrors(deletePayload).length > 0
+        ? getPayloadErrors(deletePayload)
+        : ['删除失败，请检查响应与控制台日志'];
+      issues = getPayloadIssues(deletePayload);
+      setStatus(deleteResponse.status === 409 ? 'warn' : 'error', deleteResponse.status === 409 ? '检测到外部更新' : '删除失败');
+      return;
+    }
+
+    const result = getPayloadDeleteResult(deletePayload);
+    if (!result || !result.deleted || !result.trashedPath) {
+      errors = ['删除响应缺少回收站路径，请检查开发日志'];
+      setStatus('error', '删除响应缺少结果');
+      return;
+    }
+
+    setStatus('ok', `已移动到回收站：${result.trashedPath}`);
+    window.setTimeout(() => {
+      window.location.reload();
+    }, 480);
+  } catch {
+    errors = ['删除请求失败，请稍后重试'];
+    setStatus('error', '删除请求失败');
+  } finally {
+    busy = false;
+  }
+};
+
 const handleClick = (event: MouseEvent) => {
   if (!(event.target instanceof Element)) return;
   const currentMenu = event.target.closest<HTMLDetailsElement>('.admin-content-item__more');
@@ -300,6 +441,14 @@ const handleClick = (event: MouseEvent) => {
     return;
   }
   if (!currentMenu) closeActionMenus();
+
+  const deleteTrigger = event.target.closest<HTMLElement>('[data-admin-content-delete-action]');
+  if (deleteTrigger) {
+    event.preventDefault();
+    closeActionMenu(deleteTrigger);
+    void deleteEntry(deleteTrigger);
+    return;
+  }
 
   const trigger = event.target.closest<HTMLElement>('[data-admin-content-info-action]');
   if (!trigger) return;
@@ -321,6 +470,12 @@ const handleKeydown = (event: KeyboardEvent) => {
   openMenu.open = false;
   openMenu.querySelector<HTMLElement>('summary')?.focus({ preventScroll: true });
 };
+
+$effect(() => {
+  document.querySelectorAll<HTMLButtonElement>('[data-admin-content-delete-action]').forEach((button) => {
+    button.disabled = busy;
+  });
+});
 
 $effect(() => {
   document.addEventListener('click', handleClick);

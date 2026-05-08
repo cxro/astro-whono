@@ -7,6 +7,10 @@ The format is based on Keep a Changelog, and this project aims to follow Semanti
 
 ## [Unreleased]
 
+### Added
+- Content Console 的文章列表更多菜单新增单篇 Markdown/MDX 源文件导出，开发环境下可直接下载当前条目的源文件。
+- Content Console 新增 essay / bits 条目删除功能；删除时源文件会移入 `.trash/content/`，便于误删恢复。
+
 ### Fixed
 - 修复后台图片预览在遇到无效地址时仍可能尝试加载图片的问题，地址不合法时会隐藏预览并清空图片源。
 

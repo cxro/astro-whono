@@ -64,6 +64,7 @@ type Props = {
   imageUploadEndpoint: string;
   collection: 'essay';
   entryId: string;
+  defaultPublicSlug: string;
   revision: string;
   initialFrontmatter: AdminEssayEditorValues;
   initialBody: string;
@@ -76,6 +77,7 @@ let {
   imageUploadEndpoint,
   collection,
   entryId,
+  defaultPublicSlug,
   revision,
   initialFrontmatter,
   initialBody,
@@ -98,7 +100,7 @@ const cloneFrontmatter = (value: AdminEssayEditorValues): AdminEssayEditorValues
 const isEqualFrontmatter = (left: AdminEssayEditorValues, right: AdminEssayEditorValues): boolean =>
   JSON.stringify(left) === JSON.stringify(right);
 
-const slugPlaceholder = $derived(flattenEntryIdToSlug(entryId));
+const slugPlaceholder = $derived(defaultPublicSlug || flattenEntryIdToSlug(entryId));
 
 const createInitialSnapshot = () => ({
   revision,

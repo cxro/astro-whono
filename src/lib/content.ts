@@ -3,6 +3,7 @@ import {
   type CollectionEntry,
   type CollectionKey
 } from 'astro:content';
+import { existsSync } from 'node:fs';
 import {
   ESSAY_PUBLIC_SLUG_RE,
   RESERVED_ESSAY_SLUGS,
@@ -12,6 +13,9 @@ import { deriveMarkdownText, truncateText } from '../utils/excerpt';
 export { createWithBase } from '../utils/format';
 
 type OrderBy<K extends CollectionKey> = (a: CollectionEntry<K>, b: CollectionEntry<K>) => number;
+type CollectionEntryWithSourcePath = {
+  filePath?: unknown;
+};
 
 export type GetPublishedOptions<K extends CollectionKey> = {
   orderBy?: OrderBy<K>;
@@ -37,6 +41,15 @@ export const getPageSlice = <T>(items: T[], currentPage: number, pageSize: numbe
   return items.slice(start, start + pageSize);
 };
 
+const isContentSourceFilePresent = <K extends CollectionKey>(entry: CollectionEntry<K>): boolean => {
+  if (!import.meta.env.DEV) return true;
+
+  // Dev content store 在服务端移动文件后可能短暂保留旧 entry；
+  // 本地查询以磁盘源文件为准，避免删除后刷新仍显示残留条目。
+  const filePath = (entry as CollectionEntryWithSourcePath).filePath;
+  return typeof filePath !== 'string' || filePath.length === 0 || existsSync(filePath);
+};
+
 export const buildPaginatedPaths = (totalPages: number) => {
   if (totalPages <= 1) return [];
   return Array.from({ length: totalPages - 1 }, (_, i) => ({
@@ -51,7 +64,7 @@ export async function getPublished<K extends CollectionKey>(
   const prod = import.meta.env.PROD;
   const includeDraft = opts.includeDraft ?? !prod;
   const filter = includeDraft ? undefined : ({ data }: CollectionEntry<K>) => data.draft !== true;
-  const items = await getCollection(name, filter);
+  const items = (await getCollection(name, filter)).filter(isContentSourceFilePresent);
 
   if (!opts.orderBy) return items;
   return items.slice().sort(opts.orderBy);

@@ -10,7 +10,12 @@ import {
   getAdminContentEntryEditHref,
   getAdminContentPublicFallbackLabel
 } from '../../../lib/admin-console/content';
-import { ADMIN_CONTENT_ENTRY_API_PATH } from '../../../lib/admin-console/admin-api-paths';
+import {
+  ADMIN_CONTENT_DELETE_API_PATH,
+  ADMIN_CONTENT_ENTRY_API_PATH,
+  ADMIN_CONTENT_EXPORT_API_PATH
+} from '../../../lib/admin-console/admin-api-paths';
+import { isAdminContentDeletableCollectionKey } from '../../../lib/admin-console/content-delete-contract';
 import { createWithBase } from '../../../utils/format';
 
 const isDev = import.meta.env.DEV;
@@ -47,7 +52,17 @@ const adminStylesHref = contentDevState?.stylesHref ?? adminShellStylesHref;
 const contentConsoleSubtitle = '内容管理';
 const resetHref = withBase(contentHref);
 const adminContentEntryEndpoint = withBase(ADMIN_CONTENT_ENTRY_API_PATH);
+const adminContentExportEndpoint = withBase(ADMIN_CONTENT_EXPORT_API_PATH);
+const adminContentDeleteEndpoint = withBase(ADMIN_CONTENT_DELETE_API_PATH);
 const shouldOpenContentFilters = pageData?.hasActiveFilters ?? false;
+
+const getContentEntryExportHref = (collection: string, entryId: string): string => {
+  const params = new URLSearchParams({
+    collection,
+    entryId
+  });
+  return `${adminContentExportEndpoint}?${params.toString()}`;
+};
 ---
 
 <AdminLayout title="Content Console" stylesHref={adminStylesHref}>
@@ -211,6 +226,9 @@ const shouldOpenContentFilters = pageData?.hasActiveFilters ?? false;
                               const articleInfoHref = item.collection === 'essay'
                                 ? withBase(`${editPath}?panel=info`)
                                 : editHref;
+                              const publicHref = item.publicHref ? withBase(item.publicHref) : null;
+                              const publicFallbackLabel = getAdminContentPublicFallbackLabel(item);
+                              const exportHref = getContentEntryExportHref(item.collection, item.id);
                               return (
                                 <li
                                   class="admin-row admin-row--plain admin-row--interactive admin-row--table admin-content-item"
@@ -256,34 +274,45 @@ const shouldOpenContentFilters = pageData?.hasActiveFilters ?? false;
                                           <span>{item.collection === 'essay' ? '修改信息' : item.collection === 'memo' ? '查看信息' : '编辑信息'}</span>
                                         </a>
                                         <a
-                                          class="admin-content-menu-item"
-                                          href={item.publicHref ? withBase(item.publicHref) : '#'}
+                                          class:list={[
+                                            'admin-content-menu-item',
+                                            !publicHref && 'is-disabled'
+                                          ]}
+                                          href={publicHref ?? undefined}
                                           data-admin-content-row-public-link
-                                          hidden={!item.publicHref}
-                                          aria-hidden={item.publicHref ? 'false' : 'true'}
-                                          tabindex={item.publicHref ? undefined : '-1'}
+                                          aria-disabled={publicHref ? undefined : 'true'}
+                                          title={publicHref ? undefined : publicFallbackLabel}
+                                          tabindex={publicHref ? undefined : '-1'}
                                         >
                                           <AdminIcon name="link" size={14} />
                                           <span>转到文章</span>
                                         </a>
-                                        <span
-                                          class="admin-content-menu-item is-disabled"
-                                          aria-disabled="true"
-                                          title={getAdminContentPublicFallbackLabel(item)}
-                                          data-admin-content-row-public-disabled
-                                          hidden={Boolean(item.publicHref)}
+                                        <a
+                                          class="admin-content-menu-item"
+                                          href={exportHref}
+                                          data-admin-content-export-action
                                         >
-                                          <AdminIcon name="link" size={14} />
-                                          <span>转到文章</span>
-                                        </span>
-                                        <span class="admin-content-menu-item is-disabled" aria-disabled="true" title="导出将在第二阶段接入">
                                           <AdminIcon name="download" size={14} />
                                           <span>导出</span>
-                                        </span>
-                                        <span class="admin-content-menu-item admin-content-menu-item--danger is-disabled" aria-disabled="true" title="删除将在第二阶段接入">
-                                          <AdminIcon name="trash" size={14} />
-                                          <span>删除</span>
-                                        </span>
+                                        </a>
+                                        {isAdminContentDeletableCollectionKey(item.collection) ? (
+                                          <button
+                                            type="button"
+                                            class="admin-content-menu-item admin-content-menu-item--danger"
+                                            data-admin-content-delete-action
+                                            data-collection={item.collection}
+                                            data-entry-id={item.id}
+                                            data-relative-path={item.relativePath}
+                                          >
+                                            <AdminIcon name="trash" size={14} />
+                                            <span>删除</span>
+                                          </button>
+                                        ) : (
+                                          <span class="admin-content-menu-item admin-content-menu-item--danger is-disabled" aria-disabled="true" title="memo 是固定单页内容，不支持删除">
+                                            <AdminIcon name="trash" size={14} />
+                                            <span>删除</span>
+                                          </span>
+                                        )}
                                       </div>
                                     </details>
                                   </div>
@@ -305,7 +334,7 @@ const shouldOpenContentFilters = pageData?.hasActiveFilters ?? false;
           </div>
 
           {ContentListActionsIsland ? (
-            <ContentListActionsIsland base={base} endpoint={adminContentEntryEndpoint} />
+            <ContentListActionsIsland base={base} endpoint={adminContentEntryEndpoint} deleteEndpoint={adminContentDeleteEndpoint} />
           ) : null}
         </section>
       ) : (

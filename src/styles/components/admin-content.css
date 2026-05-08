@@ -508,7 +508,7 @@
   z-index: 20;
   display: grid;
   gap: 2px;
-  width: 168px;
+  width: 102px;
   padding: 5px;
   border: 1px solid var(--border);
   border-radius: 4px;
@@ -524,6 +524,7 @@
   display: flex;
   align-items: center;
   gap: 8px;
+  justify-self: stretch;
   min-width: 0;
   min-height: 30px;
   padding: 5px 8px;
@@ -535,8 +536,23 @@
   white-space: nowrap;
 }
 
-.admin-content-menu-item:hover {
-  background: var(--admin-row-bg-hover);
+button.admin-content-menu-item {
+  width: 100%;
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+  font-family: inherit;
+  text-align: left;
+}
+
+button.admin-content-menu-item:disabled {
+  color: var(--faint);
+  cursor: wait;
+}
+
+.admin-content-menu-item:not(.is-disabled):not(:disabled):hover,
+.admin-content-menu-item:not(.is-disabled):not(:disabled):focus-visible {
+  background: var(--admin-row-hover-bg);
 }
 
 .admin-content-menu-item:focus-visible {
@@ -1445,6 +1461,6 @@ body.admin-page--content-editor .content {
 
   .admin-content-more-panel {
     inset-inline: 0 auto;
-    width: min(168px, calc(100vw - 32px));
+    width: min(128px, calc(100vw - 32px));
   }
 }

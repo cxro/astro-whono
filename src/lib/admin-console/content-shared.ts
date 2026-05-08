@@ -11,6 +11,7 @@ import { normalizeAdminBitsImageSource } from './image-shared';
 import {
   ESSAY_PUBLIC_SLUG_RE,
   RESERVED_ESSAY_SLUGS,
+  contentSourceEntryIdToPublicEntryId,
   flattenEntryIdToSlug
 } from '../../utils/slug-rules';
 import {
@@ -90,6 +91,8 @@ export type AdminContentEditorValues =
 export type AdminEssayEditorPayload = {
   collection: 'essay';
   entryId: string;
+  publicEntryId: string;
+  defaultPublicSlug: string;
   revision: string;
   relativePath: string;
   writable: true;
@@ -101,6 +104,8 @@ export type AdminEssayEditorPayload = {
 export type AdminBitsEditorPayload = {
   collection: 'bits';
   entryId: string;
+  publicEntryId: string;
+  defaultPublicSlug: string;
   revision: string;
   relativePath: string;
   writable: true;
@@ -111,6 +116,8 @@ export type AdminBitsEditorPayload = {
 export type AdminMemoEditorPayload = {
   collection: 'memo';
   entryId: string;
+  publicEntryId: string;
+  defaultPublicSlug: string;
   revision: string;
   relativePath: string;
   writable: false;
@@ -159,6 +166,8 @@ type AdminBitsFrontmatter = {
 type AdminContentSourceState = {
   collection: AdminContentCollectionKey;
   entryId: string;
+  publicEntryId: string;
+  defaultPublicSlug: string;
   sourcePath: string;
   relativePath: string;
   revision: string;
@@ -189,6 +198,14 @@ const createIssue = (path: string, message: string): AdminContentValidationIssue
 const getProjectRoot = (): string => process.env.ASTRO_WHONO_INTERNAL_TEST_PROJECT_ROOT?.trim() || process.cwd();
 const getContentRoot = (): string => path.join(getProjectRoot(), 'src', 'content');
 const getCollectionRoot = (collection: AdminContentCollectionKey): string => path.join(getContentRoot(), collection);
+
+export const toAdminContentAbsoluteProjectPath = (filePath: string): string =>
+  path.isAbsolute(filePath)
+    ? filePath
+    : path.join(getProjectRoot(), ...filePath.replace(/\\/g, '/').split('/').filter(Boolean));
+
+export const toAdminContentRelativeProjectPath = (filePath: string): string =>
+  path.relative(getProjectRoot(), toAdminContentAbsoluteProjectPath(filePath)).replace(/\\/g, '/');
 
 const hashSourceText = (sourceText: string): string =>
   createHash('sha1').update(sourceText).digest('hex');
@@ -228,7 +245,7 @@ export const resolveAdminContentEntrySourcePath = (
 };
 
 const toRelativeProjectPath = (filePath: string): string =>
-  path.relative(getProjectRoot(), filePath).replace(/\\/g, '/');
+  toAdminContentRelativeProjectPath(filePath);
 
 const getStringArray = (value: unknown): string[] =>
   Array.isArray(value)
@@ -351,7 +368,14 @@ export const resolveAdminContentEntryIdFromSourcePath = (
   collection: AdminContentCollectionKey,
   filePath: string
 ): string => {
-  const relative = path.relative(getCollectionRoot(collection), filePath).replace(/\\/g, '/');
+  const absoluteFilePath = toAdminContentAbsoluteProjectPath(filePath);
+  const relative = path.relative(getCollectionRoot(collection), absoluteFilePath).replace(/\\/g, '/');
+  if (relative.startsWith('../') || relative === '..' || path.isAbsolute(relative)) {
+    throw new AdminContentEntryResolutionError(
+      'invalid-entry-id',
+      `content 源文件不在 ${collection} 集合目录下：${toRelativeProjectPath(absoluteFilePath)}`
+    );
+  }
   if (relative.endsWith('/index.md')) {
     return relative.slice(0, -'/index.md'.length);
   }
@@ -394,17 +418,22 @@ export const readAdminSourceFrontmatterRecord = async (
   return isRecord(rawFrontmatter) ? rawFrontmatter : {};
 };
 
-const resolveEssayPublicSlug = (entryId: string, explicitSlug?: string): string =>
+const resolveDefaultPublicEntryId = (sourceEntryId: string): string => {
+  const publicEntryId = contentSourceEntryIdToPublicEntryId(sourceEntryId);
+  return publicEntryId || sourceEntryId;
+};
+
+const resolveEssayPublicSlug = (publicEntryId: string, explicitSlug?: string): string =>
   explicitSlug && explicitSlug.trim().length > 0
     ? explicitSlug.trim()
-    : flattenEntryIdToSlug(entryId);
+    : flattenEntryIdToSlug(publicEntryId);
 
 const validateEssayPublicSlug = async (
-  state: Pick<AdminContentSourceState, 'entryId'>,
+  state: Pick<AdminContentSourceState, 'entryId' | 'publicEntryId'>,
   frontmatter: Pick<AdminEssayFrontmatter, 'slug'>
 ): Promise<AdminContentValidationIssue[]> => {
   const issues: AdminContentValidationIssue[] = [];
-  const publicSlug = resolveEssayPublicSlug(state.entryId, frontmatter.slug);
+  const publicSlug = resolveEssayPublicSlug(state.publicEntryId, frontmatter.slug);
 
   if (!ESSAY_PUBLIC_SLUG_RE.test(publicSlug)) {
     issues.push(
@@ -437,7 +466,8 @@ const validateEssayPublicSlug = async (
       if (candidateEntryId === state.entryId) continue;
 
       const frontmatterRecord = await readAdminSourceFrontmatterRecord(filePath);
-      const candidateSlug = resolveEssayPublicSlug(candidateEntryId, normalizeOptionalText(frontmatterRecord.slug));
+      const candidatePublicEntryId = resolveDefaultPublicEntryId(candidateEntryId);
+      const candidateSlug = resolveEssayPublicSlug(candidatePublicEntryId, normalizeOptionalText(frontmatterRecord.slug));
       if (candidateSlug === publicSlug) {
         issues.push(
           createIssue(
@@ -465,6 +495,9 @@ const loadAdminContentSourceState = async (
   entryId: string
 ): Promise<AdminContentSourceState> => {
   const sourcePath = resolveAdminContentEntrySourcePath(collection, entryId);
+  // 以实际源文件路径回算 entryId，避免把公开 id 当作磁盘文件名使用。
+  const sourceEntryId = resolveAdminContentEntryIdFromSourcePath(collection, sourcePath);
+  const publicEntryId = resolveDefaultPublicEntryId(sourceEntryId);
   const sourceText = await readFile(sourcePath, 'utf8');
   const section = splitMarkdownFrontmatter(sourceText);
   const frontmatterDocument = parseMarkdownFrontmatterDocument(section.frontmatterText);
@@ -472,7 +505,9 @@ const loadAdminContentSourceState = async (
 
   return {
     collection,
-    entryId: normalizeEntryId(entryId),
+    entryId: sourceEntryId,
+    publicEntryId,
+    defaultPublicSlug: flattenEntryIdToSlug(publicEntryId),
     sourcePath,
     relativePath: toRelativeProjectPath(sourcePath),
     revision: hashSourceText(sourceText),
@@ -545,6 +580,8 @@ export const readAdminContentEntryEditorPayload = async (
     return {
       collection,
       entryId: state.entryId,
+      publicEntryId: state.publicEntryId,
+      defaultPublicSlug: state.defaultPublicSlug,
       revision: state.revision,
       relativePath: state.relativePath,
       writable: true,
@@ -558,6 +595,8 @@ export const readAdminContentEntryEditorPayload = async (
     return {
       collection,
       entryId: state.entryId,
+      publicEntryId: state.publicEntryId,
+      defaultPublicSlug: state.defaultPublicSlug,
       revision: state.revision,
       relativePath: state.relativePath,
       writable: true,
@@ -569,6 +608,8 @@ export const readAdminContentEntryEditorPayload = async (
   return {
     collection,
     entryId: state.entryId,
+    publicEntryId: state.publicEntryId,
+    defaultPublicSlug: state.defaultPublicSlug,
     revision: state.revision,
     relativePath: state.relativePath,
     writable: false,

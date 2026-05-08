@@ -171,7 +171,7 @@ Then open `http://localhost:4321/admin/` in your browser.
 | `/admin/images/` | Available | Image resource browser and path helper |
 | `/admin/checks/` | Available | Structured diagnostics and pre-release checks |
 | `/admin/data/` | Available | Settings snapshot export / dry-run import / confirmed write |
-| `/admin/content/` | In progress | Placeholder for content management and visual writing |
+| `/admin/content/` | Available | Content list, essay body editing, bits frontmatter editing, and readonly memo viewing |
 
 
 <details>
@@ -200,12 +200,10 @@ For more details, see the [Theme Console configuration guide](https://astro.whon
 
 #### Production behavior
 
-- Theme Console / Data Console provide write capabilities only in local development; Content Console is still a placeholder.
-- `/admin/content/` and `/admin/content/:collection/` currently only show the work-in-progress notice; collection overview, details, and frontmatter editing are not exposed.
+- Admin Console write capabilities are available only in local development, including theme settings, content editing, settings import/export, and essay body image uploads.
+- `/admin/content/` provides the content list, filters, search, and row-level actions. In development, edit pages support essay frontmatter + body editing with server-side preview, bits frontmatter editing, and readonly memo viewing.
 - Production builds remain static output. `/admin/` can show a read-only public Overview or a hidden-state message based on Theme settings; production does not show Admin tabs, and other Admin subroutes only keep a local-development notice.
-- `/api/admin/settings/` is for local development only and should not be treated as a production API
-- `/api/admin/content/entry/` is for local development frontmatter writes only and should not be treated as a production API
-- `/api/admin/data/settings/` is for local development settings export only and should not be treated as a production API
+- `/api/admin/**` is for local development only and should not be treated as a production API
 
 #### Compatibility for existing forks
 

@@ -1,5 +1,7 @@
 export const ADMIN_SETTINGS_API_PATH = '/api/admin/settings/' as const;
 export const ADMIN_CONTENT_ENTRY_API_PATH = '/api/admin/content/entry/' as const;
+export const ADMIN_CONTENT_EXPORT_API_PATH = '/api/admin/content/export/' as const;
+export const ADMIN_CONTENT_DELETE_API_PATH = '/api/admin/content/delete/' as const;
 export const ADMIN_PREVIEW_API_PATH = '/api/admin/preview/' as const;
 export const ADMIN_DATA_SETTINGS_API_PATH = '/api/admin/data/settings/' as const;
 export const ADMIN_IMAGE_LIST_API_PATH = '/api/admin/images/list/' as const;

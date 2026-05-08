@@ -32,6 +32,11 @@ describe('admin content write api', () => {
       'utf8'
     );
     await writeFile(
+      path.join(tempRoot, 'src', 'content', 'essay', 'admin-console-guide copy.md'),
+      ['---', 'title: Space Name Essay', 'date: 2026-03-21', 'draft: false', '---', '', '# Space Name', ''].join('\n'),
+      'utf8'
+    );
+    await writeFile(
       path.join(tempRoot, 'src', 'content', 'essay', 'other.md'),
       ['---', 'title: Other Essay', 'date: 2026-03-20', 'slug: existing-essay', '---', '', '# Other', '', 'duplicate guard', ''].join('\n'),
       'utf8'
@@ -86,9 +91,38 @@ describe('admin content write api', () => {
     expect(payload.writable).toBe(true);
     expect(payload.values.title).toBe('Demo Essay');
     expect(payload.values.date).toBe('2026-03-18');
+    expect(payload.defaultPublicSlug).toBe('demo');
     if (payload.collection === 'essay') {
       expect(payload.values.publishedAt).toBe('');
     }
+  });
+
+  it('loads and validates source files whose names differ from Astro public ids', async () => {
+    const { readAdminContentEntryEditorPayload } = await import('../src/lib/admin-console/content-shared');
+    const { POST } = await import('../src/pages/api/admin/content/entry');
+    const current = await readAdminContentEntryEditorPayload('essay', 'admin-console-guide copy');
+
+    expect(current.entryId).toBe('admin-console-guide copy');
+    expect(current.defaultPublicSlug).toBe('admin-console-guide-copy');
+    expect(current.relativePath).toBe('src/content/essay/admin-console-guide copy.md');
+
+    const response = await POST({
+      request: createJsonRequest('http://127.0.0.1:4321/api/admin/content/entry?dryRun=1', {
+        collection: 'essay',
+        entryId: 'admin-console-guide copy',
+        revision: current.revision,
+        frontmatter: {
+          ...current.values,
+          title: 'Space Name Essay Updated'
+        }
+      }),
+      url: new URL('http://127.0.0.1:4321/api/admin/content/entry?dryRun=1')
+    } as never);
+
+    expect(response.status).toBe(200);
+    const payload = JSON.parse(await response.text());
+    expect(payload.ok).toBe(true);
+    expect(payload.result.changedFields).toEqual(['title']);
   });
 
   it('loads legacy essay datetime dates for compatibility', async () => {

@@ -1,3 +1,5 @@
+import { slug as githubSlug } from 'github-slugger';
+
 /**
  * Shared slug rules for essay public URLs.
  *
@@ -26,3 +28,18 @@ export const RESERVED_ESSAY_SLUGS: ReadonlySet<string> = new Set([
  */
 export const flattenEntryIdToSlug = (entryId: string): string =>
   entryId.replaceAll('/', '-');
+
+/**
+ * Astro glob loader 会按路径段做 GitHub-style slug 化得到默认公开 entry id。
+ * Admin Content 的源文件 entryId 保留真实文件名，因此写入校验需要显式派生公开 id。
+ */
+export const contentSourceEntryIdToPublicEntryId = (entryId: string): string => {
+  const normalized = entryId.trim().replace(/\\/g, '/').replace(/\/+$/g, '');
+  if (!normalized) return '';
+
+  return normalized
+    .split('/')
+    .map((segment) => githubSlug(segment))
+    .join('/')
+    .replace(/\/index$/i, '');
+};

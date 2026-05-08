@@ -20,7 +20,14 @@ vi.mock('../src/lib/bits', () => ({
 }));
 
 vi.mock('../src/lib/admin-console/content-shared', () => ({
-  listAdminCollectionSourceFiles: vi.fn()
+  listAdminCollectionSourceFiles: vi.fn(),
+  resolveAdminContentEntryIdFromSourcePath: vi.fn((collection: string, filePath: string) => {
+    const relative = filePath.replace(/\\/g, '/').replace(`src/content/${collection}/`, '');
+    if (relative.endsWith('/index.md')) return relative.slice(0, -'/index.md'.length);
+    if (relative.endsWith('/index.mdx')) return relative.slice(0, -'/index.mdx'.length);
+    return relative.replace(/\.(md|mdx)$/i, '');
+  }),
+  toAdminContentRelativeProjectPath: vi.fn((filePath: string) => filePath.replace(/\\/g, '/'))
 }));
 
 const contentModule = await import('../src/lib/content');
@@ -47,6 +54,7 @@ const createItem = (overrides: Partial<AdminContentIndexItem> = {}): AdminConten
   collection: 'essay',
   collectionLabel: '随笔',
   id: 'essay/example.md',
+  publicEntryId: 'essay/example.md',
   title: 'Example Entry',
   slug: 'example-entry',
   relativePath: 'src/content/essay/example.md',
@@ -270,6 +278,25 @@ describe('admin-console/content', () => {
     expect(mockedContent.getPublished).not.toHaveBeenCalled();
     expect(pageData.filteredCount).toBe(1);
     expect(pageData.sections[0]?.items[0]?.id).toBe('admin-console-guide.md');
+  });
+
+  it('uses the source file path as the admin entry id when Astro normalizes the public id', async () => {
+    mockedContent.getSortedEssays.mockResolvedValue([
+      createEssayEntry({
+        id: 'admin-console-guide-copy',
+        filePath: 'src/content/essay/admin-console-guide copy.md'
+      })
+    ]);
+
+    const pageData = await getAdminContentConsolePageData(new URLSearchParams([
+      ['collection', 'essay']
+    ]));
+    const item = pageData.sections[0]?.items[0];
+
+    expect(item?.id).toBe('admin-console-guide copy');
+    expect(item?.publicEntryId).toBe('admin-console-guide-copy');
+    expect(item?.relativePath).toBe('src/content/essay/admin-console-guide copy.md');
+    expect(item?.publicHref).toBe('/archive/admin-console-guide-copy/');
   });
 
   it('builds bits edit list hrefs without loading the public search index', async () => {
