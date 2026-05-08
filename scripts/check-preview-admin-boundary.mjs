@@ -437,7 +437,6 @@ export const runPreviewAdminBoundaryCheck = async () => {
     const adminThemeResponse = await request(baseUrl, '/admin/theme/');
     const adminContentResponse = await request(baseUrl, '/admin/content/');
     const adminEssayContentEditResponse = await request(baseUrl, '/admin/content/essay/_edit/admin-console-guide/');
-    const adminSvelteSpikeResponse = await request(baseUrl, '/admin/content/svelte-spike/');
     const adminImageResponse = await request(baseUrl, '/admin/images/');
     const adminChecksResponse = await request(baseUrl, '/admin/checks/');
     const adminDataResponse = await request(baseUrl, '/admin/data/');
@@ -500,11 +499,6 @@ export const runPreviewAdminBoundaryCheck = async () => {
     assertReadonlyAdminThemeShell('Preview GET /admin/theme/', adminThemeResponse);
     assertAdminContentPlaceholderShell('Preview GET /admin/content/', adminContentResponse);
     assertAdminContentEditStaticMissing('Preview GET /admin/content/essay/_edit/admin-console-guide/', adminEssayContentEditResponse);
-    assertAdminContentPlaceholderShell('Preview GET /admin/content/svelte-spike/', adminSvelteSpikeResponse);
-    expect(
-      !adminSvelteSpikeResponse.body.includes('data-admin-svelte-spike'),
-      'Preview GET /admin/content/svelte-spike/ should not emit the Svelte spike island'
-    );
     assertReadonlyAdminImageShell('Preview GET /admin/images/', adminImageResponse);
     assertReadonlyAdminChecksShell('Preview GET /admin/checks/', adminChecksResponse);
     assertReadonlyAdminDataShell('Preview GET /admin/data/', adminDataResponse);
