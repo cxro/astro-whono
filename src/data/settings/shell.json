@@ -36,6 +36,13 @@
       "ornament": "·",
       "visible": true,
       "order": 5
+    },
+    {
+      "id": "admin",
+      "label": "管理后台",
+      "ornament": "·",
+      "visible": true,
+      "order": 6
     }
   ]
 }
