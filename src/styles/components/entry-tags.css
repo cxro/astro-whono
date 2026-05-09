@@ -74,7 +74,7 @@
   font-weight: 400;
   letter-spacing: 0;
   line-height: 1.2;
-  font-family: "LXGW WenKai Lite", "Kaiti SC", "STKaiti", serif;
+  font-family: var(--font-accent);
 }
 
 .entry-tags-dialog {
@@ -155,7 +155,7 @@
   color: var(--muted);
   font-size: 13px;
   line-height: 1.5;
-  font-family: "LXGW WenKai Lite", "Kaiti SC", "STKaiti", serif;
+  font-family: var(--font-accent);
 }
 
 .entry-tags-dialog__actions {
@@ -333,7 +333,7 @@
   white-space: nowrap;
   font-size: 13px;
   line-height: 1.35;
-  font-family: "LXGW WenKai Lite", "Kaiti SC", "STKaiti", serif;
+  font-family: var(--font-accent);
 }
 
 .entry-tag-option__count {

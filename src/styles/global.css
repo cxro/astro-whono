@@ -122,6 +122,8 @@
   --code-action-hover-bg: #e8e8e6;
   --panel: var(--code-header-bg);
   --font-mono: "Sarasa Mono SC", "Noto Sans Mono CJK SC", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+  --font-accent: "LXGW WenKai Lite", "Kaiti SC", "STKaiti", serif;
+  --font-serif: "Noto Serif SC", ui-serif, Georgia, "Times New Roman", "Songti SC", serif;
   --max: 900px;
   --sidebar: 320px;
   --tap-min-h: 44px;
@@ -163,7 +165,7 @@ body {
   padding: 0;
   background: var(--bg);
   color: var(--text);
-  font-family: "Noto Serif SC", ui-serif, Georgia, "Times New Roman", "Songti SC", serif;
+  font-family: var(--font-serif);
   line-height: 1.75;
   font-size: 16px;
 }
@@ -179,7 +181,7 @@ time,
 .archive-date,
 .bit-meta,
 .meta-line {
-  font-family: "LXGW WenKai Lite", "Kaiti SC", "STKaiti", serif;
+  font-family: var(--font-accent);
 }
 
 .page-subtitle,
@@ -191,7 +193,7 @@ time,
 .prose blockquote p,
 cite,
 q {
-  font-family: "LXGW WenKai Lite", "Kaiti SC", "STKaiti", serif;
+  font-family: var(--font-accent);
 }
 
 pre,
