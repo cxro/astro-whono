@@ -40,6 +40,7 @@
     "astro": "^6.3.2",
     "esbuild": "^0.28.0",
     "mdx": "^0.3.1",
+    "node-addon-api": "^8.7.0",
     "sharp": "^0.34.5"
   },
   "devDependencies": {
