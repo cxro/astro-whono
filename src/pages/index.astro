@@ -1,24 +1,24 @@
 ---
-import BaseLayout from "../layouts/BaseLayout.astro";
-import HeroImage from "../components/HeroImage.astro";
-import EntryListItem from "../components/EntryListItem.astro";
-import "../styles/home.css";
+import BaseLayout from '../layouts/BaseLayout.astro';
+import HeroImage from '../components/HeroImage.astro';
+import EntryListItem from '../components/EntryListItem.astro';
+import '../styles/home.css';
 import {
   ADMIN_HOME_INTRO_LINK_DEFAULT,
   getAdminHomeIntroLinkOption,
-} from "../lib/admin-console/theme-shared";
+} from '../lib/admin-console/theme-shared';
 import {
   getEssayDerivedText,
   getEssaySlug,
   getVisibleEssays,
-} from "../lib/content";
+} from '../lib/content';
 import {
   getThemeSettings,
   getVisibleArticleMetaTags,
-} from "../lib/theme-settings";
-import { createWithBase } from "../utils/format";
+} from '../lib/theme-settings';
+import { createWithBase } from '../utils/format';
 
-const base = import.meta.env.BASE_URL ?? "/";
+const base = import.meta.env.BASE_URL ?? '/';
 const withBase = createWithBase(base);
 const {
   settings: {
@@ -35,16 +35,16 @@ const {
     ui: { articleMeta },
   },
 } = getThemeSettings();
-const shouldShowHero = heroPresetId !== "none";
+const shouldShowHero = heroPresetId !== 'none';
 const shouldShowIntro = showIntroLead || showIntroMore;
 const homeBodyClass = [
-  "home",
-  !shouldShowHero ? "home--no-hero" : null,
-  !shouldShowIntro ? "home--no-intro" : null,
-  !shouldShowHero && !shouldShowIntro ? "home--compact-start" : null,
+  'home',
+  !shouldShowHero ? 'home--no-hero' : null,
+  !shouldShowIntro ? 'home--no-intro' : null,
+  !shouldShowHero && !shouldShowIntro ? 'home--compact-start' : null,
 ]
   .filter(Boolean)
-  .join(" ");
+  .join(' ');
 const resolvedIntroMoreLinks = (
   introMoreLinks.length ? introMoreLinks : [...ADMIN_HOME_INTRO_LINK_DEFAULT]
 ).map((linkKey) => getAdminHomeIntroLinkOption(linkKey));
@@ -52,7 +52,7 @@ const resolvedIntroMoreLinks = (
 const latest = (await getVisibleEssays()).slice(0, 12);
 
 type HomeHeadCriticalFontFace = {
-  family: "LXGW WenKai Lite" | "Noto Serif SC";
+  family: 'LXGW WenKai Lite' | 'Noto Serif SC';
   fileName: string;
   weight: 400 | 600;
   unicodeRange: string;
@@ -61,40 +61,40 @@ type HomeHeadCriticalFontFace = {
 // Keep this subset aligned with the faces the home shell actually uses above the fold.
 const HOME_HEAD_CRITICAL_FONT_FACES = [
   {
-    family: "LXGW WenKai Lite",
-    fileName: "lxgw-wenkai-lite-latin.woff2",
+    family: 'LXGW WenKai Lite',
+    fileName: 'lxgw-wenkai-lite-latin.woff2',
     weight: 400,
-    unicodeRange: "U+0000-00FF, U+2000-206F, U+3000-303F, U+FF00-FFEF",
+    unicodeRange: 'U+0000-00FF, U+2000-206F, U+3000-303F, U+FF00-FFEF',
   },
   {
-    family: "LXGW WenKai Lite",
-    fileName: "lxgw-wenkai-lite-cjk-common.woff2",
+    family: 'LXGW WenKai Lite',
+    fileName: 'lxgw-wenkai-lite-cjk-common.woff2',
     weight: 400,
-    unicodeRange: "U+4E00-9FFF",
+    unicodeRange: 'U+4E00-9FFF',
   },
   {
-    family: "Noto Serif SC",
-    fileName: "noto-serif-sc-400-latin.woff2",
+    family: 'Noto Serif SC',
+    fileName: 'noto-serif-sc-400-latin.woff2',
     weight: 400,
-    unicodeRange: "U+0000-00FF, U+2000-206F, U+3000-303F, U+FF00-FFEF",
+    unicodeRange: 'U+0000-00FF, U+2000-206F, U+3000-303F, U+FF00-FFEF',
   },
   {
-    family: "Noto Serif SC",
-    fileName: "noto-serif-sc-400-cjk-common.woff2",
+    family: 'Noto Serif SC',
+    fileName: 'noto-serif-sc-400-cjk-common.woff2',
     weight: 400,
-    unicodeRange: "U+4E00-9FFF",
+    unicodeRange: 'U+4E00-9FFF',
   },
   {
-    family: "Noto Serif SC",
-    fileName: "noto-serif-sc-600-latin.woff2",
+    family: 'Noto Serif SC',
+    fileName: 'noto-serif-sc-600-latin.woff2',
     weight: 600,
-    unicodeRange: "U+0000-00FF, U+2000-206F, U+3000-303F, U+FF00-FFEF",
+    unicodeRange: 'U+0000-00FF, U+2000-206F, U+3000-303F, U+FF00-FFEF',
   },
   {
-    family: "Noto Serif SC",
-    fileName: "noto-serif-sc-600-cjk-common.woff2",
+    family: 'Noto Serif SC',
+    fileName: 'noto-serif-sc-600-cjk-common.woff2',
     weight: 600,
-    unicodeRange: "U+4E00-9FFF",
+    unicodeRange: 'U+4E00-9FFF',
   },
 ] as const satisfies readonly HomeHeadCriticalFontFace[];
 
@@ -104,8 +104,8 @@ const renderHomeHeadCriticalFontFace = ({
   weight,
   unicodeRange,
 }: HomeHeadCriticalFontFace): string => String.raw`@font-face {
-  font-family: "${family}";
-  src: url("${withBase(`/fonts/${fileName}`)}") format("woff2");
+  font-family: '${family}';
+  src: url('${withBase(`/fonts/${fileName}`)}') format('woff2');
   font-weight: ${weight};
   font-style: normal;
   font-display: swap;
@@ -114,7 +114,7 @@ const renderHomeHeadCriticalFontFace = ({
 
 const homeHeadCriticalCss = [
   HOME_HEAD_CRITICAL_FONT_FACES.map(renderHomeHeadCriticalFontFace).join(
-    "\n\n",
+    '\n\n',
   ),
   String.raw`
 
@@ -135,7 +135,7 @@ const homeHeadCriticalCss = [
   --card-pad: 12px 14px;
 }
 
-:root[data-theme="dark"] {
+:root[data-theme='dark'] {
   color-scheme: dark;
   --bg: #1a1a1a;
   --text: #e5e5e5;
@@ -157,7 +157,7 @@ body {
   padding: 0;
   background: var(--bg);
   color: var(--text);
-  font-family: "Noto Serif SC", ui-serif, Georgia, "Times New Roman", "Songti SC", serif;
+  font-family: 'Noto Serif SC', ui-serif, Georgia, 'Times New Roman', 'Songti SC', serif;
   line-height: 1.75;
   font-size: 16px;
 }
@@ -259,7 +259,7 @@ a {
   font-size: 16px;
 }
 
-.nav a[aria-current="page"] {
+.nav a[aria-current='page'] {
   text-decoration: underline;
   text-underline-offset: 5px;
 }
@@ -281,7 +281,7 @@ a {
   opacity: 0.55;
   font-size: 14px;
   line-height: 1;
-  font-family: "LXGW WenKai Lite", "Kaiti SC", "STKaiti", serif;
+  font-family: 'LXGW WenKai Lite', 'Kaiti SC', 'STKaiti', serif;
 }
 
 .sidebar-actions {
@@ -315,11 +315,11 @@ a {
   display: none;
 }
 
-:root[data-theme="dark"] .theme-toggle .icon-sun {
+:root[data-theme='dark'] .theme-toggle .icon-sun {
   display: block;
 }
 
-:root[data-theme="dark"] .theme-toggle .icon-moon {
+:root[data-theme='dark'] .theme-toggle .icon-moon {
   display: none;
 }
 
@@ -327,11 +327,11 @@ a {
   display: none;
 }
 
-body[data-reading="immersive"] .reader-toggle .icon-book-closed {
+body[data-reading='immersive'] .reader-toggle .icon-book-closed {
   display: block;
 }
 
-body[data-reading="immersive"] .reader-toggle .icon-book-open {
+body[data-reading='immersive'] .reader-toggle .icon-book-open {
   display: none;
 }
 
@@ -367,7 +367,7 @@ body[data-reading="immersive"] .reader-toggle .icon-book-open {
 }
 
 .section-title::after {
-  content: "";
+  content: '';
   display: block;
   width: 32px;
   height: 1px;
@@ -424,7 +424,7 @@ body[data-reading="immersive"] .reader-toggle .icon-book-open {
   -webkit-line-clamp: 3;
   line-clamp: 3;
   overflow: hidden;
-  font-family: "LXGW WenKai Lite", "Kaiti SC", "STKaiti", serif;
+  font-family: 'LXGW WenKai Lite', 'Kaiti SC', 'STKaiti', serif;
 }
 
 .meta-line {
@@ -450,7 +450,7 @@ body[data-reading="immersive"] .reader-toggle .icon-book-open {
 }
 
 .meta-line__item + .meta-line__item::before {
-  content: "·";
+  content: '·';
   margin: 0 0.45em;
   color: var(--faint);
 }
@@ -489,7 +489,7 @@ body[data-reading="immersive"] .reader-toggle .icon-book-open {
     --header-gap: 4px;
   }
 
-  :root[data-theme="dark"] {
+  :root[data-theme='dark'] {
     color-scheme: dark;
     --bg: #1a1a1a;
     --text: #e5e5e5;
@@ -550,7 +550,7 @@ body[data-reading="immersive"] .reader-toggle .icon-book-open {
     transform-origin: left center;
   }
 
-  .nav a[aria-current="page"] {
+  .nav a[aria-current='page'] {
     text-decoration: underline;
     text-underline-offset: 6px;
     text-decoration-thickness: 2px;
@@ -637,7 +637,7 @@ body[data-reading="immersive"] .reader-toggle .icon-book-open {
   }
 }
 `,
-].join("\n\n");
+].join('\n\n');
 ---
 
 <BaseLayout bodyClass={homeBodyClass} deferGlobalStyles={true}>

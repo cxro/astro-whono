@@ -1,6 +1,6 @@
 ---
-import { formatISODateUtc } from "../utils/format";
-import type { ArticleMetaSettings } from "../lib/theme-settings";
+import { formatISODateUtc } from '../utils/format';
+import type { ArticleMetaSettings } from '../lib/theme-settings';
 
 const {
   href,
@@ -8,8 +8,8 @@ const {
   excerpt,
   date,
   visibleTags = [],
-  badge = "随笔",
-  slug = "",
+  badge = '随笔',
+  slug = '',
   articleMetaSettings,
 } = Astro.props as {
   href: string;
@@ -21,7 +21,7 @@ const {
   slug?: string;
   articleMetaSettings: ArticleMetaSettings;
 };
-const displayBadge = badge.trim() ? badge : "随笔";
+const displayBadge = badge.trim() ? badge : '随笔';
 const shouldShowMetaLine =
   articleMetaSettings.showDate ||
   (articleMetaSettings.showTags && visibleTags.length > 0);
