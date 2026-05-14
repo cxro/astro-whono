@@ -5,12 +5,12 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/cxro/astro-whono.git"
+    "url": "https://github.com/theapplegates/astro-whono.git"
   },
   "bugs": {
-    "url": "https://github.com/cxro/astro-whono/issues"
+    "url": "https://github.com/theapplegates/astro-whono/issues"
   },
-  "homepage": "https://astro.whono.me",
+  "homepage": "https://whono.paulapplegate.com",
   "type": "module",
   "engines": {
     "node": ">=22.12.0"
