@@ -40,7 +40,8 @@
     "astro": "^6.3.2",
     "esbuild": "^0.28.0",
     "mdx": "^0.3.1",
-    "sharp": "^0.34.5"
+    "sharp": "^0.34.5",
+    "yaml": "^2.9.0"
   },
   "devDependencies": {
     "@astrojs/check": "^0.9.8",
