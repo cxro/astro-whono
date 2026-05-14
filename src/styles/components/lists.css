@@ -199,6 +199,10 @@
   gap: 16px;
 }
 
+.list-item__row .badge {
+  height: 24px;
+}
+
 .list-item__title {
   margin: 0;
   font-size: 18px;
@@ -232,6 +236,8 @@
 .badge {
   display: inline-flex;
   align-items: center;
+  flex-shrink: 0;
+  white-space: nowrap;
   padding: 0 7px;
   border: 1px solid var(--border);
   border-radius: 999px;
@@ -330,6 +336,10 @@
     flex-direction: column;
     align-items: flex-start;
     gap: 6px;
+  }
+
+  .list-item__row .badge {
+    height: 24px;
   }
 
   .list-item__meta {
