@@ -23,6 +23,9 @@ importers:
       astro:
         specifier: ^6.3.2
         version: 6.3.2(@types/node@22.19.19)(rollup@4.60.3)(yaml@2.9.0)
+      esbuild:
+        specifier: 0.27.7
+        version: 0.27.7
       node-addon-api:
         specifier: ^8.7.0
         version: 8.7.0
@@ -30,7 +33,7 @@ importers:
         specifier: ^12.3.0
         version: 12.3.0
       sharp:
-        specifier: ^0.34.5
+        specifier: 0.34.5
         version: 0.34.5
     devDependencies:
       '@astrojs/check':
