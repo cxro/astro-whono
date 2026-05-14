@@ -42,17 +42,12 @@ const shouldShowMetaLine = articleMetaSettings.showDate || (articleMetaSettings.
     <div class="meta-line meta-line--items">
       {articleMetaSettings.showDate ? (
         <span class="meta-line__item">
-          {articleMetaSettings.dateLabel
-            ? `${articleMetaSettings.dateLabel}`
-            : ""}
-          {formatISODateUtc(date)}
+          {articleMetaSettings.dateLabel ? `${articleMetaSettings.dateLabel}` : ''}{formatISODateUtc(date)}
         </span>
       ) : null}
       {articleMetaSettings.showTags && visibleTags.length ? (
         <span class="meta-line__item meta-line__item--tags">
-          {visibleTags.map((tag) => (
-            <span class="tag">#{tag}</span>
-          ))}
+          {visibleTags.map((tag) => (<span class="tag">#{tag}</span>))}
         </span>
       ) : null}
     </div>

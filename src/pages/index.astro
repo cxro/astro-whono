@@ -17,7 +17,7 @@ const {
   settings: {
     home: { introLead, introMore, introMoreLinks, showIntroLead, showIntroMore, heroPresetId, heroImageSrc, heroImageAlt },
     ui: { articleMeta }
-  },
+  }
 } = getThemeSettings();
 const shouldShowHero = heroPresetId !== 'none';
 const shouldShowIntro = showIntroLead || showIntroMore;
@@ -79,7 +79,7 @@ const HOME_HEAD_CRITICAL_FONT_FACES = [
     fileName: 'noto-serif-sc-600-cjk-common.woff2',
     weight: 600,
     unicodeRange: 'U+4E00-9FFF'
-  },
+  }
 ] as const satisfies readonly HomeHeadCriticalFontFace[];
 
 const renderHomeHeadCriticalFontFace = ({
@@ -89,7 +89,7 @@ const renderHomeHeadCriticalFontFace = ({
   unicodeRange
 }: HomeHeadCriticalFontFace): string => String.raw`@font-face {
   font-family: "${family}";
-  src: url("${withBase(`/fonts/${fileName}`)}") format('woff2');
+  src: url("${withBase(`/fonts/${fileName}`)}") format("woff2");
   font-weight: ${weight};
   font-style: normal;
   font-display: swap;
@@ -666,7 +666,7 @@ body[data-reading="immersive"] .reader-toggle .icon-book-open {
     {latest.map((entry) => {
       const slug = getEssaySlug(entry);
       const href = withBase(`/archive/${slug}/`);
-      const visibleTags = getVisibleArticleMetaTags(entry.data.tags, "home");
+      const visibleTags = getVisibleArticleMetaTags(entry.data.tags, 'home');
       return (
         <EntryListItem
           href={href}
