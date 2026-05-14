@@ -1,0 +1,71 @@
+{
+  "name": "astro-whono",
+  "version": "0.4.1",
+  "private": true,
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/cxro/astro-whono.git"
+  },
+  "bugs": {
+    "url": "https://github.com/cxro/astro-whono/issues"
+  },
+  "homepage": "https://astro.whono.me",
+  "type": "module",
+  "engines": {
+    "node": ">=22.12.0"
+  },
+  "scripts": {
+    "dev": "astro dev",
+    "build": "astro build",
+    "preview": "astro preview",
+    "check": "astro check",
+    "test": "vitest run --config ./vitest.config.ts",
+    "audit:prod": "npm audit --omit=dev --audit-level=high --registry=https://registry.npmjs.org",
+    "check:markdown-smoke": "node ./scripts/check-markdown-smoke.mjs",
+    "check:prod-artifacts": "node ./scripts/check-production-artifacts.mjs",
+    "check:preview-admin": "node ./scripts/check-preview-admin-boundary.mjs",
+    "ci:core": "npm run check && npm run test && npm run build && npm run check:markdown-smoke",
+    "ci": "npm run ci:core",
+    "font:charset": "node ./scripts/font-charset.mjs",
+    "font:subset": "node ./scripts/font-subset.mjs",
+    "font:build": "npm run font:charset && npm run font:subset",
+    "new:bit": "node ./scripts/new-bit.mjs"
+  },
+  "dependencies": {
+    "@astrojs/mdx": "^5.0.6",
+    "@astrojs/rss": "^4.0.18",
+    "@astrojs/sitemap": "^3.7.2",
+    "@lucide/astro": "^1.8.0",
+    "astro": "^6.3.2",
+    "esbuild": "^0.28.0",
+    "mdx": "^0.3.1",
+    "sharp": "^0.34.5"
+  },
+  "devDependencies": {
+    "@astrojs/check": "^0.9.8",
+    "@iconify-json/logos": "^1.2.0",
+    "@iconify-json/simple-icons": "^1.2.0",
+    "@types/node": "^22.0.0",
+    "rehype-raw": "^7.0.0",
+    "rehype-sanitize": "^6.0.0",
+    "remark-directive": "^4.0.0",
+    "typescript": "^5.9.3",
+    "unist-util-visit": "^5.0.0",
+    "vitest": "^4.1.2"
+  },
+  "overrides": {
+    "ajv": "8.18.0",
+    "anymatch": {
+      "picomatch": "2.3.2"
+    },
+    "fast-xml-parser": "5.7.0",
+    "h3": "1.15.9",
+    "picomatch": "4.0.4",
+    "postcss": "8.5.12",
+    "rollup": "4.59.0",
+    "volar-service-yaml": "0.0.70",
+    "yaml": "2.8.3",
+    "yaml-language-server": "1.20.0"
+  }
+}
