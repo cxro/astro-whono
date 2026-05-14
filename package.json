@@ -56,12 +56,9 @@
   },
   "overrides": {
     "ajv": "8.18.0",
-    "anymatch": {
-      "picomatch": "2.3.2"
-    },
     "fast-xml-parser": "5.7.0",
     "h3": "1.15.9",
-    "picomatch": "4.0.4",
+    "picomatch": "2.3.2",
     "postcss": "8.5.12",
     "rollup": "4.59.0",
     "volar-service-yaml": "0.0.70",
