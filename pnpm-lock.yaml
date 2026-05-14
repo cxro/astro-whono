@@ -32,6 +32,9 @@ importers:
       sharp:
         specifier: ^0.34.5
         version: 0.34.5
+      yaml:
+        specifier: ^2.9.0
+        version: 2.9.0
     devDependencies:
       '@astrojs/check':
         specifier: ^0.9.8

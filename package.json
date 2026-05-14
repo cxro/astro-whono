@@ -42,6 +42,7 @@
     "mdx": "^0.3.1",
     "node-addon-api": "^8.7.0",
     "sharp": "^0.34.5"
+    "yaml": "^2.9.0"
   },
   "devDependencies": {
     "@astrojs/check": "^0.9.8",
