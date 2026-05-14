@@ -1,4 +1,5 @@
 import { fileURLToPath } from 'node:url';
+import mdx from '@astrojs/mdx';
 import { defineConfig } from 'astro/config';
 import sitemap from '@astrojs/sitemap';
 import remarkDirective from 'remark-directive';
@@ -131,12 +132,28 @@ const sanitizeSchema = {
 };
 
 export default defineConfig({
+  image: {
+    // sharp is the default, just being explicit
+    service: { entrypoint: 'astro/assets/services/sharp' },
+    experimentalLayout: 'responsive', // your 6.0+ responsive default
+  },
+  
   // Required for RSS generation. Prefer SITE_URL; fallback keeps build passing.
   site: site.url,
   // DEV 使用 server output 允许 Theme Console 的 /api/admin/settings/ 处理读写；
   // 构建阶段回到 static，让 /admin/ 保持只读提示，并避免把该路径当作生产公开 API。
   output: process.env.NODE_ENV === 'production' ? 'static' : 'server',
-  integrations: hasSiteUrl ? [sitemap({ filter: (page) => !isExcludedSitemapEntry(page) })] : [],
+  integrations: [
+  
+    mdx(),
+  
+    ...(hasSiteUrl
+  
+      ? [sitemap({ filter: (page) => !isExcludedSitemapEntry(page) })]
+  
+      : []),
+  
+  ],
   trailingSlash: 'always',
   build: {
     inlineStylesheets: 'auto'
@@ -148,15 +165,29 @@ export default defineConfig({
       }
     }
   },
-  markdown: {
-    remarkPlugins: [remarkDirective, remarkCallout],
-    rehypePlugins: [rehypeRaw, [rehypeSanitize, sanitizeSchema]],
-    shikiConfig: {
-      themes: {
-        light: 'github-light',
-        dark: 'github-dark'
-      },
-      transformers: [shikiToolbar()]
-    }
-  }
-});
+ markdown: {
+ 
+     remarkPlugins: [remarkDirective, remarkCallout],
+ 
+  rehypePlugins: [
+  
+    rehypeRaw,
+  
+  ], 
+     shikiConfig: {
+ 
+       themes: {
+ 
+         light: 'github-light',
+ 
+         dark: 'github-dark'
+ 
+       },
+ 
+       transformers: [shikiToolbar()]
+ 
+     }
+ 
+   }
+ 
+ });

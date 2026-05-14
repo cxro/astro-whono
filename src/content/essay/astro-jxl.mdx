@@ -1,0 +1,24 @@
+---
+title: Building JXL into Sharp and Astro
+description: A comprehensive guide to building Sharp with JXL support.
+date: 2026-05-14
+badge: Astro
+tags: ["Astro", "Web Development", "Tutorial", "JXL", "Sharp"]
+draft: false
+---
+
+import { Picture } from 'astro:assets';
+
+import heroImage from '../../assets/Earth22.jpg';
+
+<Picture
+
+  src={heroImage}
+
+  formats={['jxl', 'webp']}
+
+  widths={[400, 800, 1200]}
+
+  alt="Earth from space"
+
+/>

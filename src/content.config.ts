@@ -93,12 +93,12 @@ const bitsAuthor = z.object({
 });
 
 const essay = defineCollection({
-  loader: glob({ pattern: '**/*.md', base: './src/content/essay' }),
+  loader: glob({ pattern: '**/*.{md,mdx}', base: './src/content/essay' }),
   schema: essaySchema
 });
 
 const bits = defineCollection({
-  loader: glob({ pattern: '**/*.md', base: './src/content/bits' }),
+  loader: glob({ pattern: '**/*.{md,mdx}', base: './src/content/bits' }),
   schema: z.object({
     // Bits can be untitled.
     title: z.string().optional(),
@@ -115,7 +115,7 @@ const bits = defineCollection({
 });
 
 const memo = defineCollection({
-  loader: glob({ pattern: '**/*.md', base: './src/content/memo' }),
+  loader: glob({ pattern: '**/*.{md,mdx}', base: './src/content/memo' }),
   schema: z.object({
     title: z.string(),
     subtitle: z.string().optional(),
