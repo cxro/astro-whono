@@ -1,6 +1,8 @@
 ---
 import Sidebar from '../components/Sidebar.astro';
 import UiIcon from '../components/UiIcon.astro';
+import PGPKeyCard from '../components/PGPKeyCard.astro';
+import pgpPublicKey from '../assets/pgp-public-key.asc?raw';
 import globalStylesHref from '../styles/global.css?url';
 import { hasSiteUrl } from '../../site.config.mjs';
 import { createWithBase } from '../utils/format';
@@ -109,7 +111,10 @@ const withBase = createWithBase(base);
       <main id="content" class="content" tabindex="-1">
         <div class="content__inner">
           <slot />
-          <footer class="site-footer">© {yearRange} {footerCopyright}</footer>
+          <footer class="site-footer">
+            <PGPKeyCard keyText={pgpPublicKey} />
+            <p>© {yearRange} {footerCopyright}</p>
+          </footer>
         </div>
       </main>
     </div>

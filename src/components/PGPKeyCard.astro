@@ -1,0 +1,340 @@
+---
+type MetaRow = {
+  label: string;
+  value: string;
+  full?: boolean;
+};
+
+type Props = {
+  eyebrow?: string;
+  title?: string;
+  keyText: string;
+  fingerprint?: string[];
+  meta?: MetaRow[];
+  keyLabel?: string;
+  copyLabel?: string;
+  cardId?: string;
+};
+
+const {
+  eyebrow = 'OpenPGP Public Key',
+  title = 'Paul Applegate — Post-Quantum OpenPGP Public Key',
+  keyText,
+  fingerprint = [
+    'EE57 5A22 CAE0 8A37 D0DD 2D18 B9CC 0997',
+    'E036 AFFF AA2F DE67 C28C 7E45 68CA 82B5'
+  ],
+  meta = [
+    { label: 'Primary Algorithm', value: 'SLH-DSA-SHAKE-256s' },
+    { label: 'Encryption Subkey', value: 'ML-KEM-1024 + X448' },
+    { label: 'Hash Algorithm', value: 'SHA3-512' },
+    { label: 'Profile', value: 'RFC 9580 (OpenPGP v6)' },
+    {
+      label: 'Compatibility',
+      value: 'Experimental post-quantum key; requires modern OpenPGP implementations.',
+      full: true
+    }
+  ],
+  keyLabel = 'ASCII-armored public key',
+  copyLabel = 'Copy Key',
+  cardId
+} = Astro.props as Props;
+
+const titleId = cardId ? `${cardId}-title` : 'pgp-key-title';
+const keyId = cardId ? `${cardId}-key` : 'pgp-public-key';
+const statusId = cardId ? `${cardId}-status` : 'pgp-copy-status';
+const trimmedKey = keyText.trim();
+const fingerprintLines = fingerprint.filter((line) => line && line.trim().length > 0);
+const metaRows = meta.filter((row) => row && row.label && row.value);
+---
+
+<section class="pgp-card" aria-labelledby={titleId} data-pgp-card>
+  <div class="pgp-card__header">
+    <div>
+      {eyebrow ? <p class="pgp-eyebrow">{eyebrow}</p> : null}
+      <h2 id={titleId} class="pgp-title">{title}</h2>
+    </div>
+
+    <button
+      class="pgp-copy-button"
+      type="button"
+      aria-label="Copy public key"
+      data-pgp-copy
+      data-copy-label={copyLabel}
+    >
+      {copyLabel}
+    </button>
+  </div>
+
+  {metaRows.length || fingerprintLines.length ? (
+    <dl class="pgp-meta" aria-label="Key details">
+      {metaRows.map((row) => (
+        <div class={`pgp-meta__row${row.full ? ' pgp-meta__row--full' : ''}`}>
+          <dt>{row.label}</dt>
+          <dd>{row.value}</dd>
+        </div>
+      ))}
+
+      {fingerprintLines.length ? (
+        <div class="pgp-meta__row pgp-meta__row--full">
+          <dt>Fingerprint (v6)</dt>
+          <dd class="pgp-fingerprint">
+            {fingerprintLines.map((line) => <span>{line}</span>)}
+          </dd>
+        </div>
+      ) : null}
+    </dl>
+  ) : null}
+
+  <div class="pgp-key-wrap">
+    <div class="pgp-key-toolbar">
+      <span class="pgp-key-label">{keyLabel}</span>
+      <span class="pgp-copy-status" id={statusId} role="status" aria-live="polite"></span>
+    </div>
+
+    <pre id={keyId} class="pgp-key-block" data-pgp-key><code>{trimmedKey}</code></pre>
+  </div>
+</section>
+
+<style>
+  .pgp-card {
+    --pgp-bg: #0f1115;
+    --pgp-panel: #151922;
+    --pgp-panel-2: #0c0f15;
+    --pgp-text: #e8edf5;
+    --pgp-muted: #a6b0c3;
+    --pgp-border: rgba(255, 255, 255, 0.12);
+    --pgp-border-strong: rgba(255, 255, 255, 0.18);
+    --pgp-accent: #8ab4ff;
+    --pgp-accent-2: #c9dcff;
+    --pgp-shadow: 0 18px 45px rgba(0, 0, 0, 0.28);
+    --pgp-radius: 20px;
+    --pgp-radius-sm: 12px;
+    --pgp-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+    --pgp-sans: Inter, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+
+    font-family: var(--pgp-sans);
+    color: var(--pgp-text);
+    background:
+      radial-gradient(circle at top right, rgba(138, 180, 255, 0.12), transparent 28%),
+      linear-gradient(180deg, var(--pgp-panel), var(--pgp-panel-2));
+    border: 1px solid var(--pgp-border);
+    border-radius: var(--pgp-radius);
+    box-shadow: var(--pgp-shadow);
+    padding: 1.5rem;
+    max-width: 860px;
+    margin: 2rem auto;
+  }
+
+  .pgp-card__header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 1rem;
+    margin-bottom: 1.25rem;
+  }
+
+  .pgp-eyebrow {
+    margin: 0 0 0.35rem;
+    color: var(--pgp-accent);
+    font-size: 0.8rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+
+  .pgp-title {
+    margin: 0;
+    font-size: clamp(1.25rem, 1rem + 1vw, 1.85rem);
+    line-height: 1.2;
+    letter-spacing: -0.02em;
+    text-wrap: balance;
+  }
+
+  .pgp-copy-button {
+    appearance: none;
+    border: 1px solid var(--pgp-border-strong);
+    background: rgba(255, 255, 255, 0.04);
+    color: var(--pgp-text);
+    padding: 0.72rem 1rem;
+    border-radius: 999px;
+    font: inherit;
+    font-weight: 600;
+    cursor: pointer;
+    transition:
+      transform 120ms ease,
+      background 120ms ease,
+      border-color 120ms ease,
+      color 120ms ease;
+    white-space: nowrap;
+  }
+
+  .pgp-copy-button:hover {
+    background: rgba(138, 180, 255, 0.12);
+    border-color: rgba(138, 180, 255, 0.45);
+    color: var(--pgp-accent-2);
+  }
+
+  .pgp-copy-button:active {
+    transform: translateY(1px);
+  }
+
+  .pgp-copy-button:focus-visible {
+    outline: 2px solid var(--pgp-accent);
+    outline-offset: 2px;
+  }
+
+  .pgp-meta {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.9rem 1rem;
+    margin: 0 0 1.4rem;
+  }
+
+  .pgp-meta__row {
+    margin: 0;
+    padding: 0.95rem 1rem;
+    border: 1px solid var(--pgp-border);
+    border-radius: 16px;
+    background: rgba(255, 255, 255, 0.025);
+  }
+
+  .pgp-meta__row--full {
+    grid-column: 1 / -1;
+  }
+
+  .pgp-meta dt {
+    margin: 0 0 0.35rem;
+    color: var(--pgp-muted);
+    font-size: 0.92rem;
+    font-weight: 600;
+  }
+
+  .pgp-meta dd {
+    margin: 0;
+    font-size: 1rem;
+    line-height: 1.55;
+  }
+
+  .pgp-fingerprint {
+    font-family: var(--pgp-mono);
+    font-size: 0.98rem;
+    line-height: 1.75;
+    letter-spacing: 0.03em;
+    word-break: break-word;
+  }
+
+  .pgp-fingerprint span {
+    display: block;
+  }
+
+  .pgp-key-wrap {
+    border: 1px solid var(--pgp-border);
+    border-radius: 18px;
+    overflow: hidden;
+    background: rgba(0, 0, 0, 0.22);
+  }
+
+  .pgp-key-toolbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: 0.8rem 1rem;
+    border-bottom: 1px solid var(--pgp-border);
+    background: rgba(255, 255, 255, 0.03);
+  }
+
+  .pgp-key-label {
+    color: var(--pgp-muted);
+    font-size: 0.92rem;
+    font-weight: 600;
+  }
+
+  .pgp-copy-status {
+    color: var(--pgp-accent-2);
+    font-size: 0.88rem;
+    min-height: 1.2em;
+    text-align: right;
+  }
+
+  .pgp-key-block {
+    margin: 0;
+    padding: 1.15rem 1rem 1.25rem;
+    font-family: var(--pgp-mono);
+    font-size: 0.95rem;
+    line-height: 1.65;
+    white-space: pre-wrap;
+    word-break: break-word;
+    overflow-x: auto;
+    color: #edf2ff;
+  }
+
+  .pgp-key-block code {
+    font-family: inherit;
+  }
+
+  @media (max-width: 700px) {
+    .pgp-card {
+      padding: 1rem;
+      border-radius: 16px;
+    }
+
+    .pgp-card__header {
+      flex-direction: column;
+      align-items: stretch;
+    }
+
+    .pgp-copy-button {
+      width: 100%;
+      justify-content: center;
+    }
+
+    .pgp-meta {
+      grid-template-columns: 1fr;
+    }
+
+    .pgp-key-toolbar {
+      flex-direction: column;
+      align-items: flex-start;
+    }
+
+    .pgp-copy-status {
+      text-align: left;
+    }
+  }
+</style>
+
+<script>
+  const cards = document.querySelectorAll<HTMLElement>('[data-pgp-card]');
+
+  cards.forEach((card) => {
+    const button = card.querySelector<HTMLButtonElement>('[data-pgp-copy]');
+    const keyEl = card.querySelector<HTMLElement>('[data-pgp-key]');
+    const status = card.querySelector<HTMLElement>('.pgp-copy-status');
+    if (!button || !keyEl) return;
+
+    const originalLabel = button.dataset.copyLabel ?? button.textContent ?? 'Copy Key';
+    let resetTimer: number | undefined;
+
+    const resetSoon = () => {
+      if (resetTimer) window.clearTimeout(resetTimer);
+      resetTimer = window.setTimeout(() => {
+        button.textContent = originalLabel;
+        if (status) status.textContent = '';
+      }, 1800);
+    };
+
+    button.addEventListener('click', async () => {
+      const text = (keyEl.textContent ?? '').trim();
+      try {
+        await navigator.clipboard.writeText(text);
+        button.textContent = 'Copied';
+        if (status) status.textContent = 'Public key copied to clipboard.';
+      } catch {
+        button.textContent = 'Copy failed';
+        if (status) status.textContent = 'Clipboard copy failed. You can still select and copy manually.';
+      }
+      resetSoon();
+    });
+  });
+</script>
