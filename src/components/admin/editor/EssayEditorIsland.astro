@@ -1,6 +1,7 @@
 ---
 import EditorShell from './EditorShell.svelte';
 import type { AdminEssayEditorValues } from '../../../lib/admin-console/content-shared';
+import type { EditorOutlineEssaySourceItem } from './editor-outline-helpers';
 
 type Props = {
   endpoint: string;
@@ -16,6 +17,7 @@ type Props = {
   revision: string;
   initialFrontmatter: AdminEssayEditorValues;
   initialBody: string;
+  essayOutlineItems?: EditorOutlineEssaySourceItem[];
   initialArticleInfoOpen?: boolean;
 };
 

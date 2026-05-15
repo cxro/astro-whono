@@ -22,6 +22,7 @@ import {
   resolveAdminContentEntrySourcePath,
   type AdminContentCollectionKey
 } from './content-shared';
+import { extractMarkdownOutline } from './editor-outline';
 
 export const ADMIN_PREVIEW_CODE_HIGHLIGHT_MODE = 'shiki-rehype' as const;
 
@@ -43,6 +44,7 @@ export type AdminMarkdownPreviewResult = {
 
 const previewCodeHighlightCache: NonNullable<RehypeShikiOptions['cache']> = new Map();
 const PREVIEW_IMAGE_EXTENSIONS = new Set(['.avif', '.gif', '.jpg', '.jpeg', '.png', '.svg', '.webp']);
+const PREVIEW_OUTLINE_KEY_ATTR = 'data-admin-outline-key';
 
 const PREVIEW_SHIKI_LANGUAGES: NonNullable<RehypeShikiOptions['langs']> = [
   'astro',
@@ -134,12 +136,41 @@ const createPreviewImageSrcPlugin = (sourceFilePath: string | null): Plugin<[], 
   };
 };
 
-const createPreviewProcessor = (sourceFilePath: string | null) =>
+const createPreviewOutlineAnchorPlugin = (source: string): Plugin<[], Root> => {
+  const outlineItems = extractMarkdownOutline(source);
+  const outlineKeyByPosition = new Map(outlineItems.map((item) => [item.key, item.key]));
+  const outlineKeyByLine = new Map(outlineItems.map((item) => [item.line, item.key]));
+
+  return () => (tree) => {
+    if (outlineItems.length === 0) return;
+
+    visit(tree, 'element', (node: Element) => {
+      if (node.tagName !== 'h2' && node.tagName !== 'h3') return;
+
+      const start = node.position?.start;
+      const positionKey = typeof start?.line === 'number' && typeof start.offset === 'number'
+        ? `${start.line}:${start.offset}`
+        : '';
+      const outlineKey = positionKey
+        ? outlineKeyByPosition.get(positionKey) ?? outlineKeyByLine.get(start?.line ?? 0)
+        : outlineKeyByLine.get(start?.line ?? 0);
+      if (!outlineKey) return;
+
+      node.properties = {
+        ...node.properties,
+        [PREVIEW_OUTLINE_KEY_ATTR]: outlineKey
+      };
+    });
+  };
+};
+
+const createPreviewProcessor = (sourceFilePath: string | null, source: string) =>
   unified()
     .use(remarkParse)
     .use(remarkDirective)
     .use(remarkCallout)
     .use(remarkRehype, { allowDangerousHtml: true })
+    .use(createPreviewOutlineAnchorPlugin(source))
     .use(rehypeShiki, previewShikiOptions)
     .use(rehypeRaw)
     .use(createPreviewImageSrcPlugin(sourceFilePath))
@@ -155,7 +186,7 @@ export const renderAdminMarkdownPreview = async ({
 }: AdminMarkdownPreviewInput): Promise<AdminMarkdownPreviewResult> => {
   const startedAt = performance.now();
   const sourceFilePath = entryId ? resolveAdminContentEntrySourcePath(collection, entryId) : null;
-  const previewProcessor = createPreviewProcessor(sourceFilePath);
+  const previewProcessor = createPreviewProcessor(sourceFilePath, source);
   const file = await previewProcessor.process(source);
 
   return {

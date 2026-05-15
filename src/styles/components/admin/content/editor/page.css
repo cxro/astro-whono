@@ -34,18 +34,19 @@ body.admin-page--content-editor .content {
 
 :root[data-admin-sidebar='collapsed'] body.admin-page--content-editor .content {
   --admin-editor-page-padding-top: 28px;
+  --admin-editor-page-padding-bottom: 28px;
 }
 
 body.admin-page--content-editor {
-  --admin-editor-shell-max-inline-size: 2080px;
-
   overflow: hidden;
 }
 
 body.admin-page--content-editor .shell {
   min-height: 0;
   height: 100dvh;
-  max-width: min(var(--admin-editor-shell-max-inline-size), 100vw);
+  width: 100vw;
+  max-width: none;
+  margin-inline: 0;
   overflow: hidden;
 }
 

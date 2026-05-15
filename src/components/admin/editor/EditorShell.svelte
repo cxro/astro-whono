@@ -1,4 +1,5 @@
 <script lang="ts">
+import { tick } from 'svelte';
 import type { AdminEssayEditorValues } from '../../../lib/admin-console/content-shared';
 import {
   cloneFrontmatter,
@@ -27,6 +28,7 @@ import { flattenEntryIdToSlug } from '../../../utils/slug-rules';
 import ArticleInfoDialog from './ArticleInfoDialog.svelte';
 import BodyEditor from './BodyEditor.svelte';
 import EditorActionMenu from './EditorActionMenu.svelte';
+import EditorOutlinePanel from './EditorOutlinePanel.svelte';
 import EditorToolbar from './EditorToolbar.svelte';
 import ImageInsertDialog from './ImageInsertDialog.svelte';
 import {
@@ -44,9 +46,12 @@ import {
   getScrollRatio,
   getWriteFieldLabel,
   markScrollElementScrolling,
+  normalizeEditorTextareaValue,
   readStoredEditorLayout,
+  readStoredEditorOutlineState,
   readStoredWriteFeedback,
   storeEditorLayout,
+  storeEditorOutlineState,
   storeWriteFeedback,
   type EditorLayoutMode,
   type EditorPaneMode,
@@ -54,23 +59,45 @@ import {
   type EditorViewMode,
   type StatusState
 } from './editor-shell-helpers';
+import {
+  buildEssayOutlineListItems,
+  extractMarkdownOutline,
+  type EditorOutlineEssaySourceItem,
+  type EditorOutlineTab,
+  type MarkdownOutlineItem
+} from './editor-outline-helpers';
+import {
+  scrollPreviewToOutlineKey as scrollPreviewElementToOutlineKey,
+  scrollTextareaToOutlineItem as scrollTextareaElementToOutlineItem
+} from './editor-outline-scroll';
 import { type MarkdownHeadingLevel, type MarkdownToolbarCommand, type MarkdownToolId } from './markdown-tools';
 import PreviewStatusBar from './PreviewStatusBar.svelte';
 import PreviewPane from './PreviewPane.svelte';
 
 const LEAVE_CONFIRM_MESSAGE = '当前有未保存更改，确定要离开此页吗？';
 const ARTICLE_INFO_TRIGGER_SELECTOR = '[data-admin-article-info-trigger]';
+const ADMIN_SIDEBAR_TOGGLE_ID = 'admin-sidebar-toggle';
 const PAGE_ACTIONS_HOST_SELECTOR = '[data-admin-editor-page-actions-host]';
 const FRONTMATTER_PANEL_ID = 'admin-editor-frontmatter-panel';
+const OUTLINE_PANEL_ID = 'admin-editor-outline-panel';
 const FRONTMATTER_ISSUE_PATHS = new Set(['title', 'date', 'publishedAt', 'description', 'tags', 'slug', 'badge', 'cover']);
 const EDITOR_LAYOUT_STORAGE_KEY = 'astro-whono:admin-editor:layout';
+const EDITOR_OUTLINE_STATE_STORAGE_KEY = 'astro-whono:admin-editor:outline-state';
+const PREVIEW_OUTLINE_KEY_ATTR = 'data-admin-outline-key';
 // 无显式偏好时优先 split，窄容器视觉回退由 effective view 派生。
 const DEFAULT_EDITOR_LAYOUT_INTENT: EditorLayoutMode = 'split';
 // 940px 是双 pane 与工具按钮保持可读后的最低稳定宽度；CSS 只消费 data-effective-view。
 const EDITOR_SPLIT_MIN_INLINE_SIZE = 940;
+const EDITOR_OUTLINE_VISIBLE_MIN_INLINE_SIZE = {
+  // 目录是辅助导航；split + both 下允许主工作区轻微压缩，低于视觉验收线再收起。
+  splitBoth: 996,
+  // 单区/stacked 只有一个主要内容面板，可以比双栏模式更晚收起目录。
+  linear: 900
+} as const;
 const WRITE_FEEDBACK_STORAGE_PREFIX = 'astro-whono:admin-editor:write-feedback:';
 const WRITE_FEEDBACK_STORAGE_TTL_MS = 60 * 1000;
 const SCROLLBAR_VISIBILITY_TIMEOUT_MS = 800;
+const OUTLINE_TARGET_SCROLL_OFFSET_RATIO = 0.18;
 
 type Props = {
   endpoint: string;
@@ -86,6 +113,7 @@ type Props = {
   revision: string;
   initialFrontmatter: AdminEssayEditorValues;
   initialBody: string;
+  essayOutlineItems?: EditorOutlineEssaySourceItem[];
   initialArticleInfoOpen?: boolean;
 };
 
@@ -103,6 +131,7 @@ let {
   revision,
   initialFrontmatter,
   initialBody,
+  essayOutlineItems = [],
   initialArticleInfoOpen = false
 }: Props = $props();
 
@@ -111,7 +140,7 @@ const slugPlaceholder = $derived(defaultPublicSlug || flattenEntryIdToSlug(entry
 const createInitialSnapshot = () => ({
   revision,
   frontmatter: cloneFrontmatter(initialFrontmatter),
-  body: initialBody,
+  body: normalizeEditorTextareaValue(initialBody),
   articleInfoOpen: initialArticleInfoOpen
 });
 
@@ -136,11 +165,17 @@ let previewError = $state('');
 let explicitEditorLayout = $state<EditorLayoutMode | null>(null);
 let editorViewMode = $state<EditorViewMode>('both');
 let compactPaneMode = $state<EditorPaneMode>('edit');
+let outlineWantedOpen = $state(false);
+let outlineActiveTab = $state<EditorOutlineTab>('headings');
 let editorLayoutRestored = false;
+let editorOutlineStateRestored = false;
 let previewRequestId = 0;
 let previewTimer: number | null = null;
 let activePreviewAbortController: AbortController | null = null;
 let latestPreviewSource = '';
+let adminSidebarExpanded = $state(false);
+let outlineSidebarCollapseAttempted = false;
+let outlineSidebarCollapseCheckFrame: number | null = null;
 let previewInitialized = false;
 let toolbarCommandId = 0;
 let toolbarCommand = $state<MarkdownToolbarCommand | null>(null);
@@ -156,10 +191,57 @@ let syncScrollEnabled = $state(true);
 let writeFeedbackRestored = false;
 let lastScrollSource: EditorScrollSource = 'body';
 let pendingScrollSyncSource: EditorScrollSource | null = null;
+let pendingPreviewOutlineKey = $state<string | null>(null);
+let pendingPreviewOutlineJumpId = 0;
 let scrollSyncFrame: number | null = null;
 let scrollSyncReleaseFrame: number | null = null;
 let applyingScrollSync = false;
 const scrollbarVisibilityTimers = new Map<HTMLElement, number>();
+
+const getOutlineMinInlineSize = (layout: EditorLayoutMode, viewMode: EditorViewMode): number =>
+  layout === 'split' && viewMode === 'both'
+    ? EDITOR_OUTLINE_VISIBLE_MIN_INLINE_SIZE.splitBoth
+    : EDITOR_OUTLINE_VISIBLE_MIN_INLINE_SIZE.linear;
+
+const isOutlineAvailableForInlineSize = (inlineSize: number): boolean => {
+  const splitBothWouldBeCompact =
+    editorLayout === 'split'
+    && editorViewMode === 'both'
+    && inlineSize > 0
+    && inlineSize < EDITOR_SPLIT_MIN_INLINE_SIZE;
+  return !splitBothWouldBeCompact && inlineSize >= getOutlineMinInlineSize(editorLayout, editorViewMode);
+};
+
+const syncAdminSidebarExpandedState = () => {
+  if (typeof document === 'undefined') return;
+  adminSidebarExpanded = document.documentElement.dataset.adminSidebar === 'expanded';
+};
+
+const collapseExpandedAdminSidebar = (): boolean => {
+  if (typeof document === 'undefined') return false;
+  const root = document.documentElement;
+  if (root.dataset.adminSidebar !== 'expanded') return false;
+
+  const button = document.getElementById(ADMIN_SIDEBAR_TOGGLE_ID);
+  if (!(button instanceof HTMLButtonElement)) return false;
+
+  button.click();
+  syncAdminSidebarExpandedState();
+  return root.getAttribute('data-admin-sidebar') === 'collapsed';
+};
+
+const queueOutlineAvailabilityCheck = () => {
+  if (typeof window === 'undefined') return;
+  if (outlineSidebarCollapseCheckFrame !== null) {
+    window.cancelAnimationFrame(outlineSidebarCollapseCheckFrame);
+  }
+
+  outlineSidebarCollapseCheckFrame = window.requestAnimationFrame(() => {
+    outlineSidebarCollapseCheckFrame = null;
+    const nextInlineSize = editorShellEl?.getBoundingClientRect().width ?? editorShellInlineSize;
+    editorShellInlineSize = nextInlineSize;
+  });
+};
 
 const bodyLineCount = $derived(body.length === 0 ? 1 : body.split(/\r\n|\r|\n/).length);
 const bodyCharCount = $derived(body.length);
@@ -180,6 +262,8 @@ const stackedCanReturnToCompact = $derived(
   editorLayout === 'stacked' && editorViewMode === 'both' && splitWidthIsCompact
 );
 const effectiveViewMode: EditorViewMode = $derived(splitBothIsCompact ? compactPaneMode : editorViewMode);
+const outlineAvailable = $derived(isOutlineAvailableForInlineSize(editorShellInlineSize));
+const outlineVisible = $derived(outlineWantedOpen && outlineAvailable);
 const singleViewActive = $derived(editorViewMode !== 'both');
 const editorLayoutToggleLabel = $derived(
   splitBothIsCompact
@@ -204,6 +288,8 @@ const editViewToggleLabel = $derived(
 const previewViewToggleLabel = $derived(editorViewMode === 'preview' ? '取消仅预览视图' : '仅显示预览区');
 const compactPaneToggleText = $derived(compactPaneMode === 'edit' ? '预览' : '编辑');
 const compactPaneToggleLabel = $derived(compactPaneMode === 'edit' ? '显示预览区' : '显示编辑区');
+const outlineToggleLabel = $derived(outlineWantedOpen ? '关闭目录' : '打开目录');
+const outlineControlDisabled = $derived(!outlineWantedOpen && !outlineAvailable && !adminSidebarExpanded);
 const exportHref = $derived(buildContentExportHref(exportEndpoint, collection, entryId));
 const scrollSyncAvailable = $derived(
   effectiveViewMode === 'both' && Boolean(bodyScrollElement && previewScrollElement)
@@ -213,6 +299,12 @@ const scrollSyncToggleLabel = $derived(
 );
 const scrollSyncControlDisabled = $derived(!scrollSyncAvailable);
 const scrollTopControlDisabled = $derived(!bodyScrollElement && !previewScrollElement);
+const markdownOutlineItems = $derived(
+  outlineVisible && outlineActiveTab === 'headings'
+    ? extractMarkdownOutline(body)
+    : []
+);
+const essayOutlineListItems = $derived(buildEssayOutlineListItems(essayOutlineItems, entryId));
 
 const setStatus = (state: StatusState, text: string) => {
   statusState = state;
@@ -265,6 +357,38 @@ const toggleCompactPaneMode = () => {
   compactPaneMode = compactPaneMode === 'edit' ? 'preview' : 'edit';
 };
 
+const storeCurrentOutlineState = (state: Partial<{ open: boolean; activeTab: EditorOutlineTab }> = {}) => {
+  storeEditorOutlineState(EDITOR_OUTLINE_STATE_STORAGE_KEY, {
+    open: state.open ?? outlineWantedOpen,
+    activeTab: state.activeTab ?? outlineActiveTab
+  });
+};
+
+const toggleOutline = () => {
+  if (outlineWantedOpen) {
+    outlineWantedOpen = false;
+    storeCurrentOutlineState({ open: false });
+    return;
+  }
+
+  outlineWantedOpen = true;
+  storeCurrentOutlineState({ open: true });
+
+  if (outlineAvailable) {
+    return;
+  }
+
+  if (collapseExpandedAdminSidebar()) {
+    outlineSidebarCollapseAttempted = true;
+    queueOutlineAvailabilityCheck();
+  }
+};
+
+const setOutlineTab = (tab: EditorOutlineTab) => {
+  outlineActiveTab = tab;
+  storeCurrentOutlineState({ activeTab: tab });
+};
+
 const applyToolbarTool = (toolId: MarkdownToolId) => {
   if (busy) return;
   if (toolId === 'image') {
@@ -310,15 +434,24 @@ const cancelQueuedScrollSync = () => {
   pendingScrollSyncSource = null;
 };
 
-const releaseScrollSyncGuard = () => {
+const releaseScrollSyncGuard = (frameDelay = 1) => {
   if (scrollSyncReleaseFrame !== null) {
     window.cancelAnimationFrame(scrollSyncReleaseFrame);
   }
 
-  scrollSyncReleaseFrame = window.requestAnimationFrame(() => {
+  let remainingFrames = Math.max(1, frameDelay);
+  const releaseOnFrame = () => {
+    remainingFrames -= 1;
+    if (remainingFrames > 0) {
+      scrollSyncReleaseFrame = window.requestAnimationFrame(releaseOnFrame);
+      return;
+    }
+
     applyingScrollSync = false;
     scrollSyncReleaseFrame = null;
-  });
+  };
+
+  scrollSyncReleaseFrame = window.requestAnimationFrame(releaseOnFrame);
 };
 
 const applyScrollSync = (source: EditorScrollSource) => {
@@ -387,6 +520,99 @@ const scrollEditorPanesToTop = () => {
     element.scrollTop = 0;
   });
   releaseScrollSyncGuard();
+};
+
+const waitForAnimationFrame = (): Promise<void> =>
+  new Promise((resolve) => {
+    window.requestAnimationFrame(() => resolve());
+  });
+
+const scrollPreviewToOutlineTarget = (outlineKey: string): boolean => {
+  const previewElement = previewScrollElement;
+  const scrolled = scrollPreviewElementToOutlineKey(
+    previewElement,
+    outlineKey,
+    PREVIEW_OUTLINE_KEY_ATTR,
+    { targetOffsetRatio: OUTLINE_TARGET_SCROLL_OFFSET_RATIO }
+  );
+  if (!scrolled || !previewElement) return false;
+
+  markScrollElementScrolling(scrollbarVisibilityTimers, previewElement, SCROLLBAR_VISIBILITY_TIMEOUT_MS);
+  return true;
+};
+
+const scrollTextareaToOutlineTarget = (item: MarkdownOutlineItem): boolean => {
+  const textarea = bodyScrollElement;
+  const scrolled = scrollTextareaElementToOutlineItem(
+    textarea,
+    body,
+    item,
+    { targetOffsetRatio: OUTLINE_TARGET_SCROLL_OFFSET_RATIO }
+  );
+  if (!scrolled || !textarea) return false;
+
+  markScrollElementScrolling(scrollbarVisibilityTimers, textarea, SCROLLBAR_VISIBILITY_TIMEOUT_MS);
+  return true;
+};
+
+const handleOutlineHeadingSelect = (item: MarkdownOutlineItem) => {
+  const shouldScrollBody = effectiveViewMode !== 'preview';
+  const shouldScrollPreview = effectiveViewMode !== 'edit';
+  let bodyScrolled = false;
+  let previewScrolled = false;
+
+  cancelQueuedScrollSync();
+  applyingScrollSync = true;
+
+  try {
+    if (shouldScrollPreview) {
+      previewScrolled = scrollPreviewToOutlineTarget(item.key);
+      pendingPreviewOutlineKey = previewScrolled ? null : item.key;
+    }
+
+    if (shouldScrollBody) {
+      bodyScrolled = scrollTextareaToOutlineTarget(item);
+    }
+  } finally {
+    releaseScrollSyncGuard(2);
+  }
+
+  if (bodyScrolled) {
+    lastScrollSource = 'body';
+    return;
+  }
+
+  if (previewScrolled) {
+    lastScrollSource = 'preview';
+  }
+};
+
+const runPendingPreviewOutlineJump = async (outlineKey: string) => {
+  const jumpId = pendingPreviewOutlineJumpId + 1;
+  pendingPreviewOutlineJumpId = jumpId;
+
+  await tick();
+  await waitForAnimationFrame();
+
+  if (
+    jumpId !== pendingPreviewOutlineJumpId
+    || pendingPreviewOutlineKey !== outlineKey
+    || previewBusy
+    || effectiveViewMode === 'edit'
+  ) {
+    return;
+  }
+
+  cancelQueuedScrollSync();
+  applyingScrollSync = true;
+  const scrolled = scrollPreviewToOutlineTarget(outlineKey);
+  if (scrolled) {
+    pendingPreviewOutlineKey = null;
+    lastScrollSource = 'preview';
+  } else if (latestPreviewSource === body) {
+    pendingPreviewOutlineKey = null;
+  }
+  releaseScrollSyncGuard(2);
 };
 
 const closeFrontmatterPanel = () => {
@@ -478,7 +704,7 @@ const requestContentWrite = async () => {
     const nextBaseline = latestValues ? cloneFrontmatter(latestValues) : cloneFrontmatter(frontmatter);
     frontmatter = cloneFrontmatter(nextBaseline);
     baselineFrontmatter = cloneFrontmatter(nextBaseline);
-    baselineBody = latestBody ?? body;
+    baselineBody = latestBody ? normalizeEditorTextareaValue(latestBody) : body;
     body = baselineBody;
 
     const nextStatusState: StatusState = result.changed ? 'ok' : 'idle';
@@ -724,6 +950,17 @@ $effect(() => {
 });
 
 $effect(() => {
+  if (editorOutlineStateRestored) return;
+  editorOutlineStateRestored = true;
+
+  const storedOutlineState = readStoredEditorOutlineState(EDITOR_OUTLINE_STATE_STORAGE_KEY);
+  if (!storedOutlineState) return;
+
+  outlineWantedOpen = storedOutlineState.open;
+  outlineActiveTab = storedOutlineState.activeTab;
+});
+
+$effect(() => {
   const shellEl = editorShellEl;
   if (!shellEl || typeof ResizeObserver === 'undefined') return;
 
@@ -825,7 +1062,34 @@ $effect(() => {
 });
 
 $effect(() => {
+  const outlineKey = pendingPreviewOutlineKey;
+  if (!outlineKey || previewBusy || effectiveViewMode === 'edit') return;
+
+  void runPendingPreviewOutlineJump(outlineKey);
+});
+
+$effect(() => {
+  if (typeof document === 'undefined' || typeof MutationObserver === 'undefined') return;
+
+  const root = document.documentElement;
+  syncAdminSidebarExpandedState();
+  const observer = new MutationObserver(syncAdminSidebarExpandedState);
+  observer.observe(root, {
+    attributes: true,
+    attributeFilter: ['data-admin-sidebar']
+  });
+
   return () => {
+    observer.disconnect();
+  };
+});
+
+$effect(() => {
+  return () => {
+    if (outlineSidebarCollapseCheckFrame !== null) {
+      window.cancelAnimationFrame(outlineSidebarCollapseCheckFrame);
+      outlineSidebarCollapseCheckFrame = null;
+    }
     cancelQueuedScrollSync();
     if (scrollSyncReleaseFrame !== null) {
       window.cancelAnimationFrame(scrollSyncReleaseFrame);
@@ -849,6 +1113,24 @@ $effect(() => {
 $effect(() => {
   if (frontmatterIssueCount > 0 && !frontmatterPanelOpen) {
     openFrontmatterPanel();
+  }
+});
+
+$effect(() => {
+  if (!outlineWantedOpen) {
+    outlineSidebarCollapseAttempted = false;
+    return;
+  }
+
+  if (outlineAvailable) {
+    outlineSidebarCollapseAttempted = false;
+    return;
+  }
+
+  if (!outlineSidebarCollapseAttempted && collapseExpandedAdminSidebar()) {
+    outlineSidebarCollapseAttempted = true;
+    queueOutlineAvailabilityCheck();
+    return;
   }
 });
 
@@ -886,9 +1168,15 @@ $effect(() => {
   data-layout={editorLayout}
   data-view={editorViewMode}
   data-effective-view={effectiveViewMode}
+  data-outline={outlineVisible ? 'open' : 'closed'}
 >
   <EditorToolbar
     {busy}
+    outlineOpen={outlineWantedOpen}
+    {outlineVisible}
+    {outlineToggleLabel}
+    {outlineControlDisabled}
+    outlinePanelId={OUTLINE_PANEL_ID}
     editorLayoutIsSplit={editorLayout === 'split'}
     {editorLayoutToggleLabel}
     {editorLayoutToggleIcon}
@@ -902,6 +1190,7 @@ $effect(() => {
     {effectiveViewMode}
     onApplyTool={applyToolbarTool}
     onApplyHeading={applyHeadingLevel}
+    onToggleOutline={toggleOutline}
     onToggleLayout={toggleEditorLayout}
     onToggleView={toggleEditorViewMode}
     onReturnToBothView={returnToBothView}
@@ -958,6 +1247,16 @@ $effect(() => {
         />
       </div>
     </div>
+    {#if outlineVisible}
+      <EditorOutlinePanel
+        panelId={OUTLINE_PANEL_ID}
+        activeTab={outlineActiveTab}
+        headings={markdownOutlineItems}
+        essays={essayOutlineListItems}
+        onTabChange={setOutlineTab}
+        onHeadingSelect={handleOutlineHeadingSelect}
+      />
+    {/if}
   </div>
 
   <ArticleInfoDialog

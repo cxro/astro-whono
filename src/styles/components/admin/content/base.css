@@ -133,8 +133,8 @@ button.admin-content-menu-item {
 }
 
 button.admin-content-menu-item:disabled {
-  color: var(--faint);
-  cursor: wait;
+  color: var(--admin-control-text-disabled);
+  cursor: not-allowed;
 }
 
 .admin-content-menu-item:not(.is-disabled):not(:disabled):hover,
@@ -148,7 +148,7 @@ button.admin-content-menu-item:disabled {
 }
 
 .admin-content-menu-item--danger:not(.is-disabled):not(:disabled) {
-  color: var(--admin-status-danger-text);
+  color: var(--admin-error-accent);
 }
 
 .admin-content-menu-item .admin-icon {

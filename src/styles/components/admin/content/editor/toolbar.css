@@ -110,6 +110,7 @@
     inset 0 1px 0 color-mix(in srgb, var(--bg) 32%, transparent);
 }
 
+.admin-editor-outline-toggle,
 .admin-editor-layout-toggle,
 .admin-editor-view-toggle {
   display: inline-grid;
@@ -122,8 +123,10 @@
   cursor: pointer;
 }
 
+.admin-editor-outline-toggle:hover,
 .admin-editor-layout-toggle:hover,
 .admin-editor-view-toggle:hover,
+.admin-editor-outline-toggle[aria-pressed='true'],
 .admin-editor-layout-toggle[aria-pressed='true'],
 .admin-editor-view-toggle[aria-pressed='true'] {
   color: var(--text);
@@ -206,11 +209,13 @@
   box-shadow: inset 0 0 0 1px var(--admin-editor-toolbar-button-focus-ring);
 }
 
+.admin-editor-outline-toggle::before,
 .admin-editor-layout-toggle::before,
 .admin-editor-view-toggle::before {
   display: none;
 }
 
+.admin-editor-outline-toggle:focus-visible,
 .admin-editor-layout-toggle:focus-visible,
 .admin-editor-view-toggle:focus-visible {
   outline: 1px solid color-mix(in srgb, var(--admin-focus-border) 42%, transparent);

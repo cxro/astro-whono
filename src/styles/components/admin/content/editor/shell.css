@@ -5,6 +5,8 @@
 .admin-editor-shell {
   --admin-editor-shell-section-gap: 14px;
   --admin-editor-shell-edge-gap: 10px;
+  --admin-editor-outline-inline-size: 224px;
+  --admin-editor-outline-gap-inline-size: 8px;
   --admin-editor-shell-divider: color-mix(in srgb, var(--border) 76%, transparent);
   --admin-editor-shell-focus-divider: color-mix(in srgb, var(--admin-focus-border) 62%, var(--border) 38%);
   --admin-editor-body-max-inline-size: 760px;
@@ -51,6 +53,11 @@
   min-height: 0;
   height: 100%;
   min-width: 0;
+}
+
+.admin-editor-shell[data-outline='open'] .admin-editor-shell__layout {
+  grid-template-columns: minmax(0, 1fr) var(--admin-editor-outline-inline-size);
+  gap: var(--admin-editor-outline-gap-inline-size);
 }
 
 .admin-editor-shell__format-row {

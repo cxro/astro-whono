@@ -1,0 +1,192 @@
+/* Admin Content Editor Outline
+   承载 essay 编辑器右侧目录面板、tab 与列表行；面板作为布局列参与 grid，不作为 overlay。
+*/
+
+.admin-editor-outline-panel {
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr);
+  min-width: 0;
+  min-height: 0;
+  overflow: hidden;
+  border-inline-start: 1px solid var(--admin-editor-shell-divider);
+  background: color-mix(in srgb, var(--bg) 96%, var(--panel) 4%);
+}
+
+.admin-editor-outline-panel__tabs {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 2px;
+  padding: 0;
+  border-bottom: 1px solid var(--admin-editor-shell-divider);
+}
+
+.admin-editor-outline-panel__tab {
+  min-width: 0;
+  min-height: 26px;
+  padding: 0 6px;
+  border: 0;
+  border-radius: 4px;
+  appearance: none;
+  background: transparent;
+  color: var(--faint);
+  font: inherit;
+  font-size: var(--admin-text-sm);
+  font-weight: 700;
+  line-height: 1;
+  letter-spacing: 0;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.admin-editor-outline-panel__tab:hover,
+.admin-editor-outline-panel__tab:focus-visible,
+.admin-editor-outline-panel__tab.is-active {
+  background: var(--admin-row-hover-bg);
+  color: var(--text);
+}
+
+.admin-editor-outline-panel__tab:focus-visible {
+  outline: none;
+  box-shadow: var(--admin-focus-shadow);
+}
+
+.admin-editor-outline-panel__body {
+  min-width: 0;
+  min-height: 0;
+  padding: 8px 0 0 10px;
+  overflow: auto;
+}
+
+.admin-editor-outline-panel__list {
+  display: grid;
+  gap: 2px;
+  min-width: 0;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.admin-editor-outline-panel__heading-item,
+.admin-editor-outline-panel__essay-item {
+  min-width: 0;
+}
+
+.admin-editor-outline-panel__heading-item[data-level='3'] {
+  padding-inline-start: 14px;
+}
+
+.admin-editor-outline-panel__heading-button,
+.admin-editor-outline-panel__essay-link {
+  display: grid;
+  grid-template-columns: 14px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 6px;
+  width: 100%;
+  min-width: 0;
+  min-height: 31px;
+  padding: 5px 6px 5px 4px;
+  border: 1px solid transparent;
+  border-radius: 4px;
+  appearance: none;
+  background: transparent;
+  color: var(--muted);
+  font: inherit;
+  font-size: var(--admin-text-sm);
+  line-height: 1.4;
+  letter-spacing: 0;
+  text-align: left;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.admin-editor-outline-panel__essay-link {
+  grid-template-columns: minmax(0, 1fr);
+  align-items: start;
+  gap: 1px;
+  padding: 5px 6px;
+}
+
+.admin-editor-outline-panel__heading-button:hover,
+.admin-editor-outline-panel__heading-button:focus-visible,
+.admin-editor-outline-panel__essay-link:hover,
+.admin-editor-outline-panel__essay-link:focus-visible,
+.admin-editor-outline-panel__essay-link.is-active {
+  border-color: color-mix(in srgb, var(--admin-row-border) 64%, transparent);
+  background: var(--admin-row-hover-bg);
+  color: var(--text);
+}
+
+.admin-editor-outline-panel__heading-button:focus-visible,
+.admin-editor-outline-panel__essay-link:focus-visible {
+  outline: none;
+  box-shadow: var(--admin-focus-shadow);
+}
+
+.admin-editor-outline-panel__essay-link.is-active {
+  cursor: default;
+}
+
+.admin-editor-outline-panel__heading-marker {
+  display: grid;
+  place-items: center;
+  width: 14px;
+  height: 14px;
+  color: var(--faint);
+}
+
+.admin-editor-outline-panel__heading-marker svg {
+  display: block;
+}
+
+.admin-editor-outline-panel__heading-dot {
+  width: 4px;
+  height: 4px;
+  border-radius: 999px;
+  background: currentColor;
+}
+
+.admin-editor-outline-panel__heading-button:hover .admin-editor-outline-panel__heading-marker,
+.admin-editor-outline-panel__heading-button:focus-visible .admin-editor-outline-panel__heading-marker {
+  color: var(--text);
+}
+
+.admin-editor-outline-panel__heading-label,
+.admin-editor-outline-panel__essay-title,
+.admin-editor-outline-panel__essay-meta {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.admin-editor-outline-panel__heading-label {
+  font-weight: 600;
+}
+
+.admin-editor-outline-panel__essay-title {
+  font-weight: 500;
+}
+
+.admin-editor-outline-panel__essay-link.is-active .admin-editor-outline-panel__essay-title {
+  font-weight: 600;
+}
+
+.admin-editor-outline-panel__heading-item[data-level='3'] .admin-editor-outline-panel__heading-label {
+  font-weight: 500;
+}
+
+.admin-editor-outline-panel__line,
+.admin-editor-outline-panel__essay-meta {
+  color: var(--faint);
+  font-family: var(--admin-font-mono);
+  font-size: var(--admin-text-2xs);
+  line-height: 1.25;
+}
+
+.admin-editor-outline-panel__empty {
+  margin: 0;
+  padding: 8px 6px;
+  color: var(--faint);
+  font-size: var(--admin-text-xs);
+  line-height: 1.55;
+}

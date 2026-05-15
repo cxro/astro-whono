@@ -58,6 +58,34 @@ describe('admin preview api', () => {
     expect(result.html).toContain('<code class="language-ts">');
   });
 
+  it('annotates markdown H2 and H3 preview nodes with source outline keys', async () => {
+    const { renderAdminMarkdownPreview } = await import('../src/lib/admin-console/preview');
+    const { extractMarkdownOutline } = await import('../src/lib/admin-console/editor-outline');
+    const source = [
+      '## Same',
+      '',
+      '<h2>Raw heading</h2>',
+      '',
+      '### Child',
+      '',
+      '## Same'
+    ].join('\n');
+    const [first, child, second] = extractMarkdownOutline(source);
+    expect(first).toBeDefined();
+    expect(child).toBeDefined();
+    expect(second).toBeDefined();
+
+    const result = await renderAdminMarkdownPreview({
+      collection: 'essay',
+      source
+    });
+
+    expect(result.html).toContain(`<h2 data-admin-outline-key="${first!.key}">Same</h2>`);
+    expect(result.html).toContain('<h2>Raw heading</h2>');
+    expect(result.html).toContain(`<h3 data-admin-outline-key="${child!.key}">Child</h3>`);
+    expect(result.html).toContain(`<h2 data-admin-outline-key="${second!.key}">Same</h2>`);
+  });
+
   it('renders representative existing content structures', async () => {
     const { renderAdminMarkdownPreview } = await import('../src/lib/admin-console/preview');
     const { splitMarkdownFrontmatter } = await import('../src/lib/admin-console/frontmatter');

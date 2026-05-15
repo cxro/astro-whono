@@ -48,6 +48,8 @@ export const sanitizeSchema = {
       'data-state'
     ],
     a: mergeAttrs(getSchemaAttrs('a'), ['target', 'rel']),
+    h2: mergeAttrs(getSchemaAttrs('h2'), ['dataAdminOutlineKey', 'data-admin-outline-key']),
+    h3: mergeAttrs(getSchemaAttrs('h3'), ['dataAdminOutlineKey', 'data-admin-outline-key']),
     img: mergeAttrs(getSchemaAttrs('img'), ['loading', 'decoding', 'width', 'height']),
     source: mergeAttrs(getSchemaAttrs('source'), ['srcset', 'srcSet', 'type', 'media', 'sizes']),
     ul: [['className', 'gallery', 'cols-2', 'cols-3', 'contains-task-list']],

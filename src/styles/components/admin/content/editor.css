@@ -10,6 +10,7 @@
 @import "./editor/image-insert.css";
 @import "./editor/workspace.css";
 @import "./editor/toolbar.css";
+@import "./editor/outline.css";
 @import "./editor/pane-content.css";
 @import "./editor/layout-modes.css";
 @import "./editor/bits-image-row.css";

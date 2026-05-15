@@ -29,6 +29,11 @@ const markdownTools = [
 
 type Props = {
   busy?: boolean;
+  outlineOpen?: boolean;
+  outlineVisible?: boolean;
+  outlineToggleLabel: string;
+  outlineControlDisabled?: boolean;
+  outlinePanelId: string;
   editorLayoutIsSplit?: boolean;
   editorLayoutToggleLabel: string;
   editorLayoutToggleIcon: LayoutIconName;
@@ -42,6 +47,7 @@ type Props = {
   effectiveViewMode: EditorViewMode;
   onApplyTool: (toolId: MarkdownToolId) => void;
   onApplyHeading: (level: MarkdownHeadingLevel) => void;
+  onToggleOutline: () => void;
   onToggleLayout: () => void;
   onToggleView: (viewMode: EditorPaneMode) => void;
   onReturnToBothView: () => void;
@@ -50,6 +56,11 @@ type Props = {
 
 let {
   busy = false,
+  outlineOpen = false,
+  outlineVisible = outlineOpen,
+  outlineToggleLabel,
+  outlineControlDisabled = false,
+  outlinePanelId,
   editorLayoutIsSplit = false,
   editorLayoutToggleLabel,
   editorLayoutToggleIcon,
@@ -63,6 +74,7 @@ let {
   effectiveViewMode,
   onApplyTool,
   onApplyHeading,
+  onToggleOutline,
   onToggleLayout,
   onToggleView,
   onReturnToBothView,
@@ -166,7 +178,7 @@ $effect(() => {
     {/each}
   </div>
 
-  <div class="admin-editor-shell__layout-controls" aria-label="编辑器布局与视图">
+  <div class="admin-editor-shell__layout-controls" aria-label="编辑器目录、布局与视图">
     <button
       class="admin-editor-markdown-toolbar__button admin-editor-layout-toggle"
       type="button"
@@ -195,7 +207,7 @@ $effect(() => {
         aria-pressed={effectiveViewMode === 'edit' ? 'true' : 'false'}
         onclick={() => onToggleView('edit')}
       >
-        <AdminEditorIcon name="file-pen-line" size={16} strokeWidth={2} />
+        <AdminEditorIcon name="notebook-pen" size={16} strokeWidth={2} />
       </button>
       <button
         class="admin-editor-markdown-toolbar__button admin-editor-view-toggle"
@@ -205,8 +217,21 @@ $effect(() => {
         aria-pressed={effectiveViewMode === 'preview' ? 'true' : 'false'}
         onclick={() => onToggleView('preview')}
       >
-        <AdminEditorIcon name="file-search" size={16} strokeWidth={2} />
+        <AdminEditorIcon name="book-open-text" size={16} strokeWidth={2} />
       </button>
     {/if}
+    <button
+      class="admin-editor-markdown-toolbar__button admin-editor-outline-toggle"
+      type="button"
+      data-tooltip={outlineToggleLabel}
+      aria-label={outlineToggleLabel}
+      aria-controls={outlinePanelId}
+      aria-expanded={outlineVisible ? 'true' : 'false'}
+      aria-pressed={outlineOpen ? 'true' : 'false'}
+      disabled={outlineControlDisabled}
+      onclick={onToggleOutline}
+    >
+      <AdminEditorIcon name="square-chart-gantt" size={16} strokeWidth={2} />
+    </button>
   </div>
 </div>

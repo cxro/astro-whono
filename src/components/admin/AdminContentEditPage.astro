@@ -21,7 +21,13 @@ import {
 import {
   readAdminContentEntryEditorPayload
 } from '../../lib/admin-console/content-shared';
+import {
+  loadAdminContentSourceIndex,
+  loadAdminContentSourceManifest
+} from '../../lib/admin-console/content-source-index';
+import { getAdminContentEntryEditHref } from '../../lib/admin-console/content-routes';
 import { createWithBase } from '../../utils/format';
+import type { EditorOutlineEssaySourceItem } from './editor/editor-outline-helpers';
 
 type Props = {
   collection: AdminContentCollectionKey;
@@ -46,16 +52,27 @@ const loadContentEditDevState = async () => {
     return {
       payload,
       adminContentScriptHref: null,
+      essayOutlineItems: [],
       stylesHref: [adminShellStylesHref, adminContentStylesHref]
     };
   }
 
   if (payload.collection === 'essay') {
     const { default: articleStylesHref } = await import('../../styles/article.css?url');
+    const manifest = await loadAdminContentSourceManifest();
+    const essayOutlineItems: EditorOutlineEssaySourceItem[] = (await loadAdminContentSourceIndex(manifest, 'essay'))
+      .map((item) => ({
+        entryId: item.id,
+        title: item.title,
+        editHref: withBase(getAdminContentEntryEditHref('essay', item.id)),
+        dateLabel: item.dateLabel,
+        sourceError: item.sourceError
+      }));
 
     return {
       payload,
       adminContentScriptHref: null,
+      essayOutlineItems,
       stylesHref: [adminShellStylesHref, articleStylesHref, adminContentStylesHref]
     };
   }
@@ -71,6 +88,7 @@ const loadContentEditDevState = async () => {
   return {
     payload,
     adminContentScriptHref,
+    essayOutlineItems: [],
     stylesHref: [adminShellStylesHref, adminContentStylesHref, adminImageSharedStylesHref]
   };
 };
@@ -272,6 +290,7 @@ const bitsImageRows = selectedBitsImageRows.length > 0
                   revision={essayEditorPayload!.revision}
                   initialFrontmatter={essayEditorPayload!.values}
                   initialBody={essayEditorPayload!.bodyText}
+                  essayOutlineItems={contentEditDevState?.essayOutlineItems ?? []}
                   initialArticleInfoOpen={initialArticleInfoOpen}
                 />
               </article>

@@ -2,7 +2,13 @@
 import type { ComponentProps } from 'astro/types';
 import AdminIcon from './admin/AdminIcon.astro';
 import UiIcon from './UiIcon.astro';
-import { ADMIN_ROUTES, getAdminRoute, type AdminRouteId } from '../lib/admin-console/routes';
+import {
+  ADMIN_ROUTES,
+  getAdminRoute,
+  isAdminRoutePathActive,
+  type AdminRouteDefinition,
+  type AdminRouteId
+} from '../lib/admin-console/routes';
 import { ADMIN_NAV_ORNAMENT_DEFAULT } from '../lib/admin-console/theme-shared';
 import { createWithBase } from '../utils/format';
 import { getSidebarHref, getThemeSettings, type SidebarNavId } from '../lib/theme-settings';
@@ -20,8 +26,7 @@ const {
 };
 
 type AdminRailRouteId = Exclude<AdminRouteId, 'overview'>;
-type AdminRouteDefinition = (typeof ADMIN_ROUTES)[number];
-type AdminRailRouteDefinition = Extract<AdminRouteDefinition, { id: AdminRailRouteId }>;
+type AdminRailRouteDefinition = AdminRouteDefinition & { id: AdminRailRouteId };
 
 type AdminIconName = ComponentProps<typeof AdminIcon>['name'];
 type AdminRailRouteIconName = Extract<
@@ -121,7 +126,7 @@ const adminRailRoutes = ADMIN_ROUTES.filter(isAdminRailRoute);
     <nav class="admin-rail-routes" aria-label="后台页面">
       {adminRailRoutes.map((route) => {
         const href = withBase(route.href);
-        const isActive = pathname === href || pathname.startsWith(href);
+        const isActive = isAdminRoutePathActive(pathname, href, route.railActiveMatch);
         return (
           <a
             class="icon-button admin-rail-route"

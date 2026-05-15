@@ -2,12 +2,17 @@ import {
   isRecord,
   type AdminContentWriteResult
 } from '../../../scripts/admin-content/entry-transport';
+import type { EditorOutlineTab } from './editor-outline-helpers';
 
 export type StatusState = 'idle' | 'loading' | 'ready' | 'ok' | 'warn' | 'error';
 export type EditorScrollSource = 'body' | 'preview';
 export type EditorLayoutMode = 'stacked' | 'split';
 export type EditorViewMode = 'both' | 'edit' | 'preview';
 export type EditorPaneMode = Exclude<EditorViewMode, 'both'>;
+export type EditorOutlineState = {
+  open: boolean;
+  activeTab: EditorOutlineTab;
+};
 
 type StoredWriteFeedback = {
   statusState: StatusState;
@@ -18,6 +23,7 @@ type StoredWriteFeedback = {
 
 const STATUS_STATES: readonly StatusState[] = ['idle', 'loading', 'ready', 'ok', 'warn', 'error'];
 const EDITOR_LAYOUT_MODES: readonly EditorLayoutMode[] = ['stacked', 'split'];
+const EDITOR_OUTLINE_TABS: readonly EditorOutlineTab[] = ['headings', 'essays'];
 const WRITE_FIELD_LABELS: Readonly<Record<string, string>> = {
   title: '标题',
   description: '摘要',
@@ -39,6 +45,9 @@ export const getPreviewDebounceMs = (source: string): number => {
   if (length >= 3000) return 320;
   return 220;
 };
+
+export const normalizeEditorTextareaValue = (value: string): string =>
+  value.replace(/\r\n?/g, '\n');
 
 export const getOppositeScrollSource = (source: EditorScrollSource): EditorScrollSource =>
   source === 'body' ? 'preview' : 'body';
@@ -128,6 +137,14 @@ const isStoredWriteFeedback = (value: unknown): value is StoredWriteFeedback => 
 const isEditorLayoutMode = (value: unknown): value is EditorLayoutMode =>
   EDITOR_LAYOUT_MODES.includes(value as EditorLayoutMode);
 
+const isEditorOutlineTab = (value: unknown): value is EditorOutlineTab =>
+  EDITOR_OUTLINE_TABS.includes(value as EditorOutlineTab);
+
+const isEditorOutlineState = (value: unknown): value is EditorOutlineState => {
+  if (!isRecord(value)) return false;
+  return typeof value.open === 'boolean' && isEditorOutlineTab(value.activeTab);
+};
+
 export const readStoredEditorLayout = (storageKey: string): EditorLayoutMode | null => {
   if (typeof window === 'undefined') return null;
   try {
@@ -144,6 +161,28 @@ export const storeEditorLayout = (storageKey: string, layoutMode: EditorLayoutMo
     window.localStorage.setItem(storageKey, layoutMode);
   } catch {
     // 布局偏好只改善体验，不影响编辑主流程。
+  }
+};
+
+export const readStoredEditorOutlineState = (storageKey: string): EditorOutlineState | null => {
+  if (typeof window === 'undefined') return null;
+  try {
+    const rawState = window.localStorage.getItem(storageKey);
+    if (!rawState) return null;
+
+    const state: unknown = JSON.parse(rawState);
+    return isEditorOutlineState(state) ? state : null;
+  } catch {
+    return null;
+  }
+};
+
+export const storeEditorOutlineState = (storageKey: string, state: EditorOutlineState) => {
+  if (typeof window === 'undefined') return;
+  try {
+    window.localStorage.setItem(storageKey, JSON.stringify(state));
+  } catch {
+    // 目录偏好只改善跨文章体验，不影响编辑主流程。
   }
 };
 
