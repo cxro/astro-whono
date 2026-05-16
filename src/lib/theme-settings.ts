@@ -44,8 +44,8 @@ import {
 
 export type SettingSource = 'new' | 'legacy' | 'default';
 
-export type SidebarNavId = 'essay' | 'bits' | 'memo' | 'archive' | 'about';
-export type PageId = 'essay' | 'archive' | 'bits' | 'memo' | 'about';
+export type SidebarNavId = 'essay' | 'bits' | 'memo' | 'archive' | 'about' | 'admin';
+export type PageId = 'essay' | 'archive' | 'bits' | 'memo' | 'about' | 'admin';
 export type HeroPresetId = 'default' | 'none';
 export type SidebarDividerVariant = 'default' | 'subtle' | 'none';
 export type HomeIntroLinkKey = 'archive' | 'essay' | 'bits' | 'memo' | 'about' | 'tag';
@@ -166,6 +166,7 @@ export interface PageSettings {
   bits: BitsPageSettings;
   memo: MemoPageSettings;
   about: PageHeadingSettings;
+  admin: PageHeadingSettings;
 }
 
 export interface ArticleMetaSettings {
@@ -370,6 +371,7 @@ const LEGACY_ESSAY_SUBTITLE = '随笔与杂记';
 const LEGACY_BITS_TITLE = '絮语';
 const LEGACY_BITS_SUBTITLE = '生活不只是长篇';
 const LEGACY_ABOUT_TITLE = '关于';
+const LEGACY_ADMIN_TITLE = '管理后台';
 const LEGACY_QUOTE = 'A minimal Astro theme\nfor essays, notes, and docs.\nDesigned for reading,\nopen-source.';
 const LEGACY_FOOTER_START_YEAR = 2025;
 const LEGACY_FOOTER_SHOW_CURRENT_YEAR = true;
@@ -392,7 +394,8 @@ const LEGACY_NAV: SidebarNavItem[] = [
   { id: 'bits', label: '絮语', ornament: ADMIN_NAV_ORNAMENT_DEFAULT, visible: true, order: 2 },
   { id: 'memo', label: '小记', ornament: ADMIN_NAV_ORNAMENT_DEFAULT, visible: true, order: 3 },
   { id: 'archive', label: '归档', ornament: ADMIN_NAV_ORNAMENT_DEFAULT, visible: true, order: 4 },
-  { id: 'about', label: '关于', ornament: ADMIN_NAV_ORNAMENT_DEFAULT, visible: true, order: 5 }
+  { id: 'about', label: '关于', ornament: ADMIN_NAV_ORNAMENT_DEFAULT, visible: true, order: 5 },
+  { id: 'admin', label: '管理后台', ornament: ADMIN_NAV_ORNAMENT_DEFAULT, visible: true, order: 6 }
 ];
 const LEGACY_NAV_ORDER = new Map<SidebarNavId, number>(LEGACY_NAV.map((item) => [item.id, item.order]));
 
@@ -487,6 +490,10 @@ const DEFAULT_PAGE: PageSettings = {
   about: {
     title: LEGACY_ABOUT_TITLE,
     subtitle: null
+  },
+  admin: {
+    title: LEGACY_ADMIN_TITLE,
+    subtitle: null
   }
 };
 
@@ -534,7 +541,8 @@ const SIDEBAR_HREFS: Record<SidebarNavId, string> = {
   bits: '/bits/',
   memo: '/memo/',
   archive: '/archive/',
-  about: '/about/'
+  about: '/about/',
+  admin: '/admin/'
 };
 
 let cachedSettings: ThemeSettingsResolved | null = null;
@@ -1110,6 +1118,7 @@ export const getThemeSettings = (): ThemeSettingsResolved => {
   const pageBitsDefaultAuthorJson = isRecord(pageBitsJson?.defaultAuthor) ? pageBitsJson.defaultAuthor : undefined;
   const pageMemoJson = isRecord(pageJson?.memo) ? pageJson.memo : undefined;
   const pageAboutJson = isRecord(pageJson?.about) ? pageJson.about : undefined;
+  const pageAdminJson = isRecord(pageJson?.admin) ? pageJson.admin : undefined;
 
   const title = resolveValue(
     asNonEmptyString(siteJson?.title),
@@ -1304,6 +1313,16 @@ export const getThemeSettings = (): ThemeSettingsResolved => {
     undefined,
     DEFAULT_PAGE.about.subtitle
   );
+  const adminTitle = resolveValue(
+    asNullableString(pageAdminJson?.title),
+    undefined,
+    DEFAULT_PAGE.admin.title
+  );
+  const adminSubtitle = resolveValue<string | null>(
+    asNullableString(pageAdminJson?.subtitle),
+    undefined,
+    DEFAULT_PAGE.admin.subtitle
+  );
 
   const uiCodeBlock = isRecord(uiJson?.codeBlock) ? uiJson.codeBlock : undefined;
   const uiReadingMode = isRecord(uiJson?.readingMode) ? uiJson.readingMode : undefined;
@@ -1451,6 +1470,10 @@ export const getThemeSettings = (): ThemeSettingsResolved => {
         about: {
           title: aboutTitle.value,
           subtitle: aboutSubtitle.value
+        },
+        admin: {
+          title: adminTitle.value,
+          subtitle: adminSubtitle.value
         }
       },
       ui: {
@@ -1608,7 +1631,8 @@ const buildEditableThemeSettingsSnapshot = (
         }
       },
       memo: { ...resolved.settings.page.memo },
-      about: { ...resolved.settings.page.about }
+      about: { ...resolved.settings.page.about },
+      admin: { ...resolved.settings.page.admin }
     },
     ui: {
       codeBlock: { ...resolved.settings.ui.codeBlock },

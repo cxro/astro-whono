@@ -22,5 +22,9 @@
   "about": {
     "title": "关于",
     "subtitle": null
+  },
+  "admin": {
+    "title": "管理后台",
+    "subtitle": null
   }
 }

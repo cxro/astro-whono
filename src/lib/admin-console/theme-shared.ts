@@ -24,8 +24,8 @@ export {
   normalizeAdminHeroImageSrc
 };
 
-export const ADMIN_NAV_IDS = ['essay', 'bits', 'memo', 'archive', 'about'] as const satisfies readonly SidebarNavId[];
-export const ADMIN_PAGE_IDS = ['essay', 'archive', 'bits', 'memo', 'about'] as const satisfies readonly PageId[];
+export const ADMIN_NAV_IDS = ['essay', 'bits', 'memo', 'archive', 'about', 'admin'] as const satisfies readonly SidebarNavId[];
+export const ADMIN_PAGE_IDS = ['essay', 'archive', 'bits', 'memo', 'about', 'admin'] as const satisfies readonly PageId[];
 export const ADMIN_SOCIAL_CUSTOM_LIMIT = 8;
 
 export const ADMIN_HERO_PRESETS = ['default', 'none'] as const satisfies readonly HeroPresetId[];
@@ -526,6 +526,10 @@ export const canonicalizeAdminThemeSettings = (
       about: {
         title: normalizeOptionalSingleLine(String(isRecord(page.about) ? page.about.title ?? '' : '')),
         subtitle: normalizeOptionalSingleLine(String(isRecord(page.about) ? page.about.subtitle ?? '' : ''))
+      },
+      admin: {
+        title: normalizeOptionalSingleLine(String(isRecord(page.admin) ? page.admin.title ?? '' : '')),
+        subtitle: normalizeOptionalSingleLine(String(isRecord(page.admin) ? page.admin.subtitle ?? '' : ''))
       }
     },
     ui: {
@@ -605,7 +609,8 @@ export const createAdminWritableThemeSettingsGroups = (
       }
     },
     memo: { ...settings.page.memo },
-    about: { ...settings.page.about }
+    about: { ...settings.page.about },
+    admin: { ...settings.page.admin }
   },
   ui: {
     codeBlock: { ...settings.ui.codeBlock },
