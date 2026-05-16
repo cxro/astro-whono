@@ -1,6 +1,7 @@
 /* Admin Content Editor Toolbar
    承载 Markdown toolbar、heading menu、tooltip、布局/视图/compact 控件；不承载 pane 内容或 layout override。
 */
+@import "../../../callout-tokens.css";
 
 .admin-editor-markdown-toolbar {
   --admin-btn-tool-border: transparent;
@@ -17,7 +18,7 @@
   min-width: 0;
 }
 
-.admin-editor-markdown-toolbar__heading {
+.admin-editor-markdown-toolbar__menu {
   position: relative;
   display: inline-grid;
   align-items: center;
@@ -27,13 +28,13 @@
   line-height: 0;
 }
 
-.admin-editor-markdown-toolbar__heading summary {
+.admin-editor-markdown-toolbar__menu summary {
   cursor: pointer;
   list-style: none;
   user-select: none;
 }
 
-.admin-editor-markdown-toolbar__heading summary::-webkit-details-marker {
+.admin-editor-markdown-toolbar__menu summary::-webkit-details-marker {
   display: none;
 }
 
@@ -98,12 +99,12 @@
     inset 0 1px 0 color-mix(in srgb, var(--bg) 32%, transparent);
 }
 
-.admin-editor-markdown-toolbar__heading .admin-editor-markdown-toolbar__button[aria-disabled='true'] {
+.admin-editor-markdown-toolbar__menu .admin-editor-markdown-toolbar__button[aria-disabled='true'] {
   color: var(--admin-control-text-disabled);
   cursor: not-allowed;
 }
 
-.admin-editor-markdown-toolbar__heading.is-open .admin-editor-markdown-toolbar__button::before {
+.admin-editor-markdown-toolbar__menu.is-open .admin-editor-markdown-toolbar__button::before {
   background: var(--admin-editor-toolbar-button-hover-bg);
   box-shadow:
     inset 0 0 0 1px var(--admin-editor-toolbar-button-focus-ring),
@@ -111,6 +112,7 @@
 }
 
 .admin-editor-outline-toggle,
+.admin-editor-syntax-toggle,
 .admin-editor-layout-toggle,
 .admin-editor-view-toggle {
   display: inline-grid;
@@ -123,13 +125,23 @@
   cursor: pointer;
 }
 
-.admin-editor-outline-toggle:hover,
-.admin-editor-layout-toggle:hover,
-.admin-editor-view-toggle:hover,
+.admin-editor-outline-toggle:hover:not(:disabled),
+.admin-editor-syntax-toggle:hover:not(:disabled),
+.admin-editor-layout-toggle:hover:not(:disabled),
+.admin-editor-view-toggle:hover:not(:disabled),
 .admin-editor-outline-toggle[aria-pressed='true'],
+.admin-editor-syntax-toggle[aria-pressed='true'],
 .admin-editor-layout-toggle[aria-pressed='true'],
 .admin-editor-view-toggle[aria-pressed='true'] {
   color: var(--text);
+}
+
+.admin-editor-outline-toggle:disabled,
+.admin-editor-syntax-toggle:disabled,
+.admin-editor-layout-toggle:disabled,
+.admin-editor-view-toggle:disabled {
+  color: var(--admin-control-text-disabled);
+  cursor: not-allowed;
 }
 
 .admin-editor-compact-pane-toggle {
@@ -164,7 +176,7 @@
   outline-offset: 2px;
 }
 
-.admin-editor-markdown-toolbar__heading.is-open .admin-editor-markdown-toolbar__button::after {
+.admin-editor-markdown-toolbar__menu.is-open .admin-editor-markdown-toolbar__button::after {
   opacity: 0;
   visibility: hidden;
 }
@@ -190,9 +202,9 @@
   transform: translateY(0);
 }
 
-.admin-editor-markdown-toolbar__heading.is-open
+.admin-editor-markdown-toolbar__menu.is-open
   .admin-editor-markdown-toolbar__button:hover:not(:disabled):not([aria-disabled='true'])::after,
-.admin-editor-markdown-toolbar__heading.is-open
+.admin-editor-markdown-toolbar__menu.is-open
   .admin-editor-markdown-toolbar__button:focus-visible:not(:disabled):not([aria-disabled='true'])::after {
   opacity: 0;
   visibility: hidden;
@@ -210,12 +222,14 @@
 }
 
 .admin-editor-outline-toggle::before,
+.admin-editor-syntax-toggle::before,
 .admin-editor-layout-toggle::before,
 .admin-editor-view-toggle::before {
   display: none;
 }
 
 .admin-editor-outline-toggle:focus-visible,
+.admin-editor-syntax-toggle:focus-visible,
 .admin-editor-layout-toggle:focus-visible,
 .admin-editor-view-toggle:focus-visible {
   outline: 1px solid color-mix(in srgb, var(--admin-focus-border) 42%, transparent);
@@ -230,12 +244,75 @@
   line-height: normal;
 }
 
+.admin-editor-callout-menu {
+  inset-block-start: calc(100% + 8px);
+  inset-inline-start: 0;
+  inset-inline-end: auto;
+  width: 136px;
+  line-height: normal;
+}
+
 .admin-editor-heading-menu__item {
   gap: 5px;
 }
 
+.admin-editor-callout-menu__item {
+  gap: 7px;
+}
+
+.admin-editor-callout-menu__icon {
+  display: inline-grid;
+  place-items: center;
+  flex: 0 0 20px;
+  width: 20px;
+  height: 20px;
+  --admin-editor-callout-menu-accent: var(--callout-note-accent);
+  --admin-editor-callout-menu-icon: var(--callout-note-icon);
+}
+
+.admin-editor-callout-menu__icon::before {
+  content: '';
+  display: block;
+  width: 14px;
+  height: 14px;
+  border-radius: 999px;
+  box-shadow: inset 0 0 0 2px var(--admin-editor-callout-menu-accent);
+}
+
+.admin-editor-callout-menu__item[data-callout='tip'] .admin-editor-callout-menu__icon {
+  --admin-editor-callout-menu-accent: var(--callout-tip-accent);
+  --admin-editor-callout-menu-icon: var(--callout-tip-icon);
+}
+
+.admin-editor-callout-menu__item[data-callout='info'] .admin-editor-callout-menu__icon {
+  --admin-editor-callout-menu-accent: var(--callout-info-accent);
+  --admin-editor-callout-menu-icon: var(--callout-info-icon);
+}
+
+.admin-editor-callout-menu__item[data-callout='warning'] .admin-editor-callout-menu__icon {
+  --admin-editor-callout-menu-accent: var(--callout-warning-accent);
+  --admin-editor-callout-menu-icon: var(--callout-warning-icon);
+}
+
+@supports ((-webkit-mask-image: url("")) or (mask-image: url(""))) {
+  .admin-editor-callout-menu__icon::before {
+    border-radius: 0;
+    box-shadow: none;
+    background: var(--admin-editor-callout-menu-accent);
+    -webkit-mask: var(--admin-editor-callout-menu-icon) no-repeat center / contain;
+    mask: var(--admin-editor-callout-menu-icon) no-repeat center / contain;
+  }
+}
+
 .admin-editor-heading-menu__level {
   flex: 0 0 22px;
+  color: var(--text);
+  font-family: var(--admin-font-mono);
+  font-size: var(--admin-text-xs);
+}
+
+.admin-editor-callout-menu__type {
+  min-width: 0;
   color: var(--text);
   font-family: var(--admin-font-mono);
   font-size: var(--admin-text-xs);

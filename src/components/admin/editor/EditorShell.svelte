@@ -28,7 +28,7 @@ import { flattenEntryIdToSlug } from '../../../utils/slug-rules';
 import ArticleInfoDialog from './ArticleInfoDialog.svelte';
 import BodyEditor from './BodyEditor.svelte';
 import EditorActionMenu from './EditorActionMenu.svelte';
-import EditorOutlinePanel from './EditorOutlinePanel.svelte';
+import EditorSidePanels from './EditorSidePanels.svelte';
 import EditorToolbar from './EditorToolbar.svelte';
 import ImageInsertDialog from './ImageInsertDialog.svelte';
 import {
@@ -40,6 +40,7 @@ import {
   clearAllScrollbarVisibilityTimers,
   clearScrollbarVisibilityTimer,
   clearStoredWriteFeedback,
+  getEditorSidePanelLayout,
   getOppositeScrollSource,
   getPreviewDebounceMs,
   getScrollableDistance,
@@ -48,14 +49,15 @@ import {
   markScrollElementScrolling,
   normalizeEditorTextareaValue,
   readStoredEditorLayout,
-  readStoredEditorOutlineState,
+  readStoredEditorSidePanelPreference,
   readStoredWriteFeedback,
   storeEditorLayout,
-  storeEditorOutlineState,
+  storeEditorSidePanelPreference,
   storeWriteFeedback,
   type EditorLayoutMode,
   type EditorPaneMode,
   type EditorScrollSource,
+  type EditorSidePanelLayout,
   type EditorViewMode,
   type StatusState
 } from './editor-shell-helpers';
@@ -70,7 +72,12 @@ import {
   scrollPreviewToOutlineKey as scrollPreviewElementToOutlineKey,
   scrollTextareaToOutlineItem as scrollTextareaElementToOutlineItem
 } from './editor-outline-scroll';
-import { type MarkdownHeadingLevel, type MarkdownToolbarCommand, type MarkdownToolId } from './markdown-tools';
+import {
+  type MarkdownCalloutType,
+  type MarkdownHeadingLevel,
+  type MarkdownToolbarCommand,
+  type MarkdownToolId
+} from './markdown-tools';
 import PreviewStatusBar from './PreviewStatusBar.svelte';
 import PreviewPane from './PreviewPane.svelte';
 
@@ -80,9 +87,10 @@ const ADMIN_SIDEBAR_TOGGLE_ID = 'admin-sidebar-toggle';
 const PAGE_ACTIONS_HOST_SELECTOR = '[data-admin-editor-page-actions-host]';
 const FRONTMATTER_PANEL_ID = 'admin-editor-frontmatter-panel';
 const OUTLINE_PANEL_ID = 'admin-editor-outline-panel';
+const SYNTAX_PANEL_ID = 'admin-editor-syntax-panel';
 const FRONTMATTER_ISSUE_PATHS = new Set(['title', 'date', 'publishedAt', 'description', 'tags', 'slug', 'badge', 'cover']);
 const EDITOR_LAYOUT_STORAGE_KEY = 'astro-whono:admin-editor:layout';
-const EDITOR_OUTLINE_STATE_STORAGE_KEY = 'astro-whono:admin-editor:outline-state';
+const EDITOR_SIDE_PANEL_PREFERENCE_STORAGE_KEY = 'astro-whono:admin-editor:outline-state';
 const PREVIEW_OUTLINE_KEY_ATTR = 'data-admin-outline-key';
 // 无显式偏好时优先 split，窄容器视觉回退由 effective view 派生。
 const DEFAULT_EDITOR_LAYOUT_INTENT: EditorLayoutMode = 'split';
@@ -167,15 +175,17 @@ let editorViewMode = $state<EditorViewMode>('both');
 let compactPaneMode = $state<EditorPaneMode>('edit');
 let outlineWantedOpen = $state(false);
 let outlineActiveTab = $state<EditorOutlineTab>('headings');
+let syntaxWantedOpen = $state(false);
+let syntaxMaximized = $state(false);
 let editorLayoutRestored = false;
-let editorOutlineStateRestored = false;
+let editorSidePanelPreferenceRestored = false;
 let previewRequestId = 0;
 let previewTimer: number | null = null;
 let activePreviewAbortController: AbortController | null = null;
 let latestPreviewSource = '';
 let adminSidebarExpanded = $state(false);
-let outlineSidebarCollapseAttempted = false;
-let outlineSidebarCollapseCheckFrame: number | null = null;
+let sidePanelsSidebarCollapseAttempted = false;
+let sidePanelsSidebarCollapseCheckFrame: number | null = null;
 let previewInitialized = false;
 let toolbarCommandId = 0;
 let toolbarCommand = $state<MarkdownToolbarCommand | null>(null);
@@ -230,14 +240,14 @@ const collapseExpandedAdminSidebar = (): boolean => {
   return root.getAttribute('data-admin-sidebar') === 'collapsed';
 };
 
-const queueOutlineAvailabilityCheck = () => {
+const queueSidePanelsAvailabilityCheck = () => {
   if (typeof window === 'undefined') return;
-  if (outlineSidebarCollapseCheckFrame !== null) {
-    window.cancelAnimationFrame(outlineSidebarCollapseCheckFrame);
+  if (sidePanelsSidebarCollapseCheckFrame !== null) {
+    window.cancelAnimationFrame(sidePanelsSidebarCollapseCheckFrame);
   }
 
-  outlineSidebarCollapseCheckFrame = window.requestAnimationFrame(() => {
-    outlineSidebarCollapseCheckFrame = null;
+  sidePanelsSidebarCollapseCheckFrame = window.requestAnimationFrame(() => {
+    sidePanelsSidebarCollapseCheckFrame = null;
     const nextInlineSize = editorShellEl?.getBoundingClientRect().width ?? editorShellInlineSize;
     editorShellInlineSize = nextInlineSize;
   });
@@ -262,8 +272,22 @@ const stackedCanReturnToCompact = $derived(
   editorLayout === 'stacked' && editorViewMode === 'both' && splitWidthIsCompact
 );
 const effectiveViewMode: EditorViewMode = $derived(splitBothIsCompact ? compactPaneMode : editorViewMode);
-const outlineAvailable = $derived(isOutlineAvailableForInlineSize(editorShellInlineSize));
-const outlineVisible = $derived(outlineWantedOpen && outlineAvailable);
+const sidePanelsAvailable = $derived(isOutlineAvailableForInlineSize(editorShellInlineSize));
+const sidePanelLayout: EditorSidePanelLayout = $derived(
+  getEditorSidePanelLayout({
+    outlineOpen: outlineWantedOpen,
+    syntaxOpen: syntaxWantedOpen,
+    syntaxMaximized,
+    available: sidePanelsAvailable
+  })
+);
+const sidePanelsVisible = $derived(sidePanelLayout !== 'none');
+const outlineVisible = $derived(sidePanelLayout === 'outline' || sidePanelLayout === 'stacked');
+const syntaxVisible = $derived(
+  sidePanelLayout === 'syntax' || sidePanelLayout === 'stacked' || sidePanelLayout === 'syntaxMaximized'
+);
+const sidePanelRequested = $derived(outlineWantedOpen || syntaxWantedOpen);
+const syntaxMaximizeAllowed = $derived(outlineWantedOpen && syntaxWantedOpen);
 const singleViewActive = $derived(editorViewMode !== 'both');
 const editorLayoutToggleLabel = $derived(
   splitBothIsCompact
@@ -289,7 +313,9 @@ const previewViewToggleLabel = $derived(editorViewMode === 'preview' ? '取消�
 const compactPaneToggleText = $derived(compactPaneMode === 'edit' ? '预览' : '编辑');
 const compactPaneToggleLabel = $derived(compactPaneMode === 'edit' ? '显示预览区' : '显示编辑区');
 const outlineToggleLabel = $derived(outlineWantedOpen ? '关闭目录' : '打开目录');
-const outlineControlDisabled = $derived(!outlineWantedOpen && !outlineAvailable && !adminSidebarExpanded);
+const outlineControlDisabled = $derived(!outlineWantedOpen && !sidePanelsAvailable && !adminSidebarExpanded);
+const syntaxToggleLabel = $derived(syntaxWantedOpen ? '关闭语法实例' : '打开语法实例');
+const syntaxControlDisabled = $derived(!syntaxWantedOpen && !sidePanelsAvailable && !adminSidebarExpanded);
 const exportHref = $derived(buildContentExportHref(exportEndpoint, collection, entryId));
 const scrollSyncAvailable = $derived(
   effectiveViewMode === 'both' && Boolean(bodyScrollElement && previewScrollElement)
@@ -357,36 +383,63 @@ const toggleCompactPaneMode = () => {
   compactPaneMode = compactPaneMode === 'edit' ? 'preview' : 'edit';
 };
 
-const storeCurrentOutlineState = (state: Partial<{ open: boolean; activeTab: EditorOutlineTab }> = {}) => {
-  storeEditorOutlineState(EDITOR_OUTLINE_STATE_STORAGE_KEY, {
-    open: state.open ?? outlineWantedOpen,
-    activeTab: state.activeTab ?? outlineActiveTab
+const storeCurrentSidePanelPreference = (
+  preference: Partial<{
+    outlineOpen: boolean;
+    outlineActiveTab: EditorOutlineTab;
+    syntaxOpen: boolean;
+  }> = {}
+) => {
+  storeEditorSidePanelPreference(EDITOR_SIDE_PANEL_PREFERENCE_STORAGE_KEY, {
+    outlineOpen: preference.outlineOpen ?? outlineWantedOpen,
+    outlineActiveTab: preference.outlineActiveTab ?? outlineActiveTab,
+    syntaxOpen: preference.syntaxOpen ?? syntaxWantedOpen
   });
+};
+
+const requestSidePanelsAvailability = () => {
+  if (sidePanelsAvailable) return;
+
+  if (collapseExpandedAdminSidebar()) {
+    sidePanelsSidebarCollapseAttempted = true;
+    queueSidePanelsAvailabilityCheck();
+  }
 };
 
 const toggleOutline = () => {
   if (outlineWantedOpen) {
     outlineWantedOpen = false;
-    storeCurrentOutlineState({ open: false });
+    storeCurrentSidePanelPreference({ outlineOpen: false });
     return;
   }
 
   outlineWantedOpen = true;
-  storeCurrentOutlineState({ open: true });
+  storeCurrentSidePanelPreference({ outlineOpen: true });
+  requestSidePanelsAvailability();
+};
 
-  if (outlineAvailable) {
+const toggleSyntax = () => {
+  if (syntaxWantedOpen) {
+    syntaxWantedOpen = false;
+    syntaxMaximized = false;
+    storeCurrentSidePanelPreference({ syntaxOpen: false });
     return;
   }
 
-  if (collapseExpandedAdminSidebar()) {
-    outlineSidebarCollapseAttempted = true;
-    queueOutlineAvailabilityCheck();
-  }
+  syntaxWantedOpen = true;
+  syntaxMaximized = false;
+  storeCurrentSidePanelPreference({ syntaxOpen: true });
+  requestSidePanelsAvailability();
+};
+
+const toggleSyntaxMaximize = () => {
+  if (!syntaxMaximizeAllowed) return;
+  syntaxMaximized = !syntaxMaximized;
 };
 
 const setOutlineTab = (tab: EditorOutlineTab) => {
   outlineActiveTab = tab;
-  storeCurrentOutlineState({ activeTab: tab });
+  storeCurrentSidePanelPreference({ outlineActiveTab: tab });
 };
 
 const applyToolbarTool = (toolId: MarkdownToolId) => {
@@ -405,6 +458,13 @@ const applyHeadingLevel = (level: MarkdownHeadingLevel) => {
 
   toolbarCommandId += 1;
   toolbarCommand = { id: toolbarCommandId, kind: 'heading', level };
+};
+
+const applyCalloutType = (calloutType: MarkdownCalloutType) => {
+  if (busy) return;
+
+  toolbarCommandId += 1;
+  toolbarCommand = { id: toolbarCommandId, kind: 'callout', calloutType };
 };
 
 const insertMarkdownText = (text: string) => {
@@ -950,14 +1010,15 @@ $effect(() => {
 });
 
 $effect(() => {
-  if (editorOutlineStateRestored) return;
-  editorOutlineStateRestored = true;
+  if (editorSidePanelPreferenceRestored) return;
+  editorSidePanelPreferenceRestored = true;
 
-  const storedOutlineState = readStoredEditorOutlineState(EDITOR_OUTLINE_STATE_STORAGE_KEY);
-  if (!storedOutlineState) return;
+  const storedSidePanelPreference = readStoredEditorSidePanelPreference(EDITOR_SIDE_PANEL_PREFERENCE_STORAGE_KEY);
+  if (!storedSidePanelPreference) return;
 
-  outlineWantedOpen = storedOutlineState.open;
-  outlineActiveTab = storedOutlineState.activeTab;
+  outlineWantedOpen = storedSidePanelPreference.outlineOpen;
+  outlineActiveTab = storedSidePanelPreference.outlineActiveTab;
+  syntaxWantedOpen = storedSidePanelPreference.syntaxOpen;
 });
 
 $effect(() => {
@@ -1006,7 +1067,7 @@ $effect(() => {
       selector: '.admin-editor-shell__preview-detail'
     }),
     initAdminDetailsMenus({
-      selector: '.admin-editor-markdown-toolbar__heading'
+      selector: '.admin-editor-markdown-toolbar__menu'
     }),
     initAdminDetailsMenus({
       selector: '.admin-editor-shell__action-more'
@@ -1086,9 +1147,9 @@ $effect(() => {
 
 $effect(() => {
   return () => {
-    if (outlineSidebarCollapseCheckFrame !== null) {
-      window.cancelAnimationFrame(outlineSidebarCollapseCheckFrame);
-      outlineSidebarCollapseCheckFrame = null;
+    if (sidePanelsSidebarCollapseCheckFrame !== null) {
+      window.cancelAnimationFrame(sidePanelsSidebarCollapseCheckFrame);
+      sidePanelsSidebarCollapseCheckFrame = null;
     }
     cancelQueuedScrollSync();
     if (scrollSyncReleaseFrame !== null) {
@@ -1117,19 +1178,25 @@ $effect(() => {
 });
 
 $effect(() => {
-  if (!outlineWantedOpen) {
-    outlineSidebarCollapseAttempted = false;
+  if (!syntaxMaximizeAllowed && syntaxMaximized) {
+    syntaxMaximized = false;
+  }
+});
+
+$effect(() => {
+  if (!sidePanelRequested) {
+    sidePanelsSidebarCollapseAttempted = false;
     return;
   }
 
-  if (outlineAvailable) {
-    outlineSidebarCollapseAttempted = false;
+  if (sidePanelsAvailable) {
+    sidePanelsSidebarCollapseAttempted = false;
     return;
   }
 
-  if (!outlineSidebarCollapseAttempted && collapseExpandedAdminSidebar()) {
-    outlineSidebarCollapseAttempted = true;
-    queueOutlineAvailabilityCheck();
+  if (!sidePanelsSidebarCollapseAttempted && collapseExpandedAdminSidebar()) {
+    sidePanelsSidebarCollapseAttempted = true;
+    queueSidePanelsAvailabilityCheck();
     return;
   }
 });
@@ -1168,7 +1235,7 @@ $effect(() => {
   data-layout={editorLayout}
   data-view={editorViewMode}
   data-effective-view={effectiveViewMode}
-  data-outline={outlineVisible ? 'open' : 'closed'}
+  data-side-panel={sidePanelLayout}
 >
   <EditorToolbar
     {busy}
@@ -1177,6 +1244,11 @@ $effect(() => {
     {outlineToggleLabel}
     {outlineControlDisabled}
     outlinePanelId={OUTLINE_PANEL_ID}
+    syntaxOpen={syntaxWantedOpen}
+    {syntaxVisible}
+    {syntaxToggleLabel}
+    {syntaxControlDisabled}
+    syntaxPanelId={SYNTAX_PANEL_ID}
     editorLayoutIsSplit={editorLayout === 'split'}
     {editorLayoutToggleLabel}
     {editorLayoutToggleIcon}
@@ -1190,7 +1262,9 @@ $effect(() => {
     {effectiveViewMode}
     onApplyTool={applyToolbarTool}
     onApplyHeading={applyHeadingLevel}
+    onApplyCallout={applyCalloutType}
     onToggleOutline={toggleOutline}
+    onToggleSyntax={toggleSyntax}
     onToggleLayout={toggleEditorLayout}
     onToggleView={toggleEditorViewMode}
     onReturnToBothView={returnToBothView}
@@ -1220,6 +1294,7 @@ $effect(() => {
           disabled={busy}
           {toolbarCommand}
           onScrollElementChange={setBodyScrollElement}
+          onShortcutTool={applyToolbarTool}
         />
       </div>
       <PreviewStatusBar
@@ -1247,14 +1322,17 @@ $effect(() => {
         />
       </div>
     </div>
-    {#if outlineVisible}
-      <EditorOutlinePanel
-        panelId={OUTLINE_PANEL_ID}
+    {#if sidePanelsVisible}
+      <EditorSidePanels
+        layout={sidePanelLayout}
+        outlinePanelId={OUTLINE_PANEL_ID}
+        syntaxPanelId={SYNTAX_PANEL_ID}
         activeTab={outlineActiveTab}
         headings={markdownOutlineItems}
         essays={essayOutlineListItems}
         onTabChange={setOutlineTab}
         onHeadingSelect={handleOutlineHeadingSelect}
+        onSyntaxMaximizeToggle={toggleSyntaxMaximize}
       />
     {/if}
   </div>

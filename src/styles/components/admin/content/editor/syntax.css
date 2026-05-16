@@ -1,0 +1,202 @@
+/* Admin Content Editor Syntax Panel
+   承载 Markdown 语法实例与快捷键速查；插入行为只通过编辑器命令通道触发。
+*/
+
+.admin-editor-syntax-panel {
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr);
+  min-width: 0;
+  min-height: 0;
+  height: 100%;
+  overflow: hidden;
+  border-inline-start: 1px solid var(--admin-editor-shell-divider);
+  background: color-mix(in srgb, var(--bg) 96%, var(--panel) 4%);
+}
+
+.admin-editor-syntax-panel__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0;
+  min-width: 0;
+  min-height: 27px;
+  padding: 0 4px 0 0;
+  border-radius: 4px;
+  border-bottom: 1px solid var(--admin-editor-shell-divider);
+  background: var(--admin-row-hover-bg);
+}
+
+.admin-editor-syntax-panel__title {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  flex: 1 1 auto;
+  min-width: 0;
+  min-height: 26px;
+  padding: 0 6px;
+  color: var(--text);
+  font-size: var(--admin-text-sm);
+  font-weight: 700;
+  line-height: 1;
+}
+
+.admin-editor-syntax-panel__title svg {
+  flex: 0 0 auto;
+  color: var(--faint);
+}
+
+.admin-editor-syntax-panel__maximize {
+  display: inline-grid;
+  place-items: center;
+  flex: 0 0 auto;
+  padding: 0;
+  border: 0;
+  appearance: none;
+  background: transparent;
+  font: inherit;
+  cursor: pointer;
+}
+
+.admin-editor-syntax-panel__maximize::before {
+  display: none;
+}
+
+.admin-editor-syntax-panel__maximize::after {
+  inset-inline-start: auto;
+  inset-inline-end: 0;
+  transform: translateY(-2px);
+}
+
+.admin-editor-syntax-panel__maximize:hover:not(:disabled):not([aria-disabled='true'])::after,
+.admin-editor-syntax-panel__maximize:focus-visible:not(:disabled):not([aria-disabled='true'])::after {
+  transform: translateY(0);
+}
+
+.admin-editor-syntax-panel__maximize:hover,
+.admin-editor-syntax-panel__maximize:focus-visible,
+.admin-editor-syntax-panel__maximize[aria-pressed='true'] {
+  color: var(--text);
+}
+
+.admin-editor-syntax-panel__maximize:focus-visible {
+  outline: 1px solid color-mix(in srgb, var(--admin-focus-border) 42%, transparent);
+  outline-offset: 2px;
+}
+
+.admin-editor-syntax-panel__body {
+  display: grid;
+  align-content: start;
+  gap: 18px;
+  min-width: 0;
+  min-height: 0;
+  padding: 10px 0 12px 10px;
+  overflow: auto;
+}
+
+.admin-editor-syntax-panel__section {
+  display: grid;
+  align-content: start;
+  gap: 7px;
+  min-width: 0;
+}
+
+.admin-editor-syntax-panel__section-title {
+  margin: 0;
+  color: var(--text);
+  font-size: var(--admin-text-sm);
+  font-weight: 800;
+  line-height: 1.35;
+}
+
+.admin-editor-syntax-panel__list {
+  display: grid;
+  gap: 2px;
+  min-width: 0;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.admin-editor-syntax-panel__item {
+  min-width: 0;
+}
+
+.admin-editor-syntax-panel__row {
+  display: grid;
+  grid-template-columns: 18px minmax(68px, 0.78fr) minmax(72px, 1fr);
+  align-items: center;
+  gap: 6px;
+  width: 100%;
+  min-width: 0;
+  min-height: 29px;
+  padding: 4px 6px 4px 4px;
+  border: 1px solid transparent;
+  border-radius: 4px;
+  background: transparent;
+  color: var(--muted);
+  font: inherit;
+  font-size: var(--admin-text-sm);
+  line-height: 1.35;
+  letter-spacing: 0;
+  text-align: left;
+  cursor: default;
+}
+
+.admin-editor-syntax-panel__icon {
+  display: grid;
+  place-items: center;
+  width: 18px;
+  min-width: 0;
+  height: 18px;
+  color: var(--faint);
+}
+
+.admin-editor-syntax-panel__marker {
+  display: inline-block;
+  max-width: 18px;
+  overflow: hidden;
+  color: currentColor;
+  font-family: var(--admin-font-mono);
+  font-size: var(--admin-text-xs);
+  font-weight: 700;
+  line-height: 1;
+  text-align: center;
+  text-overflow: clip;
+  white-space: nowrap;
+}
+
+.admin-editor-syntax-panel__label,
+.admin-editor-syntax-panel__code {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.admin-editor-syntax-panel__label {
+  font-weight: 500;
+}
+
+.admin-editor-syntax-panel__code {
+  justify-self: end;
+  max-width: 100%;
+  color: var(--faint);
+  font-family: var(--admin-font-mono);
+  font-size: var(--admin-text-2xs);
+  line-height: 1.25;
+}
+
+.admin-editor-syntax-panel__syntax-code {
+  font-family: inherit;
+  font-size: var(--admin-text-xs);
+  font-weight: 400;
+}
+
+.admin-editor-syntax-panel__shortcut {
+  padding: 0;
+  border: 0;
+  background: transparent;
+  font-family: var(--admin-font-mono);
+  font-size: var(--admin-text-xs);
+  font-weight: 400;
+}

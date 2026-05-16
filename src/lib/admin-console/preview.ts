@@ -9,6 +9,7 @@ import rehypeSanitize from 'rehype-sanitize';
 import type { Options as RehypeSanitizeOptions } from 'rehype-sanitize';
 import rehypeStringify from 'rehype-stringify';
 import remarkDirective from 'remark-directive';
+import remarkGfm from 'remark-gfm';
 import remarkParse from 'remark-parse';
 import remarkRehype from 'remark-rehype';
 import { unified } from 'unified';
@@ -167,6 +168,8 @@ const createPreviewOutlineAnchorPlugin = (source: string): Plugin<[], Root> => {
 const createPreviewProcessor = (sourceFilePath: string | null, source: string) =>
   unified()
     .use(remarkParse)
+    // 后台预览是手写 pipeline，不继承 Astro Markdown 默认 GFM；显式接入以对齐公开文章渲染。
+    .use(remarkGfm)
     .use(remarkDirective)
     .use(remarkCallout)
     .use(remarkRehype, { allowDangerousHtml: true })

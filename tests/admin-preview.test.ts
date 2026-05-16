@@ -58,6 +58,19 @@ describe('admin preview api', () => {
     expect(result.html).toContain('<code class="language-ts">');
   });
 
+  it('renders GFM syntax shown by the editor syntax examples', async () => {
+    const { renderAdminMarkdownPreview } = await import('../src/lib/admin-console/preview');
+
+    const result = await renderAdminMarkdownPreview({
+      collection: 'essay',
+      source: ['~~删除线~~', '', '- [x] 已完成', '- [ ] 待办事项'].join('\n')
+    });
+
+    expect(result.html).toContain('<del>删除线</del>');
+    expect(result.html).toContain('<input type="checkbox" checked disabled>');
+    expect(result.html).toContain('<input type="checkbox" disabled>');
+  });
+
   it('annotates markdown H2 and H3 preview nodes with source outline keys', async () => {
     const { renderAdminMarkdownPreview } = await import('../src/lib/admin-console/preview');
     const { extractMarkdownOutline } = await import('../src/lib/admin-console/editor-outline');

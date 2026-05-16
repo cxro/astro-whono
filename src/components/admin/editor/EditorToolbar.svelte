@@ -1,24 +1,32 @@
 <script lang="ts">
 import AdminEditorIcon from './AdminEditorIcon.svelte';
 import type { EditorPaneMode, EditorViewMode } from './editor-shell-helpers';
-import type { MarkdownHeadingLevel, MarkdownToolId } from './markdown-tools';
+import type { MarkdownCalloutType, MarkdownHeadingLevel, MarkdownToolId } from './markdown-tools';
 
 type LayoutIconName = 'columns-2' | 'rows-2' | 'undo-2';
 
 const headingTool = { label: '标题', icon: 'heading' } as const;
+const calloutTool = { label: '提示块', icon: 'message-square-text' } as const;
 const headingLevelItems: readonly { level: MarkdownHeadingLevel; label: string; description: string }[] = [
   { level: 2, label: 'H2', description: '小节标题' },
   { level: 3, label: 'H3', description: '三级标题' },
   { level: 4, label: 'H4', description: '四级标题' },
   { level: 5, label: 'H5', description: '五级标题' }
 ];
+const calloutItems = [
+  { type: 'note' },
+  { type: 'tip' },
+  { type: 'info' },
+  { type: 'warning' }
+] as const;
 
 const markdownTools = [
   { id: 'bold', label: '加粗', icon: 'bold' },
   { id: 'italic', label: '斜体', icon: 'italic' },
-  { id: 'quote', label: '引用', icon: 'quote' },
+  { id: 'strikethrough', label: '删除线', icon: 'strikethrough' },
   { id: 'link', label: '链接', icon: 'link' },
   { id: 'image', label: '图片', icon: 'image' },
+  { id: 'quote', label: '引用', icon: 'quote' },
   { id: 'code', label: '行内代码', icon: 'code' },
   { id: 'codeBlock', label: '代码块', icon: 'code-block' },
   { id: 'list', label: '无序列表', icon: 'list' },
@@ -26,6 +34,8 @@ const markdownTools = [
   { id: 'taskList', label: '任务列表', icon: 'task-list' },
   { id: 'table', label: '表格', icon: 'table' }
 ] as const;
+const markdownToolsBeforeCallout = markdownTools.slice(0, 6);
+const markdownToolsAfterCallout = markdownTools.slice(6);
 
 type Props = {
   busy?: boolean;
@@ -34,6 +44,11 @@ type Props = {
   outlineToggleLabel: string;
   outlineControlDisabled?: boolean;
   outlinePanelId: string;
+  syntaxOpen?: boolean;
+  syntaxVisible?: boolean;
+  syntaxToggleLabel: string;
+  syntaxControlDisabled?: boolean;
+  syntaxPanelId: string;
   editorLayoutIsSplit?: boolean;
   editorLayoutToggleLabel: string;
   editorLayoutToggleIcon: LayoutIconName;
@@ -47,7 +62,9 @@ type Props = {
   effectiveViewMode: EditorViewMode;
   onApplyTool: (toolId: MarkdownToolId) => void;
   onApplyHeading: (level: MarkdownHeadingLevel) => void;
+  onApplyCallout: (calloutType: MarkdownCalloutType) => void;
   onToggleOutline: () => void;
+  onToggleSyntax: () => void;
   onToggleLayout: () => void;
   onToggleView: (viewMode: EditorPaneMode) => void;
   onReturnToBothView: () => void;
@@ -61,6 +78,11 @@ let {
   outlineToggleLabel,
   outlineControlDisabled = false,
   outlinePanelId,
+  syntaxOpen = false,
+  syntaxVisible = syntaxOpen,
+  syntaxToggleLabel,
+  syntaxControlDisabled = false,
+  syntaxPanelId,
   editorLayoutIsSplit = false,
   editorLayoutToggleLabel,
   editorLayoutToggleIcon,
@@ -74,7 +96,9 @@ let {
   effectiveViewMode,
   onApplyTool,
   onApplyHeading,
+  onApplyCallout,
   onToggleOutline,
+  onToggleSyntax,
   onToggleLayout,
   onToggleView,
   onReturnToBothView,
@@ -83,6 +107,8 @@ let {
 
 let headingMenuOpen = $state(false);
 let headingMenuEl = $state<HTMLDetailsElement | null>(null);
+let calloutMenuOpen = $state(false);
+let calloutMenuEl = $state<HTMLDetailsElement | null>(null);
 
 const layoutControlLabel = $derived(singleViewActive ? singleViewReturnLabel : editorLayoutToggleLabel);
 const layoutControlIcon = $derived(singleViewActive ? 'undo-2' : editorLayoutToggleIcon);
@@ -93,11 +119,27 @@ const closeHeadingMenu = () => {
   headingMenuOpen = false;
 };
 
+const closeCalloutMenu = () => {
+  if (calloutMenuEl) calloutMenuEl.open = false;
+  calloutMenuOpen = false;
+};
+
 const syncHeadingMenuOpen = () => {
   headingMenuOpen = headingMenuEl?.open ?? false;
 };
 
+const syncCalloutMenuOpen = () => {
+  calloutMenuOpen = calloutMenuEl?.open ?? false;
+};
+
 const handleHeadingSummaryClick = (event: MouseEvent) => {
+  if (!busy) return;
+
+  event.preventDefault();
+  event.stopPropagation();
+};
+
+const handleCalloutSummaryClick = (event: MouseEvent) => {
   if (!busy) return;
 
   event.preventDefault();
@@ -109,6 +151,13 @@ const applyHeadingLevel = (level: MarkdownHeadingLevel) => {
 
   closeHeadingMenu();
   onApplyHeading(level);
+};
+
+const applyCalloutType = (calloutType: MarkdownCalloutType) => {
+  if (busy) return;
+
+  closeCalloutMenu();
+  onApplyCallout(calloutType);
 };
 
 const handleLayoutControlClick = () => {
@@ -124,13 +173,16 @@ $effect(() => {
   if (busy && headingMenuOpen) {
     closeHeadingMenu();
   }
+  if (busy && calloutMenuOpen) {
+    closeCalloutMenu();
+  }
 });
 </script>
 
 <div class="admin-editor-shell__format-row">
   <div class="admin-editor-markdown-toolbar" role="toolbar" aria-label="Markdown 常用格式">
     <details
-      class="admin-editor-markdown-toolbar__heading"
+      class="admin-editor-markdown-toolbar__menu admin-editor-markdown-toolbar__menu--heading"
       class:is-open={headingMenuOpen}
       bind:this={headingMenuEl}
       ontoggle={syncHeadingMenuOpen}
@@ -164,7 +216,56 @@ $effect(() => {
       </div>
     </details>
 
-    {#each markdownTools as tool}
+    {#each markdownToolsBeforeCallout as tool}
+      <button
+        class="admin-btn admin-btn--tool admin-btn--compact admin-btn--icon admin-editor-markdown-toolbar__button"
+        type="button"
+        data-tooltip={tool.label}
+        aria-label={tool.label}
+        disabled={busy}
+        onclick={() => onApplyTool(tool.id)}
+      >
+        <AdminEditorIcon name={tool.icon} size={16} strokeWidth={2} />
+      </button>
+    {/each}
+
+    <details
+      class="admin-editor-markdown-toolbar__menu admin-editor-markdown-toolbar__menu--callout"
+      class:is-open={calloutMenuOpen}
+      bind:this={calloutMenuEl}
+      ontoggle={syncCalloutMenuOpen}
+    >
+      <summary
+        class="admin-btn admin-btn--tool admin-btn--compact admin-btn--icon admin-editor-markdown-toolbar__button"
+        data-tooltip={calloutTool.label}
+        aria-label={calloutTool.label}
+        aria-disabled={busy ? 'true' : undefined}
+        onclick={handleCalloutSummaryClick}
+      >
+        <AdminEditorIcon name={calloutTool.icon} size={16} strokeWidth={2} />
+      </summary>
+
+      <div
+        class="admin-content-menu-panel admin-editor-callout-menu"
+        id="admin-editor-callout-menu"
+        aria-label="提示块类型"
+      >
+        {#each calloutItems as item}
+          <button
+            class="admin-content-menu-item admin-editor-callout-menu__item"
+            type="button"
+            data-callout={item.type}
+            disabled={busy}
+            onclick={() => applyCalloutType(item.type)}
+          >
+            <span class="admin-editor-callout-menu__icon" aria-hidden="true"></span>
+            <span class="admin-editor-callout-menu__type">{item.type}</span>
+          </button>
+        {/each}
+      </div>
+    </details>
+
+    {#each markdownToolsAfterCallout as tool}
       <button
         class="admin-btn admin-btn--tool admin-btn--compact admin-btn--icon admin-editor-markdown-toolbar__button"
         type="button"
@@ -232,6 +333,19 @@ $effect(() => {
       onclick={onToggleOutline}
     >
       <AdminEditorIcon name="square-chart-gantt" size={16} strokeWidth={2} />
+    </button>
+    <button
+      class="admin-editor-markdown-toolbar__button admin-editor-syntax-toggle"
+      type="button"
+      data-tooltip={syntaxToggleLabel}
+      aria-label={syntaxToggleLabel}
+      aria-controls={syntaxPanelId}
+      aria-expanded={syntaxVisible ? 'true' : 'false'}
+      aria-pressed={syntaxOpen ? 'true' : 'false'}
+      disabled={syntaxControlDisabled}
+      onclick={onToggleSyntax}
+    >
+      <AdminEditorIcon name="square-asterisk" size={16} strokeWidth={2} />
     </button>
   </div>
 </div>

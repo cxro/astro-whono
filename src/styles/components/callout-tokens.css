@@ -1,0 +1,18 @@
+:root {
+  --callout-note-accent: var(--muted);
+  --callout-note-icon: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0%200%2024%2024' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><path d='M12%2020h9'/><path d='M16.5%203.5a2.1%202.1%200%200%201%203%203L7%2019l-4%201%201-4%2012.5-12.5z'/></svg>");
+  --callout-tip-accent: #7a9b87;
+  --callout-tip-icon: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0%200%2024%2024' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><path d='M15%2014c.2-1%20.7-1.7%201.5-2.5%201-.9%201.5-2.2%201.5-3.5A6%206%200%200%200%206%208c0%201%20.2%202.2%201.5%203.5.7.7%201.3%201.5%201.5%202.5'/><path d='M9%2018h6'/><path d='M10%2022h4'/></svg>");
+  --callout-info-accent: var(--faint);
+  --callout-info-icon: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0%200%2024%2024' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><circle cx='12' cy='12' r='9'/><path d='M12%2010v6'/><path d='M12%207h.01'/></svg>");
+  --callout-warning-accent: var(--accent);
+  --callout-warning-icon: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0%200%2024%2024' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><path d='M10.3%203.9l-8.4%2014.5a1.6%201.6%200%200%200%201.4%202.4h16.4a1.6%201.6%200%200%200%201.4-2.4L13.7%203.9a1.6%201.6%200%200%200-3.4%200z'/><path d='M12%209v5'/><path d='M12%2016h.01'/></svg>");
+}
+
+@supports (background: color-mix(in oklch, #000 10%, #fff)) {
+  :root {
+    --callout-note-accent: color-mix(in oklch, var(--text) 65%, var(--border));
+    --callout-info-accent: color-mix(in oklch, var(--accent) 35%, var(--text));
+    --callout-warning-accent: color-mix(in oklch, var(--accent) 65%, black);
+  }
+}

@@ -55,7 +55,7 @@
   min-width: 0;
 }
 
-.admin-editor-shell[data-outline='open'] .admin-editor-shell__layout {
+.admin-editor-shell:not([data-side-panel='none']) .admin-editor-shell__layout {
   grid-template-columns: minmax(0, 1fr) var(--admin-editor-outline-inline-size);
   gap: var(--admin-editor-outline-gap-inline-size);
 }

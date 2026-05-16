@@ -1,18 +1,27 @@
 <script lang="ts">
-import type { MarkdownHeadingLevel, MarkdownToolbarCommand, MarkdownToolId } from './markdown-tools';
+import {
+  buildMarkdownCalloutText,
+  getMarkdownShortcutTool,
+  type MarkdownCalloutType,
+  type MarkdownHeadingLevel,
+  type MarkdownToolbarCommand,
+  type MarkdownToolId
+} from './markdown-tools';
 
 type Props = {
   value: string;
   disabled?: boolean;
   toolbarCommand?: MarkdownToolbarCommand | null;
   onScrollElementChange?: (element: HTMLTextAreaElement | null) => void;
+  onShortcutTool?: (toolId: MarkdownToolId) => void;
 };
 
 let {
   value = $bindable(''),
   disabled = false,
   toolbarCommand = null,
-  onScrollElementChange
+  onScrollElementChange,
+  onShortcutTool
 }: Props = $props();
 
 let textareaEl = $state<HTMLTextAreaElement | null>(null);
@@ -121,6 +130,10 @@ const setHeadingLevel = (level: MarkdownHeadingLevel) => {
   commitTextareaValue(lineStart, lineStart + next.length);
 };
 
+const insertCallout = (calloutType: MarkdownCalloutType) => {
+  insertText(buildMarkdownCalloutText(calloutType));
+};
+
 const toggleOrderedList = () => {
   if (!textareaEl) return;
   focusTextarea();
@@ -164,6 +177,9 @@ const applyMarkdownTool = (toolId: MarkdownToolId) => {
     case 'italic':
       wrapSelection('*', '*', 'text');
       break;
+    case 'strikethrough':
+      wrapSelection('~~', '~~', 'text');
+      break;
     case 'code':
       wrapSelection('`', '`', 'code');
       break;
@@ -193,6 +209,21 @@ const applyMarkdownTool = (toolId: MarkdownToolId) => {
   }
 };
 
+const handleKeydown = (event: KeyboardEvent) => {
+  if (disabled) return;
+
+  const toolId = getMarkdownShortcutTool(event);
+  if (!toolId) return;
+
+  event.preventDefault();
+  if (onShortcutTool) {
+    onShortcutTool(toolId);
+    return;
+  }
+
+  applyMarkdownTool(toolId);
+};
+
 $effect(() => {
   const command = toolbarCommand;
   if (!command || command.id === appliedToolbarCommandId) return;
@@ -202,6 +233,8 @@ $effect(() => {
     insertText(command.text);
   } else if (command.kind === 'heading') {
     setHeadingLevel(command.level);
+  } else if (command.kind === 'callout') {
+    insertCallout(command.calloutType);
   } else {
     applyMarkdownTool(command.toolId);
   }
@@ -226,6 +259,7 @@ $effect(() => {
       bind:this={textareaEl}
       spellcheck="false"
       {disabled}
+      onkeydown={handleKeydown}
     ></textarea>
   </label>
 </section>

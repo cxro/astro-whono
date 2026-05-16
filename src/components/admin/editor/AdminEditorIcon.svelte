@@ -18,11 +18,16 @@ import ListCheck from '@lucide/svelte/icons/list-check';
 import ListOrdered from '@lucide/svelte/icons/list-ordered';
 import Lock from '@lucide/svelte/icons/lock';
 import LockOpen from '@lucide/svelte/icons/lock-open';
+import Maximize2 from '@lucide/svelte/icons/maximize-2';
+import MessageSquareText from '@lucide/svelte/icons/message-square-text';
+import Minimize2 from '@lucide/svelte/icons/minimize-2';
 import NotebookPen from '@lucide/svelte/icons/notebook-pen';
 import Quote from '@lucide/svelte/icons/quote';
 import RotateCcw from '@lucide/svelte/icons/rotate-ccw';
 import Rows2 from '@lucide/svelte/icons/rows-2';
+import SquareAsterisk from '@lucide/svelte/icons/square-asterisk';
 import SquareChartGantt from '@lucide/svelte/icons/square-chart-gantt';
+import Strikethrough from '@lucide/svelte/icons/strikethrough';
 import Table2 from '@lucide/svelte/icons/table-2';
 import Trash2 from '@lucide/svelte/icons/trash-2';
 import TreePalm from '@lucide/svelte/icons/tree-palm';
@@ -51,12 +56,17 @@ const icons = {
   list: List,
   lock: Lock,
   'lock-open': LockOpen,
+  'maximize-2': Maximize2,
+  'message-square-text': MessageSquareText,
+  'minimize-2': Minimize2,
   'notebook-pen': NotebookPen,
   'ordered-list': ListOrdered,
   quote: Quote,
   'rotate-ccw': RotateCcw,
   'rows-2': Rows2,
+  'square-asterisk': SquareAsterisk,
   'square-chart-gantt': SquareChartGantt,
+  strikethrough: Strikethrough,
   table: Table2,
   'task-list': ListCheck,
   trash: Trash2,

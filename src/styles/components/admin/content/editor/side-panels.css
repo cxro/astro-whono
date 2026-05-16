@@ -1,0 +1,61 @@
+/* Admin Content Editor Side Panels
+   承载右侧辅助区的 0/1/2 面板布局；具体目录与语法内容由各自样式文件负责。
+*/
+
+.admin-editor-side-panels {
+  position: relative;
+  display: grid;
+  min-width: 0;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.admin-editor-side-panels[data-layout='outline'],
+.admin-editor-side-panels[data-layout='syntax'],
+.admin-editor-side-panels[data-layout='syntaxMaximized'] {
+  grid-template-rows: minmax(0, 1fr);
+}
+
+.admin-editor-side-panels[data-layout='stacked'] {
+  grid-template-rows:
+    minmax(120px, var(--admin-editor-side-panels-outline-row, 45fr))
+    minmax(150px, var(--admin-editor-side-panels-syntax-row, 55fr));
+}
+
+.admin-editor-side-panels__panel {
+  display: grid;
+  min-width: 0;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.admin-editor-side-panels__panel--syntax {
+  min-height: 0;
+}
+
+.admin-editor-side-panels__resize {
+  position: absolute;
+  inset-block-start: var(--admin-editor-side-panels-resize-block-start, 45%);
+  inset-inline: 0;
+  z-index: 2;
+  height: 10px;
+  border: 0;
+  background: transparent;
+  cursor: row-resize;
+  touch-action: none;
+  transform: translateY(-50%);
+}
+
+.admin-editor-side-panels__resize:focus-visible {
+  outline: 1px solid color-mix(in srgb, var(--admin-focus-border) 42%, transparent);
+  outline-offset: -1px;
+}
+
+.admin-editor-side-panels[data-layout='stacked'] .admin-editor-side-panels__panel--syntax {
+  border-block-start: 1px solid var(--admin-editor-shell-divider);
+}
+
+:root[data-admin-editor-side-panel-resizing='true'] * {
+  cursor: row-resize !important;
+  user-select: none !important;
+}

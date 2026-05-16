@@ -1,4 +1,6 @@
 /* ============ Callout v2 (minimal, title data-icon) ============ */
+@import "./callout-tokens.css";
+
 .prose .callout {
   --callout-accent: var(--muted);
   --callout-line: var(--border);
@@ -63,23 +65,23 @@
 }
 
 .prose .callout.note {
-  --callout-accent: var(--muted);
-  --callout-icon: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0%200%2024%2024' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><path d='M12%2020h9'/><path d='M16.5%203.5a2.1%202.1%200%200%201%203%203L7%2019l-4%201%201-4%2012.5-12.5z'/></svg>");
+  --callout-accent: var(--callout-note-accent);
+  --callout-icon: var(--callout-note-icon);
 }
 
 .prose .callout.tip {
-  --callout-accent: #7a9b87;
-  --callout-icon: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0%200%2024%2024' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><path d='M15%2014c.2-1%20.7-1.7%201.5-2.5%201-.9%201.5-2.2%201.5-3.5A6%206%200%200%200%206%208c0%201%20.2%202.2%201.5%203.5.7.7%201.3%201.5%201.5%202.5'/><path d='M9%2018h6'/><path d='M10%2022h4'/></svg>");
+  --callout-accent: var(--callout-tip-accent);
+  --callout-icon: var(--callout-tip-icon);
 }
 
 .prose .callout.info {
-  --callout-accent: var(--faint);
-  --callout-icon: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0%200%2024%2024' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><circle cx='12' cy='12' r='9'/><path d='M12%2010v6'/><path d='M12%207h.01'/></svg>");
+  --callout-accent: var(--callout-info-accent);
+  --callout-icon: var(--callout-info-icon);
 }
 
 .prose .callout.warning {
-  --callout-accent: var(--accent);
-  --callout-icon: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0%200%2024%2024' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><path d='M10.3%203.9l-8.4%2014.5a1.6%201.6%200%200%200%201.4%202.4h16.4a1.6%201.6%200%200%200%201.4-2.4L13.7%203.9a1.6%201.6%200%200%200-3.4%200z'/><path d='M12%209v5'/><path d='M12%2016h.01'/></svg>");
+  --callout-accent: var(--callout-warning-accent);
+  --callout-icon: var(--callout-warning-icon);
 }
 
 @supports ((-webkit-mask-image: url("")) or (mask-image: url(""))) {
@@ -112,17 +114,5 @@
 @supports (background: color-mix(in oklch, #000 10%, #fff)) {
   .prose .callout {
     --callout-line: color-mix(in oklch, var(--border) 70%, var(--bg));
-  }
-
-  .prose .callout.note {
-    --callout-accent: color-mix(in oklch, var(--text) 65%, var(--border));
-  }
-
-  .prose .callout.info {
-    --callout-accent: color-mix(in oklch, var(--accent) 35%, var(--text));
-  }
-
-  .prose .callout.warning {
-    --callout-accent: color-mix(in oklch, var(--accent) 65%, black);
   }
 }
