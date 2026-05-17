@@ -151,7 +151,7 @@
   min-height: var(--entry-search-feedback-h);
   font-size: 12px;
   line-height: 1.45;
-  font-family: "LXGW WenKai Lite", "Kaiti SC", "STKaiti", serif;
+  font-family: var(--font-accent);
   color: var(--muted);
   white-space: nowrap;
   overflow: hidden;
@@ -230,7 +230,7 @@
   -webkit-line-clamp: 3;
   line-clamp: 3;
   overflow: hidden;
-  font-family: "LXGW WenKai Lite", "Kaiti SC", "STKaiti", serif;
+  font-family: var(--font-accent);
 }
 
 .badge {
@@ -297,7 +297,7 @@
   grid-row: 1;
   color: var(--faint);
   font-size: 13px;
-  font-family: "LXGW WenKai Lite", "Kaiti SC", "STKaiti", serif;
+  font-family: var(--font-accent);
 }
 
 .archive-date-full {
@@ -447,7 +447,7 @@
   background: var(--code-content-bg);
   color: var(--text);
   font-size: 13px;
-  font-family: "LXGW WenKai Lite", "Kaiti SC", "STKaiti", serif;
+  font-family: var(--font-accent);
 }
 
 .pagination__link:hover,

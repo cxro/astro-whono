@@ -282,7 +282,7 @@
 
 .bits-search input::placeholder {
   font-size: 14px;
-  font-family: "LXGW WenKai Lite", "Kaiti SC", "STKaiti", serif;
+  font-family: var(--font-accent);
   color: var(--muted);
   opacity: 1;
 }
@@ -548,7 +548,7 @@
   border-radius: 10px;
   font-size: 12px;
   line-height: 1.6;
-  font-family: "LXGW WenKai Lite", "Kaiti SC", "STKaiti", serif;
+  font-family: var(--font-accent);
   color: var(--muted);
   background: color-mix(in srgb, var(--panel) 38%, var(--bg));
 }
@@ -739,7 +739,7 @@
   padding: 0 9px;
   border-radius: 999px;
   font-size: 12px;
-  font-family: "LXGW WenKai Lite", "Kaiti SC", "STKaiti", serif;
+  font-family: var(--font-accent);
   color: var(--muted);
   background: color-mix(in srgb, var(--panel) 65%, var(--bg));
   border: 1px solid color-mix(in srgb, var(--border) 85%, transparent);
@@ -924,7 +924,7 @@
   border-radius: 999px;
   font-size: 14px;
   font-weight: 600;
-  font-family: "LXGW WenKai Lite", "Kaiti SC", "STKaiti", serif;
+  font-family: var(--font-accent);
   color: #fff;
   background: var(--overlay-60);
   letter-spacing: 0.2px;
@@ -1348,7 +1348,7 @@
   border-radius: 12px;
   background: var(--bg);
   color: var(--text);
-  font-family: "LXGW WenKai Lite", "Kaiti SC", "STKaiti", serif;
+  font-family: var(--font-accent);
   --bits-focus: var(--muted);
   padding: 0;
 }
@@ -1559,7 +1559,7 @@
 }
 
 #bits-draft-content {
-  font-family: "Noto Serif SC", ui-serif, Georgia, "Times New Roman", "Songti SC", serif;
+  font-family: var(--font-serif);
   min-height: 160px;
 }
 

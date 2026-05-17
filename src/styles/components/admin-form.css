@@ -196,7 +196,7 @@
 .admin-images-field-placeholder {
   padding: 14px;
   color: var(--muted);
-  font-family: "LXGW WenKai Lite", "Kaiti SC", "STKaiti", serif;
+  font-family: var(--font-accent);
   font-size: 14px;
   font-weight: 600;
   line-height: 1.6;
@@ -302,7 +302,7 @@
 .admin-label__hint {
   color: var(--faint);
   font-weight: 400;
-  font-family: "LXGW WenKai Lite", "Kaiti SC", "STKaiti", serif;
+  font-family: var(--font-accent);
 }
 
 .admin-label__toggle {
@@ -313,7 +313,7 @@
   min-height: 20px;
   color: var(--muted);
   font-weight: 400;
-  font-family: "LXGW WenKai Lite", "Kaiti SC", "STKaiti", serif;
+  font-family: var(--font-accent);
   white-space: nowrap;
   cursor: pointer;
 }
@@ -342,7 +342,7 @@
 }
 
 .admin-help__preview-value {
-  font-family: "LXGW WenKai Lite", "Kaiti SC", "STKaiti", serif;
+  font-family: var(--font-accent);
 }
 
 .admin-year-range {
@@ -432,7 +432,7 @@
   border-radius: calc(var(--admin-control-radius) - 2px);
   background: transparent;
   color: var(--muted);
-  font-family: "LXGW WenKai Lite", "Kaiti SC", "STKaiti", serif;
+  font-family: var(--font-accent);
   font-size: 13px;
   line-height: 1.3;
   text-align: center;
@@ -569,7 +569,7 @@
 
 .admin-subtitle__main,
 .admin-subtitle__hint {
-  font-family: "LXGW WenKai Lite", "Kaiti SC", "STKaiti", serif;
+  font-family: var(--font-accent);
 }
 
 .admin-subtitle__main {

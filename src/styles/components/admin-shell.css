@@ -107,8 +107,8 @@
     "Hiragino Sans GB",
     "Segoe UI",
     sans-serif;
-  --admin-font-copy: "LXGW WenKai Lite", "Kaiti SC", "STKaiti", serif;
-  --admin-font-page: "Noto Serif SC", ui-serif, Georgia, "Times New Roman", "Songti SC", serif;
+  --admin-font-copy: var(--font-accent);
+  --admin-font-page: var(--font-serif);
   --admin-font-mono: var(--font-mono, ui-monospace, "SFMono-Regular", "Cascadia Code", "Fira Code", Consolas, monospace);
   --admin-text-2xs: 0.6875rem;
   --admin-text-xs: 0.75rem;

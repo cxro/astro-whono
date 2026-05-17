@@ -115,7 +115,7 @@
   opacity: 0.55;
   font-size: 14px;
   line-height: 1;
-  font-family: "LXGW WenKai Lite", "Kaiti SC", "STKaiti", serif;
+  font-family: var(--font-accent);
 }
 
 @media (min-width: 901px) {
@@ -560,7 +560,7 @@
   background: var(--panel);
   color: var(--text);
   border: 1px solid var(--border);
-  font-family: "LXGW WenKai Lite", "Kaiti SC", "STKaiti", serif;
+  font-family: var(--font-accent);
   font-size: 12px;
   line-height: 1;
   white-space: nowrap;
