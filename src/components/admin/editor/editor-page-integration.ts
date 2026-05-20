@@ -42,25 +42,6 @@ type ElementInlineSizeObserverOptions = {
   onInlineSize: (inlineSize: number) => void;
 };
 
-type QueuedElementInlineSizeReadOptions = {
-  element: HTMLElement | null;
-  fallbackInlineSize: number;
-  existingFrame: number | null;
-  onFrame: (frame: number | null) => void;
-  onInlineSize: (inlineSize: number) => void;
-  windowRef?: Window;
-};
-
-type AdminSidebarStateObserverOptions = {
-  onChange: (expanded: boolean) => void;
-  documentRoot?: Document;
-};
-
-type AdminSidebarCollapseOptions = {
-  toggleId: string;
-  documentRoot?: Document;
-};
-
 const noop = () => {};
 
 const getDocumentRoot = (documentRoot?: Document): Document | null => {
@@ -236,65 +217,6 @@ export const observeElementInlineSize = ({
 
   syncInlineSize();
   observer.observe(element);
-  return () => {
-    observer.disconnect();
-  };
-};
-
-export const queueElementInlineSizeRead = ({
-  element,
-  fallbackInlineSize,
-  existingFrame,
-  onFrame,
-  onInlineSize,
-  windowRef
-}: QueuedElementInlineSizeReadOptions): void => {
-  const win = getWindowRef(windowRef);
-  if (!win) return;
-
-  if (existingFrame !== null) {
-    win.cancelAnimationFrame(existingFrame);
-  }
-
-  const frame = win.requestAnimationFrame(() => {
-    onFrame(null);
-    onInlineSize(element?.getBoundingClientRect().width ?? fallbackInlineSize);
-  });
-  onFrame(frame);
-};
-
-export const collapseAdminSidebarByToggle = ({
-  toggleId,
-  documentRoot
-}: AdminSidebarCollapseOptions): boolean => {
-  const root = getDocumentRoot(documentRoot);
-  if (!root || root.documentElement.dataset.adminSidebar !== 'expanded') return false;
-
-  const button = root.getElementById(toggleId);
-  if (!(button instanceof HTMLButtonElement)) return false;
-
-  button.click();
-  return root.documentElement.getAttribute('data-admin-sidebar') === 'collapsed';
-};
-
-export const observeAdminSidebarExpandedState = ({
-  onChange,
-  documentRoot
-}: AdminSidebarStateObserverOptions): Cleanup => {
-  const root = getDocumentRoot(documentRoot);
-  if (!root || typeof MutationObserver === 'undefined') return noop;
-
-  const sync = () => {
-    onChange(root.documentElement.dataset.adminSidebar === 'expanded');
-  };
-  sync();
-
-  const observer = new MutationObserver(sync);
-  observer.observe(root.documentElement, {
-    attributes: true,
-    attributeFilter: ['data-admin-sidebar']
-  });
-
   return () => {
     observer.disconnect();
   };

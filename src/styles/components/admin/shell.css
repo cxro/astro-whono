@@ -392,17 +392,6 @@
   margin-top: 0;
 }
 
-:root[data-admin-sidebar='collapsed'] body.admin-page[data-admin-dev='true'] .admin-console--shell > .admin-route-nav {
-  display: none;
-}
-
-:root[data-admin-sidebar='collapsed']
-  body.admin-page[data-admin-dev='true']
-  .admin-console--shell[data-admin-header-visible='true'][data-admin-nav-visible='true']
-  > .admin-shell {
-  margin-top: var(--admin-shell-rail-content-gap);
-}
-
 .admin-readonly-note {
   max-width: 68ch;
   margin: 0;

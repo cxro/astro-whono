@@ -4,6 +4,12 @@ import {
   cloneFrontmatter,
   isEqualFrontmatter
 } from '../../../lib/admin-console/essay-editor-values';
+import {
+  ADMIN_EDITOR_DEFAULTS_STORAGE_KEY,
+  ADMIN_EDITOR_LAYOUT_STORAGE_KEY,
+  ADMIN_EDITOR_SIDE_PANEL_PREFERENCE_STORAGE_KEY,
+  readStoredAdminEditorDefaults
+} from '../../../lib/admin-console/ui-prefs-keys';
 import { closeClosestAdminDetailsMenu } from '../../../scripts/admin-content/details-menu';
 import {
   deleteEssayEntry,
@@ -21,11 +27,8 @@ import {
   bindArticleInfoTrigger,
   bindEditorDetailsMenus,
   bindEditorNavigationGuard,
-  collapseAdminSidebarByToggle,
   mountEditorPageActionsPortal,
-  observeAdminSidebarExpandedState,
   observeElementInlineSize,
-  queueElementInlineSizeRead,
   syncArticleInfoTriggers
 } from './editor-page-integration';
 import {
@@ -42,6 +45,8 @@ import {
   readStoredEditorLayout,
   readStoredEditorSidePanelPreference,
   readStoredWriteFeedback,
+  resolveEditorLayoutPreference,
+  resolveEditorSidePanelPreference,
   storeEditorLayout,
   storeEditorSidePanelPreference,
   storeWriteFeedback,
@@ -69,16 +74,13 @@ import type { EditorShellProps } from './editor-shell-props';
 
 const LEAVE_CONFIRM_MESSAGE = '当前有未保存更改，确定要离开此页吗？';
 const ARTICLE_INFO_TRIGGER_SELECTOR = '[data-admin-article-info-trigger]';
-const ADMIN_SIDEBAR_TOGGLE_ID = 'admin-sidebar-toggle';
 const PAGE_ACTIONS_HOST_SELECTOR = '[data-admin-editor-page-actions-host]';
 const FRONTMATTER_PANEL_ID = 'admin-editor-frontmatter-panel';
 const OUTLINE_PANEL_ID = 'admin-editor-outline-panel';
 const SYNTAX_PANEL_ID = 'admin-editor-syntax-panel';
 const FRONTMATTER_ISSUE_PATHS = new Set(['title', 'date', 'publishedAt', 'description', 'tags', 'slug', 'badge', 'cover']);
-const EDITOR_LAYOUT_STORAGE_KEY = 'astro-whono:admin-editor:layout';
-const EDITOR_SIDE_PANEL_PREFERENCE_STORAGE_KEY = 'astro-whono:admin-editor:outline-state';
 const PREVIEW_OUTLINE_KEY_ATTR = 'data-admin-outline-key';
-// 无显式偏好时优先 split，窄容器视觉回退由 effective view 派生。
+// 无编辑器默认项或显式偏好时优先 split，窄容器视觉回退由 effective view 派生。
 const DEFAULT_EDITOR_LAYOUT_INTENT: EditorLayoutMode = 'split';
 // 940px 是双 pane 与工具按钮保持可读后的最低稳定宽度；CSS 只消费 data-effective-view。
 const EDITOR_SPLIT_MIN_INLINE_SIZE = 940;
@@ -151,9 +153,6 @@ let previewRequestId = 0;
 let previewTimer: number | null = null;
 let activePreviewAbortController: AbortController | null = null;
 let latestPreviewSource = '';
-let adminSidebarExpanded = $state(false);
-let sidePanelsSidebarCollapseAttempted = false;
-let sidePanelsSidebarCollapseCheckFrame: number | null = null;
 let previewInitialized = false;
 let toolbarCommand = $state<MarkdownToolbarCommand | null>(null);
 let frontmatterPanelOpen = $state(initialSnapshot.articleInfoOpen);
@@ -192,28 +191,6 @@ const isOutlineAvailableForInlineSize = (inlineSize: number): boolean => {
   return !splitBothWouldBeCompact && inlineSize >= getOutlineMinInlineSize(editorLayout, editorViewMode);
 };
 
-const collapseExpandedAdminSidebar = (): boolean => {
-  const collapsed = collapseAdminSidebarByToggle({
-    toggleId: ADMIN_SIDEBAR_TOGGLE_ID
-  });
-  if (collapsed) adminSidebarExpanded = false;
-  return collapsed;
-};
-
-const queueSidePanelsAvailabilityCheck = () => {
-  queueElementInlineSizeRead({
-    element: editorShellEl,
-    fallbackInlineSize: editorShellInlineSize,
-    existingFrame: sidePanelsSidebarCollapseCheckFrame,
-    onFrame: (frame) => {
-      sidePanelsSidebarCollapseCheckFrame = frame;
-    },
-    onInlineSize: (nextInlineSize) => {
-      editorShellInlineSize = nextInlineSize;
-    }
-  });
-};
-
 const bodyLineCount = $derived(body.length === 0 ? 1 : body.split(/\r\n|\r|\n/).length);
 const bodyCharCount = $derived(body.length);
 const frontmatterDirty = $derived(!isEqualFrontmatter(frontmatter, baselineFrontmatter));
@@ -247,7 +224,6 @@ const outlineVisible = $derived(sidePanelLayout === 'outline' || sidePanelLayout
 const syntaxVisible = $derived(
   sidePanelLayout === 'syntax' || sidePanelLayout === 'stacked' || sidePanelLayout === 'syntaxMaximized'
 );
-const sidePanelRequested = $derived(outlineWantedOpen || syntaxWantedOpen);
 const syntaxMaximizeAllowed = $derived(outlineWantedOpen && syntaxWantedOpen);
 const singleViewActive = $derived(editorViewMode !== 'both');
 const editorLayoutToggleLabel = $derived(
@@ -274,9 +250,9 @@ const previewViewToggleLabel = $derived(editorViewMode === 'preview' ? '取消�
 const compactPaneToggleText = $derived(compactPaneMode === 'edit' ? '预览' : '编辑');
 const compactPaneToggleLabel = $derived(compactPaneMode === 'edit' ? '显示预览区' : '显示编辑区');
 const outlineToggleLabel = $derived(outlineWantedOpen ? '关闭目录' : '打开目录');
-const outlineControlDisabled = $derived(!outlineWantedOpen && !sidePanelsAvailable && !adminSidebarExpanded);
+const outlineControlDisabled = $derived(!outlineWantedOpen && !sidePanelsAvailable);
 const syntaxToggleLabel = $derived(syntaxWantedOpen ? '关闭语法实例' : '打开语法实例');
-const syntaxControlDisabled = $derived(!syntaxWantedOpen && !sidePanelsAvailable && !adminSidebarExpanded);
+const syntaxControlDisabled = $derived(!syntaxWantedOpen && !sidePanelsAvailable);
 const exportHref = $derived(buildContentExportHref(exportEndpoint, collection, entryId));
 const scrollSyncAvailable = $derived(
   effectiveViewMode === 'both' && Boolean(bodyScrollElement && previewScrollElement)
@@ -329,7 +305,9 @@ const toggleEditorLayout = () => {
 
   const nextLayout = editorLayout === 'split' ? 'stacked' : 'split';
   explicitEditorLayout = nextLayout;
-  storeEditorLayout(EDITOR_LAYOUT_STORAGE_KEY, nextLayout);
+  if (!readDevAdminEditorDefaults()) {
+    storeEditorLayout(ADMIN_EDITOR_LAYOUT_STORAGE_KEY, nextLayout);
+  }
 };
 
 const toggleEditorViewMode = (viewMode: Exclude<EditorViewMode, 'both'>) => {
@@ -351,20 +329,13 @@ const storeCurrentSidePanelPreference = (
     syntaxOpen: boolean;
   }> = {}
 ) => {
-  storeEditorSidePanelPreference(EDITOR_SIDE_PANEL_PREFERENCE_STORAGE_KEY, {
+  if (readDevAdminEditorDefaults()) return;
+
+  storeEditorSidePanelPreference(ADMIN_EDITOR_SIDE_PANEL_PREFERENCE_STORAGE_KEY, {
     outlineOpen: preference.outlineOpen ?? outlineWantedOpen,
     outlineActiveTab: preference.outlineActiveTab ?? outlineActiveTab,
     syntaxOpen: preference.syntaxOpen ?? syntaxWantedOpen
   });
-};
-
-const requestSidePanelsAvailability = () => {
-  if (sidePanelsAvailable) return;
-
-  if (collapseExpandedAdminSidebar()) {
-    sidePanelsSidebarCollapseAttempted = true;
-    queueSidePanelsAvailabilityCheck();
-  }
 };
 
 const toggleOutline = () => {
@@ -376,7 +347,6 @@ const toggleOutline = () => {
 
   outlineWantedOpen = true;
   storeCurrentSidePanelPreference({ outlineOpen: true });
-  requestSidePanelsAvailability();
 };
 
 const toggleSyntax = () => {
@@ -390,7 +360,6 @@ const toggleSyntax = () => {
   syntaxWantedOpen = true;
   syntaxMaximized = false;
   storeCurrentSidePanelPreference({ syntaxOpen: true });
-  requestSidePanelsAvailability();
 };
 
 const toggleSyntaxMaximize = () => {
@@ -695,6 +664,9 @@ const resetFrontmatterToBaseline = () => {
   clearStatus();
 };
 
+const readDevAdminEditorDefaults = () =>
+  import.meta.env.DEV ? readStoredAdminEditorDefaults(ADMIN_EDITOR_DEFAULTS_STORAGE_KEY) : null;
+
 const closeActionMenu = (target: EventTarget | null) => {
   if (target instanceof HTMLElement) {
     closeClosestAdminDetailsMenu(target, '.admin-editor-shell__action-more');
@@ -787,14 +759,20 @@ $effect(() => {
 $effect(() => {
   if (editorLayoutRestored) return;
   editorLayoutRestored = true;
-  explicitEditorLayout = readStoredEditorLayout(EDITOR_LAYOUT_STORAGE_KEY);
+  explicitEditorLayout = resolveEditorLayoutPreference(
+    readStoredEditorLayout(ADMIN_EDITOR_LAYOUT_STORAGE_KEY),
+    readDevAdminEditorDefaults()
+  );
 });
 
 $effect(() => {
   if (editorSidePanelPreferenceRestored) return;
   editorSidePanelPreferenceRestored = true;
 
-  const storedSidePanelPreference = readStoredEditorSidePanelPreference(EDITOR_SIDE_PANEL_PREFERENCE_STORAGE_KEY);
+  const storedSidePanelPreference = resolveEditorSidePanelPreference(
+    readStoredEditorSidePanelPreference(ADMIN_EDITOR_SIDE_PANEL_PREFERENCE_STORAGE_KEY),
+    readDevAdminEditorDefaults()
+  );
   if (!storedSidePanelPreference) return;
 
   outlineWantedOpen = storedSidePanelPreference.outlineOpen;
@@ -889,19 +867,7 @@ $effect(() => {
 });
 
 $effect(() => {
-  return observeAdminSidebarExpandedState({
-    onChange: (expanded) => {
-      adminSidebarExpanded = expanded;
-    }
-  });
-});
-
-$effect(() => {
   return () => {
-    if (sidePanelsSidebarCollapseCheckFrame !== null) {
-      window.cancelAnimationFrame(sidePanelsSidebarCollapseCheckFrame);
-      sidePanelsSidebarCollapseCheckFrame = null;
-    }
     scrollSyncController.destroy();
   };
 });
@@ -925,24 +891,6 @@ $effect(() => {
 $effect(() => {
   if (!syntaxMaximizeAllowed && syntaxMaximized) {
     syntaxMaximized = false;
-  }
-});
-
-$effect(() => {
-  if (!sidePanelRequested) {
-    sidePanelsSidebarCollapseAttempted = false;
-    return;
-  }
-
-  if (sidePanelsAvailable) {
-    sidePanelsSidebarCollapseAttempted = false;
-    return;
-  }
-
-  if (!sidePanelsSidebarCollapseAttempted && collapseExpandedAdminSidebar()) {
-    sidePanelsSidebarCollapseAttempted = true;
-    queueSidePanelsAvailabilityCheck();
-    return;
   }
 });
 

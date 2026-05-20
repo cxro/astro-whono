@@ -39,7 +39,6 @@ const { collection, entryId, initialArticleInfoOpen = false } = Astro.props;
 
 const isDev = import.meta.env.DEV;
 const shouldShowContentConsole = isDev;
-const shouldShowAdminNav = isDev;
 const base = import.meta.env.BASE_URL ?? '/';
 const withBase = createWithBase(base);
 const { default: adminShellStylesHref } = await import('../../styles/components/admin/shell.css?url');
@@ -193,13 +192,14 @@ const bitsImageRows = selectedBitsImageRows.length > 0
   title={shouldUseSvelteEssayEditor ? editTitle : 'Content Console'}
   stylesHref={adminStylesHref}
   bodyClass={contentEditorBodyClass}
+  adminSidebarScope="page"
 >
   <AdminShell
     currentRoute="content"
     title="Content Console"
     subtitle={contentConsoleSubtitle}
     showHeader={!shouldUseSvelteEssayEditor}
-    showNav={shouldShowAdminNav && !shouldUseSvelteEssayEditor}
+    showNav={false}
   >
     {shouldShowContentConsole && shouldUseLegacyContentEditor ? (
       <div slot="status" class="admin-status-slot">

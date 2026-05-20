@@ -2,6 +2,7 @@ import {
   isRecord,
   type AdminContentWriteResult
 } from '../../../scripts/admin-content/entry-transport';
+import type { AdminEditorDefaults } from '../../../lib/admin-console/ui-prefs-keys';
 import type { EditorOutlineTab } from './editor-outline-helpers';
 
 export type StatusState = 'idle' | 'loading' | 'ready' | 'ok' | 'warn' | 'error';
@@ -276,6 +277,26 @@ export const readStoredEditorSidePanelPreference = (storageKey: string): EditorS
   } catch {
     return null;
   }
+};
+
+export const resolveEditorLayoutPreference = (
+  storedLayout: EditorLayoutMode | null,
+  adminDefaults: AdminEditorDefaults | null
+): EditorLayoutMode | null =>
+  adminDefaults?.layout ?? storedLayout ?? null;
+
+export const resolveEditorSidePanelPreference = (
+  storedPreference: EditorSidePanelPreference | null,
+  adminDefaults: AdminEditorDefaults | null
+): EditorSidePanelPreference | null => {
+  if (adminDefaults) {
+    return {
+      outlineOpen: adminDefaults.outlineOpen,
+      outlineActiveTab: 'headings',
+      syntaxOpen: adminDefaults.syntaxOpen
+    };
+  }
+  return storedPreference;
 };
 
 export const storeEditorSidePanelPreference = (storageKey: string, state: EditorSidePanelPreference) => {

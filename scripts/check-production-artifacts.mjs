@@ -8,7 +8,9 @@ import {
   assertAdminImageUploadStaticShell,
   assertAdminPreviewStaticShell,
   assertNoAdminRouteNav,
+  assertNoDevAdminUiPreferenceChrome,
   assertAdminSettingsStaticShell,
+  DEV_ADMIN_UI_PREFERENCE_MARKERS,
   expect
 } from './smoke-utils.mjs';
 
@@ -43,6 +45,27 @@ const findAdminContentEditArtifactDirs = () => {
 
   walk(root);
   return matches;
+};
+
+const findBuiltAstroAssets = () => {
+  const root = 'dist/_astro';
+  if (!existsSync(root)) return [];
+
+  return readdirSync(root, { withFileTypes: true })
+    .filter((entry) => entry.isFile() && /\.(css|js)$/i.test(entry.name))
+    .map((entry) => path.join(root, entry.name));
+};
+
+const assertNoDevAdminUiPreferenceAssets = () => {
+  for (const filePath of findBuiltAstroAssets()) {
+    for (const marker of DEV_ADMIN_UI_PREFERENCE_MARKERS) {
+      expect(
+        !filePath.includes(marker),
+        `${filePath} should not be emitted as a DEV-only admin UI preference asset`
+      );
+    }
+    assertNoDevAdminUiPreferenceChrome(filePath, readText(filePath));
+  }
 };
 
 const PREV_LINK_PATTERN = /<a class="prev-next__link prev-next__link--prev"[^>]*rel="prev">/;
@@ -120,6 +143,7 @@ export const runProductionArtifactCheck = async (options = {}) => {
     aboutHtml.includes(`<meta property="og:url" content="${siteUrl}/about/"`),
     'About page og:url no longer matches SITE_URL'
   );
+  assertNoDevAdminUiPreferenceChrome('dist/about/index.html', aboutHtml);
   expect(!/\.admin-/.test(aboutHtml), 'Public about page still contains admin CSS rules');
   expect(!/--admin-status-/.test(aboutHtml), 'Public about page still contains admin CSS tokens');
 
@@ -150,6 +174,7 @@ export const runProductionArtifactCheck = async (options = {}) => {
   );
 
   assertAdminOverviewHeader('dist/admin/index.html', adminHtml);
+  assertNoDevAdminUiPreferenceChrome('dist/admin/index.html', adminHtml);
   if (adminHtml.includes('data-admin-overview-mode="hidden"')) {
     expect(
       adminHtml.includes('admin-site-overview__hidden-message'),
@@ -175,6 +200,7 @@ export const runProductionArtifactCheck = async (options = {}) => {
   for (const [filePath, html, heading] of readonlyAdminHtmlChecks) {
     expect(html.includes(heading), `${filePath} is missing the expected ${heading} route heading`);
     assertNoAdminRouteNav(filePath, html);
+    assertNoDevAdminUiPreferenceChrome(filePath, html);
     expect(!html.includes('data-admin-root'), `${filePath} should stay readonly outside dev`);
     expect(!html.includes('id="admin-bootstrap"'), `${filePath} should not emit theme bootstrap payload`);
     expect(!html.includes('data-admin-content-root'), `${filePath} should not emit content console payload`);
@@ -186,12 +212,14 @@ export const runProductionArtifactCheck = async (options = {}) => {
       `${filePath} still links an external _astro module script`
     );
   }
+  assertNoDevAdminUiPreferenceAssets();
 
   const indexHtml = readText('dist/index.html');
   expect(
     /<h1 class="sr-only">[^<]+<\/h1>/.test(indexHtml),
     'Homepage hidden H1 is missing from dist/index.html'
   );
+  assertNoDevAdminUiPreferenceChrome('dist/index.html', indexHtml);
   expect(!/\.admin-/.test(indexHtml), 'Homepage still contains admin CSS rules');
   expect(!/--admin-status-/.test(indexHtml), 'Homepage still contains admin CSS tokens');
 

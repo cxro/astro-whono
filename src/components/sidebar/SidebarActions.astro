@@ -1,0 +1,122 @@
+---
+import AdminIcon from '../admin/AdminIcon.astro';
+import UiIcon from '../UiIcon.astro';
+import AdminUiPrefsCard from './AdminUiPrefsCard.astro';
+
+type SidebarActionNavItem = {
+  href: string;
+  label: string;
+  isActive: boolean;
+};
+
+const {
+  isAdminContext = false,
+  isDev = false,
+  navItems,
+  homeHref,
+  rssHref,
+  adminOverviewHref,
+  showReaderToggle = false,
+  showRssLink = false,
+  showThemeToggle = false,
+  showAdminEntry = false
+} = Astro.props as {
+  isAdminContext?: boolean;
+  isDev?: boolean;
+  navItems: readonly SidebarActionNavItem[];
+  homeHref: string;
+  rssHref: string;
+  adminOverviewHref: string;
+  showReaderToggle?: boolean;
+  showRssLink?: boolean;
+  showThemeToggle?: boolean;
+  showAdminEntry?: boolean;
+};
+
+const mainSiteHomeLabel = '主站首页';
+const showAdminUiPrefs = isAdminContext && isDev;
+---
+
+<div class="sidebar-actions">
+  {isAdminContext ? (
+    <a
+      class="icon-button public-home-link sidebar-action--rail-only"
+      href={homeHref}
+      aria-label={mainSiteHomeLabel}
+      data-tooltip={mainSiteHomeLabel}
+    >
+      <AdminIcon name="admin-home" class="icon" />
+    </a>
+  ) : null}
+
+  {isAdminContext && navItems.length > 0 ? (
+    <details class="public-nav-group sidebar-action--rail-only">
+      <summary class="icon-button public-nav-group__summary" aria-label="前台页面" data-tooltip="前台页面">
+        <AdminIcon name="layout-list" class="icon" />
+      </summary>
+      <div class="public-nav-group__popover">
+        <ul class="public-nav-group__list">
+          {navItems.map((item) => (
+            <li>
+              <a class="public-nav-group__link" href={item.href} aria-current={item.isActive ? 'page' : undefined}>
+                <span>{item.label}</span>
+              </a>
+            </li>
+          ))}
+        </ul>
+      </div>
+    </details>
+  ) : null}
+
+  {showReaderToggle ? (
+    <button
+      id="reader-toggle"
+      class="icon-button reader-toggle sidebar-action--rail-hidden"
+      type="button"
+      aria-label="阅读模式"
+      aria-pressed="false"
+      data-tooltip="阅读模式"
+    >
+      <UiIcon name="book-open" class="icon icon-book-open" />
+      <UiIcon name="book-closed" class="icon icon-book-closed" />
+    </button>
+  ) : null}
+
+  {showRssLink ? (
+    <a
+      class="icon-button rss-link sidebar-action--rail-hidden"
+      href={rssHref}
+      aria-label="RSS 订阅"
+      data-tooltip="RSS 订阅"
+    >
+      <UiIcon name="rss" class="icon" />
+    </a>
+  ) : null}
+
+  {showThemeToggle ? (
+    <button
+      id="theme-toggle"
+      class="icon-button theme-toggle"
+      type="button"
+      aria-label="夜间模式"
+      aria-pressed="false"
+      data-tooltip="夜间模式"
+    >
+      <UiIcon name="moon" class="icon icon-moon" />
+      <UiIcon name="sun" class="icon icon-sun" />
+    </button>
+  ) : null}
+
+  {showAdminEntry ? (
+    <a
+      class="icon-button admin-entry-link sidebar-action--rail-hidden"
+      href={adminOverviewHref}
+      aria-label="站点概览"
+      data-tooltip="站点概览"
+    >
+      <UiIcon name="monitor-dot" class="icon" />
+    </a>
+  ) : null}
+
+  {showAdminUiPrefs ? <AdminUiPrefsCard /> : null}
+</div>

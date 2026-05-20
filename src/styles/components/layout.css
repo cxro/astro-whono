@@ -358,7 +358,7 @@
   min-height: 48px;
 }
 
-/* Admin rail：桌面手动收起与窄屏强制 rail 共用同一套声明。 */
+/* Admin rail：窄屏与页面级 rail 共用同一套声明。 */
 body.admin-page {
   --admin-rail-width: 68px;
   --admin-rail-item-size: 44px;
@@ -394,9 +394,6 @@ body.admin-page {
   --admin-sidebar-actions-direction: row;
   --admin-sidebar-actions-align-self: flex-end;
   --admin-sidebar-actions-gap: 10px;
-  --admin-sidebar-actions-divider-width: 1px;
-  --admin-sidebar-actions-divider-height: 18px;
-  --admin-sidebar-actions-divider-margin: 0 1px;
   --admin-sidebar-action-size: 34px;
   --admin-sidebar-action-radius: 999px;
   --admin-sidebar-action-backdrop-display: none;
@@ -428,9 +425,6 @@ body.admin-page {
   --admin-sidebar-actions-direction: column;
   --admin-sidebar-actions-align-self: center;
   --admin-sidebar-actions-gap: 8px;
-  --admin-sidebar-actions-divider-width: 22px;
-  --admin-sidebar-actions-divider-height: 1px;
-  --admin-sidebar-actions-divider-margin: 2px 0;
   --admin-sidebar-action-size: var(--admin-rail-item-size);
   --admin-sidebar-action-radius: var(--admin-rail-control-radius);
   --admin-sidebar-action-backdrop-display: block;
@@ -680,17 +674,11 @@ body.admin-page .sidebar-actions {
   gap: var(--admin-sidebar-actions-gap);
 }
 
-body.admin-page .sidebar-actions__admin-divider {
-  width: var(--admin-sidebar-actions-divider-width);
-  height: var(--admin-sidebar-actions-divider-height);
-  margin: var(--admin-sidebar-actions-divider-margin);
-}
-
-body.admin-page .sidebar-actions .icon-button[title]::after {
+body.admin-page .sidebar-actions .icon-button[data-tooltip]::after {
   display: var(--admin-sidebar-action-tooltip-display);
 }
 
-:root[data-admin-sidebar='collapsed'] body.admin-page .sidebar-actions .icon-button[title]::before {
+:root[data-admin-sidebar='collapsed'] body.admin-page .sidebar-actions .icon-button[data-tooltip]::before {
   content: '';
   display: block;
   position: absolute;
@@ -711,7 +699,7 @@ body.admin-page .sidebar-actions .icon-button[title]::after {
 :root[data-admin-sidebar='collapsed']
   body.admin-page
   .sidebar-actions
-  .icon-button[title]:is(:hover, :focus-visible)::before {
+  .icon-button[data-tooltip]:is(:hover, :focus-visible)::before {
   background: color-mix(in srgb, var(--panel) 72%, transparent);
 }
 
@@ -741,16 +729,13 @@ body.admin-page .sidebar-actions .icon-button[title]::after {
     --admin-sidebar-actions-direction: column;
     --admin-sidebar-actions-align-self: center;
     --admin-sidebar-actions-gap: 8px;
-    --admin-sidebar-actions-divider-width: 22px;
-    --admin-sidebar-actions-divider-height: 1px;
-    --admin-sidebar-actions-divider-margin: 2px 0;
     --admin-sidebar-action-size: var(--admin-rail-item-size);
     --admin-sidebar-action-radius: var(--admin-rail-control-radius);
     --admin-sidebar-action-backdrop-display: block;
     --admin-sidebar-action-tooltip-display: none;
   }
 
-  :root body.admin-page .sidebar-actions .icon-button[title]::before {
+  :root:not([data-admin-sidebar='collapsed']) body.admin-page .sidebar-actions .icon-button[data-tooltip]::before {
     content: '';
     display: block;
     position: absolute;
@@ -768,14 +753,13 @@ body.admin-page .sidebar-actions .icon-button[title]::after {
     z-index: 0;
   }
 
-  :root body.admin-page .sidebar-actions .icon-button[title]:is(:hover, :focus-visible)::before {
+  :root:not([data-admin-sidebar='collapsed'])
+    body.admin-page
+    .sidebar-actions
+    .icon-button[data-tooltip]:is(:hover, :focus-visible)::before {
     background: color-mix(in srgb, var(--panel) 72%, transparent);
   }
 
-  body.admin-page .sidebar-actions__admin-divider,
-  body.admin-page .admin-sidebar-toggle {
-    display: none;
-  }
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -962,20 +946,6 @@ body.admin-page .sidebar-actions .icon-button[title]::after {
   align-self: flex-end;
 }
 
-.sidebar-actions__admin-divider {
-  display: block;
-  flex: 0 0 auto;
-  width: 1px;
-  height: 18px;
-  margin-inline: 1px;
-  border-radius: 999px;
-  background: color-mix(in srgb, var(--border) 76%, transparent);
-}
-
-.admin-sidebar-toggle {
-  color: var(--muted);
-}
-
 @media (max-width: 900px) {
   :where(body:not(.admin-page)) .sidebar-actions {
     margin-left: auto;
@@ -1016,12 +986,12 @@ body.admin-page .sidebar-actions .icon-button[title]::after {
 }
 
 /* 图标悬停提示 */
-.sidebar-actions .icon-button[title] {
+.sidebar-actions .icon-button[data-tooltip] {
   position: relative;
 }
 
-.sidebar-actions .icon-button[title]::after {
-  content: attr(title);
+.sidebar-actions .icon-button[data-tooltip]::after {
+  content: attr(data-tooltip);
   position: absolute;
   left: 50%;
   bottom: calc(100% + 8px);
@@ -1041,7 +1011,7 @@ body.admin-page .sidebar-actions .icon-button[title]::after {
   z-index: 5;
 }
 
-.sidebar-actions .icon-button[title]::before {
+.sidebar-actions .icon-button[data-tooltip]::before {
   content: '';
   position: absolute;
   left: 50%;
@@ -1055,10 +1025,10 @@ body.admin-page .sidebar-actions .icon-button[title]::after {
   z-index: 4;
 }
 
-.sidebar-actions .icon-button[title]:hover::after,
-.sidebar-actions .icon-button[title]:focus-visible::after,
-.sidebar-actions .icon-button[title]:hover::before,
-.sidebar-actions .icon-button[title]:focus-visible::before {
+.sidebar-actions .icon-button[data-tooltip]:hover::after,
+.sidebar-actions .icon-button[data-tooltip]:focus-visible::after,
+.sidebar-actions .icon-button[data-tooltip]:hover::before,
+.sidebar-actions .icon-button[data-tooltip]:focus-visible::before {
   opacity: 1;
   transform: translate(-50%, 0);
 }
@@ -1096,24 +1066,6 @@ body.admin-page .sidebar-actions .icon-button[title]::after {
   transition: transform 0.25s ease;
 }
 
-.admin-sidebar-toggle .admin-sidebar-toggle__icon--expand {
-  display: none;
-}
-
-:root[data-admin-sidebar='collapsed']
-  body.admin-page
-  .admin-sidebar-toggle
-  .admin-sidebar-toggle__icon--collapse {
-  display: none;
-}
-
-:root[data-admin-sidebar='collapsed']
-  body.admin-page
-  .admin-sidebar-toggle
-  .admin-sidebar-toggle__icon--expand {
-  display: block;
-}
-
 .theme-toggle .icon-sun {
   display: none;
 }
@@ -1145,18 +1097,18 @@ body[data-reading="immersive"] .reader-toggle .icon-book-open {
     transform: none;
   }
 
-  .sidebar-actions .icon-button[title]::before,
-  .sidebar-actions .icon-button[title]::after {
+  .sidebar-actions .icon-button[data-tooltip]::before,
+  .sidebar-actions .icon-button[data-tooltip]::after {
     display: none;
   }
 }
 
 @media (hover: none) and (max-width: 900px) {
-  body.admin-page .sidebar-actions .icon-button[title]::before {
+  body.admin-page .sidebar-actions .icon-button[data-tooltip]::before {
     display: block;
   }
 
-  body.admin-page .sidebar-actions .icon-button[title]::after {
+  body.admin-page .sidebar-actions .icon-button[data-tooltip]::after {
     display: none;
   }
 }

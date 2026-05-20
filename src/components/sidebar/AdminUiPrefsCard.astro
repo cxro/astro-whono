@@ -1,0 +1,133 @@
+---
+import AdminIcon from '../admin/AdminIcon.astro';
+
+const showTopNavId = 'admin-ui-pref-show-top-nav';
+const defaultNavPublicId = 'admin-ui-pref-default-nav-public';
+const defaultNavAdminId = 'admin-ui-pref-default-nav-admin';
+const editorLayoutSplitId = 'admin-ui-pref-editor-layout-split';
+const editorLayoutStackedId = 'admin-ui-pref-editor-layout-stacked';
+const editorOutlineId = 'admin-ui-pref-editor-outline';
+const editorSyntaxId = 'admin-ui-pref-editor-syntax';
+const prefsTitleId = 'admin-ui-prefs-title';
+const interfaceTitleId = 'admin-ui-prefs-interface-title';
+const defaultSidebarNavLabelId = 'admin-ui-prefs-default-sidebar-nav-label';
+const editorTitleId = 'admin-ui-prefs-editor-title';
+const editorLayoutLabelId = 'admin-ui-prefs-editor-layout-label';
+---
+
+<details class="admin-ui-prefs" data-admin-ui-prefs-root>
+  <summary class="icon-button admin-ui-prefs__summary" aria-label="偏好设置" data-tooltip="偏好设置">
+    <AdminIcon name="settings" class="icon" />
+  </summary>
+  <div class="admin-ui-prefs__popover" role="group" aria-labelledby={prefsTitleId}>
+    <span id={prefsTitleId} class="sr-only">偏好设置</span>
+
+    <section class="admin-ui-prefs__section" aria-labelledby={interfaceTitleId}>
+      <div id={interfaceTitleId} class="admin-ui-prefs__section-title">
+        <AdminIcon name="panels-top-left" size={14} class="admin-ui-prefs__section-icon" />
+        <span>后台界面</span>
+      </div>
+
+      <label class="admin-ui-prefs__setting" for={showTopNavId}>
+        <span class="admin-ui-prefs__setting-label">顶部导航</span>
+        <input
+          id={showTopNavId}
+          type="checkbox"
+          data-admin-ui-pref="show-top-nav"
+        />
+        <span class="admin-ui-prefs__switch" aria-hidden="true"></span>
+      </label>
+
+      <div class="admin-ui-prefs__setting" role="group" aria-labelledby={defaultSidebarNavLabelId}>
+        <span id={defaultSidebarNavLabelId} class="admin-ui-prefs__setting-label">新窗口默认侧栏</span>
+        <div
+          class="admin-ui-prefs__segmented"
+          role="radiogroup"
+          aria-labelledby={defaultSidebarNavLabelId}
+          data-admin-ui-pref-group="default-sidebar-nav"
+        >
+          <label class="admin-ui-prefs__segment" for={defaultNavPublicId}>
+            <input
+              id={defaultNavPublicId}
+              type="radio"
+              name="admin-ui-pref-default-sidebar-nav"
+              value="public"
+              data-admin-ui-pref="default-sidebar-nav"
+              checked
+            />
+            <span>前台</span>
+          </label>
+          <label class="admin-ui-prefs__segment" for={defaultNavAdminId}>
+            <input
+              id={defaultNavAdminId}
+              type="radio"
+              name="admin-ui-pref-default-sidebar-nav"
+              value="admin"
+              data-admin-ui-pref="default-sidebar-nav"
+            />
+            <span>后台</span>
+          </label>
+        </div>
+      </div>
+    </section>
+
+    <section class="admin-ui-prefs__section" aria-labelledby={editorTitleId}>
+      <div id={editorTitleId} class="admin-ui-prefs__section-title">
+        <AdminIcon name="file-text" size={14} class="admin-ui-prefs__section-icon" />
+        <span>文章编辑器</span>
+      </div>
+
+      <div class="admin-ui-prefs__setting" role="group" aria-labelledby={editorLayoutLabelId}>
+        <span id={editorLayoutLabelId} class="admin-ui-prefs__setting-label">默认布局</span>
+        <div
+          class="admin-ui-prefs__segmented"
+          role="radiogroup"
+          aria-labelledby={editorLayoutLabelId}
+          data-admin-ui-pref-group="editor-default-layout"
+        >
+          <label class="admin-ui-prefs__segment" for={editorLayoutSplitId}>
+            <input
+              id={editorLayoutSplitId}
+              type="radio"
+              name="admin-ui-pref-editor-layout"
+              value="split"
+              data-admin-ui-pref="editor-default-layout"
+              checked
+            />
+            <span>左右</span>
+          </label>
+          <label class="admin-ui-prefs__segment" for={editorLayoutStackedId}>
+            <input
+              id={editorLayoutStackedId}
+              type="radio"
+              name="admin-ui-pref-editor-layout"
+              value="stacked"
+              data-admin-ui-pref="editor-default-layout"
+            />
+            <span>堆叠</span>
+          </label>
+        </div>
+      </div>
+
+      <label class="admin-ui-prefs__setting" for={editorOutlineId}>
+        <span class="admin-ui-prefs__setting-label">自动展开文章目录</span>
+        <input
+          id={editorOutlineId}
+          type="checkbox"
+          data-admin-ui-pref="editor-default-outline"
+        />
+        <span class="admin-ui-prefs__switch" aria-hidden="true"></span>
+      </label>
+
+      <label class="admin-ui-prefs__setting" for={editorSyntaxId}>
+        <span class="admin-ui-prefs__setting-label">自动展开语法提示</span>
+        <input
+          id={editorSyntaxId}
+          type="checkbox"
+          data-admin-ui-pref="editor-default-syntax"
+        />
+        <span class="admin-ui-prefs__switch" aria-hidden="true"></span>
+      </label>
+    </section>
+  </div>
+</details>

@@ -1,0 +1,29 @@
+---
+type SidebarAdminNavItem = {
+  href: string;
+  label: string;
+  description: string;
+  isActive: boolean;
+};
+
+const { items } = Astro.props as {
+  items: readonly SidebarAdminNavItem[];
+};
+---
+
+<ul class="nav sidebar-admin-nav" data-admin-nav-panel="admin" aria-label="后台导航">
+  {items.map((item) => (
+    <li>
+      <a
+        class="sidebar-admin-nav__link"
+        href={item.href}
+        aria-current={item.isActive ? 'page' : undefined}
+        title={item.description}
+        data-admin-nav-link
+      >
+        <span>{item.label}</span>
+        <span class="dot" aria-hidden="true"></span>
+      </a>
+    </li>
+  ))}
+</ul>

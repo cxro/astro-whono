@@ -3,6 +3,7 @@ import type { AstroComponent } from '@lucide/astro';
 import Activity from '@lucide/astro/icons/activity';
 import Check from '@lucide/astro/icons/check';
 import ChevronDown from '@lucide/astro/icons/chevron-down';
+import ChevronRight from '@lucide/astro/icons/chevron-right';
 import CodeXml from '@lucide/astro/icons/code-xml';
 import Copy from '@lucide/astro/icons/copy';
 import Database from '@lucide/astro/icons/database';
@@ -22,10 +23,11 @@ import List from '@lucide/astro/icons/list';
 import Monitor from '@lucide/astro/icons/monitor';
 import Palette from '@lucide/astro/icons/palette';
 import PanelLeft from '@lucide/astro/icons/panel-left';
-import PanelLeftOpen from '@lucide/astro/icons/panel-left-open';
+import PanelsTopLeft from '@lucide/astro/icons/panels-top-left';
 import RefreshCw from '@lucide/astro/icons/refresh-cw';
 import Scan from '@lucide/astro/icons/scan';
 import Search from '@lucide/astro/icons/search';
+import Settings from '@lucide/astro/icons/settings';
 import ShieldCheck from '@lucide/astro/icons/shield-check';
 import Tags from '@lucide/astro/icons/tags';
 import Terminal from '@lucide/astro/icons/terminal';
@@ -34,45 +36,7 @@ import Trash2 from '@lucide/astro/icons/trash-2';
 import Upload from '@lucide/astro/icons/upload';
 import Waypoints from '@lucide/astro/icons/waypoints';
 import X from '@lucide/astro/icons/x';
-
-type AdminIconName =
-  | 'admin-code'
-  | 'admin-home'
-  | 'admin-page'
-  | 'admin-sidebar'
-  | 'admin-sidebar-collapse'
-  | 'admin-sidebar-expand'
-  | 'admin-site'
-  | 'activity'
-  | 'astro-logo'
-  | 'astro-logo-color'
-  | 'check'
-  | 'chevron-down'
-  | 'copy'
-  | 'database'
-  | 'download'
-  | 'eye'
-  | 'funnel'
-  | 'grid-tiles'
-  | 'info'
-  | 'images'
-  | 'layers'
-  | 'layout-list'
-  | 'link'
-  | 'list'
-  | 'monitor'
-  | 'palette'
-  | 'refresh'
-  | 'scan'
-  | 'search'
-  | 'shield-check'
-  | 'tags'
-  | 'terminal'
-  | 'triangle-alert'
-  | 'trash'
-  | 'upload'
-  | 'waypoints'
-  | 'x-mark';
+import type { AdminIconName } from '../../lib/admin-console/admin-icon-names';
 
 interface Props {
   name: AdminIconName;
@@ -97,12 +61,11 @@ const adminIconComponents = {
   'admin-home': House,
   'admin-page': FileText,
   'admin-sidebar': PanelLeft,
-  'admin-sidebar-collapse': PanelLeft,
-  'admin-sidebar-expand': PanelLeftOpen,
   'admin-site': Globe,
   activity: Activity,
   check: Check,
   'chevron-down': ChevronDown,
+  'chevron-right': ChevronRight,
   copy: Copy,
   database: Database,
   download: Download,
@@ -113,13 +76,16 @@ const adminIconComponents = {
   images: Images,
   layers: Layers,
   'layout-list': LayoutList,
+  'file-text': FileText,
   link: Link,
   list: List,
   monitor: Monitor,
   palette: Palette,
+  'panels-top-left': PanelsTopLeft,
   refresh: RefreshCw,
   scan: Scan,
   search: Search,
+  settings: Settings,
   'shield-check': ShieldCheck,
   tags: Tags,
   terminal: Terminal,

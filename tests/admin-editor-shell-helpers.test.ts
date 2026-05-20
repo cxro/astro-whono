@@ -4,8 +4,15 @@ import {
   getEditorSidePanelLayout,
   getEditorSidePanelStackedRatioFromPointer,
   normalizeEditorTextareaValue,
-  readStoredEditorSidePanelPreference
+  readStoredEditorSidePanelPreference,
+  resolveEditorLayoutPreference,
+  resolveEditorSidePanelPreference
 } from '../src/components/admin/editor/editor-shell-helpers';
+import {
+  DEFAULT_ADMIN_EDITOR_DEFAULTS,
+  parseAdminEditorDefaults,
+  serializeAdminEditorDefaults
+} from '../src/lib/admin-console/ui-prefs-keys';
 
 describe('admin editor shell helpers', () => {
   afterEach(() => {
@@ -106,6 +113,77 @@ describe('admin editor shell helpers', () => {
       outlineOpen: true,
       outlineActiveTab: 'headings',
       syntaxOpen: false
+    });
+  });
+
+  it('parses admin editor defaults conservatively', () => {
+    expect(parseAdminEditorDefaults(serializeAdminEditorDefaults({
+      layout: 'stacked',
+      outlineOpen: true,
+      syntaxOpen: false
+    }))).toEqual({
+      layout: 'stacked',
+      outlineOpen: true,
+      syntaxOpen: false
+    });
+    expect(parseAdminEditorDefaults(JSON.stringify({
+      layout: 'grid',
+      outlineOpen: true,
+      syntaxOpen: false
+    }))).toBeNull();
+    expect(parseAdminEditorDefaults('{bad json')).toBeNull();
+  });
+
+  it('keeps admin editor defaults ahead of explicit editor preferences', () => {
+    expect(resolveEditorLayoutPreference('stacked', {
+      ...DEFAULT_ADMIN_EDITOR_DEFAULTS,
+      layout: 'split'
+    })).toBe('split');
+
+    expect(resolveEditorSidePanelPreference({
+      outlineOpen: false,
+      outlineActiveTab: 'essays',
+      syntaxOpen: false
+    }, {
+      layout: 'split',
+      outlineOpen: true,
+      syntaxOpen: true
+    })).toEqual({
+      outlineOpen: true,
+      outlineActiveTab: 'headings',
+      syntaxOpen: true
+    });
+  });
+
+  it('uses explicit editor preferences when admin editor defaults are missing', () => {
+    expect(resolveEditorLayoutPreference('stacked', null)).toBe('stacked');
+
+    expect(resolveEditorSidePanelPreference({
+      outlineOpen: false,
+      outlineActiveTab: 'essays',
+      syntaxOpen: true
+    }, null)).toEqual({
+      outlineOpen: false,
+      outlineActiveTab: 'essays',
+      syntaxOpen: true
+    });
+  });
+
+  it('uses admin editor defaults when no explicit editor preferences exist', () => {
+    expect(resolveEditorLayoutPreference(null, {
+      layout: 'stacked',
+      outlineOpen: true,
+      syntaxOpen: true
+    })).toBe('stacked');
+
+    expect(resolveEditorSidePanelPreference(null, {
+      layout: 'split',
+      outlineOpen: true,
+      syntaxOpen: true
+    })).toEqual({
+      outlineOpen: true,
+      outlineActiveTab: 'headings',
+      syntaxOpen: true
     });
   });
 

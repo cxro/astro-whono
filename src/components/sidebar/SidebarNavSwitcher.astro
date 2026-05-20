@@ -1,0 +1,22 @@
+---
+import AdminIcon from '../admin/AdminIcon.astro';
+
+const switchLabel = '后台导航';
+const title = '切换到后台导航';
+---
+
+<button
+  class="sidebar-nav-switcher"
+  type="button"
+  role="switch"
+  aria-label={switchLabel}
+  aria-checked="false"
+  title={title}
+  data-admin-nav-switcher
+>
+  <span class="sidebar-nav-switcher__control" aria-hidden="true">
+    <span class="sidebar-nav-switcher__thumb">
+      <AdminIcon name="chevron-right" class="sidebar-nav-switcher__thumb-icon" size={12} strokeWidth={2.4} />
+    </span>
+  </span>
+</button>

@@ -1,0 +1,30 @@
+---
+import { ADMIN_NAV_ORNAMENT_DEFAULT } from '../../lib/admin-console/theme-shared';
+
+type SidebarPublicNavItem = {
+  href: string;
+  label: string;
+  ornament?: string | null;
+  isActive: boolean;
+};
+
+const { items, isAdminNavPanel = false } = Astro.props as {
+  items: readonly SidebarPublicNavItem[];
+  isAdminNavPanel?: boolean;
+};
+---
+
+<ul class="nav sidebar-public-nav" data-admin-nav-panel={isAdminNavPanel ? 'public' : undefined}>
+  {items.map((item) => (
+    <li>
+      <a href={item.href} aria-current={item.isActive ? 'page' : undefined}>
+        <span>{item.label}</span>
+        {item.ornament === ADMIN_NAV_ORNAMENT_DEFAULT ? (
+          <span class="dot" aria-hidden="true"></span>
+        ) : item.ornament ? (
+          <span class="nav-ornament" aria-hidden="true">{item.ornament}</span>
+        ) : null}
+      </a>
+    </li>
+  ))}
+</ul>

@@ -9,6 +9,22 @@ const ADMIN_OVERVIEW_HEADER_PATTERN = new RegExp([
   '<span\\b(?=[^>]*\\bclass="[^"]*\\bpage-subtitle\\b[^"]*")[^>]*>\\s*站点概览\\s*</span>'
 ].join('\\s*'));
 const ADMIN_ROUTE_NAV_PATTERN = /<nav\b(?=[^>]*\bclass=(["'])[^"']*\badmin-route-nav\b[^"']*\1)[^>]*>/;
+export const DEV_ADMIN_UI_PREFERENCE_MARKERS = [
+  'data-admin-sidebar-nav',
+  'data-admin-nav-switcher',
+  'data-admin-nav-mode',
+  'data-admin-show-top-nav',
+  'data-admin-ui-prefs-root',
+  'astro-whono:admin-sidebar:nav-mode',
+  'astro-whono:admin-sidebar:default-nav-mode',
+  'astro-whono:admin:show-top-nav',
+  'astro-whono:admin-editor:defaults',
+  'astro-whono:admin-editor:layout',
+  'astro-whono:admin-editor:outline-state',
+  'astro-whono:admin-sidebar:state',
+  'AdminUiPrefsCard',
+  'admin-sidebar-toggle'
+];
 
 export const expect = (condition, message) => {
   if (!condition) {
@@ -75,6 +91,15 @@ export const assertHasAdminRouteNav = (label, body) => {
     ADMIN_ROUTE_NAV_PATTERN.test(body),
     `${label} is missing admin route tabs in dev`
   );
+};
+
+export const assertNoDevAdminUiPreferenceChrome = (label, body) => {
+  for (const marker of DEV_ADMIN_UI_PREFERENCE_MARKERS) {
+    expect(
+      !body.includes(marker),
+      `${label} should not expose DEV-only admin UI preference marker: ${marker}`
+    );
+  }
 };
 
 export const assertAdminOverviewSectionOrder = (label, body) => {

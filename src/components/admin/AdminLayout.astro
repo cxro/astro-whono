@@ -1,21 +1,29 @@
 ---
 import BaseLayout from '../../layouts/BaseLayout.astro';
 
-const { title, stylesHref = null, bodyClass } = Astro.props as {
+const { title, stylesHref = null, bodyClass, adminSidebarScope = 'default' } = Astro.props as {
   title: string;
   stylesHref?: string | readonly string[] | null;
   bodyClass?: string;
+  adminSidebarScope?: 'default' | 'page';
 };
 
-const stylesheetHrefs = Array.isArray(stylesHref)
+const isDev = import.meta.env.DEV;
+const devAdminUiPrefsStylesHref = isDev
+  ? (await import('../../styles/components/admin/dev-ui-prefs.css?url')).default
+  : null;
+const baseStylesheetHrefs = Array.isArray(stylesHref)
   ? stylesHref.filter((href): href is string => typeof href === 'string' && href.length > 0)
   : typeof stylesHref === 'string' && stylesHref.length > 0
     ? [stylesHref]
     : [];
+const stylesheetHrefs = devAdminUiPrefsStylesHref
+  ? [...baseStylesheetHrefs, devAdminUiPrefsStylesHref]
+  : baseStylesheetHrefs;
 const resolvedBodyClass = ['admin-page', bodyClass].filter(Boolean).join(' ');
 ---
 
-<BaseLayout title={title} bodyClass={resolvedBodyClass}>
+<BaseLayout title={title} bodyClass={resolvedBodyClass} adminSidebarScope={adminSidebarScope}>
   <Fragment slot="head">
     <meta name="robots" content="noindex,nofollow" />
     {stylesheetHrefs.map((href) => <link rel="stylesheet" href={href} />)}
