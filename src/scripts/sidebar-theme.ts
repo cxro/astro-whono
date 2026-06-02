@@ -1,4 +1,8 @@
-const KEY = 'theme';
+const THEME_KEY = 'theme';
+const THEME_MODE_KEY = 'theme-mode';
+type Theme = 'light' | 'dark';
+type ThemeMode = Theme | 'system';
+
 const root = document.documentElement;
 const body = document.body;
 
@@ -15,30 +19,93 @@ const isLongPage = () =>
   /^(?:\/(?:archive|essay|memo)(?:\/|$))/.test(window.location.pathname);
 
 let updateFloating = () => {};
+const colorSchemeMq = window.matchMedia('(prefers-color-scheme: dark)');
 
-const isDark = () => root.dataset.theme === 'dark';
+const isTheme = (value: string | null): value is Theme =>
+  value === 'light' || value === 'dark';
 
-const applyTheme = (theme: string) => {
+const isThemeMode = (value: string | null): value is ThemeMode =>
+  value === 'system' || isTheme(value);
+
+const getSystemTheme = (): Theme => colorSchemeMq.matches ? 'dark' : 'light';
+
+const resolveTheme = (mode: ThemeMode): Theme =>
+  mode === 'system' ? getSystemTheme() : mode;
+
+const readThemeMode = (): ThemeMode => {
+  try {
+    const storedMode = localStorage.getItem(THEME_MODE_KEY);
+    if (isThemeMode(storedMode)) return storedMode;
+
+    const legacyTheme = localStorage.getItem(THEME_KEY);
+    if (isTheme(legacyTheme)) return legacyTheme;
+  } catch (_) {}
+
+  return 'system';
+};
+
+const writeThemeMode = (mode: ThemeMode) => {
+  try {
+    localStorage.setItem(THEME_MODE_KEY, mode);
+    if (mode === 'system') {
+      localStorage.removeItem(THEME_KEY);
+    } else {
+      localStorage.setItem(THEME_KEY, mode);
+    }
+  } catch (_) {}
+};
+
+const getNextThemeMode = (mode: ThemeMode): ThemeMode => {
+  if (mode === 'system') return 'light';
+  if (mode === 'light') return 'dark';
+  return 'system';
+};
+
+const getThemeModeLabel = (mode: ThemeMode, theme: Theme): string => {
+  const current = theme === 'dark' ? '深色' : '浅色';
+  const nextMode = getNextThemeMode(mode);
+  const next = nextMode === 'system'
+    ? '跟随系统'
+    : (nextMode === 'dark' ? '深色模式' : '浅色模式');
+
+  if (mode === 'system') {
+    return `跟随系统（当前${current}模式），点击固定为${next}`;
+  }
+
+  return `${current}模式，点击切换为${next}`;
+};
+
+let activeThemeMode: ThemeMode = readThemeMode();
+
+const applyTheme = (theme: Theme, mode: ThemeMode = activeThemeMode) => {
   root.dataset.theme = theme;
+  root.dataset.themeMode = mode;
   const dark = theme === 'dark';
   if (themeBtn) {
-    themeBtn.setAttribute('aria-pressed', dark ? 'true' : 'false');
-    const label = dark ? '浅色模式' : '夜间模式';
+    themeBtn.setAttribute('aria-pressed', mode === 'system' ? 'mixed' : (dark ? 'true' : 'false'));
+    const label = getThemeModeLabel(mode, theme);
     themeBtn.setAttribute('aria-label', label);
     themeBtn.setAttribute('title', label);
   }
 };
 
+const setThemeMode = (mode: ThemeMode, persist = true) => {
+  activeThemeMode = mode;
+  applyTheme(resolveTheme(mode), mode);
+  if (persist) writeThemeMode(mode);
+};
+
 const initTheme = () => {
-  const current = isDark() ? 'dark' : 'light';
-  applyTheme(current);
+  setThemeMode(activeThemeMode, false);
   themeBtn?.addEventListener('click', () => {
-    const next = isDark() ? 'light' : 'dark';
-    applyTheme(next);
-    try {
-      localStorage.setItem(KEY, next);
-    } catch (_) {}
+    setThemeMode(getNextThemeMode(activeThemeMode));
   });
+
+  const syncSystemTheme = () => {
+    if (activeThemeMode === 'system') setThemeMode('system', false);
+  };
+
+  colorSchemeMq.addEventListener?.('change', syncSystemTheme);
 };
 
 const isReaderOn = () => body?.dataset.reading === 'immersive';

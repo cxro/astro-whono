@@ -293,7 +293,8 @@ a {
   display: block;
 }
 
-.theme-toggle .icon-sun {
+.theme-toggle .icon-sun,
+.theme-toggle .icon-system {
   display: none;
 }
 
@@ -302,6 +303,15 @@ a {
 }
 
 :root[data-theme="dark"] .theme-toggle .icon-moon {
+  display: none;
+}
+
+:root[data-theme-mode="system"] .theme-toggle .icon-system {
+  display: block;
+}
+
+:root[data-theme-mode="system"] .theme-toggle .icon-moon,
+:root[data-theme-mode="system"] .theme-toggle .icon-sun {
   display: none;
 }
 

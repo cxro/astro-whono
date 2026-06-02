@@ -54,12 +54,21 @@ const withBase = createWithBase(base);
   <head>
     <script is:inline>
       (() => {
-        const key = 'theme';
-        let stored = null;
-        try { stored = localStorage.getItem(key); } catch (_) {}
+        const themeKey = 'theme';
+        const modeKey = 'theme-mode';
+        let storedMode = null;
+        let legacyTheme = null;
+        try {
+          storedMode = localStorage.getItem(modeKey);
+          legacyTheme = localStorage.getItem(themeKey);
+        } catch (_) {}
         const prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
-        const theme = stored === 'dark' || stored === 'light' ? stored : (prefersDark ? 'dark' : 'light');
+        const mode = storedMode === 'system' || storedMode === 'dark' || storedMode === 'light'
+          ? storedMode
+          : (legacyTheme === 'dark' || legacyTheme === 'light' ? legacyTheme : 'system');
+        const theme = mode === 'system' ? (prefersDark ? 'dark' : 'light') : mode;
         document.documentElement.dataset.theme = theme;
+        document.documentElement.dataset.themeMode = mode;
       })();
     </script>
     <meta charset="utf-8" />

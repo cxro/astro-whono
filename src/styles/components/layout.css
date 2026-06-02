@@ -625,7 +625,8 @@
   transition: transform 0.25s ease;
 }
 
-.theme-toggle .icon-sun {
+.theme-toggle .icon-sun,
+.theme-toggle .icon-system {
   display: none;
 }
 
@@ -634,6 +635,15 @@
 }
 
 :root[data-theme="dark"] .theme-toggle .icon-moon {
+  display: none;
+}
+
+:root[data-theme-mode="system"] .theme-toggle .icon-system {
+  display: block;
+}
+
+:root[data-theme-mode="system"] .theme-toggle .icon-moon,
+:root[data-theme-mode="system"] .theme-toggle .icon-sun {
   display: none;
 }
 
