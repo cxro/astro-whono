@@ -103,6 +103,18 @@ describe('admin content write api', () => {
     }
   });
 
+  it('loads editable payload for bits entries with body text', async () => {
+    const { readAdminContentEntryEditorPayload } = await import('../src/lib/admin-console/content-shared');
+    const payload = await readAdminContentEntryEditorPayload('bits', 'demo');
+
+    expect(payload.writable).toBe(true);
+    expect(payload.collection).toBe('bits');
+    if (payload.collection === 'bits') {
+      expect(payload.bodyText).toBe('\nBits body\n');
+      expect(payload.values.imagesText).toContain('bits/demo.webp');
+    }
+  });
+
   it('loads and validates source files whose names differ from Astro public ids', async () => {
     const { readAdminContentEntryEditorPayload } = await import('../src/lib/admin-console/content-shared');
     const { POST } = await import('../src/pages/api/admin/content/entry');
@@ -211,12 +223,6 @@ describe('admin content write api', () => {
         status: 400,
         issuePath: 'body',
         message: 'body 必须是 Markdown 字符串'
-      },
-      {
-        body: { collection: 'bits', entryId: 'demo', revision: 'stale', frontmatter: {}, body: 'Bits body' },
-        status: 400,
-        issuePath: 'body',
-        message: '仅 essay 支持正文写盘'
       }
     ];
 
@@ -783,6 +789,61 @@ describe('admin content write api', () => {
     );
   });
 
+  it('supports dry-run and real writes for bits body while preserving frontmatter bytes', async () => {
+    const { readAdminContentEntryEditorPayload } = await import('../src/lib/admin-console/content-shared');
+    const { splitMarkdownFrontmatter } = await import('../src/lib/admin-console/frontmatter');
+    const { POST } = await import('../src/pages/api/admin/content/entry');
+
+    const current = await readAdminContentEntryEditorPayload('bits', 'demo');
+    if (current.collection !== 'bits') {
+      throw new Error('Expected bits editor payload');
+    }
+    const nextBody = ['今天的絮语正文。', '', '- 可以保存 body', ''].join('\n');
+
+    const dryRunResponse = await POST({
+      request: createJsonRequest('http://127.0.0.1:4321/api/admin/content/entry?dryRun=1', {
+        collection: 'bits',
+        entryId: 'demo',
+        revision: current.revision,
+        frontmatter: current.values,
+        body: nextBody
+      }),
+      url: new URL('http://127.0.0.1:4321/api/admin/content/entry?dryRun=1')
+    } as never);
+
+    expect(dryRunResponse.status).toBe(200);
+    const dryRunPayload = JSON.parse(await dryRunResponse.text());
+    expect(dryRunPayload.ok).toBe(true);
+    expect(dryRunPayload.dryRun).toBe(true);
+    expect(dryRunPayload.result.changedFields).toEqual(['body']);
+
+    const bitsPath = path.join(tempRoot, 'src', 'content', 'bits', 'demo.md');
+    const before = await readFile(bitsPath, 'utf8');
+    const beforeSection = splitMarkdownFrontmatter(before);
+
+    const writeResponse = await POST({
+      request: createJsonRequest('http://127.0.0.1:4321/api/admin/content/entry', {
+        collection: 'bits',
+        entryId: 'demo',
+        revision: current.revision,
+        frontmatter: current.values,
+        body: nextBody
+      }),
+      url: new URL('http://127.0.0.1:4321/api/admin/content/entry')
+    } as never);
+
+    expect(writeResponse.status).toBe(200);
+    const writePayload = JSON.parse(await writeResponse.text());
+    expect(writePayload.ok).toBe(true);
+    expect(writePayload.result.changedFields).toEqual(['body']);
+    expect(writePayload.payload.bodyText).toBe(nextBody);
+
+    const after = await readFile(bitsPath, 'utf8');
+    const afterSection = splitMarkdownFrontmatter(after);
+    expect(afterSection.frontmatterBlock).toBe(beforeSection.frontmatterBlock);
+    expect(afterSection.bodyText).toBe(nextBody);
+  });
+
   it('returns field issues for invalid bits author avatar paths', async () => {
     const { readAdminContentEntryEditorPayload } = await import('../src/lib/admin-console/content-shared');
     const { POST } = await import('../src/pages/api/admin/content/entry');
@@ -1152,5 +1213,43 @@ describe('admin content write api', () => {
     expect(payload.ok).toBe(false);
     expect(payload.errors[0]).toContain('外部更新');
     expect(payload.payload.values.title).toBe('External Change');
+  });
+
+  it('returns latest bits body when rejecting stale revisions', async () => {
+    const { readAdminContentEntryEditorPayload } = await import('../src/lib/admin-console/content-shared');
+    const { POST } = await import('../src/pages/api/admin/content/entry');
+    const current = await readAdminContentEntryEditorPayload('bits', 'demo');
+
+    await writeFile(
+      path.join(tempRoot, 'src', 'content', 'bits', 'demo.md'),
+      [
+        '---',
+        'date: 2025-02-03T01:01:45+08:00',
+        'tags:',
+        '  - Markdown',
+        '---',
+        '',
+        'external bits body',
+        ''
+      ].join('\n'),
+      'utf8'
+    );
+
+    const response = await POST({
+      request: createJsonRequest('http://127.0.0.1:4321/api/admin/content/entry', {
+        collection: 'bits',
+        entryId: 'demo',
+        revision: current.revision,
+        frontmatter: current.values,
+        body: 'local bits body\n'
+      }),
+      url: new URL('http://127.0.0.1:4321/api/admin/content/entry')
+    } as never);
+
+    expect(response.status).toBe(409);
+    const payload = JSON.parse(await response.text());
+    expect(payload.ok).toBe(false);
+    expect(payload.payload.collection).toBe('bits');
+    expect(payload.payload.bodyText).toBe('\nexternal bits body\n');
   });
 });

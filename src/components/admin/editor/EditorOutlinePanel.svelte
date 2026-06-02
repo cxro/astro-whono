@@ -2,21 +2,22 @@
 import { tick } from 'svelte';
 import AdminEditorIcon from './AdminEditorIcon.svelte';
 import type {
-  EditorOutlineEssayListItem,
+  EditorOutlineListItem,
   EditorOutlineTab,
   MarkdownOutlineItem
 } from './editor-outline-helpers';
-
-const tabs: readonly { id: EditorOutlineTab; label: string }[] = [
-  { id: 'headings', label: '文章目录' },
-  { id: 'essays', label: '文章列表' }
-];
 
 type Props = {
   panelId: string;
   activeTab: EditorOutlineTab;
   headings: readonly MarkdownOutlineItem[];
-  essays: readonly EditorOutlineEssayListItem[];
+  listItems: readonly EditorOutlineListItem[];
+  headingsEnabled?: boolean;
+  headingsTabLabel?: string;
+  listTabLabel?: string;
+  headingsEmptyText?: string;
+  listEmptyText?: string;
+  panelLabel?: string;
   onTabChange: (tab: EditorOutlineTab) => void;
   onHeadingSelect: (item: MarkdownOutlineItem) => void;
 };
@@ -25,11 +26,24 @@ let {
   panelId,
   activeTab,
   headings,
-  essays,
+  listItems,
+  headingsEnabled = true,
+  headingsTabLabel = '文章目录',
+  listTabLabel = '文章列表',
+  headingsEmptyText = '暂无 H2/H3 标题',
+  listEmptyText = '暂无文章',
+  panelLabel = '编辑器目录',
   onTabChange,
   onHeadingSelect
 }: Props = $props();
 
+const tabs = $derived([
+  ...(headingsEnabled ? [{ id: 'headings' as const, label: headingsTabLabel }] : []),
+  { id: 'essays' as const, label: listTabLabel }
+]);
+const effectiveActiveTab = $derived(
+  headingsEnabled && activeTab === 'headings' ? 'headings' : 'essays'
+);
 const getTabId = (tab: EditorOutlineTab) => `${panelId}-${tab}-tab`;
 const getPanelId = (tab: EditorOutlineTab) => `${panelId}-${tab}-panel`;
 
@@ -46,7 +60,8 @@ const selectTab = async (tab: EditorOutlineTab, options: { focus?: boolean } = {
 
 const selectRelativeTab = (currentTab: EditorOutlineTab, direction: -1 | 1) => {
   const currentIndex = tabs.findIndex((tab) => tab.id === currentTab);
-  const nextIndex = (currentIndex + direction + tabs.length) % tabs.length;
+  const safeCurrentIndex = currentIndex === -1 ? 0 : currentIndex;
+  const nextIndex = (safeCurrentIndex + direction + tabs.length) % tabs.length;
   void selectTab(tabs[nextIndex]?.id ?? currentTab, { focus: true });
 };
 
@@ -65,29 +80,34 @@ const handleTabKeydown = (event: KeyboardEvent, tab: EditorOutlineTab) => {
 
   if (event.key === 'Home') {
     event.preventDefault();
-    void selectTab('headings', { focus: true });
+    void selectTab(tabs[0]?.id ?? tab, { focus: true });
     return;
   }
 
   if (event.key === 'End') {
     event.preventDefault();
-    void selectTab('essays', { focus: true });
+    void selectTab(tabs[tabs.length - 1]?.id ?? tab, { focus: true });
   }
 };
 </script>
 
-<aside class="admin-editor-outline-panel" id={panelId} aria-label="编辑器目录">
-  <div class="admin-editor-outline-panel__tabs" role="tablist" aria-label="目录面板">
+<aside class="admin-editor-outline-panel" id={panelId} aria-label={panelLabel}>
+  <div
+    class="admin-editor-outline-panel__tabs"
+    data-single={tabs.length === 1 ? 'true' : undefined}
+    role="tablist"
+    aria-label="目录面板"
+  >
     {#each tabs as tab}
       <button
         class="admin-editor-outline-panel__tab"
-        class:is-active={activeTab === tab.id}
+        class:is-active={effectiveActiveTab === tab.id}
         id={getTabId(tab.id)}
         type="button"
         role="tab"
-        aria-selected={activeTab === tab.id ? 'true' : 'false'}
+        aria-selected={effectiveActiveTab === tab.id ? 'true' : 'false'}
         aria-controls={getPanelId(tab.id)}
-        tabindex={activeTab === tab.id ? 0 : -1}
+        tabindex={effectiveActiveTab === tab.id ? 0 : -1}
         onclick={() => onTabChange(tab.id)}
         onkeydown={(event) => handleTabKeydown(event, tab.id)}
       >
@@ -96,7 +116,7 @@ const handleTabKeydown = (event: KeyboardEvent, tab: EditorOutlineTab) => {
     {/each}
   </div>
 
-  {#if activeTab === 'headings'}
+  {#if effectiveActiveTab === 'headings'}
     <div
       class="admin-editor-outline-panel__body"
       id={getPanelId('headings')}
@@ -131,7 +151,7 @@ const handleTabKeydown = (event: KeyboardEvent, tab: EditorOutlineTab) => {
           {/each}
         </ol>
       {:else}
-        <p class="admin-editor-outline-panel__empty">暂无 H2/H3 标题</p>
+        <p class="admin-editor-outline-panel__empty">{headingsEmptyText}</p>
       {/if}
     </div>
   {:else}
@@ -141,9 +161,9 @@ const handleTabKeydown = (event: KeyboardEvent, tab: EditorOutlineTab) => {
       role="tabpanel"
       aria-labelledby={getTabId('essays')}
     >
-      {#if essays.length > 0}
+      {#if listItems.length > 0}
         <ol class="admin-editor-outline-panel__list admin-editor-outline-panel__list--essays">
-          {#each essays as item (item.entryId)}
+          {#each listItems as item (item.entryId)}
             <li class="admin-editor-outline-panel__essay-item">
               {#if item.active}
                 <span
@@ -168,7 +188,7 @@ const handleTabKeydown = (event: KeyboardEvent, tab: EditorOutlineTab) => {
           {/each}
         </ol>
       {:else}
-        <p class="admin-editor-outline-panel__empty">暂无文章</p>
+        <p class="admin-editor-outline-panel__empty">{listEmptyText}</p>
       {/if}
     </div>
   {/if}

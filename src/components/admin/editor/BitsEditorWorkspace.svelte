@@ -1,7 +1,10 @@
 <script lang="ts">
-import { tick } from 'svelte';
-import { containsMarkdownMath } from '../../../lib/markdown-math';
-import { ensureMarkdownMathStylesheet } from '../../../lib/markdown-math-styles';
+import { onMount } from 'svelte';
+import type { AdminBitsEditorValues } from '../../../lib/admin-console/content-shared';
+import {
+  buildBitsCardViewModel,
+  type BitsCardAuthorInput
+} from '../../../lib/bits-card-view-model';
 import {
   ADMIN_EDITOR_DEFAULTS_STORAGE_KEY,
   ADMIN_EDITOR_DISPLAY_PREFERENCE_STORAGE_KEY,
@@ -10,6 +13,11 @@ import {
   readStoredAdminEditorDefaults
 } from '../../../lib/admin-console/ui-prefs-keys';
 import { closeClosestAdminDetailsMenu } from '../../../scripts/admin-content/details-menu';
+import { createAdminImagePicker, type AdminImagePickerController } from '../../../scripts/admin-shared/image-picker';
+import {
+  CONTENT_LIST_DELETE_FEEDBACK_STORAGE_KEY,
+  CONTENT_LIST_DELETE_FEEDBACK_VALUE
+} from './content-list-feedback';
 import {
   deleteContentEntry as requestContentDelete,
   renderContentPreview,
@@ -17,26 +25,12 @@ import {
   type AdminContentIssue,
   type AdminContentWriteResult
 } from './content-editor-client';
-import { flattenEntryIdToSlug } from '../../../utils/slug-rules';
-import EditorDialogs from './EditorDialogs.svelte';
-import EditorFooterActions from './EditorFooterActions.svelte';
-import EditorTopControls from './EditorTopControls.svelte';
-import EditorWorkspace from './EditorWorkspace.svelte';
 import {
-  bindArticleInfoTrigger,
-  bindEditorDetailsMenus,
-  bindEditorNavigationGuard,
-  mountEditorPageActionsPortal,
-  observeElementInlineSize,
-  syncArticleInfoTriggers
-} from './editor-page-integration';
-import {
-  CONTENT_LIST_DELETE_FEEDBACK_STORAGE_KEY,
-  CONTENT_LIST_DELETE_FEEDBACK_VALUE
-} from './content-list-feedback';
+  getContentEditorAdapter,
+  isBitsEditorValues
+} from './content-editor-adapters';
 import {
   buildContentExportHref,
-  clearStoredWriteFeedback,
   DEFAULT_EDITOR_DISPLAY_PREFERENCE,
   DEFAULT_EDITOR_LAYOUT_INTENT,
   EDITOR_OUTLINE_TARGET_SCROLL_OFFSET_RATIO,
@@ -58,13 +52,11 @@ import {
   readStoredEditorDisplayPreference,
   readStoredEditorLayout,
   readStoredEditorSidePanelPreference,
-  readStoredWriteFeedback,
   resolveEditorLayoutPreference,
   resolveEditorSidePanelPreference,
   storeEditorDisplayPreference,
   storeEditorLayout,
   storeEditorSidePanelPreference,
-  storeWriteFeedback,
   type EditorDisplayPreference,
   type EditorLayoutMode,
   type EditorPaneMode,
@@ -73,34 +65,87 @@ import {
   type EditorViewMode,
   type StatusState
 } from './editor-shell-helpers';
-import type { MarkdownHighlightTheme } from './editor-markdown-highlight';
-import type { EditableImageBlock } from './editor-image-blocks';
-import type { EditableGalleryBlock } from './editor-gallery-blocks';
-import { createEditorScrollSyncController } from './editor-scroll-sync';
 import {
-  buildEssayOutlineListItems,
-  extractMarkdownOutline,
+  bindArticleInfoTrigger,
+  bindEditorDetailsMenus,
+  bindEditorNavigationGuard,
+  mountEditorPageActionsPortal,
+  observeElementInlineSize,
+  syncArticleInfoTriggers
+} from './editor-page-integration';
+import type { MarkdownHighlightTheme } from './editor-markdown-highlight';
+import {
+  buildEditorOutlineListItems,
+  type EditorOutlineListSourceItem,
   type EditorOutlineTab,
   type MarkdownOutlineJumpCommand,
   type MarkdownOutlineItem
 } from './editor-outline-helpers';
-import {
-  scrollPreviewToOutlineKey as scrollPreviewElementToOutlineKey
-} from './editor-outline-scroll';
 import type { MarkdownToolbarCommand } from './markdown-tools';
+import { createEditorScrollSyncController } from './editor-scroll-sync';
 import { createMarkdownCommandDispatcher } from './editor-markdown-command-dispatcher';
-import type { EssayEditorShellProps } from './editor-shell-props';
-import { getContentEditorAdapter } from './content-editor-adapters';
+import ArticleInfoDialog from './ArticleInfoDialog.svelte';
+import EditorFooterActions from './EditorFooterActions.svelte';
+import EditorTopControls from './EditorTopControls.svelte';
+import EditorWorkspace from './EditorWorkspace.svelte';
+import BitsImageRowsEditor from './BitsImageRowsEditor.svelte';
+import BitsPublishStrip from './BitsPublishStrip.svelte';
+import BitsPreviewPane from './BitsPreviewPane.svelte';
+import {
+  getEditableBitsImageRows,
+  serializeBitsImageRows,
+  type BitsImageRowDraft
+} from './bits-image-rows';
+import {
+  getBitsEditorAuthor,
+  getBitsEditorImages,
+  getBitsEditorTags
+} from './bits-editor-values';
 
-const LEAVE_CONFIRM_MESSAGE = '当前有未保存更改，确定要离开此页吗？';
-const ARTICLE_INFO_TRIGGER_SELECTOR = '[data-admin-article-info-trigger]';
+type Props = {
+  endpoint: string;
+  exportEndpoint: string;
+  deleteEndpoint: string;
+  previewEndpoint: string;
+  imageUploadEndpoint: string;
+  returnHref: string;
+  entryId: string;
+  relativePath: string;
+  defaultPublicSlug: string;
+  revision: string;
+  initialFrontmatter: AdminBitsEditorValues;
+  initialBody: string;
+  defaultAuthor: BitsCardAuthorInput;
+  bitsOutlineItems?: EditorOutlineListSourceItem[];
+};
+
+const LEAVE_CONFIRM_MESSAGE = '当前内容尚未保存，确认离开此页面？';
+const BITS_INFO_TRIGGER_SELECTOR = '[data-admin-bits-info-trigger]';
 const PAGE_ACTIONS_HOST_SELECTOR = '[data-admin-editor-page-actions-host]';
-const FRONTMATTER_PANEL_ID = 'admin-editor-frontmatter-panel';
-const OUTLINE_PANEL_ID = 'admin-editor-outline-panel';
-const SYNTAX_PANEL_ID = 'admin-editor-syntax-panel';
-const PREVIEW_OUTLINE_KEY_ATTR = 'data-admin-outline-key';
-const WRITE_FEEDBACK_STORAGE_PREFIX = 'astro-whono:admin-editor:write-feedback:';
-const WRITE_FEEDBACK_STORAGE_TTL_MS = 60 * 1000;
+const BITS_INFO_PANEL_ID = 'admin-editor-frontmatter-panel';
+const OUTLINE_PANEL_ID = 'admin-bits-editor-outline-panel';
+const SYNTAX_PANEL_ID = 'admin-bits-editor-syntax-panel';
+const BITS_EDITOR_SIDE_PANEL_PREFERENCE_STORAGE_KEY = `${ADMIN_EDITOR_SIDE_PANEL_PREFERENCE_STORAGE_KEY}:bits`;
+const BITS_INFO_FIELD_PATHS = [
+  'title',
+  'description',
+  'draft',
+  'authorName',
+  'authorAvatar'
+] as const satisfies readonly (keyof AdminBitsEditorValues)[];
+type BitsInfoFieldPath = (typeof BITS_INFO_FIELD_PATHS)[number];
+
+const isBitsInfoFieldPath = (path: string): path is BitsInfoFieldPath =>
+  BITS_INFO_FIELD_PATHS.includes(path as BitsInfoFieldPath);
+
+const getBitsInfoValues = (values: AdminBitsEditorValues): Pick<AdminBitsEditorValues, BitsInfoFieldPath> => ({
+  title: values.title,
+  description: values.description,
+  draft: values.draft,
+  authorName: values.authorName,
+  authorAvatar: values.authorAvatar
+});
+const editorAdapter = getContentEditorAdapter('bits');
 
 let {
   endpoint,
@@ -114,97 +159,122 @@ let {
   defaultPublicSlug,
   revision,
   initialFrontmatter,
-  initialBody = '',
-  essayOutlineItems = [],
-  initialArticleInfoOpen = false
-}: EssayEditorShellProps = $props();
+  initialBody,
+  defaultAuthor,
+  bitsOutlineItems = []
+}: Props = $props();
 
-const editorAdapter = getContentEditorAdapter('essay');
-const collection = editorAdapter.collection;
-const slugPlaceholder = $derived(defaultPublicSlug || flattenEntryIdToSlug(entryId));
-const bodyEditingEnabled = editorAdapter.capabilities.body;
-const previewEnabled = editorAdapter.capabilities.preview;
-const imageInsertEnabled = editorAdapter.capabilities.bodyImageInsert;
-const galleryInsertEnabled = editorAdapter.capabilities.bodyGalleryInsert;
-const essayOutlineEnabled = editorAdapter.capabilities.essayOutline;
+const normalizeBitsValues = (values: AdminBitsEditorValues): AdminBitsEditorValues => {
+  const rows = getEditableBitsImageRows(values.imagesText);
+  return {
+    ...values,
+    imagesText: serializeBitsImageRows(rows)
+  };
+};
 
-const createInitialSnapshot = () => ({
-  revision,
-  frontmatter: editorAdapter.cloneValues(initialFrontmatter),
-  body: bodyEditingEnabled ? normalizeEditorBodyValue(initialBody) : '',
-  articleInfoOpen: initialArticleInfoOpen
-});
+const cloneBitsValues = (values: AdminBitsEditorValues): AdminBitsEditorValues => {
+  const cloned = editorAdapter.cloneValues(values);
+  if (!isBitsEditorValues(cloned)) return normalizeBitsValues(values);
+  return normalizeBitsValues(cloned);
+};
+
+const createInitialSnapshot = () => {
+  const frontmatter = cloneBitsValues(initialFrontmatter);
+  return {
+    revision,
+    frontmatter,
+    body: normalizeEditorBodyValue(initialBody),
+    imageRows: getEditableBitsImageRows(frontmatter.imagesText)
+  };
+};
 
 const initialSnapshot = createInitialSnapshot();
-const writeFeedbackStorageKey = $derived(`${WRITE_FEEDBACK_STORAGE_PREFIX}${collection}:${entryId}`);
+const exportHref = $derived(buildContentExportHref(exportEndpoint, 'bits', entryId));
 
+let topActionsEl = $state<HTMLDivElement | null>(null);
+let imagePicker = $state<AdminImagePickerController | null>(null);
 let currentRevision = $state(initialSnapshot.revision);
-let baselineFrontmatter = $state(editorAdapter.cloneValues(initialSnapshot.frontmatter));
+let baselineFrontmatter = $state(cloneBitsValues(initialSnapshot.frontmatter));
 let baselineBody = $state(initialSnapshot.body);
-let frontmatter = $state(editorAdapter.cloneValues(initialSnapshot.frontmatter));
+let frontmatter = $state(cloneBitsValues(initialSnapshot.frontmatter));
 let body = $state(initialSnapshot.body);
+let imageRows = $state<BitsImageRowDraft[]>(initialSnapshot.imageRows);
 let busy = $state(false);
-let previewBusy = $state(false);
+let imageUploadPending = $state(false);
 let statusState = $state<StatusState>('idle');
 let statusText = $state('');
 let errors = $state<string[]>([]);
 let issues = $state<AdminContentIssue[]>([]);
 let writeResult = $state<AdminContentWriteResult | null>(null);
 let previewHtml = $state('');
-let previewWarnings = $state<string[]>([]);
+let previewBusy = $state(false);
 let previewError = $state('');
+let bitsInfoOpen = $state(false);
+let bitsInfoDialog = $state<ArticleInfoDialog | null>(null);
+let previewRequestId = 0;
+let previewTimer: number | null = null;
+let activePreviewAbortController: AbortController | null = null;
+let latestPreviewBody = '';
+let previewInitialized = false;
 let explicitEditorLayout = $state<EditorLayoutMode | null>(null);
 let editorViewMode = $state<EditorViewMode>('both');
 let compactPaneMode = $state<EditorPaneMode>('edit');
 let outlineWantedOpen = $state(false);
-let outlineActiveTab = $state<EditorOutlineTab>('headings');
+let outlineActiveTab = $state<EditorOutlineTab>('essays');
 let syntaxWantedOpen = $state(false);
 let syntaxMaximized = $state(false);
 let editorLayoutRestored = false;
 let editorDisplayPreferenceRestored = false;
 let editorSidePanelPreferenceRestored = false;
-let previewRequestId = 0;
-let previewTimer: number | null = null;
-let activePreviewAbortController: AbortController | null = null;
-let latestPreviewSource = '';
-let previewInitialized = false;
 let toolbarCommand = $state<MarkdownToolbarCommand | null>(null);
 let outlineJumpCommand = $state<MarkdownOutlineJumpCommand | null>(null);
-let frontmatterPanelOpen = $state(initialSnapshot.articleInfoOpen);
-let editorDialogs = $state<EditorDialogs | null>(null);
-let imageInsertOpen = $state(false);
-let galleryInsertOpen = $state(false);
-let editingImageBlock = $state<EditableImageBlock | null>(null);
-let editingGalleryBlock = $state<EditableGalleryBlock | null>(null);
-const markdownCommandDispatcher = createMarkdownCommandDispatcher({
-  isBusy: () => busy,
-  onCommand: (command) => {
-    toolbarCommand = command;
-  }
-});
 let editorShellEl = $state<HTMLElement | null>(null);
 let editorShellInlineSize = $state(0);
-let topActionsEl = $state<HTMLDivElement | null>(null);
 let bodyScrollElement = $state<HTMLElement | null>(null);
 let previewScrollElement = $state<HTMLElement | null>(null);
 let syncScrollEnabled = $state(true);
 let lineNumbersEnabled = $state(false);
 let markdownHighlightTheme = $state<MarkdownHighlightTheme>(DEFAULT_EDITOR_DISPLAY_PREFERENCE.markdownHighlightTheme);
-let writeFeedbackRestored = false;
-let pendingPreviewOutlineKey = $state<string | null>(null);
-let pendingPreviewOutlineJumpId = 0;
 let outlineJumpCommandId = 0;
 
-const bodyLineCount = $derived(body.length === 0 ? 1 : body.split(/\r\n|\r|\n/).length);
-const bodyCharCount = $derived(body.length);
-const frontmatterDirty = $derived(!editorAdapter.isEqualValues(frontmatter, baselineFrontmatter));
-const bodyDirty = $derived(bodyEditingEnabled && body !== baselineBody);
-const isDirty = $derived(frontmatterDirty || bodyDirty);
-const canWriteContent = $derived(!busy && isDirty);
-const frontmatterIssueCount = $derived(
-  issues.filter((issue) => editorAdapter.isFrontmatterIssuePath(issue.path)).length
+const markdownCommandDispatcher = createMarkdownCommandDispatcher({
+  isBusy: () => editorBusy,
+  onCommand: (command) => {
+    toolbarCommand = command;
+  }
+});
+
+const imageRowsText = $derived(serializeBitsImageRows(imageRows));
+const currentFrontmatter = $derived({
+  ...frontmatter,
+  imagesText: imageRowsText
+});
+const frontmatterDirty = $derived(!editorAdapter.isEqualValues(currentFrontmatter, baselineFrontmatter));
+const bitsInfoDirty = $derived(
+  BITS_INFO_FIELD_PATHS.some((field) => frontmatter[field] !== baselineFrontmatter[field])
 );
-const visibleWriteResult = $derived(!isDirty ? writeResult : null);
+const bitsInfoIssueCount = $derived(
+  issues.filter((issue) => isBitsInfoFieldPath(issue.path)).length
+);
+const bodyDirty = $derived(body !== baselineBody);
+const dirty = $derived(frontmatterDirty || bodyDirty);
+const editorBusy = $derived(busy || imageUploadPending);
+const canWriteContent = $derived(!editorBusy && dirty);
+const previewViewModel = $derived(buildBitsCardViewModel({
+  id: entryId,
+  slug: defaultPublicSlug,
+  bodyText: body,
+  tags: getBitsEditorTags(frontmatter.tagsText),
+  date: frontmatter.date,
+  images: getBitsEditorImages(imageRows),
+  author: getBitsEditorAuthor(frontmatter),
+  defaultAuthor,
+  base: import.meta.env.BASE_URL ?? '/',
+  draft: frontmatter.draft
+}));
+const bodyLineCount = $derived(body.length === 0 ? 1 : body.split(/\r\n|\r|\n/).length);
+const bodyCharCount = $derived(Array.from(body).length);
+const visibleWriteResult = $derived(!dirty ? writeResult : null);
 const editorLayout = $derived(explicitEditorLayout ?? DEFAULT_EDITOR_LAYOUT_INTENT);
 const splitWidthIsCompact = $derived(
   editorShellInlineSize > 0 && editorShellInlineSize < EDITOR_SPLIT_MIN_INLINE_SIZE
@@ -258,7 +328,11 @@ const outlineControlDisabled = $derived(!outlineWantedOpen && !sidePanelsAvailab
 const syntaxToggleLabel = $derived(syntaxWantedOpen ? '关闭语法实例' : '打开语法实例');
 const syntaxControlDisabled = $derived(!syntaxWantedOpen && !sidePanelsAvailable);
 const lineNumbersToggleLabel = $derived(lineNumbersEnabled ? '隐藏行号' : '显示行号');
-const exportHref = $derived(buildContentExportHref(exportEndpoint, collection, entryId));
+const markdownOutlineItems: readonly MarkdownOutlineItem[] = $derived([]);
+const outlineListItems = $derived(
+  buildEditorOutlineListItems(bitsOutlineItems, entryId)
+);
+const previewWarnings = $derived([]);
 const scrollSyncAvailable = $derived(
   effectiveViewMode === 'both' && Boolean(bodyScrollElement && previewScrollElement)
 );
@@ -268,30 +342,10 @@ const scrollSyncToggleLabel = $derived(getEditorScrollSyncToggleLabel({
 }));
 const scrollSyncControlDisabled = $derived(!scrollSyncAvailable);
 const scrollTopControlDisabled = $derived(!bodyScrollElement && !previewScrollElement);
-const markdownOutlineItems = $derived(
-  essayOutlineEnabled && outlineVisible && outlineActiveTab === 'headings'
-    ? extractMarkdownOutline(body)
-    : []
-);
-const outlineListItems = $derived(
-  essayOutlineEnabled ? buildEssayOutlineListItems(essayOutlineItems, entryId) : []
-);
 
 const setStatus = (state: StatusState, text: string) => {
   statusState = state;
   statusText = text;
-};
-
-const clearStatus = () => {
-  setStatus('idle', '');
-};
-
-const storeContentListDeleteFeedback = () => {
-  try {
-    window.sessionStorage.setItem(CONTENT_LIST_DELETE_FEEDBACK_STORAGE_KEY, CONTENT_LIST_DELETE_FEEDBACK_VALUE);
-  } catch {
-    // 跳转后的轻提示只改善反馈可见性，不应影响删除主流程。
-  }
 };
 
 const clearWriteFeedback = () => {
@@ -300,13 +354,14 @@ const clearWriteFeedback = () => {
   writeResult = null;
 };
 
-const syncDirtyStatus = () => {
-  if (busy || statusState === 'warn' || statusState === 'error') return;
-
-  if (isDirty) {
-    clearStatus();
-  }
+const markDirty = () => {
+  clearWriteFeedback();
+  if (statusState === 'error' || statusState === 'warn') return;
+  if (dirty) setStatus('idle', '');
 };
+
+const readDevAdminEditorDefaults = () =>
+  import.meta.env.DEV ? readStoredAdminEditorDefaults(ADMIN_EDITOR_DEFAULTS_STORAGE_KEY) : null;
 
 const toggleEditorLayout = () => {
   if (singleViewActive) return;
@@ -339,9 +394,9 @@ const storeCurrentSidePanelPreference = (
 ) => {
   if (readDevAdminEditorDefaults()) return;
 
-  storeEditorSidePanelPreference(ADMIN_EDITOR_SIDE_PANEL_PREFERENCE_STORAGE_KEY, {
+  storeEditorSidePanelPreference(BITS_EDITOR_SIDE_PANEL_PREFERENCE_STORAGE_KEY, {
     outlineOpen: preference.outlineOpen ?? outlineWantedOpen,
-    outlineActiveTab: preference.outlineActiveTab ?? outlineActiveTab,
+    outlineActiveTab: 'essays',
     syntaxOpen: preference.syntaxOpen ?? syntaxWantedOpen
   });
 };
@@ -398,44 +453,20 @@ const toggleSyntaxMaximize = () => {
 };
 
 const setOutlineTab = (tab: EditorOutlineTab) => {
-  outlineActiveTab = tab;
-  storeCurrentSidePanelPreference({ outlineActiveTab: tab });
+  outlineActiveTab = tab === 'headings' ? 'essays' : tab;
+  storeCurrentSidePanelPreference({ outlineActiveTab });
 };
 
-const closeImageInsert = () => {
-  imageInsertOpen = false;
-  editingImageBlock = null;
-};
-
-const handleImageToolRequest = (block: EditableImageBlock | null) => {
-  if (!imageInsertEnabled) return;
-  editingImageBlock = block;
-  imageInsertOpen = true;
+const handleImageToolRequest = () => {
+  setStatus('warn', '正文图片请在卡片图片区维护');
 };
 
 const openGalleryInsert = () => {
-  if (!galleryInsertEnabled) return;
-  editingGalleryBlock = null;
-  galleryInsertOpen = true;
+  setStatus('warn', '正文暂不提供图片画廊');
 };
 
-const closeGalleryInsert = () => {
-  galleryInsertOpen = false;
-  editingGalleryBlock = null;
-};
-
-const handleGalleryEditRequest = (block: EditableGalleryBlock) => {
-  if (!galleryInsertEnabled) return;
-  editingGalleryBlock = block;
-  galleryInsertOpen = true;
-};
-
-const removeEditingGallery = () => {
-  const galleryBlock = editingGalleryBlock;
-  if (!galleryBlock) return;
-
-  markdownCommandDispatcher.replaceText(galleryBlock.range, '');
-  editingGalleryBlock = null;
+const handleGalleryEditRequest = () => {
+  setStatus('warn', '正文暂不提供图片画廊');
 };
 
 const setBodyScrollElement = (element: HTMLElement | null) => {
@@ -471,25 +502,6 @@ const scrollEditorPanesToTop = () => {
   scrollSyncController.scrollToTop(effectiveViewMode);
 };
 
-const waitForAnimationFrame = (): Promise<void> =>
-  new Promise((resolve) => {
-    window.requestAnimationFrame(() => resolve());
-  });
-
-const scrollPreviewToOutlineTarget = (outlineKey: string): boolean => {
-  const previewElement = previewScrollElement;
-  const scrolled = scrollPreviewElementToOutlineKey(
-    previewElement,
-    outlineKey,
-    PREVIEW_OUTLINE_KEY_ATTR,
-    { targetOffsetRatio: EDITOR_OUTLINE_TARGET_SCROLL_OFFSET_RATIO }
-  );
-  if (!scrolled || !previewElement) return false;
-
-  scrollSyncController.markElementScrolling(previewElement);
-  return true;
-};
-
 const scrollBodyToOutlineTarget = (item: MarkdownOutlineItem): boolean => {
   if (!bodyScrollElement) return false;
 
@@ -507,83 +519,13 @@ const handleBodyOutlineJump = (element: HTMLElement) => {
 };
 
 const handleOutlineHeadingSelect = (item: MarkdownOutlineItem) => {
-  const shouldScrollBody = effectiveViewMode !== 'preview';
-  const shouldScrollPreview = effectiveViewMode !== 'edit';
-  let bodyScrolled = false;
-  let previewScrolled = false;
+  if (effectiveViewMode === 'preview') return;
 
   scrollSyncController.cancelQueued();
-  scrollSyncController.setGuarded(true);
-
-  try {
-    if (shouldScrollPreview) {
-      previewScrolled = scrollPreviewToOutlineTarget(item.key);
-      pendingPreviewOutlineKey = previewScrolled ? null : item.key;
-    }
-
-    if (shouldScrollBody) {
-      bodyScrolled = scrollBodyToOutlineTarget(item);
-    }
-  } finally {
-    scrollSyncController.releaseGuard(2);
-  }
-
+  const bodyScrolled = scrollBodyToOutlineTarget(item);
   if (bodyScrolled) {
     scrollSyncController.setLastSource('body');
-    return;
   }
-
-  if (previewScrolled) {
-    scrollSyncController.setLastSource('preview');
-  }
-};
-
-const runPendingPreviewOutlineJump = async (outlineKey: string) => {
-  const jumpId = pendingPreviewOutlineJumpId + 1;
-  pendingPreviewOutlineJumpId = jumpId;
-
-  await tick();
-  await waitForAnimationFrame();
-
-  if (
-    jumpId !== pendingPreviewOutlineJumpId
-    || pendingPreviewOutlineKey !== outlineKey
-    || previewBusy
-    || effectiveViewMode === 'edit'
-  ) {
-    return;
-  }
-
-  scrollSyncController.cancelQueued();
-  scrollSyncController.setGuarded(true);
-  const scrolled = scrollPreviewToOutlineTarget(outlineKey);
-  if (scrolled) {
-    pendingPreviewOutlineKey = null;
-    scrollSyncController.setLastSource('preview');
-  } else if (latestPreviewSource === body) {
-    pendingPreviewOutlineKey = null;
-  }
-  scrollSyncController.releaseGuard(2);
-};
-
-const closeFrontmatterPanel = () => {
-  frontmatterPanelOpen = false;
-};
-
-const openFrontmatterPanel = (trigger?: HTMLElement | null) => {
-  if (!frontmatterPanelOpen) {
-    editorDialogs?.captureReturnFocus(trigger);
-  }
-  frontmatterPanelOpen = true;
-};
-
-const toggleFrontmatterPanel = (trigger?: HTMLElement | null) => {
-  if (frontmatterPanelOpen) {
-    closeFrontmatterPanel();
-    return;
-  }
-
-  openFrontmatterPanel(trigger);
 };
 
 const clearPreviewTimer = () => {
@@ -593,147 +535,49 @@ const clearPreviewTimer = () => {
 };
 
 const abortActivePreviewRequest = (invalidate = false) => {
+  clearPreviewTimer();
   if (invalidate) previewRequestId += 1;
   activePreviewAbortController?.abort();
   activePreviewAbortController = null;
   if (invalidate) previewBusy = false;
 };
 
-const requestContentWrite = async () => {
-  busy = true;
-  clearWriteFeedback();
-  clearStoredWriteFeedback(writeFeedbackStorageKey);
-  setStatus('loading', '内容保存中');
-
-  try {
-    const saveOutcome = await saveContentEntry({
-      endpoint,
-      collection,
-      entryId,
-      revision: currentRevision,
-      frontmatter,
-      ...(bodyEditingEnabled && bodyDirty ? { body } : {})
-    });
-
-    if (saveOutcome.revision && saveOutcome.responseOk) currentRevision = saveOutcome.revision;
-
-    if (!saveOutcome.responseOk || !saveOutcome.payloadOk) {
-      issues = saveOutcome.issues;
-      errors = saveOutcome.errors;
-      if (errors.length === 0) {
-        errors = ['保存失败，检查控制台日志'];
-      }
-      if (saveOutcome.status === 409) {
-        window.alert(errors[0] ?? '检测到内容文件已在外部更新，已拒绝覆盖，请刷新当前条目后再保存');
-      }
-      setStatus(saveOutcome.status === 409 ? 'warn' : 'error', '保存失败');
-      return;
-    }
-
-    const result = saveOutcome.result;
-    if (!result) {
-      errors = ['响应体缺少 result 字段，请检查开发日志'];
-      setStatus('error', '保存失败');
-      return;
-    }
-
-    writeResult = result;
-    const latestValues = saveOutcome.latestValues;
-    const latestBody = saveOutcome.latestBody;
-    const nextBaseline = latestValues
-      ? editorAdapter.cloneValues(latestValues)
-      : editorAdapter.cloneValues(frontmatter);
-    frontmatter = editorAdapter.cloneValues(nextBaseline);
-    baselineFrontmatter = editorAdapter.cloneValues(nextBaseline);
-    baselineBody = bodyEditingEnabled && latestBody !== null ? normalizeEditorBodyValue(latestBody) : body;
-    body = baselineBody;
-
-    const nextStatusState: StatusState = result.changed ? 'ok' : 'idle';
-    const nextStatusText = result.changed ? '内容已保存' : '';
-    if (result.changed) {
-      storeWriteFeedback(writeFeedbackStorageKey, result, nextStatusState, nextStatusText);
-    }
-    setStatus(nextStatusState, nextStatusText);
-  } catch {
-    errors = ['保存请求失败，请稍后重试'];
-    setStatus('error', '保存失败');
-  } finally {
-    busy = false;
-  }
-};
-
-const requestPreview = async () => {
-  if (!previewEnabled) return;
-
-  const requestId = previewRequestId + 1;
-  previewRequestId = requestId;
-  const sourceSnapshot = body;
-  latestPreviewSource = sourceSnapshot;
-
-  activePreviewAbortController?.abort();
-  const abortController = new AbortController();
-  activePreviewAbortController = abortController;
-
-  previewBusy = true;
-  previewError = '';
-  previewWarnings = [];
-
-  try {
-    const previewOutcome = await renderContentPreview({
-      endpoint: previewEndpoint,
-      collection,
-      entryId,
-      source: sourceSnapshot,
-      signal: abortController.signal
-    });
-
-    if (requestId !== previewRequestId) return;
-    if (sourceSnapshot !== body) {
-      return;
-    }
-
-    const previewResult = previewOutcome.result;
-    if (!previewOutcome.responseOk || !previewOutcome.payloadOk || !previewResult) {
-      const payloadErrors = previewOutcome.errors;
-      previewError = payloadErrors[0] ?? '预览生成失败，请检查响应与控制台日志';
-      setStatus('error', '预览生成失败');
-      return;
-    }
-
-    previewHtml = previewResult.html;
-    previewWarnings = previewResult.warnings;
-  } catch {
-    if (abortController.signal.aborted) return;
-    if (requestId !== previewRequestId) return;
-    previewError = '预览请求失败，请稍后重试';
-    setStatus('error', '预览请求失败');
-  } finally {
-    if (requestId === previewRequestId) {
-      previewBusy = false;
-      if (activePreviewAbortController === abortController) {
-        activePreviewAbortController = null;
-      }
-    }
-  }
-};
-
 const resetToBaseline = () => {
-  frontmatter = editorAdapter.cloneValues(baselineFrontmatter);
+  frontmatter = cloneBitsValues(baselineFrontmatter);
   body = baselineBody;
+  imageRows = getEditableBitsImageRows(frontmatter.imagesText);
   clearWriteFeedback();
-  clearStoredWriteFeedback(writeFeedbackStorageKey);
-  clearStatus();
+  setStatus('idle', '');
 };
 
-const resetFrontmatterToBaseline = () => {
-  frontmatter = editorAdapter.cloneValues(baselineFrontmatter);
+const resetBitsInfoToBaseline = () => {
+  frontmatter = {
+    ...frontmatter,
+    ...getBitsInfoValues(baselineFrontmatter)
+  };
   clearWriteFeedback();
-  clearStoredWriteFeedback(writeFeedbackStorageKey);
-  clearStatus();
+  setStatus('idle', '');
 };
 
-const readDevAdminEditorDefaults = () =>
-  import.meta.env.DEV ? readStoredAdminEditorDefaults(ADMIN_EDITOR_DEFAULTS_STORAGE_KEY) : null;
+const closeBitsInfoPanel = () => {
+  bitsInfoOpen = false;
+};
+
+const openBitsInfoPanel = (trigger?: HTMLElement | null) => {
+  if (!bitsInfoOpen) {
+    bitsInfoDialog?.captureReturnFocus(trigger);
+  }
+  bitsInfoOpen = true;
+};
+
+const toggleBitsInfoPanel = (trigger?: HTMLElement | null) => {
+  if (bitsInfoOpen) {
+    closeBitsInfoPanel();
+    return;
+  }
+
+  openBitsInfoPanel(trigger);
+};
 
 const closeActionMenu = (target: EventTarget | null) => {
   if (target instanceof HTMLElement) {
@@ -750,6 +594,133 @@ const handleActionMenuDownload = (event: MouseEvent) => {
   closeActionMenu(event.currentTarget);
 };
 
+const commitLatestValues = (latestValues: AdminBitsEditorValues | null, latestBody: string | null) => {
+  const nextValues = cloneBitsValues(latestValues ?? currentFrontmatter);
+  const nextBody = latestBody === null ? body : normalizeEditorBodyValue(latestBody);
+  frontmatter = cloneBitsValues(nextValues);
+  baselineFrontmatter = cloneBitsValues(nextValues);
+  body = nextBody;
+  baselineBody = nextBody;
+  imageRows = getEditableBitsImageRows(nextValues.imagesText);
+};
+
+const applyLatestBaseline = (latestValues: AdminBitsEditorValues | null, latestBody: string | null) => {
+  if (!isBitsEditorValues(latestValues) || latestBody === null) return false;
+
+  baselineFrontmatter = cloneBitsValues(latestValues);
+  baselineBody = normalizeEditorBodyValue(latestBody);
+  return true;
+};
+
+const requestContentWrite = async () => {
+  busy = true;
+  clearWriteFeedback();
+  setStatus('loading', '正在保存内容');
+
+  try {
+    const saveOutcome = await saveContentEntry({
+      endpoint,
+      collection: 'bits',
+      entryId,
+      revision: currentRevision,
+      frontmatter: currentFrontmatter,
+      ...(bodyDirty ? { body } : {})
+    });
+
+    if (saveOutcome.revision && saveOutcome.responseOk) currentRevision = saveOutcome.revision;
+
+    if (!saveOutcome.responseOk || !saveOutcome.payloadOk) {
+      issues = saveOutcome.issues;
+      const nextErrors = saveOutcome.errors.length > 0
+        ? saveOutcome.errors
+        : ['保存失败，请检查当前内容与磁盘状态'];
+      if (saveOutcome.status === 409 && applyLatestBaseline(
+        isBitsEditorValues(saveOutcome.latestValues) ? saveOutcome.latestValues : null,
+        saveOutcome.latestBody
+      )) {
+        if (saveOutcome.revision) currentRevision = saveOutcome.revision;
+        errors = [
+          ...nextErrors,
+          '已载入磁盘最新版本作为冲突基线，当前编辑内容仍保留。请核对后再次保存，或通过“还原更改”载入磁盘版本。'
+        ];
+        setStatus('warn', '检测到外部更新，草稿已保留');
+        return;
+      }
+
+      errors = nextErrors;
+      setStatus(saveOutcome.status === 409 ? 'warn' : 'error', saveOutcome.status === 409 ? '检测到外部更新' : '写入失败');
+      return;
+    }
+
+    const result = saveOutcome.result;
+    if (!result) {
+      errors = ['响应体缺少 result 字段，请检查开发日志'];
+      setStatus('error', '写入响应异常');
+      return;
+    }
+
+    writeResult = result;
+    commitLatestValues(isBitsEditorValues(saveOutcome.latestValues) ? saveOutcome.latestValues : null, saveOutcome.latestBody);
+    setStatus(result.changed ? 'ok' : 'ready', result.changed ? '内容已保存' : '当前没有变更');
+  } catch {
+    errors = ['保存请求失败，请稍后重试'];
+    setStatus('error', '保存请求失败');
+  } finally {
+    busy = false;
+  }
+};
+
+const requestPreview = async (sourceSnapshot: string) => {
+  const requestId = previewRequestId + 1;
+  previewRequestId = requestId;
+  latestPreviewBody = sourceSnapshot;
+
+  activePreviewAbortController?.abort();
+  const abortController = new AbortController();
+  activePreviewAbortController = abortController;
+
+  previewBusy = true;
+  previewError = '';
+
+  try {
+    const previewOutcome = await renderContentPreview({
+      endpoint: previewEndpoint,
+      collection: 'bits',
+      entryId,
+      source: sourceSnapshot,
+      signal: abortController.signal
+    });
+
+    if (requestId !== previewRequestId || sourceSnapshot !== body) return;
+
+    const previewResult = previewOutcome.result;
+    if (!previewOutcome.responseOk || !previewOutcome.payloadOk || !previewResult) {
+      previewError = previewOutcome.errors[0] ?? '预览生成失败，请检查响应与控制台日志';
+      return;
+    }
+
+    previewHtml = previewResult.html;
+  } catch {
+    if (abortController.signal.aborted || requestId !== previewRequestId) return;
+    previewError = '预览请求失败，请稍后重试';
+  } finally {
+    if (requestId === previewRequestId) {
+      previewBusy = false;
+      if (activePreviewAbortController === abortController) {
+        activePreviewAbortController = null;
+      }
+    }
+  }
+};
+
+const storeContentListDeleteFeedback = () => {
+  try {
+    window.sessionStorage.setItem(CONTENT_LIST_DELETE_FEEDBACK_STORAGE_KEY, CONTENT_LIST_DELETE_FEEDBACK_VALUE);
+  } catch {
+    // 删除后的列表反馈只改善返回体验，不影响删除主流程。
+  }
+};
+
 const deleteContentEntry = async (event: MouseEvent) => {
   closeActionMenu(event.currentTarget);
 
@@ -762,13 +733,11 @@ const deleteContentEntry = async (event: MouseEvent) => {
     `确认删除《${editorAdapter.getDeleteTitle(frontmatter, entryId)}》？`,
     '',
     `源文件：${relativePath}`,
-    ...(isDirty ? ['', '当前未保存改动不会写入文件，删除会移动当前源文件。'] : []),
+    ...(dirty ? ['', '当前未保存改动不会写入文件，删除会移动当前源文件。'] : []),
     '',
     '文件会移到 .trash/content/，之后可从回收站手动恢复。'
   ].join('\n'));
-  if (!confirmed) {
-    return;
-  }
+  if (!confirmed) return;
 
   busy = true;
   clearWriteFeedback();
@@ -777,7 +746,7 @@ const deleteContentEntry = async (event: MouseEvent) => {
   try {
     const deleteOutcome = await requestContentDelete({
       endpoint: deleteEndpoint,
-      collection,
+      collection: 'bits',
       entryId,
       revision: currentRevision,
       expectedRelativePath: relativePath
@@ -793,36 +762,24 @@ const deleteContentEntry = async (event: MouseEvent) => {
 
     const result = deleteOutcome.result;
     if (!result || !result.deleted || !result.trashedPath) {
-      errors = [];
+      errors = ['删除响应异常，请检查开发日志'];
       issues = [];
-      setStatus('error', '删除响应异常，请检查开发日志');
+      setStatus('error', '删除响应异常');
       return;
     }
 
-    baselineFrontmatter = editorAdapter.cloneValues(frontmatter);
+    baselineFrontmatter = cloneBitsValues(currentFrontmatter);
     baselineBody = body;
     storeContentListDeleteFeedback();
     window.location.assign(returnHref || '/admin/content/');
   } catch {
-    errors = [];
+    errors = ['删除请求失败，请稍后重试'];
     issues = [];
-    setStatus('error', '删除请求失败，请稍后重试');
+    setStatus('error', '删除请求失败');
   } finally {
     busy = false;
   }
 };
-
-$effect(() => {
-  if (writeFeedbackRestored) return;
-  writeFeedbackRestored = true;
-
-  const storedFeedback = readStoredWriteFeedback(writeFeedbackStorageKey, WRITE_FEEDBACK_STORAGE_TTL_MS);
-  if (!storedFeedback) return;
-
-  writeResult = storedFeedback.result;
-  setStatus(storedFeedback.statusState, storedFeedback.statusText);
-  clearStoredWriteFeedback(writeFeedbackStorageKey);
-});
 
 $effect(() => {
   if (editorLayoutRestored) return;
@@ -850,13 +807,13 @@ $effect(() => {
   editorSidePanelPreferenceRestored = true;
 
   const storedSidePanelPreference = resolveEditorSidePanelPreference(
-    readStoredEditorSidePanelPreference(ADMIN_EDITOR_SIDE_PANEL_PREFERENCE_STORAGE_KEY),
+    readStoredEditorSidePanelPreference(BITS_EDITOR_SIDE_PANEL_PREFERENCE_STORAGE_KEY),
     readDevAdminEditorDefaults()
   );
   if (!storedSidePanelPreference) return;
 
   outlineWantedOpen = storedSidePanelPreference.outlineOpen;
-  outlineActiveTab = storedSidePanelPreference.outlineActiveTab;
+  outlineActiveTab = 'essays';
   syntaxWantedOpen = storedSidePanelPreference.syntaxOpen;
 });
 
@@ -877,30 +834,19 @@ $effect(() => {
 });
 
 $effect(() => {
-  const cleanupDetailsMenus = bindEditorDetailsMenus({
-    selectors: [
-      '.admin-editor-shell__preview-detail',
-      '.admin-editor-markdown-toolbar__menu',
-      '.admin-editor-shell__action-more'
-    ]
+  syncArticleInfoTriggers({
+    selector: BITS_INFO_TRIGGER_SELECTOR,
+    panelId: BITS_INFO_PANEL_ID,
+    open: bitsInfoOpen,
+    dirty: bitsInfoDirty,
+    invalid: bitsInfoIssueCount > 0
   });
-  const cleanupNavigationGuard = bindEditorNavigationGuard({
-    isDirty: () => isDirty,
-    message: LEAVE_CONFIRM_MESSAGE,
-    onBlocked: () => {
-      setStatus('warn', '请先保存或还原');
-    }
-  });
-  const cleanupArticleInfoTrigger = bindArticleInfoTrigger({
-    selector: ARTICLE_INFO_TRIGGER_SELECTOR,
-    onToggle: toggleFrontmatterPanel
-  });
+});
 
-  return () => {
-    cleanupDetailsMenus();
-    cleanupNavigationGuard();
-    cleanupArticleInfoTrigger();
-  };
+$effect(() => {
+  if (bitsInfoIssueCount > 0 && !bitsInfoOpen) {
+    openBitsInfoPanel();
+  }
 });
 
 $effect(() => {
@@ -940,10 +886,9 @@ $effect(() => {
 });
 
 $effect(() => {
-  const outlineKey = pendingPreviewOutlineKey;
-  if (!outlineKey || previewBusy || effectiveViewMode === 'edit') return;
-
-  void runPendingPreviewOutlineJump(outlineKey);
+  if (!syntaxMaximizeAllowed && syntaxMaximized) {
+    syntaxMaximized = false;
+  }
 });
 
 $effect(() => {
@@ -953,49 +898,24 @@ $effect(() => {
 });
 
 $effect(() => {
-  syncArticleInfoTriggers({
-    selector: ARTICLE_INFO_TRIGGER_SELECTOR,
-    panelId: FRONTMATTER_PANEL_ID,
-    open: frontmatterPanelOpen,
-    dirty: frontmatterDirty,
-    invalid: frontmatterIssueCount > 0
-  });
-});
+  const bodySnapshot = body;
+  const shouldRenderFull = previewViewModel.body.shouldRenderFull;
 
-$effect(() => {
-  if (frontmatterIssueCount > 0 && !frontmatterPanelOpen) {
-    openFrontmatterPanel();
-  }
-});
-
-$effect(() => {
-  if (!syntaxMaximizeAllowed && syntaxMaximized) {
-    syntaxMaximized = false;
-  }
-});
-
-$effect(() => {
-  syncDirtyStatus();
-});
-
-$effect(() => {
-  if (previewEnabled && containsMarkdownMath(body)) {
-    ensureMarkdownMathStylesheet();
-  }
-});
-
-$effect(() => {
-  if (!previewEnabled) return;
-
-  const currentBody = body;
-
-  if (!previewInitialized) {
-    previewInitialized = true;
-    void requestPreview();
+  if (!shouldRenderFull) {
+    abortActivePreviewRequest(true);
+    latestPreviewBody = bodySnapshot;
+    previewHtml = '';
+    previewError = '';
     return;
   }
 
-  if (currentBody === latestPreviewSource) {
+  if (!previewInitialized) {
+    previewInitialized = true;
+    void requestPreview(bodySnapshot);
+    return;
+  }
+
+  if (bodySnapshot === latestPreviewBody) {
     clearPreviewTimer();
     return;
   }
@@ -1003,16 +923,46 @@ $effect(() => {
   abortActivePreviewRequest(true);
   previewTimer = window.setTimeout(() => {
     previewTimer = null;
-    void requestPreview();
-  }, getPreviewDebounceMs(currentBody));
+    void requestPreview(bodySnapshot);
+  }, Math.max(320, getPreviewDebounceMs(bodySnapshot)));
 
   return clearPreviewTimer;
+});
+
+onMount(() => {
+  imagePicker = createAdminImagePicker();
+  const cleanupDetailsMenus = bindEditorDetailsMenus({
+    selectors: [
+      '.admin-editor-shell__preview-detail',
+      '.admin-editor-markdown-toolbar__menu',
+      '.admin-editor-shell__action-more'
+    ]
+  });
+  const cleanupNavigationGuard = bindEditorNavigationGuard({
+    isDirty: () => dirty || imageUploadPending,
+    message: LEAVE_CONFIRM_MESSAGE,
+    onBlocked: () => {
+      setStatus('warn', imageUploadPending ? '请等待图片上传完成' : '请先保存或还原');
+    }
+  });
+  const cleanupBitsInfoTrigger = bindArticleInfoTrigger({
+    selector: BITS_INFO_TRIGGER_SELECTOR,
+    onToggle: toggleBitsInfoPanel
+  });
+
+  return () => {
+    abortActivePreviewRequest(true);
+    cleanupDetailsMenus();
+    cleanupNavigationGuard();
+    cleanupBitsInfoTrigger();
+  };
 });
 </script>
 
 <section
-  class="admin-editor-shell"
+  class="admin-bits-editor admin-editor-shell"
   bind:this={editorShellEl}
+  data-admin-bits-editor-workspace
   data-layout={editorLayout}
   data-view={editorViewMode}
   data-effective-view={effectiveViewMode}
@@ -1020,8 +970,8 @@ $effect(() => {
 >
   <EditorTopControls
     bind:actionMenuElement={topActionsEl}
-    {busy}
-    bodyToolsEnabled={bodyEditingEnabled}
+    busy={editorBusy}
+    toolbarPreset="bits"
     outlineOpen={outlineWantedOpen}
     {outlineVisible}
     {outlineToggleLabel}
@@ -1062,113 +1012,127 @@ $effect(() => {
     {statusText}
     {statusState}
     {canWriteContent}
-    dirty={isDirty}
+    {dirty}
     {returnHref}
     {exportHref}
+    actionLabel="内容操作"
+    moreLabel="更多内容操作"
+    saveLabel="保存内容"
+    downloadLabel="下载源文件"
+    deleteLabel="删除内容"
     onSave={requestContentWrite}
     onReset={handleActionMenuReset}
     onDownload={handleActionMenuDownload}
     onDelete={deleteContentEntry}
   />
 
-  {#if bodyEditingEnabled}
-    <EditorWorkspace
-      bind:value={body}
-      disabled={busy}
-      {toolbarCommand}
-      {outlineJumpCommand}
-      {lineNumbersEnabled}
-      {markdownHighlightTheme}
-      {effectiveViewMode}
-      {bodyLineCount}
-      {bodyCharCount}
-      {errors}
-      {issues}
-      {previewError}
-      {previewWarnings}
-      writeResult={visibleWriteResult}
-      {syncScrollEnabled}
-      {scrollSyncToggleLabel}
-      {scrollSyncControlDisabled}
-      {scrollTopControlDisabled}
-      getWriteFieldLabel={editorAdapter.getWriteFieldLabel}
-      mediaEditEnabled={imageInsertEnabled}
-      galleryEditEnabled={galleryInsertEnabled}
-      {previewHtml}
-      previewBusy={previewBusy}
-      {sidePanelsVisible}
-      {sidePanelLayout}
-      outlinePanelId={OUTLINE_PANEL_ID}
-      syntaxPanelId={SYNTAX_PANEL_ID}
-      {outlineActiveTab}
-      {markdownOutlineItems}
-      {outlineListItems}
-      onBodyScrollElementChange={setBodyScrollElement}
-      onBodyOutlineJump={handleBodyOutlineJump}
-      onImageToolRequest={handleImageToolRequest}
-      onGalleryEditRequest={handleGalleryEditRequest}
-      onPreviewScrollElementChange={setPreviewScrollElement}
-      onShortcutTool={markdownCommandDispatcher.applyTool}
-      onToggleScrollSync={toggleScrollSync}
-      onScrollToTop={scrollEditorPanesToTop}
-      onOutlineTabChange={setOutlineTab}
-      onOutlineHeadingSelect={handleOutlineHeadingSelect}
-      onSyntaxMaximizeToggle={toggleSyntaxMaximize}
-    />
-  {/if}
-
-  <EditorDialogs
-    bind:this={editorDialogs}
-    bind:frontmatter
-    {collection}
-    dialogTitle={editorAdapter.dialogTitle}
-    fieldsAriaLabel={editorAdapter.fieldsAriaLabel}
-    frontmatterOpen={frontmatterPanelOpen}
-    {relativePath}
+  <EditorWorkspace
+    bind:value={body}
+    disabled={editorBusy}
+    {toolbarCommand}
+    {outlineJumpCommand}
+    {lineNumbersEnabled}
+    {markdownHighlightTheme}
+    {effectiveViewMode}
+    {bodyLineCount}
+    {bodyCharCount}
+    {errors}
     {issues}
-    disabled={busy}
-    {frontmatterDirty}
-    canSave={canWriteContent}
-    {slugPlaceholder}
-    {imageInsertOpen}
-    {galleryInsertOpen}
-    imageEditDraft={editingImageBlock?.draft ?? null}
-    galleryEditDraft={editingGalleryBlock?.draft ?? null}
-    {imageInsertEnabled}
-    {galleryInsertEnabled}
-    {imageUploadEndpoint}
-    {entryId}
-    onFrontmatterClose={closeFrontmatterPanel}
-    onFrontmatterReset={resetFrontmatterToBaseline}
-    onFrontmatterSave={() => void requestContentWrite()}
-    onImageClose={closeImageInsert}
-    onImageInsert={(text, placement) => {
-      const imageBlock = editingImageBlock;
-      if (imageBlock) {
-        markdownCommandDispatcher.replaceText(imageBlock.range, text, placement);
-        editingImageBlock = null;
-        return;
-      }
-      markdownCommandDispatcher.insertText(text, placement);
-    }}
-    onGalleryClose={closeGalleryInsert}
-    onGalleryRemove={removeEditingGallery}
-    onGalleryInsert={(text, placement) => {
-      const galleryBlock = editingGalleryBlock;
-      if (galleryBlock) {
-        markdownCommandDispatcher.replaceText(galleryBlock.range, text, placement);
-        editingGalleryBlock = null;
-        return;
-      }
-      markdownCommandDispatcher.insertText(text, placement);
-    }}
+    {previewError}
+    {previewWarnings}
+    writeResult={visibleWriteResult}
+    {syncScrollEnabled}
+    {scrollSyncToggleLabel}
+    {scrollSyncControlDisabled}
+    {scrollTopControlDisabled}
+    getWriteFieldLabel={editorAdapter.getWriteFieldLabel}
+    mediaEditEnabled={editorAdapter.capabilities.bodyImageInsert}
+    galleryEditEnabled={editorAdapter.capabilities.bodyGalleryInsert}
+    {previewHtml}
+    {previewBusy}
+    {sidePanelsVisible}
+    {sidePanelLayout}
+    outlinePanelId={OUTLINE_PANEL_ID}
+    syntaxPanelId={SYNTAX_PANEL_ID}
+    {outlineActiveTab}
+    {markdownOutlineItems}
+    {outlineListItems}
+    outlineHeadingsEnabled={false}
+    outlineListTabLabel="动态列表"
+    outlineListEmptyText="暂无絮语"
+    outlinePanelLabel="动态辅助目录"
+    onBodyScrollElementChange={setBodyScrollElement}
+    onBodyOutlineJump={handleBodyOutlineJump}
+    onImageToolRequest={handleImageToolRequest}
+    onGalleryEditRequest={handleGalleryEditRequest}
+    onBodyChange={markDirty}
+    onPreviewScrollElementChange={setPreviewScrollElement}
+    onShortcutTool={markdownCommandDispatcher.applyTool}
+    onToggleScrollSync={toggleScrollSync}
+    onScrollToTop={scrollEditorPanesToTop}
+    onOutlineTabChange={setOutlineTab}
+    onOutlineHeadingSelect={handleOutlineHeadingSelect}
+    onSyntaxMaximizeToggle={toggleSyntaxMaximize}
+  >
+    {#snippet bodyFooterContent()}
+      <BitsPublishStrip
+        bind:value={frontmatter}
+        {issues}
+        disabled={editorBusy}
+        onDirty={markDirty}
+      />
+
+      <section class="admin-bits-assets">
+        <BitsImageRowsEditor
+          bind:rows={imageRows}
+          {issues}
+          disabled={editorBusy}
+          uploadEndpoint={imageUploadEndpoint}
+          {entryId}
+          picker={imagePicker}
+          onStatus={setStatus}
+          onDirty={markDirty}
+          onUploadPendingChange={(pending) => {
+            imageUploadPending = pending;
+          }}
+        />
+      </section>
+    {/snippet}
+
+    {#snippet previewContent()}
+      <BitsPreviewPane
+        viewModel={previewViewModel}
+        {previewHtml}
+        {previewBusy}
+        {previewError}
+        onScrollElementChange={setPreviewScrollElement}
+      />
+    {/snippet}
+  </EditorWorkspace>
+
+  <ArticleInfoDialog
+    bind:this={bitsInfoDialog}
+    bind:value={frontmatter}
+    collection="bits"
+    open={bitsInfoOpen}
+    {issues}
+    disabled={editorBusy}
+    dirty={bitsInfoDirty}
+    canSave={!editorBusy && bitsInfoDirty}
+    dialogTitle="修改信息"
+    fieldsAriaLabel="标题、摘要与作者"
+    fieldScope="bits-summary"
+    onDirty={markDirty}
+    onClose={closeBitsInfoPanel}
+    onReset={resetBitsInfoToBaseline}
+    onSave={() => void requestContentWrite()}
   />
 
   <EditorFooterActions
     {statusText}
     {statusState}
-    {busy}
-    dirty={isDirty}
+    busy={editorBusy}
+    {dirty}
     {canWriteContent}
     onReset={resetToBaseline}
     onSave={requestContentWrite}

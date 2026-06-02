@@ -119,6 +119,7 @@ export type AdminBitsEditorPayload = {
   relativePath: string;
   writable: true;
   readonlyReason: null;
+  bodyText: string;
   values: AdminBitsEditorValues;
 };
 
@@ -707,6 +708,7 @@ export const readAdminContentEntryEditorPayload = async (
       relativePath: state.relativePath,
       writable: true,
       readonlyReason: null,
+      bodyText: state.bodyText,
       values: toBitsEditorValues(state)
     };
   }
@@ -1121,7 +1123,11 @@ const buildEssayWritePlan = async (
   };
 };
 
-const buildBitsWritePlan = (state: AdminContentSourceState, values: AdminBitsEditorValues): AdminWritePlan => {
+const buildBitsWritePlan = (
+  state: AdminContentSourceState,
+  values: AdminBitsEditorValues,
+  bodyInput?: string
+): AdminWritePlan => {
   const next = buildBitsFrontmatterFromValues(values);
   if (!next.frontmatter) {
     return { issues: next.issues, changedFields: [], patches: [] };
@@ -1156,7 +1162,16 @@ const buildBitsWritePlan = (state: AdminContentSourceState, values: AdminBitsEdi
     );
   }
 
-  return { issues: [], changedFields, patches };
+  if (bodyInput !== undefined && bodyInput !== state.bodyText) {
+    changedFields.push('body');
+  }
+
+  return {
+    issues: [],
+    changedFields,
+    patches,
+    ...(bodyInput !== undefined ? { bodyText: bodyInput } : {})
+  };
 };
 
 export const buildAdminContentWritePlan = async (
@@ -1199,7 +1214,7 @@ export const buildAdminContentWritePlan = async (
 
     return {
       state,
-      ...buildBitsWritePlan(state, parsed.values)
+      ...buildBitsWritePlan(state, parsed.values, bodyInput)
     };
   }
 

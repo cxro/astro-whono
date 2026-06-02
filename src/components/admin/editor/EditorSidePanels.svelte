@@ -10,7 +10,7 @@ import {
 import EditorOutlinePanel from './EditorOutlinePanel.svelte';
 import EditorSyntaxPanel from './EditorSyntaxPanel.svelte';
 import type {
-  EditorOutlineEssayListItem,
+  EditorOutlineListItem,
   EditorOutlineTab,
   MarkdownOutlineItem
 } from './editor-outline-helpers';
@@ -21,7 +21,13 @@ type Props = {
   syntaxPanelId: string;
   activeTab: EditorOutlineTab;
   headings: readonly MarkdownOutlineItem[];
-  essays: readonly EditorOutlineEssayListItem[];
+  listItems: readonly EditorOutlineListItem[];
+  outlineHeadingsEnabled?: boolean;
+  outlineHeadingsTabLabel?: string;
+  outlineListTabLabel?: string;
+  outlineHeadingsEmptyText?: string;
+  outlineListEmptyText?: string;
+  outlinePanelLabel?: string;
   onTabChange: (tab: EditorOutlineTab) => void;
   onHeadingSelect: (item: MarkdownOutlineItem) => void;
   onSyntaxMaximizeToggle: () => void;
@@ -33,7 +39,13 @@ let {
   syntaxPanelId,
   activeTab,
   headings,
-  essays,
+  listItems,
+  outlineHeadingsEnabled = true,
+  outlineHeadingsTabLabel = '文章目录',
+  outlineListTabLabel = '文章列表',
+  outlineHeadingsEmptyText = '暂无 H2/H3 标题',
+  outlineListEmptyText = '暂无文章',
+  outlinePanelLabel = '编辑器目录',
   onTabChange,
   onHeadingSelect,
   onSyntaxMaximizeToggle
@@ -185,7 +197,13 @@ $effect(() => {
         panelId={outlinePanelId}
         {activeTab}
         {headings}
-        {essays}
+        {listItems}
+        headingsEnabled={outlineHeadingsEnabled}
+        headingsTabLabel={outlineHeadingsTabLabel}
+        listTabLabel={outlineListTabLabel}
+        headingsEmptyText={outlineHeadingsEmptyText}
+        listEmptyText={outlineListEmptyText}
+        panelLabel={outlinePanelLabel}
         onTabChange={onTabChange}
         onHeadingSelect={onHeadingSelect}
       />
@@ -193,15 +211,19 @@ $effect(() => {
   {/if}
 
   {#if layout === 'stacked'}
+    <!-- WAI-ARIA APG window splitter pattern uses a focusable separator with range values. -->
+    <!-- svelte-ignore a11y_no_noninteractive_tabindex, a11y_no_noninteractive_element_interactions -->
     <div
       class="admin-editor-side-panels__resize"
       role="separator"
       tabindex="0"
       aria-label="调整目录和语法面板高度"
+      aria-controls={outlinePanelId}
       aria-orientation="horizontal"
       aria-valuemin={Math.round(stackedRatioBounds.min)}
       aria-valuemax={Math.round(stackedRatioBounds.max)}
       aria-valuenow={Math.round(stackedOutlineRatio)}
+      aria-valuetext={`${Math.round(stackedOutlineRatio)}%`}
       onpointerdown={startResize}
       onpointermove={handleResizeMove}
       onpointerup={stopResize}

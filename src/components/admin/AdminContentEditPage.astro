@@ -1,8 +1,6 @@
 ---
 import AdminLayout from './AdminLayout.astro';
-import AdminDiagnosticPanel from './AdminDiagnosticPanel.astro';
 import AdminImagePicker from './AdminImagePicker.astro';
-import AdminBitsImageRow from './AdminBitsImageRow.astro';
 import AdminReadonlyNotice from './AdminReadonlyNotice.astro';
 import AdminShell from './AdminShell.astro';
 import {
@@ -18,16 +16,13 @@ import {
   ADMIN_IMAGE_UPLOAD_API_PATH,
   ADMIN_PREVIEW_API_PATH
 } from '../../lib/admin-console/admin-api-paths';
-import {
-  readAdminContentEntryEditorPayload
-} from '../../lib/admin-console/content-shared';
-import {
-  loadAdminContentSourceIndex,
-  loadAdminContentSourceManifest
-} from '../../lib/admin-console/content-source-index';
-import { getAdminContentEntryEditHref } from '../../lib/admin-console/content-routes';
+import { getThemeSettings } from '../../lib/theme-settings';
 import { createWithBase } from '../../utils/format';
-import type { EditorOutlineEssaySourceItem } from './editor/editor-outline-helpers';
+import {
+  buildBitsEditorIslandProps,
+  buildEssayEditorIslandProps,
+  loadAdminContentEditDevState
+} from './admin-content-edit-dev-state';
 
 type Props = {
   collection: AdminContentCollectionKey;
@@ -41,58 +36,17 @@ const isDev = import.meta.env.DEV;
 const shouldShowContentConsole = isDev;
 const base = import.meta.env.BASE_URL ?? '/';
 const withBase = createWithBase(base);
+const { settings } = getThemeSettings();
+const bitsDefaultAuthor = settings.page.bits.defaultAuthor;
 const { default: adminShellStylesHref } = await import('../../styles/components/admin/shell.css?url');
-
-const loadContentEditDevState = async () => {
-  const payload = await readAdminContentEntryEditorPayload(collection, entryId);
-  const { default: adminContentStylesHref } = await import('../../styles/components/admin/content/index.css?url');
-
-  if (!payload.writable) {
-    return {
-      payload,
-      adminContentScriptHref: null,
-      essayOutlineItems: [],
-      stylesHref: [adminShellStylesHref, adminContentStylesHref]
-    };
-  }
-
-  if (payload.collection === 'essay') {
-    const { default: articleStylesHref } = await import('../../styles/article.css?url');
-    const manifest = await loadAdminContentSourceManifest();
-    const essayOutlineItems: EditorOutlineEssaySourceItem[] = (await loadAdminContentSourceIndex(manifest, 'essay'))
-      .map((item) => ({
-        entryId: item.id,
-        title: item.title,
-        editHref: withBase(getAdminContentEntryEditHref('essay', item.id)),
-        dateLabel: item.dateLabel,
-        sourceError: item.sourceError
-      }));
-
-    return {
-      payload,
-      adminContentScriptHref: null,
-      essayOutlineItems,
-      stylesHref: [adminShellStylesHref, articleStylesHref, adminContentStylesHref]
-    };
-  }
-
-  const [
-    { default: adminContentScriptHref },
-    { default: adminImageSharedStylesHref }
-  ] = await Promise.all([
-    import('../../scripts/admin-content/index.ts?url'),
-    import('../../styles/components/admin/images/shared.css?url')
-  ]);
-
-  return {
-    payload,
-    adminContentScriptHref,
-    essayOutlineItems: [],
-    stylesHref: [adminShellStylesHref, adminContentStylesHref, adminImageSharedStylesHref]
-  };
-};
-
-const contentEditDevState = shouldShowContentConsole ? await loadContentEditDevState() : null;
+const contentEditDevState = shouldShowContentConsole
+  ? await loadAdminContentEditDevState({
+      collection,
+      entryId,
+      adminShellStylesHref,
+      withBase
+    })
+  : null;
 const selectedEntryEditorPayload = contentEditDevState?.payload ?? null;
 const essayEditorPayload = selectedEntryEditorPayload?.writable && selectedEntryEditorPayload.collection === 'essay'
   ? selectedEntryEditorPayload
@@ -103,41 +57,55 @@ const bitsEditorPayload = selectedEntryEditorPayload?.writable && selectedEntryE
 const memoEditorPayload = selectedEntryEditorPayload?.collection === 'memo'
   ? selectedEntryEditorPayload
   : null;
-// Keep the Svelte island behind a DEV-only dynamic import; a static import leaks
+// Keep Svelte islands behind DEV-only dynamic imports; static imports leak
 // editor chunks into the production build.
-// bits 仍保留 legacy frontmatter 表单；Svelte shell 已抽出 adapter 边界，
-// 但 bits 需要独立工作区布局后再切换，避免把主编辑面临时降级为弹窗表单。
-const svelteEditorPayload = essayEditorPayload;
-let ContentEditorIsland: any = null;
-if (import.meta.env.DEV && svelteEditorPayload) {
-  ContentEditorIsland = (await import('./editor/EssayEditorIsland.astro')).default;
+let EssayEditorIsland: any = null;
+let BitsEditorIsland: any = null;
+if (import.meta.env.DEV && essayEditorPayload) {
+  EssayEditorIsland = (await import('./editor/EssayEditorIsland.astro')).default;
+}
+if (import.meta.env.DEV && bitsEditorPayload) {
+  BitsEditorIsland = (await import('./editor/BitsEditorIsland.astro')).default;
 }
 const adminStylesHref = contentEditDevState?.stylesHref ?? adminShellStylesHref;
 const collectionHref = withBase(getAdminContentEntryListHref(collection));
-const shouldUseLegacyContentEditor = Boolean(bitsEditorPayload);
-const shouldUseSvelteContentEditor = Boolean(ContentEditorIsland);
-const contentEditorBodyClass = shouldUseSvelteContentEditor ? 'admin-page--content-editor' : undefined;
-const adminContentEntryEndpoint = withBase(ADMIN_CONTENT_ENTRY_API_PATH);
-const adminContentExportEndpoint = withBase(ADMIN_CONTENT_EXPORT_API_PATH);
-const adminContentDeleteEndpoint = withBase(ADMIN_CONTENT_DELETE_API_PATH);
-const adminPreviewEndpoint = withBase(ADMIN_PREVIEW_API_PATH);
-const adminContentBootstrap = bitsEditorPayload
-  ? JSON.stringify({
-      endpoint: adminContentEntryEndpoint,
-      collection: bitsEditorPayload.collection,
-      entryId: bitsEditorPayload.entryId,
-      revision: bitsEditorPayload.revision
-    })
-  : null;
+const shouldUseSvelteEssayEditor = Boolean(EssayEditorIsland);
+const shouldUseBitsEditor = Boolean(BitsEditorIsland);
+const shouldUseEditorPageLayout = shouldUseSvelteEssayEditor || shouldUseBitsEditor;
+const contentEditorBodyClass = shouldUseEditorPageLayout ? 'admin-page--content-editor' : undefined;
+const editorEndpoints = {
+  endpoint: withBase(ADMIN_CONTENT_ENTRY_API_PATH),
+  exportEndpoint: withBase(ADMIN_CONTENT_EXPORT_API_PATH),
+  deleteEndpoint: withBase(ADMIN_CONTENT_DELETE_API_PATH),
+  previewEndpoint: withBase(ADMIN_PREVIEW_API_PATH),
+  imageUploadEndpoint: withBase(ADMIN_IMAGE_UPLOAD_API_PATH)
+};
 const adminImageListEndpoint = withBase(ADMIN_IMAGE_LIST_API_PATH);
 const adminImageMetaEndpoint = withBase(ADMIN_IMAGE_META_API_PATH);
-const adminImageUploadEndpoint = withBase(ADMIN_IMAGE_UPLOAD_API_PATH);
+const essayEditorIslandProps = essayEditorPayload && contentEditDevState
+  ? buildEssayEditorIslandProps({
+      payload: essayEditorPayload,
+      endpoints: editorEndpoints,
+      returnHref: withBase('/admin/content/'),
+      essayOutlineItems: contentEditDevState.essayOutlineItems,
+      initialArticleInfoOpen
+    })
+  : null;
+const bitsEditorIslandProps = bitsEditorPayload && contentEditDevState
+  ? buildBitsEditorIslandProps({
+      payload: bitsEditorPayload,
+      endpoints: editorEndpoints,
+      returnHref: collectionHref,
+      defaultAuthor: bitsDefaultAuthor,
+      bitsOutlineItems: contentEditDevState.bitsOutlineItems
+    })
+  : null;
 const contentConsoleSubtitle = selectedEntryEditorPayload
   ? `${selectedEntryEditorPayload.collection} · ${
       selectedEntryEditorPayload.collection === 'essay'
         ? '内容编辑'
         : selectedEntryEditorPayload.writable
-          ? 'frontmatter 编辑'
+          ? '内容编辑'
           : '只读详情'
     }`
   : '内容编辑';
@@ -158,41 +126,10 @@ const memoReadonlyRows = memoEditorPayload
       { label: 'memo.draft', value: memoEditorPayload.values.draft ? 'true' : 'false' }
     ]
   : [];
-
-type AdminBitsImageRowValue = {
-  src: string;
-  width: string;
-  height: string;
-  alt: string;
-};
-
-const parseInitialBitsImages = (value: string): AdminBitsImageRowValue[] => {
-  try {
-    const parsed = JSON.parse(value) as unknown;
-    if (!Array.isArray(parsed)) return [];
-    return parsed
-      .filter((item): item is Record<string, unknown> => typeof item === 'object' && item !== null && !Array.isArray(item))
-      .map((item) => ({
-        src: typeof item.src === 'string' ? item.src : '',
-        width: item.width == null ? '' : String(item.width),
-        height: item.height == null ? '' : String(item.height),
-        alt: typeof item.alt === 'string' ? item.alt : ''
-      }));
-  } catch {
-    return [];
-  }
-};
-
-const selectedBitsImageRows = bitsEditorPayload
-  ? parseInitialBitsImages(bitsEditorPayload.values.imagesText)
-  : [];
-const bitsImageRows = selectedBitsImageRows.length > 0
-  ? selectedBitsImageRows
-  : [{ src: '', width: '', height: '', alt: '' }];
 ---
 
 <AdminLayout
-  title={shouldUseSvelteContentEditor ? editTitle : 'Content Console'}
+  title={shouldUseEditorPageLayout ? editTitle : 'Content Console'}
   stylesHref={adminStylesHref}
   bodyClass={contentEditorBodyClass}
   adminSidebarScope="page"
@@ -201,42 +138,50 @@ const bitsImageRows = selectedBitsImageRows.length > 0
     currentRoute="content"
     title="Content Console"
     subtitle={contentConsoleSubtitle}
-    showHeader={!shouldUseSvelteContentEditor}
+    showHeader={!shouldUseEditorPageLayout}
     showNav={false}
   >
-    {shouldShowContentConsole && shouldUseLegacyContentEditor ? (
-      <div slot="status" class="admin-status-slot">
-        <p id="admin-content-status-live" class="admin-sr-only" role="status" aria-live="polite" aria-atomic="true"></p>
-        <p id="admin-content-status" class="admin-status" data-state="idle">等待编辑</p>
-      </div>
-    ) : null}
-
     {
       shouldShowContentConsole && selectedEntryEditorPayload ? (
         <section
           class:list={[
             'admin-content-console',
             'admin-content-edit-page',
-            shouldUseSvelteContentEditor && 'admin-content-edit-page--essay'
+            shouldUseSvelteEssayEditor && 'admin-content-edit-page--essay',
+            shouldUseBitsEditor && 'admin-content-edit-page--bits'
           ]}
-          data-admin-content-root={shouldUseLegacyContentEditor ? true : undefined}
         >
           <header class="admin-content-page-head">
             <div class="admin-content-page-head__copy">
               {
-                shouldUseSvelteContentEditor ? (
+                shouldUseSvelteEssayEditor || shouldUseBitsEditor ? (
                   <div class="admin-content-title-row">
                     <h2 class="admin-content-heading">{editTitle}</h2>
-                    <button
-                      class="admin-content-info-trigger"
-                      type="button"
-                      data-admin-article-info-trigger
-                      aria-haspopup="dialog"
-                      aria-controls="admin-editor-frontmatter-panel"
-                      aria-expanded="false"
-                    >
-                      修改信息
-                    </button>
+                    {
+                      shouldUseSvelteEssayEditor ? (
+                        <button
+                          class="admin-content-info-trigger"
+                          type="button"
+                          data-admin-article-info-trigger
+                          aria-haspopup="dialog"
+                          aria-controls="admin-editor-frontmatter-panel"
+                          aria-expanded="false"
+                        >
+                          修改信息
+                        </button>
+                      ) : (
+                        <button
+                          class="admin-content-info-trigger"
+                          type="button"
+                          data-admin-bits-info-trigger
+                          aria-haspopup="dialog"
+                          aria-controls="admin-editor-frontmatter-panel"
+                          aria-expanded="false"
+                        >
+                          修改信息
+                        </button>
+                      )
+                    }
                   </div>
                 ) : (
                   <>
@@ -246,7 +191,7 @@ const bitsImageRows = selectedBitsImageRows.length > 0
                 )
               }
               {
-                !shouldUseSvelteContentEditor ? (
+                !shouldUseEditorPageLayout ? (
                   <p class="admin-content-copy">
                     <code>{selectedEntryEditorPayload.relativePath}</code>
                   </p>
@@ -255,13 +200,13 @@ const bitsImageRows = selectedBitsImageRows.length > 0
             </div>
             <div
               class="admin-content-actions"
-              data-admin-editor-page-actions-host={shouldUseSvelteContentEditor ? true : undefined}
+              data-admin-editor-page-actions-host={shouldUseEditorPageLayout ? true : undefined}
             >
               {
-                shouldUseSvelteContentEditor ? (
+                shouldUseEditorPageLayout ? (
                   <a
                     class="admin-btn admin-btn--ghost admin-btn--compact"
-                    href={withBase('/admin/content/')}
+                    href={shouldUseBitsEditor ? collectionHref : withBase('/admin/content/')}
                     data-admin-editor-page-actions-fallback
                   >
                     返回
@@ -277,150 +222,13 @@ const bitsImageRows = selectedBitsImageRows.length > 0
           </header>
 
           {
-            shouldUseSvelteContentEditor ? (
+            EssayEditorIsland && essayEditorIslandProps ? (
               <article class="admin-content-editor admin-content-editor--svelte">
-                <ContentEditorIsland
-                  endpoint={adminContentEntryEndpoint}
-                  exportEndpoint={adminContentExportEndpoint}
-                  deleteEndpoint={adminContentDeleteEndpoint}
-                  previewEndpoint={adminPreviewEndpoint}
-                  imageUploadEndpoint={adminImageUploadEndpoint}
-                  returnHref={withBase('/admin/content/')}
-                  collection={svelteEditorPayload!.collection}
-                  entryId={svelteEditorPayload!.entryId}
-                  relativePath={svelteEditorPayload!.relativePath}
-                  defaultPublicSlug={svelteEditorPayload!.defaultPublicSlug}
-                  revision={svelteEditorPayload!.revision}
-                  initialFrontmatter={svelteEditorPayload!.values}
-                  initialBody={svelteEditorPayload!.bodyText}
-                  essayOutlineItems={contentEditDevState?.essayOutlineItems ?? []}
-                  initialArticleInfoOpen={initialArticleInfoOpen}
-                />
+                <EssayEditorIsland {...essayEditorIslandProps} />
               </article>
-            ) : bitsEditorPayload ? (
-              <article class="admin-content-editor">
-                <div class="admin-content-section-head">
-                  <div>
-                    <p class="admin-content-kicker">Frontmatter</p>
-                    <h3 class="admin-content-section-title">可写字段</h3>
-                    <p class="admin-content-muted">
-                      当前 bits 编辑器仅开放 frontmatter 写回；正文编辑与预览暂不在此页面提供。
-                    </p>
-                  </div>
-                  <div class="admin-content-actions">
-                    <span class="admin-badge">revision</span>
-                    <code class="admin-content-editor__revision">{selectedEntryEditorPayload.revision}</code>
-                  </div>
-                </div>
-
-                <AdminDiagnosticPanel
-                  bannerId="admin-content-editor-error-banner"
-                  titleId="admin-content-editor-error-title"
-                  messageId="admin-content-editor-error-message"
-                  listId="admin-content-editor-error-list"
-                  title="frontmatter 未写入"
-                  label="写入异常"
-                />
-
-                <form id="admin-content-editor-form">
-                  <div class="admin-content-editor__grid">
-                    <>
-                          <label class="admin-field admin-content-editor__field" data-field-path="title">
-                            <span class="admin-field__label">title（可选）</span>
-                            <input class="admin-field__control" id="admin-content-title" name="title" type="text" value={bitsEditorPayload.values.title} />
-                            <p class="admin-content-editor__error" data-field-error="title" hidden></p>
-                          </label>
-
-                          <label class="admin-field admin-content-editor__field" data-field-path="date">
-                            <span class="admin-field__label">date</span>
-                            <input class="admin-field__control" id="admin-content-date" name="date" type="text" value={bitsEditorPayload.values.date} />
-                            <p class="admin-content-editor__error" data-field-error="date" hidden></p>
-                          </label>
-
-                          <label class="admin-field admin-content-editor__field admin-field--full" data-field-path="description">
-                            <span class="admin-field__label">description</span>
-                            <textarea class="admin-field__control" id="admin-content-description" name="description">{bitsEditorPayload.values.description}</textarea>
-                            <p class="admin-content-editor__error" data-field-error="description" hidden></p>
-                          </label>
-
-                          <label class="admin-field admin-content-editor__field admin-field--full" data-field-path="tags">
-                            <span class="admin-field__label">tags（每行一个）</span>
-                            <textarea class="admin-field__control" id="admin-content-tags" name="tagsText">{bitsEditorPayload.values.tagsText}</textarea>
-                            <p class="admin-content-editor__error" data-field-error="tags" hidden></p>
-                          </label>
-
-                          <label class="admin-field admin-content-editor__field" data-field-path="authorName">
-                            <span class="admin-field__label">author.name</span>
-                            <input class="admin-field__control" id="admin-content-author-name" name="authorName" type="text" value={bitsEditorPayload.values.authorName} />
-                            <p class="admin-content-editor__error" data-field-error="authorName" hidden></p>
-                          </label>
-
-                          <label class="admin-field admin-content-editor__field" data-field-path="authorAvatar">
-                            <span class="admin-field__label">author.avatar</span>
-                            <input class="admin-field__control" id="admin-content-author-avatar" name="authorAvatar" type="text" value={bitsEditorPayload.values.authorAvatar} />
-                            <p class="admin-content-editor__error" data-field-error="authorAvatar" hidden></p>
-                          </label>
-
-                          <div class="admin-field admin-content-editor__field admin-field--full" data-field-path="imagesText">
-                            <div class="admin-content-image-editor__header">
-                              <span class="admin-field__label">images</span>
-                              <button
-                                class="admin-btn admin-btn--ghost admin-content-image-editor__add"
-                                id="admin-content-image-add"
-                                type="button"
-                              >
-                                + 添加图片
-                              </button>
-                            </div>
-                            <input
-                              id="admin-content-images-json"
-                              name="imagesText"
-                              type="hidden"
-                              value={bitsEditorPayload.values.imagesText}
-                            />
-                            <p class="admin-content-image-editor__hint">
-                              保持现有 `bits.images` 协议：本地相对路径或 `https://` 远程 URL；宽高可留空，本地图片可通过选择器自动回填。
-                            </p>
-                            <p class="admin-content-editor__error" data-field-error="imagesText" hidden></p>
-                            <div class="admin-content-image-editor" id="admin-content-image-editor">
-                              {
-                                bitsImageRows.map((image, index) => (
-                                  <AdminBitsImageRow image={image} index={index} />
-                                ))
-                              }
-                            </div>
-                            <template id="admin-content-image-row-template">
-                              <AdminBitsImageRow image={{ src: '', width: '', height: '', alt: '' }} index={0} />
-                            </template>
-                          </div>
-
-                          <div class="admin-content-editor__toggles">
-                            <label class="admin-toggle-row">
-                              <input id="admin-content-draft" name="draft" type="checkbox" checked={bitsEditorPayload.values.draft} />
-                              <span>draft</span>
-                            </label>
-                          </div>
-                    </>
-                  </div>
-                </form>
-
-                <article id="admin-content-write-preview" class="admin-content-write-preview" hidden>
-                  <p id="admin-content-write-preview-title" class="admin-content-section-title">dry-run 结果</p>
-                  <p id="admin-content-write-preview-body" class="admin-content-copy"></p>
-                  <ul id="admin-content-write-preview-list" class="admin-content-editor__preview-list"></ul>
-                </article>
-
-                <div class="admin-content-toolbar__footer admin-content-editor__actions">
-                  <p class="admin-content-muted">
-                    真实写盘前会再次执行 revision 校验；若当前条目已被外部修改，后台会拒绝覆盖并要求刷新。
-                  </p>
-                  <div class="admin-content-actions">
-                    <button id="admin-content-dry-run" class="admin-btn admin-btn--secondary" type="button">执行 dry-run</button>
-                    <button id="admin-content-save" class="admin-btn admin-btn--primary" type="button">保存 frontmatter</button>
-                  </div>
-                </div>
-
-                <div id="admin-content-bootstrap" hidden>{adminContentBootstrap}</div>
+            ) : BitsEditorIsland && bitsEditorIslandProps ? (
+              <article class="admin-content-editor admin-content-editor--bits">
+                <BitsEditorIsland {...bitsEditorIslandProps} />
               </article>
             ) : (
               <article class="admin-content-readonly">
@@ -454,14 +262,8 @@ const bitsImageRows = selectedBitsImageRows.length > 0
   </AdminShell>
 
   {
-    shouldShowContentConsole && shouldUseLegacyContentEditor ? (
+    shouldShowContentConsole && shouldUseBitsEditor ? (
       <AdminImagePicker listEndpoint={adminImageListEndpoint} metaEndpoint={adminImageMetaEndpoint} />
-    ) : null
-  }
-
-  {
-    shouldShowContentConsole && contentEditDevState?.adminContentScriptHref ? (
-      <script is:inline type="module" src={contentEditDevState.adminContentScriptHref}></script>
     ) : null
   }
 </AdminLayout>

@@ -5,6 +5,8 @@
 @import "./editor/base.css";
 @import "./editor/page.css";
 @import "./editor/legacy-form.css";
+@import "./editor/bits-workspace.css";
+@import "./editor/bits-preview.css";
 @import "./editor/shell.css";
 @import "./editor/frontmatter.css";
 @import "./editor/image-insert.css";

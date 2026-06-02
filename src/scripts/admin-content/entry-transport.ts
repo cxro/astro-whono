@@ -167,6 +167,7 @@ const isAdminBitsEditorPayload = (value: unknown): value is AdminBitsEditorPaylo
   && typeof value.relativePath === 'string'
   && value.writable === true
   && value.readonlyReason === null
+  && typeof value.bodyText === 'string'
   && isAdminBitsEditorValues(value.values);
 
 const isAdminMemoEditorPayload = (value: unknown): value is AdminMemoEditorPayload =>
@@ -226,7 +227,8 @@ export const getPayloadEditorBody = (
   collection: AdminContentWriteCollectionKey
 ): string | null => {
   const payload = getPayloadEditorPayload(value);
-  return collection === 'essay' && payload?.collection === 'essay' && isAdminEssayEditorPayload(payload)
-    ? payload.bodyText
-    : null;
+  if (!payload || payload.collection !== collection) return null;
+  if (collection === 'essay' && isAdminEssayEditorPayload(payload)) return payload.bodyText;
+  if (collection === 'bits' && isAdminBitsEditorPayload(payload)) return payload.bodyText;
+  return null;
 };

@@ -44,6 +44,7 @@ export type ContentEditorSaveInput = {
   revision: string;
   frontmatter: AdminContentEditorValues;
   body?: string;
+  dryRun?: boolean;
   fetchImpl?: FetchLike;
 };
 
@@ -86,6 +87,14 @@ const JSON_REQUEST_HEADERS = {
 
 const getFetch = (fetchImpl?: FetchLike): FetchLike => fetchImpl ?? fetch;
 
+const buildContentWriteEndpoint = (endpoint: string, dryRun: boolean): string => {
+  if (!dryRun) return endpoint;
+  const baseUrl = typeof window === 'undefined' ? 'http://127.0.0.1/' : window.location.href;
+  const url = new URL(endpoint, baseUrl);
+  url.searchParams.set('dryRun', '1');
+  return url.toString();
+};
+
 export const saveContentEntry = async ({
   endpoint,
   collection,
@@ -93,9 +102,10 @@ export const saveContentEntry = async ({
   revision,
   frontmatter,
   body,
+  dryRun = false,
   fetchImpl
 }: ContentEditorSaveInput): Promise<ContentEditorSaveOutcome> => {
-  const response = await getFetch(fetchImpl)(endpoint, {
+  const response = await getFetch(fetchImpl)(buildContentWriteEndpoint(endpoint, dryRun), {
     method: 'POST',
     headers: JSON_REQUEST_HEADERS,
     cache: 'no-store',

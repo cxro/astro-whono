@@ -1,7 +1,7 @@
 import type { CollectionEntry } from 'astro:content';
 import { getPublished, getPageSlice, getTotalPages, type GetPublishedOptions } from './content';
 import { createWithBase, formatDateTime } from '../utils/format';
-import { deriveMarkdownText, truncateText } from '../utils/excerpt';
+import { deriveBitsCardText } from './bits-card-view-model';
 import {
   buildPublishedBitsHrefMap,
   compareBitsForRouting,
@@ -55,7 +55,6 @@ export type BitsDerivedText = {
 type BitsQueryOptions = Pick<GetPublishedOptions<'bits'>, 'includeDraft'>;
 
 const MAX_INDEX_TEXT = 600;
-const FULL_RENDER_LIMIT = 180;
 export const MAX_PRIMARY_BITS_FILTER_YEARS = 2;
 const shouldMemoizeBitQueries = import.meta.env.PROD;
 const base = import.meta.env.BASE_URL ?? '/';
@@ -129,13 +128,13 @@ const getSearchIndexText = (plainText: string) =>
   plainText.length > MAX_INDEX_TEXT ? plainText.slice(0, MAX_INDEX_TEXT) : plainText;
 
 const buildBitsDerivedText = (bit: BitsEntry): BitsDerivedText => {
-  const { plainText, excerptText } = deriveMarkdownText(bit.body ?? '');
+  const derivedText = deriveBitsCardText(bit.body ?? '');
 
   return {
-    plainText,
-    text: getSearchIndexText(plainText),
-    excerpt: truncateText(excerptText, FULL_RENDER_LIMIT),
-    shouldRenderFull: plainText.length <= FULL_RENDER_LIMIT
+    plainText: derivedText.plainText,
+    text: getSearchIndexText(derivedText.plainText),
+    excerpt: derivedText.excerpt,
+    shouldRenderFull: derivedText.shouldRenderFull
   };
 };
 

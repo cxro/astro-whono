@@ -1,6 +1,6 @@
 ---
 import { type BitsEntry, getBitAnchorId } from '../lib/bits';
-import { createWithBase, formatDateTime } from '../utils/format';
+import { buildBitsCardViewModel } from '../lib/bits-card-view-model';
 import { getThemeSettings } from '../lib/theme-settings';
 
 const {
@@ -11,32 +11,21 @@ const {
 } = Astro.props;
 
 const bitEntry = bit as BitsEntry;
-
-const tags = bit.data.tags ?? [];
-const placeTag = tags.find((t: string) => t.toLowerCase().startsWith('loc:')) ?? '';
-const placeText = placeTag ? placeTag.slice(4).trim() : '';
-const normalTags = tags.filter((t: string) => !t.toLowerCase().startsWith('loc:'));
-const normalTagItems: string[] = normalTags.map((t: string) => `#${t}`);
 const base = import.meta.env.BASE_URL ?? '/';
-const withBase = createWithBase(base);
 const { settings } = getThemeSettings();
-const defaultAuthorName = (settings.page.bits.defaultAuthor.name ?? 'Whono').trim() || 'Whono';
-const authorName = (bit.data.author?.name ?? defaultAuthorName).trim() || defaultAuthorName;
-const authorAvatarRaw = (bit.data.author?.avatar ?? settings.page.bits.defaultAuthor.avatar ?? '').trim();
-const authorAvatar = authorAvatarRaw ? withBase(authorAvatarRaw) : '';
-const avatarLetter = Array.from(authorName)[0] ?? 'W';
-type BitImage = { src: string; width?: number; height?: number; alt?: string };
-const images = (bit.data.images ?? []) as BitImage[];
-const imageItems = images.map((image) => ({
-  ...image,
-  src: withBase(image.src)
-}));
+const card = buildBitsCardViewModel({
+  id: bitEntry.id,
+  slug: bitEntry.data.slug,
+  bodyText: bitEntry.body ?? '',
+  tags: bitEntry.data.tags ?? [],
+  date: bitEntry.data.date,
+  images: bitEntry.data.images ?? [],
+  ...(bitEntry.data.author ? { author: bitEntry.data.author } : {}),
+  defaultAuthor: settings.page.bits.defaultAuthor,
+  base
+});
+const previewExcerpt = excerpt || (!Content ? card.body.excerpt : '');
 const maxVisible = 4;
-const visibleImages = imageItems.slice(0, maxVisible);
-const firstImage = imageItems.length === 1 ? imageItems[0] : null;
-const totalImages = imageItems.length;
-const wideIndex = totalImages > 1 && totalImages <= maxVisible && totalImages % 2 === 1 ? 0 : -1;
-const hasTags = Boolean(placeText || normalTagItems.length);
 const getImageLoading = (prioritize: boolean) => (prioritize ? 'eager' : 'lazy');
 const getImageFetchPriority = (prioritize: boolean) => (prioritize ? 'high' : undefined);
 ---
@@ -46,13 +35,13 @@ const getImageFetchPriority = (prioritize: boolean) => (prioritize ? 'high' : un
   id={getBitAnchorId(bitEntry.id)}
   data-bit
   data-bit-key={bitEntry.id}
-  data-slug={bitEntry.data.slug ?? bitEntry.id}
+  data-slug={card.slug}
 >
   <div class="bit-author">
-    <div class={`avatar${authorAvatar ? ' avatar--image' : ' is-fallback'}`} aria-hidden="true">
-      {authorAvatar ? (
+    <div class={`avatar${card.authorAvatar ? ' avatar--image' : ' is-fallback'}`} aria-hidden="true">
+      {card.authorAvatar ? (
         <img
-          src={authorAvatar}
+          src={card.authorAvatar}
           alt=""
           width="32"
           height="32"
@@ -61,22 +50,22 @@ const getImageFetchPriority = (prioritize: boolean) => (prioritize ? 'high' : un
           onerror="this.parentElement?.classList.add('is-fallback'); this.remove();"
         />
       ) : null}
-      <span class="avatar-fallback">{avatarLetter}</span>
+      <span class="avatar-fallback">{card.avatarLetter}</span>
     </div>
-    <div class="name">{authorName}</div>
+    <div class="name">{card.authorName}</div>
   </div>
 
   {Content ? (
     <div class="bit-body">
       <Content />
     </div>
-  ) : excerpt ? (
+  ) : previewExcerpt ? (
     <div class="bit-body">
-      <p>{excerpt}</p>
+      <p>{previewExcerpt}</p>
     </div>
   ) : null}
 
-  {firstImage ? (
+  {card.firstImage ? (
     <div class="bit-media bit-media--single">
       <button
         type="button"
@@ -86,31 +75,31 @@ const getImageFetchPriority = (prioritize: boolean) => (prioritize ? 'high' : un
         aria-label="查看图片预览"
       >
         <img
-          src={firstImage.src}
-          alt={firstImage.alt ?? ''}
-          width={firstImage.width}
-          height={firstImage.height}
+          src={card.firstImage.src}
+          alt={card.firstImage.alt}
+          width={card.firstImage.width}
+          height={card.firstImage.height}
           loading={getImageLoading(prioritizeLeadMedia)}
           fetchpriority={getImageFetchPriority(prioritizeLeadMedia)}
         />
       </button>
     </div>
-  ) : imageItems.length > 1 ? (
+  ) : card.imageItems.length > 1 ? (
     <div class="bit-media bit-media--grid">
       <div class="bit-media-grid">
-        {visibleImages.map((image, index) => {
-          const isMore = index === maxVisible - 1 && imageItems.length > maxVisible;
+        {card.visibleImages.map((image, index) => {
+          const isMore = index === maxVisible - 1 && card.imageItems.length > maxVisible;
           return (
             <button
               type="button"
-              class={`bit-media-item${index === wideIndex ? ' bit-media-item--wide' : ''}${isMore ? ' bit-media-item--more' : ''}`}
+              class={`bit-media-item${index === card.wideIndex ? ' bit-media-item--wide' : ''}${isMore ? ' bit-media-item--more' : ''}`}
               data-bit-image-button
               data-bit-image-index={index}
-              aria-label={isMore ? `查看全部图片（共 ${imageItems.length} 张）` : `图片 ${index + 1}`}
+              aria-label={isMore ? `查看全部图片（共 ${card.imageItems.length} 张）` : `图片 ${index + 1}`}
             >
               <img
                 src={image.src}
-                alt={image.alt ?? ''}
+                alt={image.alt}
                 width={image.width}
                 height={image.height}
                 loading={getImageLoading(prioritizeLeadMedia && index === 0)}
@@ -119,8 +108,8 @@ const getImageFetchPriority = (prioritize: boolean) => (prioritize ? 'high' : un
               {isMore ? (
                 <>
                   <span class="bit-media-more" aria-hidden="true" data-bit-image-open-hidden={maxVisible}>
-                    <span class="bit-media-more-short">+ {imageItems.length - maxVisible}</span>
-                    <span class="bit-media-more-full">查看其余{imageItems.length - maxVisible}张</span>
+                    <span class="bit-media-more-short">+ {card.imageItems.length - maxVisible}</span>
+                    <span class="bit-media-more-full">查看其余{card.imageItems.length - maxVisible}张</span>
                   </span>
                 </>
               ) : null}
@@ -131,13 +120,13 @@ const getImageFetchPriority = (prioritize: boolean) => (prioritize ? 'high' : un
     </div>
   ) : null}
 
-  {imageItems.length ? (
+  {card.imageItems.length ? (
     <div hidden aria-hidden="true">
-      {imageItems.map((image) => (
+      {card.imageItems.map((image) => (
         <span
           data-bit-image-item
           data-bit-image-src={image.src}
-          data-bit-image-alt={image.alt ?? ''}
+          data-bit-image-alt={image.alt}
           data-bit-image-width={image.width}
           data-bit-image-height={image.height}
         ></span>
@@ -146,19 +135,19 @@ const getImageFetchPriority = (prioritize: boolean) => (prioritize ? 'high' : un
   ) : null}
 
   <div class="bit-meta">
-    {hasTags ? (
+    {card.hasTags ? (
       <div class="bit-tags">
-        {placeText ? (
+        {card.placeText ? (
           <span class="bit-tag bit-tag--place">
             <span class="bit-tag-icon" aria-hidden="true">📍</span>
-            <span class="bit-tag-text">{placeText}</span>
+            <span class="bit-tag-text">{card.placeText}</span>
           </span>
         ) : null}
-        {normalTagItems.length ? (
+        {card.normalTagItems.length ? (
           <span class="bit-tag bit-tag--normal">
             <span class="bit-tag-icon" aria-hidden="true">❤</span>
             <span class="bit-tag-list">
-              {normalTagItems.map((tag) => (
+              {card.normalTagItems.map((tag) => (
                 <span class="bit-tag-token">{tag}</span>
               ))}
             </span>
@@ -166,6 +155,6 @@ const getImageFetchPriority = (prioritize: boolean) => (prioritize ? 'high' : un
         ) : null}
       </div>
     ) : null}
-    <div>{formatDateTime(bit.data.date)}</div>
+    <div>{card.dateLabel}</div>
   </div>
 </article>

@@ -11,12 +11,13 @@ import type {
 } from './markdown-tools';
 import type { MarkdownHighlightTheme } from './editor-markdown-highlight';
 import EditorActionMenu from './EditorActionMenu.svelte';
-import EditorToolbar from './EditorToolbar.svelte';
+import EditorToolbar, { type EditorToolbarPreset } from './EditorToolbar.svelte';
 
 type Props = {
   actionMenuElement: HTMLDivElement | null;
   busy: boolean;
   bodyToolsEnabled?: boolean;
+  toolbarPreset?: EditorToolbarPreset;
   outlineOpen: boolean;
   outlineVisible: boolean;
   outlineToggleLabel: string;
@@ -47,6 +48,12 @@ type Props = {
   dirty: boolean;
   returnHref: string;
   exportHref: string;
+  actionLabel?: string;
+  moreLabel?: string;
+  saveLabel?: string;
+  resetLabel?: string;
+  downloadLabel?: string;
+  deleteLabel?: string;
   onApplyTool: (toolId: MarkdownToolId) => void;
   onApplyHeading: (level: MarkdownHeadingLevel) => void;
   onApplyCallout: (calloutType: MarkdownCalloutType) => void;
@@ -70,6 +77,7 @@ let {
   actionMenuElement = $bindable(null),
   busy,
   bodyToolsEnabled = true,
+  toolbarPreset = 'full',
   outlineOpen,
   outlineVisible,
   outlineToggleLabel,
@@ -100,6 +108,12 @@ let {
   dirty,
   returnHref,
   exportHref,
+  actionLabel = '内容操作',
+  moreLabel = '更多内容操作',
+  saveLabel = '保存内容',
+  resetLabel = '还原更改',
+  downloadLabel = '下载源文件',
+  deleteLabel = '删除内容',
   onApplyTool,
   onApplyHeading,
   onApplyCallout,
@@ -122,6 +136,7 @@ let {
 
 {#if bodyToolsEnabled}
   <EditorToolbar
+    preset={toolbarPreset}
     {busy}
     {outlineOpen}
     {outlineVisible}
@@ -172,6 +187,12 @@ let {
   {dirty}
   {returnHref}
   {exportHref}
+  {actionLabel}
+  {moreLabel}
+  {saveLabel}
+  {resetLabel}
+  {downloadLabel}
+  {deleteLabel}
   {onSave}
   {onReset}
   {onDownload}

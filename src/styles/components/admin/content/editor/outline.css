@@ -20,6 +20,10 @@
   border-bottom: 1px solid var(--admin-editor-shell-divider);
 }
 
+.admin-editor-outline-panel__tabs[data-single='true'] {
+  grid-template-columns: minmax(0, 1fr);
+}
+
 .admin-editor-outline-panel__tab {
   min-width: 0;
   min-height: 26px;

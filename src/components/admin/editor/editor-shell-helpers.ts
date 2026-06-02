@@ -59,6 +59,19 @@ export const DEFAULT_EDITOR_DISPLAY_PREFERENCE: EditorDisplayPreference = {
   lineNumbers: false,
   markdownHighlightTheme: DEFAULT_MARKDOWN_HIGHLIGHT_THEME
 };
+// 无编辑器默认项或显式偏好时优先 split，窄容器视觉回退由 effective view 派生。
+export const DEFAULT_EDITOR_LAYOUT_INTENT: EditorLayoutMode = 'split';
+// 940px 是双 pane 与工具按钮保持可读后的最低稳定宽度；CSS 只消费 data-effective-view。
+export const EDITOR_SPLIT_MIN_INLINE_SIZE = 940;
+export const EDITOR_OUTLINE_VISIBLE_MIN_INLINE_SIZE = {
+  // 目录是辅助导航；split + both 下允许主工作区轻微压缩，低于视觉验收线再收起。
+  splitBoth: 996,
+  // 单区/stacked 只有一个主要内容面板，可以比双栏模式更晚收起目录。
+  linear: 900
+} as const;
+export const EDITOR_SCROLLBAR_VISIBILITY_TIMEOUT_MS = 800;
+export const EDITOR_OUTLINE_TARGET_SCROLL_OFFSET_RATIO = 0.18;
+export const EDITOR_SINGLE_VIEW_RETURN_LABEL = '返回编辑与预览双区视图';
 export const DEFAULT_EDITOR_SIDE_PANEL_STACKED_RATIO = 45;
 export const EDITOR_SIDE_PANEL_STACKED_RATIO_STEP = 5;
 export const EDITOR_SIDE_PANEL_OUTLINE_MIN_BLOCK_SIZE = 120;
@@ -153,6 +166,90 @@ export const markScrollElementScrolling = (
 };
 
 export const getWriteFieldLabel = (field: string): string => WRITE_FIELD_LABELS[field] ?? field;
+
+export const getEditorOutlineMinInlineSize = (
+  layout: EditorLayoutMode,
+  viewMode: EditorViewMode
+): number =>
+  layout === 'split' && viewMode === 'both'
+    ? EDITOR_OUTLINE_VISIBLE_MIN_INLINE_SIZE.splitBoth
+    : EDITOR_OUTLINE_VISIBLE_MIN_INLINE_SIZE.linear;
+
+export const isEditorOutlineAvailableForInlineSize = ({
+  inlineSize,
+  layout,
+  viewMode
+}: {
+  inlineSize: number;
+  layout: EditorLayoutMode;
+  viewMode: EditorViewMode;
+}): boolean => {
+  const splitBothWouldBeCompact =
+    layout === 'split'
+    && viewMode === 'both'
+    && inlineSize > 0
+    && inlineSize < EDITOR_SPLIT_MIN_INLINE_SIZE;
+  return !splitBothWouldBeCompact && inlineSize >= getEditorOutlineMinInlineSize(layout, viewMode);
+};
+
+export type EditorLayoutToggleIcon = 'columns-2' | 'rows-2' | 'undo-2';
+
+export const getEditorLayoutToggleLabel = ({
+  splitBothIsCompact,
+  stackedCanReturnToCompact,
+  editorLayout
+}: {
+  splitBothIsCompact: boolean;
+  stackedCanReturnToCompact: boolean;
+  editorLayout: EditorLayoutMode;
+}): string =>
+  splitBothIsCompact
+    ? '展开上下双区'
+    : stackedCanReturnToCompact
+      ? '返回单区视图'
+      : editorLayout === 'split'
+        ? '切换到上下布局'
+        : '切换到左右布局';
+
+export const getEditorLayoutToggleIcon = ({
+  stackedCanReturnToCompact,
+  editorLayout
+}: {
+  stackedCanReturnToCompact: boolean;
+  editorLayout: EditorLayoutMode;
+}): EditorLayoutToggleIcon =>
+  stackedCanReturnToCompact ? 'undo-2' : editorLayout === 'split' ? 'rows-2' : 'columns-2';
+
+export const getEditorEditViewToggleLabel = ({
+  editorViewMode,
+  splitBothIsCompact
+}: {
+  editorViewMode: EditorViewMode;
+  splitBothIsCompact: boolean;
+}): string =>
+  editorViewMode === 'edit'
+    ? '取消仅编辑视图'
+    : splitBothIsCompact
+      ? '当前宽度显示编辑区；点击固定为仅编辑'
+      : '仅显示编辑区';
+
+export const getEditorPreviewViewToggleLabel = (editorViewMode: EditorViewMode): string =>
+  editorViewMode === 'preview' ? '取消仅预览视图' : '仅显示预览区';
+
+export const getEditorCompactPaneToggleText = (compactPaneMode: EditorPaneMode): string =>
+  compactPaneMode === 'edit' ? '预览' : '编辑';
+
+export const getEditorCompactPaneToggleLabel = (compactPaneMode: EditorPaneMode): string =>
+  compactPaneMode === 'edit' ? '显示预览区' : '显示编辑区';
+
+export const getEditorScrollSyncToggleLabel = ({
+  available,
+  enabled
+}: {
+  available: boolean;
+  enabled: boolean;
+}): string =>
+  available ? (enabled ? '关闭同步滚动' : '开启同步滚动') : '单视图下不可同步滚动';
 
 const roundEditorSidePanelRatio = (value: number): number => Math.round(value * 10) / 10;
 

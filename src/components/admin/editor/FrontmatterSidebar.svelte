@@ -21,6 +21,8 @@ type Props = {
   disabled?: boolean;
   slugPlaceholder?: string;
   ariaLabel?: string;
+  fieldScope?: 'all' | 'bits-summary';
+  onDirty?: () => void;
 };
 
 let {
@@ -29,7 +31,9 @@ let {
   issues = [],
   disabled = false,
   slugPlaceholder = '',
-  ariaLabel = '内容字段'
+  ariaLabel = '内容字段',
+  fieldScope = 'all',
+  onDirty
 }: Props = $props();
 
 const getIssue = (path: string): string =>
@@ -118,45 +122,49 @@ const bitsImagesIssue = $derived(getIssue('imagesText') || getIssueByPrefix('ima
     {:else if collection === 'bits' && isBitsEditorValues(value)}
       <label class="admin-field admin-content-editor__field" class:is-invalid={Boolean(getIssue('title'))}>
         <span class="admin-field__label">title（可选）</span>
-        <input class="admin-field__control" name="title" type="text" bind:value={value.title} {disabled} />
+        <input class="admin-field__control" name="title" type="text" bind:value={value.title} oninput={onDirty} {disabled} />
         <p class="admin-content-editor__error" hidden={!getIssue('title')}>{getIssue('title')}</p>
       </label>
 
-      <label class="admin-field admin-content-editor__field" class:is-invalid={Boolean(getIssue('date'))}>
-        <span class="admin-field__label">date</span>
-        <input class="admin-field__control" name="date" type="text" bind:value={value.date} {disabled} />
-        <p class="admin-content-editor__error" hidden={!getIssue('date')}>{getIssue('date')}</p>
-      </label>
+      {#if fieldScope !== 'bits-summary'}
+        <label class="admin-field admin-content-editor__field" class:is-invalid={Boolean(getIssue('date'))}>
+          <span class="admin-field__label">date</span>
+          <input class="admin-field__control" name="date" type="text" bind:value={value.date} {disabled} />
+          <p class="admin-content-editor__error" hidden={!getIssue('date')}>{getIssue('date')}</p>
+        </label>
+      {/if}
 
       <label class="admin-field admin-content-editor__field" class:is-invalid={Boolean(getIssue('authorName'))}>
         <span class="admin-field__label">author.name</span>
-        <input class="admin-field__control" name="authorName" type="text" bind:value={value.authorName} {disabled} />
+        <input class="admin-field__control" name="authorName" type="text" bind:value={value.authorName} oninput={onDirty} {disabled} />
         <p class="admin-content-editor__error" hidden={!getIssue('authorName')}>{getIssue('authorName')}</p>
       </label>
 
       <label class="admin-field admin-content-editor__field" class:is-invalid={Boolean(getIssue('authorAvatar'))}>
         <span class="admin-field__label">author.avatar</span>
-        <input class="admin-field__control" name="authorAvatar" type="text" bind:value={value.authorAvatar} spellcheck="false" {disabled} />
+        <input class="admin-field__control" name="authorAvatar" type="text" bind:value={value.authorAvatar} spellcheck="false" oninput={onDirty} {disabled} />
         <p class="admin-content-editor__error" hidden={!getIssue('authorAvatar')}>{getIssue('authorAvatar')}</p>
       </label>
 
       <label class="admin-field admin-content-editor__field" class:is-invalid={Boolean(getIssue('description'))}>
         <span class="admin-field__label">description</span>
-        <textarea class="admin-field__control" name="description" bind:value={value.description} rows="3" {disabled}></textarea>
+        <textarea class="admin-field__control" name="description" bind:value={value.description} rows="3" oninput={onDirty} {disabled}></textarea>
         <p class="admin-content-editor__error" hidden={!getIssue('description')}>{getIssue('description')}</p>
       </label>
 
-      <label class="admin-field admin-content-editor__field" class:is-invalid={Boolean(getIssue('tags'))}>
-        <span class="admin-field__label">tags（每行一个）</span>
-        <textarea class="admin-field__control" name="tags" bind:value={value.tagsText} rows="3" spellcheck="false" {disabled}></textarea>
-        <p class="admin-content-editor__error" hidden={!getIssue('tags')}>{getIssue('tags')}</p>
-      </label>
+      {#if fieldScope !== 'bits-summary'}
+        <label class="admin-field admin-content-editor__field" class:is-invalid={Boolean(getIssue('tags'))}>
+          <span class="admin-field__label">tags（每行一个）</span>
+          <textarea class="admin-field__control" name="tags" bind:value={value.tagsText} rows="3" spellcheck="false" {disabled}></textarea>
+          <p class="admin-content-editor__error" hidden={!getIssue('tags')}>{getIssue('tags')}</p>
+        </label>
 
-      <label class="admin-field admin-content-editor__field" class:is-invalid={Boolean(bitsImagesIssue)}>
-        <span class="admin-field__label">images</span>
-        <textarea class="admin-field__control" name="imagesText" bind:value={value.imagesText} rows="8" spellcheck="false" {disabled}></textarea>
-        <p class="admin-content-editor__error" hidden={!bitsImagesIssue}>{bitsImagesIssue}</p>
-      </label>
+        <label class="admin-field admin-content-editor__field" class:is-invalid={Boolean(bitsImagesIssue)}>
+          <span class="admin-field__label">images</span>
+          <textarea class="admin-field__control" name="imagesText" bind:value={value.imagesText} rows="8" spellcheck="false" {disabled}></textarea>
+          <p class="admin-content-editor__error" hidden={!bitsImagesIssue}>{bitsImagesIssue}</p>
+        </label>
+      {/if}
     {/if}
   </div>
 </aside>

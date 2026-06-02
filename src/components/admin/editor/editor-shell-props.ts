@@ -1,10 +1,7 @@
-import type {
-  AdminBitsEditorValues,
-  AdminEssayEditorValues
-} from '../../../lib/admin-console/content-shared';
+import type { AdminEssayEditorValues } from '../../../lib/admin-console/content-shared';
 import type { EditorOutlineEssaySourceItem } from './editor-outline-helpers';
 
-type BaseEditorShellProps = {
+type BaseEssayEditorShellProps = {
   endpoint: string;
   exportEndpoint: string;
   deleteEndpoint: string;
@@ -18,18 +15,8 @@ type BaseEditorShellProps = {
   initialArticleInfoOpen?: boolean;
 };
 
-export type EssayEditorShellProps = BaseEditorShellProps & {
-  collection: 'essay';
+export type EssayEditorShellProps = BaseEssayEditorShellProps & {
   initialFrontmatter: AdminEssayEditorValues;
   initialBody: string;
   essayOutlineItems?: EditorOutlineEssaySourceItem[];
 };
-
-export type BitsEditorShellProps = BaseEditorShellProps & {
-  collection: 'bits';
-  initialFrontmatter: AdminBitsEditorValues;
-  initialBody?: string;
-  essayOutlineItems?: never;
-};
-
-export type EditorShellProps = EssayEditorShellProps | BitsEditorShellProps;

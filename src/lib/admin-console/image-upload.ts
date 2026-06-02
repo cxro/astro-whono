@@ -9,6 +9,7 @@ import {
   invalidateAdminImageCaches,
   readAdminLocalImageInspectionMeta
 } from './image-shared';
+import { getAdminImageFieldValue } from './image-params';
 
 export type AdminImageUploadResult = {
   src: string;
@@ -82,6 +83,8 @@ const resolveEssayUploadDirectory = (sourcePath: string): string => {
     : path.join(parsed.dir, `${parsed.name}-assets`);
 };
 
+const resolveBitsUploadDirectory = (): string => path.join(getProjectRoot(), 'public', 'bits');
+
 const toMarkdownRelativeImageSrc = (sourcePath: string, assetPath: string): string => {
   const relative = path.relative(path.dirname(sourcePath), assetPath).replace(/\\/g, '/');
   return relative.startsWith('.') ? relative : `./${relative}`;
@@ -150,6 +153,48 @@ export const uploadAdminEssayImage = async ({
 
   return {
     src: toMarkdownRelativeImageSrc(sourcePath, assetPath),
+    path: relativePath,
+    fileName: path.basename(assetPath),
+    width: meta.width,
+    height: meta.height,
+    size: meta.size,
+    mimeType: meta.mimeType ?? (file.type.trim() || null)
+  };
+};
+
+export const uploadAdminBitsImage = async ({
+  entryId,
+  file
+}: {
+  entryId: string;
+  file: File;
+}): Promise<AdminImageUploadResult> => {
+  assertUploadFile(file);
+
+  try {
+    resolveAdminContentEntrySourcePath('bits', entryId);
+  } catch (error) {
+    if (error instanceof AdminContentEntryResolutionError) {
+      throw new AdminImageUploadError(error.message, error.code === 'source-not-found' ? 404 : 400);
+    }
+    throw error;
+  }
+
+  const safeFileName = getSafeImageFileName(file.name);
+  const buffer = Buffer.from(await file.arrayBuffer());
+  const assetPath = await writeUniqueImageFile(resolveBitsUploadDirectory(), safeFileName, buffer);
+  const relativePath = toRelativeProjectPath(assetPath);
+  const src = getAdminImageFieldValue('bits.images', relativePath, 'public');
+  if (!src) {
+    throw new AdminImageUploadError('无法生成 bits.images 可保存的图片路径');
+  }
+
+  invalidateAdminImageCaches();
+  const meta = await readAdminLocalImageInspectionMeta(relativePath);
+  invalidateAdminImageCaches();
+
+  return {
+    src,
     path: relativePath,
     fileName: path.basename(assetPath),
     width: meta.width,

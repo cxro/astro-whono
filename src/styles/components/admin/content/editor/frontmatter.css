@@ -135,7 +135,11 @@
   --admin-modal-width: 460px;
   --admin-modal-max-height: min(74vh, 680px);
   --admin-modal-z-index: 36;
-  --admin-modal-padding: 32px var(--pad-x);
+  --admin-modal-padding: 24px var(--pad-x);
+}
+
+.admin-editor-frontmatter-popover__panel {
+  transform: translateY(clamp(-36px, -4vh, -18px));
 }
 
 .admin-editor-frontmatter-popover__title-row {
@@ -175,6 +179,10 @@
 .admin-editor-frontmatter-popover__actions {
   flex-wrap: wrap;
   gap: 8px 12px;
+}
+
+.admin-editor-frontmatter-popover__actions--compact {
+  justify-content: flex-end;
 }
 
 .admin-editor-frontmatter-popover__toggles,

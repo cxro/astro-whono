@@ -9,8 +9,12 @@ import { getWriteFieldLabel } from './editor-shell-helpers';
 type ContentEditorCapabilities = {
   body: boolean;
   preview: boolean;
-  imageInsert: boolean;
-  galleryInsert: boolean;
+  bodyImageInsert: boolean;
+  bodyImageUpload: boolean;
+  bodyGalleryInsert: boolean;
+  imageUpload: boolean;
+  imagePicker: boolean;
+  imageArray: boolean;
   essayOutline: boolean;
 };
 
@@ -125,7 +129,10 @@ const BITS_FIELD_LABELS: Readonly<Record<string, string>> = {
   draft: '草稿状态',
   authorName: '作者名称',
   authorAvatar: '作者头像',
-  imagesText: '图片'
+  author: '作者',
+  images: '图片',
+  imagesText: '图片',
+  body: '正文'
 };
 
 const ESSAY_ADAPTER: ContentEditorAdapter = {
@@ -135,8 +142,12 @@ const ESSAY_ADAPTER: ContentEditorAdapter = {
   capabilities: {
     body: true,
     preview: true,
-    imageInsert: true,
-    galleryInsert: true,
+    bodyImageInsert: true,
+    bodyImageUpload: true,
+    bodyGalleryInsert: true,
+    imageUpload: false,
+    imagePicker: false,
+    imageArray: false,
     essayOutline: true
   },
   frontmatterIssuePaths: ESSAY_FRONTMATTER_ISSUE_PATHS,
@@ -149,13 +160,17 @@ const ESSAY_ADAPTER: ContentEditorAdapter = {
 
 const BITS_ADAPTER: ContentEditorAdapter = {
   collection: 'bits',
-  dialogTitle: '絮语信息',
-  fieldsAriaLabel: '絮语字段',
+  dialogTitle: '修改信息',
+  fieldsAriaLabel: '内容字段',
   capabilities: {
-    body: false,
-    preview: false,
-    imageInsert: false,
-    galleryInsert: false,
+    body: true,
+    preview: true,
+    bodyImageInsert: false,
+    bodyImageUpload: false,
+    bodyGalleryInsert: false,
+    imageUpload: true,
+    imagePicker: true,
+    imageArray: true,
     essayOutline: false
   },
   frontmatterIssuePaths: BITS_FRONTMATTER_ISSUE_PATHS,

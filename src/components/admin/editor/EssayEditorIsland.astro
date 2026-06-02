@@ -1,37 +1,8 @@
 ---
 import EditorShell from './EditorShell.svelte';
-import type {
-  AdminBitsEditorValues,
-  AdminEssayEditorValues
-} from '../../../lib/admin-console/content-shared';
-import type { EditorOutlineEssaySourceItem } from './editor-outline-helpers';
+import type { EssayEditorShellProps } from './editor-shell-props';
 
-type BaseProps = {
-  endpoint: string;
-  exportEndpoint: string;
-  deleteEndpoint: string;
-  previewEndpoint: string;
-  imageUploadEndpoint: string;
-  returnHref: string;
-  entryId: string;
-  relativePath: string;
-  defaultPublicSlug: string;
-  revision: string;
-  initialArticleInfoOpen?: boolean;
-};
-
-type Props = BaseProps & ({
-  collection: 'essay';
-  initialFrontmatter: AdminEssayEditorValues;
-  initialBody: string;
-  essayOutlineItems?: EditorOutlineEssaySourceItem[];
-} | {
-  collection: 'bits';
-  initialFrontmatter: AdminBitsEditorValues;
-  initialBody?: string;
-});
-
-const props = Astro.props;
+const props = Astro.props as EssayEditorShellProps;
 ---
 
 <div data-admin-content-editor-island>

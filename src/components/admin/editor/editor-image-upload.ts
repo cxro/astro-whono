@@ -4,6 +4,7 @@ import {
   isRecord,
   parseResponseBody
 } from '../../../scripts/admin-content/entry-transport';
+import type { AdminContentWriteCollectionKey } from '../../../lib/admin-console/content-shared';
 
 export type EditorImageUploadResult = {
   src: string;
@@ -17,6 +18,7 @@ export type EditorImageUploadResult = {
 
 export type EditorImageUploadInput = {
   uploadEndpoint: string;
+  collection: AdminContentWriteCollectionKey;
   entryId: string;
   file: File;
 };
@@ -49,14 +51,15 @@ const getEditorImageUploadResult = (value: unknown): EditorImageUploadResult | n
   };
 };
 
-export const uploadEssayEditorImage = async ({
+export const uploadContentEditorImage = async ({
   uploadEndpoint,
+  collection,
   entryId,
   file
 }: EditorImageUploadInput): Promise<EditorImageUploadResponse> => {
   try {
     const formData = new FormData();
-    formData.set('collection', 'essay');
+    formData.set('collection', collection);
     formData.set('entryId', entryId);
     formData.set('image', file);
 
@@ -86,3 +89,13 @@ export const uploadEssayEditorImage = async ({
     };
   }
 };
+
+export const uploadEssayEditorImage = (
+  input: Omit<EditorImageUploadInput, 'collection'>
+): Promise<EditorImageUploadResponse> =>
+  uploadContentEditorImage({ ...input, collection: 'essay' });
+
+export const uploadBitsEditorImage = (
+  input: Omit<EditorImageUploadInput, 'collection'>
+): Promise<EditorImageUploadResponse> =>
+  uploadContentEditorImage({ ...input, collection: 'bits' });

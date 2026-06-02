@@ -21,6 +21,10 @@
   min-width: 0;
 }
 
+.admin-editor-shell .admin-editor-shell__pane[hidden] {
+  display: none;
+}
+
 .admin-editor-body__field {
   height: 100%;
   min-width: 0;

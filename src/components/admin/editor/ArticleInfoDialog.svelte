@@ -26,6 +26,9 @@ type Props = {
   relativePath?: string;
   dialogTitle?: string;
   fieldsAriaLabel?: string;
+  fieldScope?: 'all' | 'bits-summary';
+  showPublishToggles?: boolean;
+  onDirty?: () => void;
   onClose: () => void;
   onReset: () => void;
   onSave: () => void;
@@ -44,6 +47,9 @@ let {
   relativePath = '',
   dialogTitle = '文章信息',
   fieldsAriaLabel = '随笔字段',
+  fieldScope = 'all',
+  showPublishToggles = true,
+  onDirty = () => {},
   onClose,
   onReset,
   onSave
@@ -132,22 +138,27 @@ $effect(() => {
             {loadingText}
           </div>
         {:else}
-          <FrontmatterSidebar bind:value {collection} {issues} {disabled} {slugPlaceholder} ariaLabel={fieldsAriaLabel} />
+          <FrontmatterSidebar bind:value {collection} {issues} {disabled} {slugPlaceholder} ariaLabel={fieldsAriaLabel} {fieldScope} {onDirty} />
         {/if}
       </div>
-      <footer class="admin-modal__actions admin-editor-frontmatter-popover__actions">
-        <div class="admin-editor-frontmatter-popover__toggles">
-          <label class="admin-toggle-row">
-            <input name="draft" type="checkbox" bind:checked={value.draft} disabled={disabled || loading} />
-            <span>草稿</span>
-          </label>
-          {#if collection === 'essay' && isEssayEditorValues(value)}
+      <footer
+        class="admin-modal__actions admin-editor-frontmatter-popover__actions"
+        class:admin-editor-frontmatter-popover__actions--compact={!showPublishToggles}
+      >
+        {#if showPublishToggles}
+          <div class="admin-editor-frontmatter-popover__toggles">
             <label class="admin-toggle-row">
-              <input name="archive" type="checkbox" bind:checked={value.archive} disabled={disabled || loading} />
-              <span>归档</span>
+              <input name="draft" type="checkbox" bind:checked={value.draft} disabled={disabled || loading} onchange={onDirty} />
+              <span>草稿</span>
             </label>
-          {/if}
-        </div>
+            {#if collection === 'essay' && isEssayEditorValues(value)}
+              <label class="admin-toggle-row">
+                <input name="archive" type="checkbox" bind:checked={value.archive} disabled={disabled || loading} onchange={onDirty} />
+                <span>归档</span>
+              </label>
+            {/if}
+          </div>
+        {/if}
         <div class="admin-editor-frontmatter-popover__buttons">
           <button class="admin-btn admin-btn--ghost admin-btn--compact" type="button" onclick={onReset} disabled={disabled || loading || !dirty}>
             还原

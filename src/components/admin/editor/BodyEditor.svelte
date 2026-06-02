@@ -37,10 +37,13 @@ type Props = {
   toolbarCommand?: MarkdownToolbarCommand | null;
   outlineJumpCommand?: MarkdownOutlineJumpCommand | null;
   lineNumbersEnabled?: boolean;
+  mediaEditEnabled?: boolean;
+  galleryEditEnabled?: boolean;
   onScrollElementChange?: (element: HTMLElement | null) => void;
   onOutlineJump?: (element: HTMLElement) => void;
   onImageToolRequest?: (block: EditableImageBlock | null) => void;
   onGalleryEditRequest?: (block: EditableGalleryBlock) => void;
+  onChange?: (value: string) => void;
   onShortcutTool?: (toolId: MarkdownToolId) => void;
 };
 
@@ -50,10 +53,13 @@ let {
   toolbarCommand = null,
   outlineJumpCommand = null,
   lineNumbersEnabled = false,
+  mediaEditEnabled = true,
+  galleryEditEnabled = true,
   onScrollElementChange,
   onOutlineJump,
   onImageToolRequest,
   onGalleryEditRequest,
+  onChange,
   onShortcutTool
 }: Props = $props();
 
@@ -148,6 +154,7 @@ const applyToolbarCommand = (command: MarkdownToolbarCommand) => {
   if (disabled || !view) return;
 
   if (command.kind === 'tool' && command.toolId === 'image') {
+    if (!mediaEditEnabled) return;
     onImageToolRequest?.(
       findEditableImageBlockAtSelection(
         view.state.doc.toString(),
@@ -182,6 +189,26 @@ const markdownKeymap: readonly KeyBinding[] = [
   { key: 'Mod-k', run: () => applyShortcutTool('link') }
 ];
 
+const createMediaEditExtensions = (): Extension[] => {
+  if (!mediaEditEnabled) return [];
+
+  return [
+    getImageEditTooltipExtension({
+      isDisabled: () => disabled,
+      onEditImageBlock: (block) => {
+        onImageToolRequest?.(block);
+      },
+      ...(galleryEditEnabled
+        ? {
+            onEditGalleryBlock: (block: EditableGalleryBlock) => {
+              onGalleryEditRequest?.(block);
+            }
+          }
+        : {})
+    })
+  ];
+};
+
 const createEditorExtensions = (): Extension[] => [
   markdown({
     completeHTMLTags: false,
@@ -189,15 +216,7 @@ const createEditorExtensions = (): Extension[] => [
   }),
   getMarkdownHighlightExtension(),
   getMarkdownCodeDecorationsExtension(),
-  getImageEditTooltipExtension({
-    isDisabled: () => disabled,
-    onEditImageBlock: (block) => {
-      onImageToolRequest?.(block);
-    },
-    onEditGalleryBlock: (block) => {
-      onGalleryEditRequest?.(block);
-    }
-  }),
+  ...createMediaEditExtensions(),
   history(),
   EditorView.lineWrapping,
   lineNumbersCompartment.of(lineNumbersEnabled ? lineNumbers() : []),
@@ -219,6 +238,9 @@ const createEditorExtensions = (): Extension[] => [
     lastKnownEditorValue = nextValue;
     if (nextValue !== value) {
       value = nextValue;
+    }
+    if (!update.transactions.some((transaction) => transaction.annotation(Transaction.addToHistory) === false)) {
+      onChange?.(nextValue);
     }
   })
 ];

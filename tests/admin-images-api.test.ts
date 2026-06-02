@@ -29,6 +29,7 @@ describe('admin images api', () => {
     await mkdir(path.join(tempRoot, 'public', 'images', 'archive'), { recursive: true });
     await mkdir(path.join(tempRoot, 'src', 'content', 'essay', 'guide-assets'), { recursive: true });
     await mkdir(path.join(tempRoot, 'src', 'content', 'essay', 'no-assets'), { recursive: true });
+    await mkdir(path.join(tempRoot, 'src', 'content', 'bits'), { recursive: true });
     await mkdir(path.join(tempRoot, 'src', 'assets'), { recursive: true });
 
     await writeFile(path.join(tempRoot, 'public', 'favicon.png'), PNG_1X1);
@@ -43,6 +44,10 @@ describe('admin images api', () => {
     await writeFile(
       path.join(tempRoot, 'src', 'content', 'essay', 'no-assets', 'index.md'),
       ['---', 'title: 无附件条目', '---', '', '这里只是普通正文，没有图片。'].join('\n')
+    );
+    await writeFile(
+      path.join(tempRoot, 'src', 'content', 'bits', 'demo.md'),
+      ['---', 'title: Bits 图片上传测试', 'date: 2026-05-26T10:00:00+08:00', '---', '', '短内容。'].join('\n')
     );
     await writeFile(path.join(tempRoot, 'src', 'content', 'essay', 'guide-assets', 'hero.png'), PNG_1X1);
     await writeFile(path.join(tempRoot, 'src', 'assets', 'hero.png'), PNG_1X1);
@@ -278,6 +283,34 @@ describe('admin images api', () => {
     expect(payload.ok).toBe(true);
     expect(payload.result.src).toBe('./guide-assets/hero-2.png');
     await expect(readFile(path.join(tempRoot, 'src', 'content', 'essay', 'guide-assets', 'hero-2.png'))).resolves.toEqual(PNG_1X1);
+  });
+
+  it('uploads bits images to the public bits directory with field-ready src', async () => {
+    const { POST } = await import('../src/pages/api/admin/images/upload');
+    const formData = new FormData();
+    formData.set('collection', 'bits');
+    formData.set('entryId', 'demo');
+    formData.set('image', new File([PNG_1X1], 'Bit Cover.PNG', { type: 'image/png' }));
+
+    const response = await POST({
+      request: createUploadRequest('http://127.0.0.1:4321/api/admin/images/upload', formData),
+      url: new URL('http://127.0.0.1:4321/api/admin/images/upload')
+    } as never);
+
+    expect(response.status).toBe(200);
+    const payload = JSON.parse(await response.text());
+    expect(payload.ok).toBe(true);
+    expect(payload.result).toEqual(
+      expect.objectContaining({
+        src: 'bits/bit-cover.png',
+        path: 'public/bits/bit-cover.png',
+        fileName: 'bit-cover.png',
+        width: 1,
+        height: 1,
+        mimeType: 'image/png'
+      })
+    );
+    await expect(readFile(path.join(tempRoot, 'public', 'bits', 'bit-cover.png'))).resolves.toEqual(PNG_1X1);
   });
 
   it('rejects non-image uploads without writing files', async () => {

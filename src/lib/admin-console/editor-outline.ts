@@ -15,7 +15,7 @@ export type MarkdownOutlineSelectionRange = {
   selectionEnd: number;
 };
 
-export type EditorOutlineEssaySourceItem = {
+export type EditorOutlineListSourceItem = {
   entryId: string;
   title: string;
   editHref: string;
@@ -23,9 +23,12 @@ export type EditorOutlineEssaySourceItem = {
   sourceError?: string | null;
 };
 
-export type EditorOutlineEssayListItem = EditorOutlineEssaySourceItem & {
+export type EditorOutlineListItem = EditorOutlineListSourceItem & {
   active: boolean;
 };
+
+export type EditorOutlineEssaySourceItem = EditorOutlineListSourceItem;
+export type EditorOutlineEssayListItem = EditorOutlineListItem;
 
 type FenceState = {
   marker: '`' | '~';
@@ -169,10 +172,10 @@ export const getMarkdownOutlineSelectionRange = (
 
 const normalizeListText = (value: string): string => value.trim();
 
-export const buildEssayOutlineListItems = (
-  items: readonly EditorOutlineEssaySourceItem[],
+export const buildEditorOutlineListItems = (
+  items: readonly EditorOutlineListSourceItem[],
   currentEntryId: string
-): EditorOutlineEssayListItem[] =>
+): EditorOutlineListItem[] =>
   items.map((item) => {
     const entryId = normalizeListText(item.entryId);
     return {
@@ -182,3 +185,5 @@ export const buildEssayOutlineListItems = (
       active: entryId === currentEntryId
     };
   });
+
+export const buildEssayOutlineListItems = buildEditorOutlineListItems;

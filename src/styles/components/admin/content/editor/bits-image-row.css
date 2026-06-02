@@ -2,94 +2,226 @@
    承载 bits 图片行编辑器；不承载 essay Svelte editor 或通用 legacy 表单规则。
 */
 
-.admin-content-image-editor__header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-}
-
-.admin-content-image-editor__add {
-  flex-shrink: 0;
-}
-
-.admin-content-image-editor__hint {
-  margin: 10px 0 0;
-  color: var(--muted);
-  font-size: var(--admin-text-sm);
-  line-height: 1.6;
-}
-
 .admin-content-image-editor {
   display: grid;
-  gap: 12px;
-  margin-top: 12px;
+  gap: 8px;
+  margin-top: 0;
+}
+
+.admin-content-image-strip {
+  min-width: 0;
+}
+
+.admin-content-image-film {
+  display: grid;
+  grid-auto-columns: minmax(92px, 112px);
+  grid-auto-flow: column;
+  gap: 8px;
+  min-width: 0;
+  padding: 2px 2px 8px;
+  overflow-x: auto;
+  overscroll-behavior-inline: contain;
+  scrollbar-width: thin;
+}
+
+.admin-content-image-thumb {
+  position: relative;
+  display: grid;
+  grid-template-rows: 64px auto;
+  min-width: 0;
+  padding: 0;
+  overflow: hidden;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: color-mix(in srgb, var(--admin-surface) 84%, var(--bg) 16%);
+  color: var(--text);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.admin-content-image-thumb:hover {
+  border-color: color-mix(in srgb, var(--text) 26%, var(--border));
+  background: color-mix(in srgb, var(--panel) 74%, var(--admin-surface) 26%);
+}
+
+.admin-content-image-thumb:focus-visible {
+  outline: none;
+  box-shadow: var(--admin-focus-shadow);
+}
+
+.admin-content-image-thumb.is-active {
+  border-color: color-mix(in srgb, var(--text) 46%, var(--border));
+  box-shadow:
+    inset 0 0 0 1px color-mix(in srgb, var(--text) 34%, transparent),
+    0 8px 22px color-mix(in srgb, var(--text) 8%, transparent);
+}
+
+.admin-content-image-thumb.is-invalid {
+  border-color: var(--admin-field-invalid-border);
+}
+
+.admin-content-image-thumb.is-empty {
+  border-style: dashed;
+  color: var(--faint);
+}
+
+.admin-content-image-thumb--insert {
+  border-color: color-mix(in srgb, var(--border) 84%, transparent);
+  border-style: solid;
+  color: var(--faint);
+  background: color-mix(in srgb, var(--admin-surface) 72%, transparent);
+}
+
+.admin-content-image-thumb--insert:hover:not(:disabled) {
+  border-style: solid;
+  color: var(--muted);
+}
+
+.admin-content-image-thumb--insert.is-active {
+  border-color: color-mix(in srgb, var(--text) 30%, var(--border));
+  border-style: solid;
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--bg) 64%, transparent);
+}
+
+.admin-content-image-thumb--insert:disabled {
+  cursor: not-allowed;
+  opacity: 0.62;
+}
+
+.admin-content-image-thumb.is-loading {
+  cursor: progress;
+}
+
+.admin-content-image-thumb.is-loading .admin-content-image-thumb__media {
+  opacity: 0.72;
+}
+
+.admin-content-image-thumb__media {
+  display: grid;
+  place-items: center;
+  min-width: 0;
+  min-height: 0;
+  overflow: hidden;
+  background:
+    linear-gradient(
+      135deg,
+      color-mix(in srgb, var(--panel) 84%, transparent),
+      color-mix(in srgb, var(--admin-surface) 92%, transparent)
+    );
+  color: var(--faint);
+}
+
+.admin-content-image-thumb__media img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.admin-content-image-thumb__body {
+  display: grid;
+  gap: 2px;
+  min-width: 0;
+  padding: 7px 8px 8px;
+}
+
+.admin-content-image-thumb__label,
+.admin-content-image-thumb__status {
+  display: block;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.admin-content-image-thumb__label {
+  font-size: var(--admin-text-xs);
+  font-weight: 750;
+  line-height: 1.1;
+}
+
+.admin-content-image-thumb__status {
+  color: var(--muted);
+  font-size: var(--admin-text-xs);
+  line-height: 1.1;
+}
+
+.admin-content-image-thumb__alert {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  display: grid;
+  place-items: center;
+  width: 20px;
+  height: 20px;
+  border-radius: 999px;
+  background: var(--admin-field-invalid-bg);
+  color: var(--admin-field-invalid-label);
+  box-shadow: 0 0 0 1px var(--admin-field-invalid-border);
 }
 
 .admin-content-image-row {
   display: grid;
-  gap: 12px;
-  min-inline-size: var(--admin-content-editor-min-inline-size);
-  padding: 12px;
+  gap: 8px;
+  min-inline-size: 0;
+  padding: 8px 0 0;
 }
 
-.admin-content-image-row__head {
+.admin-content-image-row__actions {
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  gap: 12px;
+  justify-content: flex-end;
+  gap: 6px;
+  min-width: 0;
 }
 
-.admin-content-image-row__title {
-  font-size: var(--admin-text-sm);
+.admin-content-image-row__action {
+  min-height: 30px;
+  padding-inline: 10px;
+}
+
+.admin-content-image-row__remove {
+  width: 32px;
+  min-width: 32px;
+  min-height: 30px;
+  padding-inline: 0;
 }
 
 .admin-content-image-row__grid {
   display: grid;
-  grid-template-columns: minmax(360px, 2.2fr) repeat(2, minmax(96px, 0.55fr)) minmax(220px, 1fr);
-  gap: 12px;
+  grid-template-columns: minmax(220px, 1fr) auto;
+  align-items: start;
+  gap: 10px;
 }
 
 .admin-content-image-row__field {
   display: grid;
-  gap: 8px;
-}
-
-.admin-content-image-row__field--src,
-.admin-content-image-row__field--alt {
-  min-width: 0;
-}
-
-.admin-content-image-row__src-inputs {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) auto;
-  gap: 8px;
-}
-
-.admin-content-image-row__footer {
-  display: flex;
+  grid-template-columns: auto minmax(0, 1fr);
   align-items: center;
-  justify-content: space-between;
-  gap: 12px;
+  gap: 6px;
 }
 
-.admin-content-image-row__meta {
-  margin: 0;
-  color: var(--muted);
-  font-size: var(--admin-text-sm);
+.admin-content-image-row__field > .admin-field__label {
+  line-height: 1;
+  white-space: nowrap;
 }
 
-.admin-content-image-row__preview {
-  width: 72px;
-  height: 72px;
-  border-radius: 8px;
-  overflow: hidden;
-  border: 1px solid var(--border);
-  background: var(--admin-surface);
+.admin-content-image-row__field > .admin-content-editor__error {
+  grid-column: 1 / -1;
 }
 
-.admin-content-image-row__preview img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
+.admin-content-image-row__field--src {
+  min-width: 0;
+  grid-template-columns: minmax(0, 1fr);
+}
+
+@media (max-width: 860px) {
+  .admin-content-image-row__grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .admin-content-image-row__actions {
+    align-items: flex-start;
+    justify-content: flex-start;
+  }
 }

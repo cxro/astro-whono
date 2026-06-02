@@ -1,0 +1,10 @@
+---
+import BitsEditorWorkspace from './BitsEditorWorkspace.svelte';
+import type { BitsEditorIslandProps } from './bits-editor-island-props';
+
+const props = Astro.props as BitsEditorIslandProps;
+---
+
+<div data-admin-bits-editor-island>
+  <BitsEditorWorkspace client:only="svelte" {...props} />
+</div>

@@ -1,3 +1,7 @@
+<script lang="ts" module>
+export type EditorToolbarPreset = 'full' | 'bits';
+</script>
+
 <script lang="ts">
 import AdminEditorIcon from './AdminEditorIcon.svelte';
 import EmojiPickerPopover from './EmojiPickerPopover.svelte';
@@ -68,8 +72,17 @@ const markdownListTools = [
   { id: 'orderedList', label: '有序列表', icon: 'ordered-list' },
   { id: 'taskList', label: '任务列表', icon: 'task-list' }
 ] as const;
+const bitsMarkdownTextTools = [
+  { id: 'bold', label: '加粗', icon: 'bold' },
+  { id: 'italic', label: '斜体', icon: 'italic' }
+] as const;
+const bitsInlineTools = [
+  { id: 'link', label: '链接', icon: 'link' },
+  { id: 'code', label: '行内代码', icon: 'code' }
+] as const;
 
 type Props = {
+  preset?: EditorToolbarPreset;
   busy?: boolean;
   outlineOpen?: boolean;
   outlineVisible?: boolean;
@@ -111,6 +124,7 @@ type Props = {
 };
 
 let {
+  preset = 'full',
   busy = false,
   outlineOpen = false,
   outlineVisible = outlineOpen,
@@ -385,7 +399,7 @@ $effect(() => {
 <div class="admin-editor-shell__format-row">
   <div class="admin-editor-markdown-toolbar" role="toolbar" aria-label="Markdown 常用格式">
     <div class="admin-editor-markdown-toolbar__group" role="group" aria-label="文本样式">
-      {#each markdownTextTools as tool}
+      {#each preset === 'bits' ? bitsMarkdownTextTools : markdownTextTools as tool}
         <button
           class="admin-btn admin-btn--tool admin-btn--compact admin-btn--icon admin-editor-markdown-toolbar__button"
           type="button"
@@ -400,77 +414,90 @@ $effect(() => {
     </div>
 
     <div class="admin-editor-markdown-toolbar__group" role="group" aria-label="段落结构">
-      <details
-        class="admin-editor-markdown-toolbar__menu admin-editor-markdown-toolbar__menu--heading"
-        class:is-open={headingMenuOpen}
-        bind:this={headingMenuEl}
-        ontoggle={syncHeadingMenuOpen}
-      >
-        <summary
+      {#if preset === 'full'}
+        <details
+          class="admin-editor-markdown-toolbar__menu admin-editor-markdown-toolbar__menu--heading"
+          class:is-open={headingMenuOpen}
+          bind:this={headingMenuEl}
+          ontoggle={syncHeadingMenuOpen}
+        >
+          <summary
+            class="admin-btn admin-btn--tool admin-btn--compact admin-btn--icon admin-editor-markdown-toolbar__button"
+            data-tooltip={headingTool.label}
+            aria-label={headingTool.label}
+            aria-disabled={busy ? 'true' : undefined}
+            onclick={handleHeadingSummaryClick}
+          >
+            <AdminEditorIcon name={headingTool.icon} size={toolbarIconSize} strokeWidth={2} />
+          </summary>
+
+          <div
+            class="admin-content-menu-panel admin-editor-heading-menu"
+            id="admin-editor-heading-menu"
+            aria-label="标题级别"
+          >
+            {#each headingLevelItems as item}
+              <button
+                class="admin-content-menu-item admin-editor-heading-menu__item"
+                type="button"
+                disabled={busy}
+                onclick={() => applyHeadingLevel(item.level)}
+              >
+                <span class="admin-editor-heading-menu__level">{item.label}</span>
+                <span class="admin-editor-heading-menu__text">{item.description}</span>
+              </button>
+            {/each}
+          </div>
+        </details>
+
+        <details
+          class="admin-editor-markdown-toolbar__menu admin-editor-markdown-toolbar__menu--list"
+          class:is-open={listMenuOpen}
+          bind:this={listMenuEl}
+          ontoggle={syncListMenuOpen}
+        >
+          <summary
+            class="admin-btn admin-btn--tool admin-btn--compact admin-btn--icon admin-editor-markdown-toolbar__button"
+            data-tooltip={listTool.label}
+            aria-label={listTool.label}
+            aria-disabled={busy ? 'true' : undefined}
+            onclick={handleListSummaryClick}
+          >
+            <AdminEditorIcon name={listTool.icon} size={toolbarIconSize} strokeWidth={2} />
+          </summary>
+
+          <div
+            class="admin-content-menu-panel admin-editor-list-menu"
+            id="admin-editor-list-menu"
+            aria-label="列表类型"
+          >
+            {#each markdownListTools as tool}
+              <button
+                class="admin-content-menu-item admin-editor-insert-menu__item"
+                type="button"
+                disabled={busy}
+                onclick={() => applyListTool(tool.id)}
+              >
+                <span class="admin-editor-insert-menu__icon" aria-hidden="true">
+                  <AdminEditorIcon name={tool.icon} size={15} strokeWidth={2} />
+                </span>
+                <span class="admin-editor-insert-menu__label">{tool.label}</span>
+              </button>
+            {/each}
+          </div>
+        </details>
+      {:else}
+        <button
           class="admin-btn admin-btn--tool admin-btn--compact admin-btn--icon admin-editor-markdown-toolbar__button"
-          data-tooltip={headingTool.label}
-          aria-label={headingTool.label}
-          aria-disabled={busy ? 'true' : undefined}
-          onclick={handleHeadingSummaryClick}
+          type="button"
+          data-tooltip="无序列表"
+          aria-label="无序列表"
+          disabled={busy}
+          onclick={() => onApplyTool('list')}
         >
-          <AdminEditorIcon name={headingTool.icon} size={toolbarIconSize} strokeWidth={2} />
-        </summary>
-
-        <div
-          class="admin-content-menu-panel admin-editor-heading-menu"
-          id="admin-editor-heading-menu"
-          aria-label="标题级别"
-        >
-          {#each headingLevelItems as item}
-            <button
-              class="admin-content-menu-item admin-editor-heading-menu__item"
-              type="button"
-              disabled={busy}
-              onclick={() => applyHeadingLevel(item.level)}
-            >
-              <span class="admin-editor-heading-menu__level">{item.label}</span>
-              <span class="admin-editor-heading-menu__text">{item.description}</span>
-            </button>
-          {/each}
-        </div>
-      </details>
-
-      <details
-        class="admin-editor-markdown-toolbar__menu admin-editor-markdown-toolbar__menu--list"
-        class:is-open={listMenuOpen}
-        bind:this={listMenuEl}
-        ontoggle={syncListMenuOpen}
-      >
-        <summary
-          class="admin-btn admin-btn--tool admin-btn--compact admin-btn--icon admin-editor-markdown-toolbar__button"
-          data-tooltip={listTool.label}
-          aria-label={listTool.label}
-          aria-disabled={busy ? 'true' : undefined}
-          onclick={handleListSummaryClick}
-        >
-          <AdminEditorIcon name={listTool.icon} size={toolbarIconSize} strokeWidth={2} />
-        </summary>
-
-        <div
-          class="admin-content-menu-panel admin-editor-list-menu"
-          id="admin-editor-list-menu"
-          aria-label="列表类型"
-        >
-          {#each markdownListTools as tool}
-            <button
-              class="admin-content-menu-item admin-editor-insert-menu__item"
-              type="button"
-              disabled={busy}
-              onclick={() => applyListTool(tool.id)}
-            >
-              <span class="admin-editor-insert-menu__icon" aria-hidden="true">
-                <AdminEditorIcon name={tool.icon} size={15} strokeWidth={2} />
-              </span>
-              <span class="admin-editor-insert-menu__label">{tool.label}</span>
-            </button>
-          {/each}
-        </div>
-      </details>
+          <AdminEditorIcon name="list" size={toolbarIconSize} strokeWidth={2} />
+        </button>
+      {/if}
 
       {#each markdownParagraphTools as tool}
         <button
@@ -487,7 +514,7 @@ $effect(() => {
     </div>
 
     <div class="admin-editor-markdown-toolbar__group" role="group" aria-label="链接与媒体">
-      {#each markdownInlineMediaTools as tool}
+      {#each preset === 'bits' ? bitsInlineTools : markdownInlineMediaTools as tool}
         <button
           class="admin-btn admin-btn--tool admin-btn--compact admin-btn--icon admin-editor-markdown-toolbar__button"
           type="button"
@@ -499,19 +526,51 @@ $effect(() => {
           <AdminEditorIcon name={tool.icon} size={toolbarIconSize} strokeWidth={2} />
         </button>
       {/each}
-      <button
-        class="admin-btn admin-btn--tool admin-btn--compact admin-btn--icon admin-editor-markdown-toolbar__button admin-editor-markdown-toolbar__gallery-direct"
-        type="button"
-        data-tooltip={galleryTool.label}
-        aria-label={galleryTool.label}
-        disabled={busy}
-        onclick={openGalleryDialog}
-      >
-        <AdminEditorIcon name={galleryTool.icon} size={toolbarIconSize} strokeWidth={2} />
-      </button>
+      {#if preset === 'full'}
+        <button
+          class="admin-btn admin-btn--tool admin-btn--compact admin-btn--icon admin-editor-markdown-toolbar__button admin-editor-markdown-toolbar__gallery-direct"
+          type="button"
+          data-tooltip={galleryTool.label}
+          aria-label={galleryTool.label}
+          disabled={busy}
+          onclick={openGalleryDialog}
+        >
+          <AdminEditorIcon name={galleryTool.icon} size={toolbarIconSize} strokeWidth={2} />
+        </button>
+      {/if}
     </div>
 
-    <div class="admin-editor-markdown-toolbar__group" role="group" aria-label="文章结构">
+    {#if preset === 'bits'}
+      <div class="admin-editor-markdown-toolbar__group" role="group" aria-label="表情">
+        <button
+          class="admin-btn admin-btn--tool admin-btn--compact admin-btn--icon admin-editor-markdown-toolbar__button"
+          type="button"
+          data-tooltip={emojiTool.label}
+          aria-label={emojiTool.label}
+          aria-controls="admin-editor-emoji-picker-menu"
+          aria-expanded={emojiMenuOpen ? 'true' : 'false'}
+          aria-haspopup="dialog"
+          disabled={busy}
+          onclick={handleEmojiSummaryClick}
+          bind:this={emojiButtonEl}
+        >
+          <AdminEditorIcon name={emojiTool.icon} size={toolbarIconSize} strokeWidth={2} />
+        </button>
+
+        {#if emojiMenuOpen}
+          <EmojiPickerPopover
+            disabled={busy}
+            anchorElement={emojiPopoverAnchorEl ?? emojiButtonEl}
+            fallbackFocusElements={[emojiButtonEl]}
+            onClose={closeEmojiMenu}
+            onInsert={handleEmojiInsert}
+          />
+        {/if}
+      </div>
+    {/if}
+
+    {#if preset === 'full'}
+      <div class="admin-editor-markdown-toolbar__group" role="group" aria-label="文章结构">
       <button
         class="admin-btn admin-btn--tool admin-btn--compact admin-btn--icon admin-editor-markdown-toolbar__button admin-editor-markdown-toolbar__more-direct"
         type="button"
@@ -571,7 +630,7 @@ $effect(() => {
       </button>
     </div>
 
-    <div class="admin-editor-markdown-toolbar__group" role="group" aria-label="内容块">
+      <div class="admin-editor-markdown-toolbar__group" role="group" aria-label="内容块">
       {#each markdownBlockTools as tool}
         <button
           class="admin-btn admin-btn--tool admin-btn--compact admin-btn--icon admin-editor-markdown-toolbar__button"
@@ -650,7 +709,7 @@ $effect(() => {
       </div>
     </div>
 
-    <details
+      <details
       class="admin-editor-markdown-toolbar__menu admin-editor-markdown-toolbar__menu--insert"
       class:is-open={insertMenuOpen}
       bind:this={insertMenuEl}
@@ -766,8 +825,9 @@ $effect(() => {
           </button>
         </div>
 
-      </div>
-    </details>
+        </div>
+      </details>
+    {/if}
   </div>
 
   <div class="admin-editor-shell__layout-controls" aria-label="编辑器显示、目录、布局与视图">

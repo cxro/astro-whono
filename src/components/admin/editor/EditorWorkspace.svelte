@@ -1,4 +1,5 @@
 <script lang="ts">
+import type { Snippet } from 'svelte';
 import type {
   AdminContentIssue,
   AdminContentWriteResult
@@ -8,7 +9,7 @@ import type {
   EditorViewMode
 } from './editor-shell-helpers';
 import type {
-  EditorOutlineEssayListItem,
+  EditorOutlineListItem,
   EditorOutlineTab,
   MarkdownOutlineJumpCommand,
   MarkdownOutlineItem
@@ -45,6 +46,8 @@ type Props = {
   scrollSyncControlDisabled: boolean;
   scrollTopControlDisabled: boolean;
   getWriteFieldLabel: (field: string) => string;
+  mediaEditEnabled?: boolean;
+  galleryEditEnabled?: boolean;
   previewHtml: string;
   previewBusy: boolean;
   sidePanelsVisible: boolean;
@@ -53,11 +56,18 @@ type Props = {
   syntaxPanelId: string;
   outlineActiveTab: EditorOutlineTab;
   markdownOutlineItems: readonly MarkdownOutlineItem[];
-  essayOutlineListItems: readonly EditorOutlineEssayListItem[];
+  outlineListItems: readonly EditorOutlineListItem[];
+  outlineHeadingsEnabled?: boolean;
+  outlineHeadingsTabLabel?: string;
+  outlineListTabLabel?: string;
+  outlineHeadingsEmptyText?: string;
+  outlineListEmptyText?: string;
+  outlinePanelLabel?: string;
   onBodyScrollElementChange: (element: HTMLElement | null) => void;
   onBodyOutlineJump: (element: HTMLElement) => void;
   onImageToolRequest: (block: EditableImageBlock | null) => void;
   onGalleryEditRequest: (block: EditableGalleryBlock) => void;
+  onBodyChange?: (value: string) => void;
   onPreviewScrollElementChange: (element: HTMLElement | null) => void;
   onShortcutTool: (toolId: MarkdownToolId) => void;
   onToggleScrollSync: () => void;
@@ -65,6 +75,9 @@ type Props = {
   onOutlineTabChange: (tab: EditorOutlineTab) => void;
   onOutlineHeadingSelect: (item: MarkdownOutlineItem) => void;
   onSyntaxMaximizeToggle: () => void;
+  bodyHeaderContent?: Snippet;
+  bodyFooterContent?: Snippet;
+  previewContent?: Snippet;
 };
 
 let {
@@ -87,6 +100,8 @@ let {
   scrollSyncControlDisabled,
   scrollTopControlDisabled,
   getWriteFieldLabel,
+  mediaEditEnabled = true,
+  galleryEditEnabled = true,
   previewHtml,
   previewBusy,
   sidePanelsVisible,
@@ -95,18 +110,28 @@ let {
   syntaxPanelId,
   outlineActiveTab,
   markdownOutlineItems,
-  essayOutlineListItems,
+  outlineListItems,
+  outlineHeadingsEnabled = true,
+  outlineHeadingsTabLabel = '文章目录',
+  outlineListTabLabel = '文章列表',
+  outlineHeadingsEmptyText = '暂无 H2/H3 标题',
+  outlineListEmptyText = '暂无文章',
+  outlinePanelLabel = '编辑器目录',
   onBodyScrollElementChange,
   onBodyOutlineJump,
   onImageToolRequest,
   onGalleryEditRequest,
+  onBodyChange = () => {},
   onPreviewScrollElementChange,
   onShortcutTool,
   onToggleScrollSync,
   onScrollToTop,
   onOutlineTabChange,
   onOutlineHeadingSelect,
-  onSyntaxMaximizeToggle
+  onSyntaxMaximizeToggle,
+  bodyHeaderContent,
+  bodyFooterContent,
+  previewContent
 }: Props = $props();
 </script>
 
@@ -116,8 +141,12 @@ let {
       class="admin-editor-shell__pane admin-editor-shell__pane--body"
       data-markdown-highlight-theme={markdownHighlightTheme}
       data-line-numbers={lineNumbersEnabled ? 'true' : undefined}
+      data-body-composer={bodyHeaderContent || bodyFooterContent ? 'true' : undefined}
       hidden={effectiveViewMode === 'preview'}
     >
+      {#if bodyHeaderContent}
+        {@render bodyHeaderContent()}
+      {/if}
       <BodyEditor
         bind:value
         {disabled}
@@ -126,10 +155,16 @@ let {
         {lineNumbersEnabled}
         onScrollElementChange={onBodyScrollElementChange}
         onOutlineJump={onBodyOutlineJump}
+        {mediaEditEnabled}
+        {galleryEditEnabled}
         {onImageToolRequest}
         {onGalleryEditRequest}
+        onChange={onBodyChange}
         onShortcutTool={onShortcutTool}
       />
+      {#if bodyFooterContent}
+        {@render bodyFooterContent()}
+      {/if}
     </div>
     <PreviewStatusBar
       {bodyLineCount}
@@ -148,12 +183,16 @@ let {
       onScrollToTop={onScrollToTop}
     />
     <div class="admin-editor-shell__pane admin-editor-shell__pane--preview" hidden={effectiveViewMode === 'edit'}>
-      <PreviewPane
-        html={previewHtml}
-        loading={previewBusy}
-        error={previewError}
-        onScrollElementChange={onPreviewScrollElementChange}
-      />
+      {#if previewContent}
+        {@render previewContent()}
+      {:else}
+        <PreviewPane
+          html={previewHtml}
+          loading={previewBusy}
+          error={previewError}
+          onScrollElementChange={onPreviewScrollElementChange}
+        />
+      {/if}
     </div>
   </div>
   {#if sidePanelsVisible}
@@ -163,7 +202,13 @@ let {
       {syntaxPanelId}
       activeTab={outlineActiveTab}
       headings={markdownOutlineItems}
-      essays={essayOutlineListItems}
+      listItems={outlineListItems}
+      {outlineHeadingsEnabled}
+      {outlineHeadingsTabLabel}
+      {outlineListTabLabel}
+      {outlineHeadingsEmptyText}
+      {outlineListEmptyText}
+      {outlinePanelLabel}
       onTabChange={onOutlineTabChange}
       onHeadingSelect={onOutlineHeadingSelect}
       onSyntaxMaximizeToggle={onSyntaxMaximizeToggle}
