@@ -17,6 +17,7 @@ const {
   image,
   ogType = 'website',
   bodyClass,
+  allowReadingMode = true,
   deferGlobalStyles = false,
   activeNavId,
   adminSidebarScope = 'default'
@@ -26,6 +27,7 @@ const {
   image?: string;
   ogType?: string;
   bodyClass?: string;
+  allowReadingMode?: boolean;
   deferGlobalStyles?: boolean;
   activeNavId?: SidebarNavId;
   adminSidebarScope?: 'default' | 'page';
@@ -181,6 +183,7 @@ const adminUiPrefsScriptHref = isDevAdminPage
         activeNavId={activeNavId}
         isAdminContext={isAdminPage}
         isDev={isDev}
+        allowReadingMode={allowReadingMode}
         adminSidebarScope={isPageScopedAdminSidebar ? 'page' : 'default'}
       />
       <div class="divider" aria-hidden="true"></div>
@@ -206,6 +209,8 @@ const adminUiPrefsScriptHref = isDevAdminPage
     <script>
       import '../scripts/sidebar-theme.ts';
       import '../scripts/sidebar-rail-nav.ts';
+      import '../scripts/sidebar-floating-actions.ts';
+      import '../scripts/sidebar-reading.ts';
     </script>
     {adminSidebarNavModeScriptHref ? (
       <script is:inline type="module" src={adminSidebarNavModeScriptHref}></script>

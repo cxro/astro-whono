@@ -16,6 +16,9 @@ type OrderBy<K extends CollectionKey> = (a: CollectionEntry<K>, b: CollectionEnt
 type CollectionEntryWithSourcePath = {
   filePath?: unknown;
 };
+type CollectionEntryDataWithDraft = {
+  draft?: unknown;
+};
 
 export type GetPublishedOptions<K extends CollectionKey> = {
   orderBy?: OrderBy<K>;
@@ -51,6 +54,9 @@ const isContentSourceFilePresent = <K extends CollectionKey>(entry: CollectionEn
   return typeof filePath !== 'string' || filePath.length === 0 || existsSync(filePath);
 };
 
+const isDraftContentEntry = <K extends CollectionKey>(entry: CollectionEntry<K>): boolean =>
+  (entry.data as CollectionEntryDataWithDraft).draft === true;
+
 export const buildPaginatedPaths = (totalPages: number) => {
   if (totalPages <= 1) return [];
   return Array.from({ length: totalPages - 1 }, (_, i) => ({
@@ -64,7 +70,7 @@ export async function getPublished<K extends CollectionKey>(
 ) {
   const prod = import.meta.env.PROD;
   const includeDraft = opts.includeDraft ?? !prod;
-  const filter = includeDraft ? undefined : ({ data }: CollectionEntry<K>) => data.draft !== true;
+  const filter = includeDraft ? undefined : (entry: CollectionEntry<K>) => !isDraftContentEntry(entry);
   const items = (await getCollection(name, filter)).filter(isContentSourceFilePresent);
 
   if (!opts.orderBy) return items;

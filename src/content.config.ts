@@ -5,6 +5,12 @@ import { ESSAY_PUBLIC_SLUG_RE } from './utils/slug-rules';
 import { normalizeBitsAvatarPath } from './utils/format';
 import { parseEssayDateInput, parseEssayPublishedAtInput } from './utils/date-only';
 import { normalizeBitsImageSource } from './lib/bits-image-source';
+import {
+  DEFAULT_ABOUT_FRIENDS_TITLE,
+  normalizeAboutFriendApplyHref,
+  normalizeAboutFriendAvatarSource,
+  normalizeAboutFriendUrl
+} from './lib/about-page';
 
 const slugRule = z
   .string()
@@ -103,6 +109,98 @@ const bitsAuthor = z.object({
   avatar: bitsAuthorAvatar.optional()
 });
 
+const optionalTextInput = z.preprocess(
+  (value) => value === null ? undefined : value,
+  z.string().trim().optional()
+);
+
+const optionalDisplayText = optionalTextInput
+  .transform((value) => value || undefined);
+
+const aboutFriendsTitle = optionalTextInput
+  .transform((value) => value || DEFAULT_ABOUT_FRIENDS_TITLE);
+
+const aboutFriendApply = z.preprocess(
+  (value) => value === null ? undefined : value,
+  z.object({
+    label: optionalDisplayText,
+    href: optionalDisplayText
+  })
+    .optional()
+)
+  .transform((value, ctx) => {
+    if (!value) return undefined;
+
+    const label = value.label ?? '';
+    const hrefInput = value.href ?? '';
+    if (!label && !hrefInput) return undefined;
+    if (!label || !hrefInput) {
+      ctx.addIssue({
+        code: 'custom',
+        message: 'friendApply.label 和 friendApply.href 必须同时存在'
+      });
+      return z.NEVER;
+    }
+
+    const href = normalizeAboutFriendApplyHref(hrefInput);
+    if (!href) {
+      ctx.addIssue({
+        code: 'custom',
+        path: ['href'],
+        message: 'friendApply.href 只允许 mailto: 或 http(s): 外部入口'
+      });
+      return z.NEVER;
+    }
+
+    return { label, href };
+  });
+
+const aboutFriendUrl = z
+  .string()
+  .trim()
+  .superRefine((value, ctx) => {
+    if (!normalizeAboutFriendUrl(value)) {
+      ctx.addIssue({
+        code: 'custom',
+        message: 'friends[].url 只允许 http(s): URL'
+      });
+    }
+  })
+  .transform((value) => normalizeAboutFriendUrl(value) ?? value);
+
+const aboutFriendAvatar = z.preprocess(
+  (value) => value === null ? undefined : value,
+  z.string().trim().optional()
+)
+  .transform((value, ctx) => {
+    if (!value) return undefined;
+
+    const normalized = normalizeAboutFriendAvatarSource(value);
+    if (!normalized) {
+      ctx.addIssue({
+        code: 'custom',
+        message: 'friends[].avatar 只允许 public/** 下的相对图片路径或 https:// 远程 URL，不要带 public/、不要以 / 开头，也不要使用 http、..、?、#'
+      });
+      return z.NEVER;
+    }
+
+    return normalized;
+  });
+
+const aboutFriend = z.object({
+  name: z.string().trim().min(1, 'friends[].name 不能为空'),
+  url: aboutFriendUrl,
+  description: optionalDisplayText,
+  avatar: aboutFriendAvatar,
+  visible: z.boolean().nullish().transform((value) => value ?? true),
+  order: z.number().int().nullish().transform((value) => value ?? undefined)
+});
+
+const aboutFaqItem = z.object({
+  question: z.string().trim().min(1, 'faq[].question 不能为空'),
+  answer: z.string().trim().min(1, 'faq[].answer 不能为空')
+});
+
 const essay = defineCollection({
   loader: glob({ pattern: '**/*.md', base: './src/content/essay' }),
   schema: essaySchema
@@ -136,4 +234,16 @@ const memo = defineCollection({
   })
 });
 
-export const collections = { essay, bits, memo };
+const about = defineCollection({
+  loader: glob({ pattern: 'index.md', base: './src/content/about' }),
+  schema: z.object({
+    friendsTitle: aboutFriendsTitle,
+    friendsDescription: optionalDisplayText,
+    friendApply: aboutFriendApply,
+    friends: z.array(aboutFriend).nullish().transform((value) => value ?? []),
+    faq: z.array(aboutFaqItem).nullish().transform((value) => value ?? []),
+    contactNote: optionalDisplayText
+  })
+});
+
+export const collections = { essay, bits, memo, about };

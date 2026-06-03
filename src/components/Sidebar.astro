@@ -18,12 +18,14 @@ const {
   activeNavId,
   isAdminContext = false,
   isDev = false,
+  allowReadingMode = true,
   adminSidebarScope = 'default'
 } = Astro.props as {
   siteTitle?: string;
   activeNavId?: SidebarNavId;
   isAdminContext?: boolean;
   isDev?: boolean;
+  allowReadingMode?: boolean;
   adminSidebarScope?: 'default' | 'page';
 };
 
@@ -53,7 +55,7 @@ const nav = settings.shell.nav
     };
   });
 const hidePublicSidebarActionsInDevAdmin = isAdminContext && isDev;
-const showReaderToggle = !hidePublicSidebarActionsInDevAdmin && settings.ui.readingMode.showEntry;
+const showReaderToggle = allowReadingMode && !hidePublicSidebarActionsInDevAdmin && settings.ui.readingMode.showEntry;
 const showRssLink = !hidePublicSidebarActionsInDevAdmin && settings.ui.sidebarActions.showRssLink;
 const showThemeToggle = settings.ui.sidebarActions.showThemeToggle;
 const showAdminEntry = !hidePublicSidebarActionsInDevAdmin
