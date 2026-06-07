@@ -35,6 +35,7 @@ const derivedText = getEssayDerivedText(entry);
 const rawDescription = entry?.data?.description?.trim?.() ?? '';
 const description = rawDescription || truncateText(derivedText.excerpt, 90);
 const activeNavId: SidebarNavId = entry?.data?.archive === false ? 'essay' : 'archive';
+const updatedAt = entry.data.updatedAt ?? null;
 const articleReadingStats = articleMetaSettings.showWordCount || articleMetaSettings.showReadingTime
   ? (() => {
       const wordCount = derivedText.plainText.replace(/\s+/g, '').length;
@@ -62,6 +63,7 @@ const shouldShowMetaLine = articleMetaSettings.showDate
 >
   <Fragment slot="head">
     <meta property="article:published_time" content={entry.data.date.toISOString()} />
+    {updatedAt ? <meta property="article:modified_time" content={updatedAt.toISOString()} /> : null}
     {entryTags.map((tag: string) => (
       <meta property="article:tag" content={tag} />
     ))}
@@ -83,7 +85,14 @@ const shouldShowMetaLine = articleMetaSettings.showDate
       <div class="meta-line meta-line--items">
         {articleMetaSettings.showDate ? (
           <span class="meta-line__item">
-            {articleMetaSettings.dateLabel ? `${articleMetaSettings.dateLabel}` : ''}{formatISODateUtc(entry.data.date)}
+            <time datetime={entry.data.date.toISOString()}>
+              {`${articleMetaSettings.dateLabel ?? ''}${formatISODateUtc(entry.data.date)}`}
+            </time>
+          </span>
+        ) : null}
+        {articleMetaSettings.showDate && updatedAt ? (
+          <span class="meta-line__item">
+            <time datetime={updatedAt.toISOString()}>{`更新于：${formatISODateUtc(updatedAt)}`}</time>
           </span>
         ) : null}
         {articleMetaSettings.showTags && visibleTags.length ? (

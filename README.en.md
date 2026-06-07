@@ -244,6 +244,7 @@ draft: false        # Draft: hidden from list/RSS in production (visible in loca
 archive: true       # Archive switch: false excludes it from /archive and /archive/rss.xml (default true; detail page and /essay remain available)
 slug: optional      # Custom URL slug (defaults to the flattened content path, e.g. 2024/my-post -> 2024-my-post)
 badge: optional     # List badge; if omitted, list shows "Essay"
+updatedAt: 2026-01-02 # Optional update date; hidden when omitted
 ```
 
 `essay.date` should use the `YYYY-MM-DD` format for archive grouping, ordering, and page date display.
@@ -257,6 +258,14 @@ publishedAt: 2026-01-01T12:00:00+08:00
 ```
 
 `publishedAt` does not need to be added to existing content in bulk. Public lists, archives, RSS, and page date display still use `date`.
+
+If you need to show an article revision date, you can add the optional field:
+
+```yaml
+updatedAt: 2026-01-02
+```
+
+`updatedAt` accepts `YYYY-MM-DD` or an ISO 8601 datetime and is displayed as an update date in the article meta line. When omitted, pages keep the current behavior and no update date is shown.
 
 Unquoted YAML datetimes are also accepted. In rare UTC-boundary cases, the parser may have already lost the original timezone text; in that case the parsed UTC date is used.
 

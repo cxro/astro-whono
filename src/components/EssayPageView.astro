@@ -74,6 +74,7 @@ const fallbackListId = 'essay-tag-list';
         title={entry.data.title}
         excerpt={getEssayDerivedText(entry).excerpt}
         date={entry.data.date}
+        updatedAt={entry.data.updatedAt}
         visibleTags={getVisibleArticleMetaTags(entry.data.tags, 'list')}
         articleMetaSettings={articleMeta}
         badge={entry.data.badge}

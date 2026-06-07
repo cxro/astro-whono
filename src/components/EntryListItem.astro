@@ -7,6 +7,7 @@ const {
   title,
   excerpt,
   date,
+  updatedAt = null,
   visibleTags = [],
   articleMetaSettings
 } = Astro.props as {
@@ -14,6 +15,7 @@ const {
   title: string;
   excerpt?: string | null;
   date: Date;
+  updatedAt?: Date | null;
   visibleTags?: string[];
   articleMetaSettings: ArticleMetaSettings;
 };
@@ -30,7 +32,14 @@ const shouldShowMetaLine = articleMetaSettings.showDate || (articleMetaSettings.
     <div class="meta-line meta-line--items">
       {articleMetaSettings.showDate ? (
         <span class="meta-line__item">
-          {articleMetaSettings.dateLabel ? `${articleMetaSettings.dateLabel}` : ''}{formatISODateUtc(date)}
+          <time datetime={date.toISOString()}>
+            {`${articleMetaSettings.dateLabel ?? ''}${formatISODateUtc(date)}`}
+          </time>
+        </span>
+      ) : null}
+      {articleMetaSettings.showDate && updatedAt ? (
+        <span class="meta-line__item">
+          <time datetime={updatedAt.toISOString()}>{`更新于：${formatISODateUtc(updatedAt)}`}</time>
         </span>
       ) : null}
       {articleMetaSettings.showTags && visibleTags.length ? (
