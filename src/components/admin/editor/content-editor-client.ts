@@ -1,6 +1,7 @@
 import type {
   AdminBitsEditorValues,
   AdminContentEditorValues,
+  AdminContentEditorPayload,
   AdminEssayEditorValues
 } from '../../../lib/admin-console/content-editor-payload';
 import type { AdminContentCollectionKey } from '../../../lib/admin-console/content-collections';
@@ -8,12 +9,14 @@ import type { AdminContentDeletableCollectionKey } from '../../../lib/admin-cons
 import {
   getPayloadDeleteResult,
   getPayloadEditorBody,
+  getPayloadEditorPayload,
   getPayloadEditorValues,
   getPayloadErrors,
   getPayloadIssues,
   getPayloadPreviewResult,
   getPayloadResult,
   getPayloadRevision,
+  isRecord,
   isPayloadOk,
   parseResponseBody,
   type AdminContentDeleteResult,
@@ -100,6 +103,20 @@ export type ContentEditorDeleteInput = {
 
 export type ContentEditorDeleteOutcome = ContentEditorRequestOutcome & {
   result: AdminContentDeleteResult | null;
+};
+
+export type ContentEditorCreateInput = {
+  endpoint: string;
+  collection: 'essay';
+  entryId: string;
+  frontmatter: AdminEssayEditorValues;
+  fetchImpl?: FetchLike;
+};
+
+export type ContentEditorCreateOutcome = Omit<ContentEditorRequestOutcome, 'revision'> & {
+  result: AdminContentWriteResult | null;
+  payload: AdminContentEditorPayload | null;
+  editHref: string | null;
 };
 
 const JSON_REQUEST_HEADERS = {
@@ -219,5 +236,36 @@ export const deleteContentEntry = async ({
     errors: getPayloadErrors(payload),
     issues: getPayloadIssues(payload),
     result: getPayloadDeleteResult(payload)
+  };
+};
+
+export const createContentEntry = async ({
+  endpoint,
+  collection,
+  entryId,
+  frontmatter,
+  fetchImpl
+}: ContentEditorCreateInput): Promise<ContentEditorCreateOutcome> => {
+  const response = await getFetch(fetchImpl)(endpoint, {
+    method: 'POST',
+    headers: JSON_REQUEST_HEADERS,
+    cache: 'no-store',
+    body: JSON.stringify({
+      collection,
+      entryId,
+      frontmatter
+    })
+  });
+  const payload = await parseResponseBody(response);
+
+  return {
+    responseOk: response.ok,
+    status: response.status,
+    payloadOk: isPayloadOk(payload),
+    errors: getPayloadErrors(payload),
+    issues: getPayloadIssues(payload),
+    result: getPayloadResult(payload),
+    payload: getPayloadEditorPayload(payload),
+    editHref: isRecord(payload) && typeof payload.editHref === 'string' ? payload.editHref : null
   };
 };

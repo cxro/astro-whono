@@ -5,6 +5,8 @@
 .admin-content-toolbar,
 .admin-content-modules,
 .admin-content-module {
+  --admin-content-action-inline-size: 86px;
+
   min-width: 0;
 }
 
@@ -155,6 +157,7 @@
   min-width: 0;
   margin: 0;
   border-bottom: 1px dashed color-mix(in srgb, var(--border) 85%, transparent);
+  border-inline: 0;
   border-radius: 4px;
 }
 
@@ -168,11 +171,13 @@
   align-items: center;
   justify-content: flex-end;
   gap: 6px;
-  min-width: max-content;
+  inline-size: var(--admin-content-action-inline-size);
+  min-width: var(--admin-content-action-inline-size);
 }
 
 .admin-content-item__actions .admin-btn,
-.admin-content-filter-actions .admin-btn {
+.admin-content-filter-actions .admin-btn,
+.admin-content-module__actions .admin-btn {
   min-height: 26px;
   padding-inline: 7px;
   border-radius: 4px;
@@ -392,6 +397,7 @@
   gap: 12px;
   min-width: 0;
   padding-bottom: 2px;
+  padding-inline: var(--admin-row-table-padding-inline);
 }
 
 .admin-content-module__head h3 {
@@ -405,6 +411,22 @@
   display: flex;
   align-items: baseline;
   gap: 8px;
+}
+
+.admin-content-module__actions {
+  display: inline-flex;
+  flex: 0 0 auto;
+  flex-wrap: nowrap;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 6px;
+  min-width: var(--admin-content-action-inline-size);
+}
+
+.admin-content-create-action.admin-btn {
+  inline-size: var(--admin-content-action-inline-size);
+  min-height: 24px;
+  background: var(--admin-button-secondary-bg);
 }
 
 .admin-content-module__route {
@@ -572,9 +594,11 @@
 
 .admin-content-action-feedback {
   position: relative;
-  display: inline-grid;
-  justify-items: end;
-  gap: 16px;
+  display: inline-flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  justify-content: flex-end;
+  gap: 8px;
   min-width: 0;
 }
 

@@ -1,6 +1,8 @@
 /* Admin Content
-   聚合 /admin/content/ 列表页私有样式。@import 必须保持在普通规则之前，避免入口文件重新承担具体样式职责。
+   聚合 /admin/content/ 列表页样式。ArticleInfoDialog 在列表页与编辑页复用，frontmatter 样式也需在此入口加载。
+   @import 必须保持在普通规则之前，避免入口文件重新承担具体样式职责。
 */
 
 @import "./base.css";
+@import "./editor/frontmatter.css";
 @import "./console.css";

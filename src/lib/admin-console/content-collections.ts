@@ -41,7 +41,7 @@ export const ADMIN_CONTENT_COLLECTION_CAPABILITIES = {
     writable: true,
     exportable: true,
     deletable: true,
-    create: false,
+    create: true,
     multiEntry: true,
     articleFilters: true,
     pagination: true,
@@ -136,6 +136,7 @@ export type AdminContentBodyImageUploadCollectionKey = CollectionKeysWithCapabil
 export type AdminContentImageUploadCollectionKey = CollectionKeysWithCapability<'imageUpload'>;
 export type AdminContentDeletableCollectionKey = CollectionKeysWithCapability<'deletable'>;
 export type AdminContentExportableCollectionKey = CollectionKeysWithCapability<'exportable'>;
+export type AdminContentCreatableCollectionKey = CollectionKeysWithCapability<'create'>;
 
 export const ADMIN_CONTENT_WRITE_COLLECTION_KEYS = ADMIN_CONTENT_COLLECTION_KEYS
   .filter((collection): collection is AdminContentWriteCollectionKey =>
@@ -160,6 +161,10 @@ export const ADMIN_CONTENT_DELETABLE_COLLECTION_KEYS = ADMIN_CONTENT_COLLECTION_
 export const ADMIN_CONTENT_EXPORTABLE_COLLECTION_KEYS = ADMIN_CONTENT_COLLECTION_KEYS
   .filter((collection): collection is AdminContentExportableCollectionKey =>
     ADMIN_CONTENT_COLLECTION_CAPABILITIES[collection].exportable);
+
+export const ADMIN_CONTENT_CREATABLE_COLLECTION_KEYS = ADMIN_CONTENT_COLLECTION_KEYS
+  .filter((collection): collection is AdminContentCreatableCollectionKey =>
+    ADMIN_CONTENT_COLLECTION_CAPABILITIES[collection].create);
 
 export const getAdminContentCollectionCapability = (
   collection: AdminContentCollectionKey
@@ -191,3 +196,6 @@ export const isAdminContentDeletableCollectionKey = (value: string): value is Ad
 
 export const isAdminContentExportableCollectionKey = (value: string): value is AdminContentExportableCollectionKey =>
   isAdminContentCollectionKey(value) && getAdminContentCollectionCapability(value).exportable;
+
+export const isAdminContentCreatableCollectionKey = (value: string): value is AdminContentCreatableCollectionKey =>
+  isAdminContentCollectionKey(value) && getAdminContentCollectionCapability(value).create;

@@ -64,7 +64,7 @@ import {
 import type { MarkdownToolbarCommand } from './markdown-tools';
 import { createMarkdownCommandDispatcher } from './editor-markdown-command-dispatcher';
 import type { EssayEditorShellProps } from './editor-shell-props';
-import { getContentEditorAdapter } from './content-editor-adapters';
+import { getContentEditorAdapter, isEssayEditorValues } from './content-editor-adapters';
 
 const LEAVE_CONFIRM_MESSAGE = '当前有未保存更改，确定要离开此页吗？';
 const ARTICLE_INFO_TRIGGER_SELECTOR = '[data-admin-article-info-trigger]';
@@ -95,9 +95,9 @@ let {
   initialArticleInfoOpen = false
 }: EssayEditorShellProps = $props();
 
-const editorAdapter = getContentEditorAdapter('essay');
-const collection = editorAdapter.collection;
-const slugPlaceholder = $derived(defaultPublicSlug || flattenEntryIdToSlug(entryId));
+const collection = 'essay' as const;
+const editorAdapter = getContentEditorAdapter(collection);
+const slugPlaceholder = $derived(`留空使用默认：${defaultPublicSlug || flattenEntryIdToSlug(entryId)}`);
 const bodyEditingEnabled = editorAdapter.capabilities.body;
 const previewEnabled = editorAdapter.capabilities.preview;
 const imageInsertEnabled = editorAdapter.capabilities.bodyImageInsert;
@@ -450,7 +450,7 @@ const requestContentWrite = async () => {
     }
 
     writeResult = result;
-    const latestValues = saveOutcome.latestValues;
+    const latestValues = isEssayEditorValues(saveOutcome.latestValues) ? saveOutcome.latestValues : null;
     const latestBody = saveOutcome.latestBody;
     const nextBaseline = latestValues
       ? editorAdapter.cloneValues(latestValues)

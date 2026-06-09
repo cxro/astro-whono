@@ -7,6 +7,7 @@ import type {
 } from '../../../lib/admin-console/content-editor-payload';
 import { parseEssayDateInput } from '../../../utils/date-only';
 import AdminEditorIcon from './AdminEditorIcon.svelte';
+import FrontmatterTagsInput from './FrontmatterTagsInput.svelte';
 import {
   isBitsEditorValues,
   isEssayEditorValues
@@ -22,9 +23,12 @@ type Props = {
   collection?: AdminContentCollectionKey;
   issues?: readonly AdminContentIssue[];
   disabled?: boolean;
+  entryId?: string;
+  showEntryId?: boolean;
   slugPlaceholder?: string;
   ariaLabel?: string;
   fieldScope?: 'all' | 'bits-summary';
+  onEntryIdInput?: (value: string) => void;
   onDirty?: () => void;
 };
 
@@ -33,10 +37,13 @@ let {
   collection = 'essay',
   issues = [],
   disabled = false,
+  entryId = '',
+  showEntryId = false,
   slugPlaceholder = '',
   ariaLabel = '内容字段',
   fieldScope = 'all',
-  onDirty
+  onEntryIdInput = () => {},
+  onDirty = () => {}
 }: Props = $props();
 
 const getIssue = (path: string): string =>
@@ -143,6 +150,22 @@ const bitsImagesIssue = $derived(getIssue('imagesText') || getIssueByPrefix('ima
         <input class="admin-field__control" name="title" type="text" bind:value={value.title} {disabled} />
         <p class="admin-content-editor__error" hidden={!getIssue('title')}>{getIssue('title')}</p>
       </label>
+
+      {#if showEntryId}
+        <label class="admin-field admin-content-editor__field" class:is-invalid={Boolean(getIssue('entryId'))}>
+          <span class="admin-field__label">源文件名</span>
+          <input
+            class="admin-field__control"
+            name="entryId"
+            type="text"
+            value={entryId}
+            spellcheck="false"
+            {disabled}
+            oninput={(event) => onEntryIdInput(event.currentTarget.value)}
+          />
+          <p class="admin-content-editor__error" hidden={!getIssue('entryId')}>{getIssue('entryId')}</p>
+        </label>
+      {/if}
 
       <div class="admin-editor-frontmatter__datetime-grid">
         <div class="admin-field admin-content-editor__field" class:is-invalid={Boolean(getIssue('date'))}>
@@ -251,11 +274,20 @@ const bitsImagesIssue = $derived(getIssue('imagesText') || getIssueByPrefix('ima
         <p class="admin-content-editor__error" hidden={!getIssue('description')}>{getIssue('description')}</p>
       </label>
 
-      <label class="admin-field admin-content-editor__field" class:is-invalid={Boolean(getIssue('slug'))}>
-        <span class="admin-field__label">自定义路径</span>
-        <input class="admin-field__control" name="slug" type="text" bind:value={value.slug} placeholder={slugPlaceholder} spellcheck="false" {disabled} />
+      <div class="admin-field admin-content-editor__field" class:is-invalid={Boolean(getIssue('slug'))}>
+        <label class="admin-field__label" for="admin-essay-slug">公开 URL 别名（可选）</label>
+        <input
+          id="admin-essay-slug"
+          class="admin-field__control"
+          name="slug"
+          type="text"
+          bind:value={value.slug}
+          placeholder={slugPlaceholder}
+          spellcheck="false"
+          {disabled}
+        />
         <p class="admin-content-editor__error" hidden={!getIssue('slug')}>{getIssue('slug')}</p>
-      </label>
+      </div>
 
       <label class="admin-field admin-content-editor__field" class:is-invalid={Boolean(getIssue('cover'))}>
         <span class="admin-field__label">封面图</span>
@@ -263,11 +295,17 @@ const bitsImagesIssue = $derived(getIssue('imagesText') || getIssueByPrefix('ima
         <p class="admin-content-editor__error" hidden={!getIssue('cover')}>{getIssue('cover')}</p>
       </label>
 
-      <label class="admin-field admin-content-editor__field" class:is-invalid={Boolean(getIssue('tags'))}>
-        <span class="admin-field__label">标签（每行一个）</span>
-        <textarea class="admin-field__control" name="tags" bind:value={value.tagsText} rows="3" spellcheck="false" {disabled}></textarea>
+      <div class="admin-field admin-content-editor__field" class:is-invalid={Boolean(getIssue('tags'))}>
+        <label class="admin-field__label" for="admin-essay-tags">标签</label>
+        <FrontmatterTagsInput
+          id="admin-essay-tags"
+          bind:value={value.tagsText}
+          {disabled}
+          invalid={Boolean(getIssue('tags'))}
+          onDirty={onDirty}
+        />
         <p class="admin-content-editor__error" hidden={!getIssue('tags')}>{getIssue('tags')}</p>
-      </label>
+      </div>
     {:else if collection === 'bits' && isBitsEditorValues(value)}
       <label class="admin-field admin-content-editor__field" class:is-invalid={Boolean(getIssue('title'))}>
         <span class="admin-field__label">title（可选）</span>
@@ -302,11 +340,17 @@ const bitsImagesIssue = $derived(getIssue('imagesText') || getIssueByPrefix('ima
       </label>
 
       {#if fieldScope !== 'bits-summary'}
-        <label class="admin-field admin-content-editor__field" class:is-invalid={Boolean(getIssue('tags'))}>
-          <span class="admin-field__label">tags（每行一个）</span>
-          <textarea class="admin-field__control" name="tags" bind:value={value.tagsText} rows="3" spellcheck="false" {disabled}></textarea>
+        <div class="admin-field admin-content-editor__field" class:is-invalid={Boolean(getIssue('tags'))}>
+          <label class="admin-field__label" for="admin-bits-tags">tags</label>
+          <FrontmatterTagsInput
+            id="admin-bits-tags"
+            bind:value={value.tagsText}
+            {disabled}
+            invalid={Boolean(getIssue('tags'))}
+            onDirty={onDirty}
+          />
           <p class="admin-content-editor__error" hidden={!getIssue('tags')}>{getIssue('tags')}</p>
-        </label>
+        </div>
 
         <label class="admin-field admin-content-editor__field" class:is-invalid={Boolean(bitsImagesIssue)}>
           <span class="admin-field__label">images</span>

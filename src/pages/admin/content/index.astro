@@ -21,6 +21,7 @@ import type {
   AdminContentSortKey
 } from '../../../lib/admin-console/content';
 import {
+  ADMIN_CONTENT_CREATE_API_PATH,
   ADMIN_CONTENT_DELETE_API_PATH,
   ADMIN_CONTENT_ENTRY_API_PATH,
   ADMIN_CONTENT_EXPORT_API_PATH
@@ -64,6 +65,7 @@ const adminStylesHref = contentDevState?.stylesHref ?? adminShellStylesHref;
 const contentConsoleSubtitle = '内容管理';
 const resetHref = withBase(contentHref);
 const adminContentEntryEndpoint = withBase(ADMIN_CONTENT_ENTRY_API_PATH);
+const adminContentCreateEndpoint = withBase(ADMIN_CONTENT_CREATE_API_PATH);
 const adminContentExportEndpoint = withBase(ADMIN_CONTENT_EXPORT_API_PATH);
 const adminContentDeleteEndpoint = withBase(ADMIN_CONTENT_DELETE_API_PATH);
 const adminContentFilterMenusScriptHref = contentDevState?.filterMenusScriptHref ?? null;
@@ -186,7 +188,12 @@ const getContentEmptyMessage = (sectionLabel: string): string => {
   >
     {ContentListActionsIsland ? (
       <div slot="status" class="admin-status-slot">
-        <ContentListActionsIsland base={base} endpoint={adminContentEntryEndpoint} deleteEndpoint={adminContentDeleteEndpoint} />
+        <ContentListActionsIsland
+          base={base}
+          endpoint={adminContentEntryEndpoint}
+          createEndpoint={adminContentCreateEndpoint}
+          deleteEndpoint={adminContentDeleteEndpoint}
+        />
       </div>
     ) : null}
 
@@ -391,18 +398,39 @@ const getContentEmptyMessage = (sectionLabel: string): string => {
             {
               pageData.sections.map((section) => {
                 const sectionTitleId = `admin-content-${section.collection}-title`;
+                const sectionCapability = getAdminContentCollectionCapability(section.collection);
+                const shouldShowSectionCreateAction = section.collection === 'essay' && sectionCapability.create;
+                const shouldShowSectionListAction = pageData.mode === 'overview' && section.filteredCount > section.items.length;
                 return (
                   <section class="admin-content-module" aria-labelledby={sectionTitleId}>
                     <div class="admin-content-module__head">
                       <h3 id={sectionTitleId}>
                         <span>{section.collectionLabel}</span>
-                        <span class="admin-content-module__route">{getAdminContentCollectionCapability(section.collection).consoleSectionHref}</span>
+                        <span class="admin-content-module__route">{sectionCapability.consoleSectionHref}</span>
                       </h3>
                       {
-                        pageData.mode === 'overview' && section.filteredCount > section.items.length ? (
-                          <a class="admin-btn admin-btn--ghost admin-btn--compact" href={getCollectionListHref(section.collection)}>
-                            查看全部
-                          </a>
+                        shouldShowSectionCreateAction || shouldShowSectionListAction ? (
+                          <div class="admin-content-module__actions">
+                            {
+                              shouldShowSectionListAction ? (
+                                <a class="admin-btn admin-btn--ghost admin-btn--compact" href={getCollectionListHref(section.collection)}>
+                                  查看全部
+                                </a>
+                              ) : null
+                            }
+                            {
+                              shouldShowSectionCreateAction ? (
+                                <button
+                                  class="admin-btn admin-btn--ghost admin-btn--compact admin-content-create-action"
+                                  type="button"
+                                  data-admin-content-create-action
+                                  disabled
+                                >
+                                  新增文章
+                                </button>
+                              ) : null
+                            }
+                          </div>
                         ) : null
                       }
                     </div>

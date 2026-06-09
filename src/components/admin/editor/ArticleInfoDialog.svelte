@@ -24,12 +24,18 @@ type Props = {
   loading?: boolean;
   dirty?: boolean;
   canSave?: boolean;
+  entryId?: string;
+  showEntryId?: boolean;
   slugPlaceholder?: string;
   relativePath?: string;
   dialogTitle?: string;
   fieldsAriaLabel?: string;
   fieldScope?: 'all' | 'bits-summary';
   showPublishToggles?: boolean;
+  draftLocked?: boolean;
+  draftLockHelp?: string;
+  saveLabel?: string;
+  onEntryIdInput?: (value: string) => void;
   onDirty?: () => void;
   onClose: () => void;
   onReset: () => void;
@@ -45,12 +51,18 @@ let {
   loading = false,
   dirty = false,
   canSave = false,
+  entryId = '',
+  showEntryId = false,
   slugPlaceholder = '',
   relativePath = '',
   dialogTitle = '文章信息',
   fieldsAriaLabel = '随笔字段',
   fieldScope = 'all',
   showPublishToggles = true,
+  draftLocked = false,
+  draftLockHelp = '',
+  saveLabel = '保存',
+  onEntryIdInput = () => {},
   onDirty = () => {},
   onClose,
   onReset,
@@ -69,7 +81,8 @@ const closeDialog = () => {
 
 const getInitialFocus = (): HTMLElement | null => {
   if (loading) return closeButtonEl;
-  return panelEl?.querySelector<HTMLElement>('.admin-field.is-invalid .admin-field__control:not([disabled])')
+  return panelEl?.querySelector<HTMLElement>('.admin-field.is-invalid .admin-frontmatter-tags-input__input:not([disabled])')
+    ?? panelEl?.querySelector<HTMLElement>('.admin-field.is-invalid .admin-field__control:not([disabled])')
     ?? panelEl?.querySelector<HTMLElement>('[name="title"]:not([disabled])')
     ?? closeButtonEl;
 };
@@ -117,11 +130,16 @@ $effect(() => {
       tabindex="-1"
     >
       <header class="admin-modal__head admin-editor-frontmatter-popover__head">
-        <div class="admin-editor-frontmatter-popover__title-row">
-          <h3 id="admin-editor-frontmatter-panel-title" class="admin-modal__title admin-content-section-title">{dialogTitle}</h3>
-          {#if relativePath}
-            <code class="admin-editor-frontmatter-popover__source-path" title={relativePath}>{relativePath}</code>
-          {/if}
+        <div class="admin-editor-frontmatter-popover__title-wrap">
+          <span class="admin-editor-frontmatter-popover__icon" aria-hidden="true">
+            <AdminEditorIcon name="notebook-pen" size={16} strokeWidth={1.9} />
+          </span>
+          <div class="admin-editor-frontmatter-popover__title-copy">
+            <h3 id="admin-editor-frontmatter-panel-title" class="admin-modal__title admin-content-section-title">{dialogTitle}</h3>
+            {#if relativePath}
+              <code class="admin-editor-frontmatter-popover__source-path" title={relativePath}>{relativePath}</code>
+            {/if}
+          </div>
         </div>
         <button
           bind:this={closeButtonEl}
@@ -140,25 +158,50 @@ $effect(() => {
             {loadingText}
           </div>
         {:else}
-          <FrontmatterSidebar bind:value {collection} {issues} {disabled} {slugPlaceholder} ariaLabel={fieldsAriaLabel} {fieldScope} {onDirty} />
+          <FrontmatterSidebar
+            bind:value
+            {collection}
+            {issues}
+            {disabled}
+            {entryId}
+            {showEntryId}
+            {slugPlaceholder}
+            ariaLabel={fieldsAriaLabel}
+            {fieldScope}
+            {onEntryIdInput}
+            {onDirty}
+          />
         {/if}
       </div>
       <footer
         class="admin-modal__actions admin-editor-frontmatter-popover__actions"
         class:admin-editor-frontmatter-popover__actions--compact={!showPublishToggles}
+        class:admin-editor-frontmatter-popover__actions--locked={draftLocked}
       >
         {#if showPublishToggles}
-          <div class="admin-editor-frontmatter-popover__toggles">
-            <label class="admin-toggle-row">
-              <input name="draft" type="checkbox" bind:checked={value.draft} disabled={disabled || loading} onchange={onDirty} />
-              <span>草稿</span>
-            </label>
-            {#if collection === 'essay' && isEssayEditorValues(value)}
-              <label class="admin-toggle-row">
-                <input name="archive" type="checkbox" bind:checked={value.archive} disabled={disabled || loading} onchange={onDirty} />
-                <span>归档</span>
-              </label>
-            {/if}
+          <div class="admin-editor-frontmatter-popover__publish-state">
+            <div class="admin-editor-frontmatter-popover__toggles">
+              {#if draftLocked}
+                <span class="admin-badge admin-editor-frontmatter-popover__state-badge">草稿</span>
+                {#if collection === 'essay' && isEssayEditorValues(value)}
+                  <span class="admin-badge admin-editor-frontmatter-popover__state-badge">归档</span>
+                {/if}
+                {#if draftLockHelp}
+                  <p class="admin-editor-frontmatter-popover__hint">{draftLockHelp}</p>
+                {/if}
+              {:else}
+                <label class="admin-toggle-row">
+                  <input name="draft" type="checkbox" bind:checked={value.draft} disabled={disabled || loading} onchange={onDirty} />
+                  <span>草稿</span>
+                </label>
+                {#if collection === 'essay' && isEssayEditorValues(value)}
+                  <label class="admin-toggle-row">
+                    <input name="archive" type="checkbox" bind:checked={value.archive} disabled={disabled || loading} onchange={onDirty} />
+                    <span>归档</span>
+                  </label>
+                {/if}
+              {/if}
+            </div>
           </div>
         {/if}
         <div class="admin-editor-frontmatter-popover__buttons">
@@ -166,7 +209,7 @@ $effect(() => {
             还原
           </button>
           <button class="admin-btn admin-btn--primary admin-btn--compact" type="button" onclick={onSave} disabled={loading || !canSave}>
-            保存
+            {saveLabel}
           </button>
         </div>
       </footer>

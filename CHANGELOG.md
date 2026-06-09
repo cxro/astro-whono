@@ -9,7 +9,7 @@ The format is based on Keep a Changelog, and this project aims to follow Semanti
 
 ### Added
 - `/about/` 新增友链区块，支持展示友链列表、申请入口和说明文案。
-- 新增本地文章管理与写作 Content Console，可在开发环境中浏览、编辑、导出和删除文章。
+- 新增本地文章管理与写作 Content Console，可在开发环境中浏览、新增 essay 草稿、编辑、导出和删除文章。
 - `essay` 内容支持可选 `updatedAt` 更新日期；前台存在时显示“更新于”，本地后台可编辑并会在保存时校验日期一致性（[PR #36](https://github.com/cxro/astro-whono/pull/36)，by [@ZephyrCICD](https://github.com/ZephyrCICD)）。
 - 文章编辑器引入 CodeMirror 编辑区，内置5种语法高亮主题，提升长文编辑体验。
 - 文章编辑器支持编辑 / 预览布局切换、目录与语法侧栏、编辑器语法高亮、行号选项，以及常用 Markdown、数学公式、emoji、图片与画廊写作辅助。
@@ -29,6 +29,7 @@ The format is based on Keep a Changelog, and this project aims to follow Semanti
 ### Fixed
 - 修复后台图片预览在遇到无效地址时仍可能尝试加载图片的问题，地址不合法时会隐藏预览并清空图片源。
 - 修复 Content Console 在本地新增、保存或删除内容后，刷新时可能因 Astro content store 同步窗口出现整页空列表的问题。
+- 修复在 Content Console 新增中文标题 essay 时，未填写公开 URL 别名会导致创建失败的问题。
 - 修复列表标题过长时 badge 可能被挤压换行的问题（[PR #32](https://github.com/cxro/astro-whono/pull/32)，by [@dodola](https://github.com/dodolalorc)）。
 
 

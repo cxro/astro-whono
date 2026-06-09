@@ -5,18 +5,19 @@ import {
 } from '../../utils/date-only';
 import { normalizeAdminBitsImageSource } from './image-shared';
 import {
-  ESSAY_PUBLIC_SLUG_RE,
-  RESERVED_ESSAY_SLUGS,
-  contentSourceEntryIdToPublicEntryId,
-  flattenEntryIdToSlug
-} from '../../utils/slug-rules';
-import {
   patchMarkdownFrontmatter,
   replaceMarkdownBody,
   type FrontmatterPatch
 } from './frontmatter';
 import { findMissingMarkdownBodyLocalImageReferences } from './essay-image-references';
 import { buildAdminAboutWritePlan } from './content-about-contract';
+import {
+  buildEssayFrontmatterFromValues,
+  parseAdminEssayEditorInput,
+  parseTagsText,
+  validateEssayPublicSlug,
+  type AdminEssayOptionalInputMode
+} from './content-essay-frontmatter';
 import type { AdminContentValidationIssue } from './content-entry-contract';
 import {
   getAdminContentCollectionCapability,
@@ -25,10 +26,7 @@ import {
 import {
   AdminContentEntryResolutionError,
   getAdminContentReadOnlyReason,
-  listAdminCollectionSourceFiles,
   loadAdminContentSourceState,
-  readAdminSourceFrontmatterRecord,
-  resolveAdminContentEntryIdFromSourcePath,
   type AdminContentSourceState
 } from './content-entry-source';
 import type {
@@ -41,22 +39,6 @@ import {
   isRecord,
   normalizeOptionalText
 } from './content-entry-utils';
-
-type AdminEssayFrontmatter = {
-  title: string;
-  description?: string;
-  date: string;
-  publishedAt?: string;
-  updatedAt?: string;
-  tags: string[];
-  draft: boolean;
-  archive: boolean;
-  slug?: string;
-  cover?: string;
-  badge?: string;
-};
-
-type AdminEssayOptionalInputMode = 'missing' | 'present';
 
 type AdminBitsImage = {
   src: string;
@@ -114,12 +96,6 @@ const getRequiredBooleanField = (
   return false;
 };
 
-const parseTagsText = (value: string): string[] =>
-  value
-    .split(/\r?\n/)
-    .map((item) => item.trim())
-    .filter(Boolean);
-
 const POSITIVE_INTEGER_PATTERN = /^[1-9]\d*$/;
 
 const parseOptionalPositiveInteger = (value: unknown): number | undefined => {
@@ -146,57 +122,6 @@ const parseOptionalPositiveInteger = (value: unknown): number | undefined => {
 const isPositiveInteger = (value: number | undefined): boolean =>
   value === undefined || (Number.isInteger(value) && value > 0);
 
-const parseAdminEssayEditorInput = (
-  input: unknown
-): {
-  values?: AdminEssayEditorValues;
-  publishedAtInputMode: AdminEssayOptionalInputMode;
-  updatedAtInputMode: AdminEssayOptionalInputMode;
-  issues: AdminContentValidationIssue[];
-} => {
-  if (!isRecord(input)) {
-    return {
-      publishedAtInputMode: 'missing',
-      updatedAtInputMode: 'missing',
-      issues: [createIssue('frontmatter', 'frontmatter 必须是对象')]
-    };
-  }
-
-  const issues: AdminContentValidationIssue[] = [];
-  const rawPublishedAtInput = input.publishedAt;
-  const hasPublishedAtInput = hasOwn(input, 'publishedAt')
-    && typeof rawPublishedAtInput === 'string';
-  const rawUpdatedAtInput = input.updatedAt;
-  const hasUpdatedAtInput = hasOwn(input, 'updatedAt')
-    && typeof rawUpdatedAtInput === 'string';
-  const values: AdminEssayEditorValues = {
-    title: getRequiredStringField(input, 'title', issues),
-    description: getRequiredStringField(input, 'description', issues),
-    date: getRequiredStringField(input, 'date', issues),
-    publishedAt: hasPublishedAtInput ? rawPublishedAtInput : '',
-    updatedAt: hasUpdatedAtInput ? rawUpdatedAtInput : '',
-    tagsText: getRequiredStringField(input, 'tagsText', issues),
-    draft: getRequiredBooleanField(input, 'draft', issues),
-    archive: getRequiredBooleanField(input, 'archive', issues),
-    slug: getRequiredStringField(input, 'slug', issues),
-    cover: getRequiredStringField(input, 'cover', issues),
-    badge: getRequiredStringField(input, 'badge', issues)
-  };
-
-  return issues.length > 0
-    ? {
-        publishedAtInputMode: hasPublishedAtInput ? 'present' : 'missing',
-        updatedAtInputMode: hasUpdatedAtInput ? 'present' : 'missing',
-        issues
-      }
-    : {
-        values,
-        publishedAtInputMode: hasPublishedAtInput ? 'present' : 'missing',
-        updatedAtInputMode: hasUpdatedAtInput ? 'present' : 'missing',
-        issues
-      };
-};
-
 const parseAdminBitsEditorInput = (
   input: unknown
 ): { values?: AdminBitsEditorValues; issues: AdminContentValidationIssue[] } => {
@@ -219,161 +144,6 @@ const parseAdminBitsEditorInput = (
   };
 
   return issues.length > 0 ? { issues } : { values, issues };
-};
-
-const resolveDefaultPublicEntryId = (sourceEntryId: string): string => {
-  const publicEntryId = contentSourceEntryIdToPublicEntryId(sourceEntryId);
-  return publicEntryId || sourceEntryId;
-};
-
-const resolveEssayPublicSlug = (publicEntryId: string, explicitSlug?: string): string =>
-  explicitSlug && explicitSlug.trim().length > 0
-    ? explicitSlug.trim()
-    : flattenEntryIdToSlug(publicEntryId);
-
-const validateEssayPublicSlug = async (
-  state: Pick<AdminContentSourceState, 'entryId' | 'publicEntryId'>,
-  frontmatter: Pick<AdminEssayFrontmatter, 'slug'>
-): Promise<AdminContentValidationIssue[]> => {
-  const issues: AdminContentValidationIssue[] = [];
-  const publicSlug = resolveEssayPublicSlug(state.publicEntryId, frontmatter.slug);
-
-  if (!ESSAY_PUBLIC_SLUG_RE.test(publicSlug)) {
-    issues.push(
-      createIssue(
-        'slug',
-        frontmatter.slug
-          ? 'essay.slug 必须是小写 kebab-case'
-          : '当前条目路径拍平后的公开 slug 不合法，请设置合法 slug 或调整文件路径'
-      )
-    );
-  }
-
-  if (RESERVED_ESSAY_SLUGS.has(publicSlug)) {
-    issues.push(
-      createIssue(
-        'slug',
-        `公开 slug "${publicSlug}" 与 /archive 或 /essay 下的保留路由冲突，请修改 slug`
-      )
-    );
-  }
-
-  if (issues.length > 0) {
-    return issues;
-  }
-
-  try {
-    const essayFiles = await listAdminCollectionSourceFiles('essay');
-    for (const filePath of essayFiles) {
-      const candidateEntryId = resolveAdminContentEntryIdFromSourcePath('essay', filePath);
-      if (candidateEntryId === state.entryId) continue;
-
-      const frontmatterRecord = await readAdminSourceFrontmatterRecord(filePath);
-      const candidatePublicEntryId = resolveDefaultPublicEntryId(candidateEntryId);
-      const candidateSlug = resolveEssayPublicSlug(candidatePublicEntryId, normalizeOptionalText(frontmatterRecord.slug));
-      if (candidateSlug === publicSlug) {
-        issues.push(
-          createIssue(
-            'slug',
-            `公开 slug "${publicSlug}" 已被其他 essay 占用：${candidateEntryId}`
-          )
-        );
-        return issues;
-      }
-    }
-  } catch (error) {
-    issues.push(
-      createIssue(
-        'slug',
-        `无法完成 essay.slug 唯一性校验：${error instanceof Error ? error.message : 'unknown error'}`
-      )
-    );
-  }
-
-  return issues;
-};
-
-const buildEssayFrontmatterFromValues = (
-  values: AdminEssayEditorValues,
-  options: {
-    preservedPublishedAt?: string;
-    preservedUpdatedAt?: string;
-  } = {}
-): { frontmatter?: AdminEssayFrontmatter; issues: AdminContentValidationIssue[] } => {
-  const issues: AdminContentValidationIssue[] = [];
-  const title = values.title.trim();
-  if (!title) {
-    issues.push(createIssue('title', 'title 不能为空'));
-  }
-
-  const dateResult = parseEssayDateInput(values.date);
-  if (!dateResult) {
-    issues.push(createIssue('date', 'essay.date 必须是 YYYY-MM-DD 或带时区的 ISO 8601 日期时间'));
-  }
-
-  const explicitPublishedAt = values.publishedAt.trim();
-  const hasExplicitPublishedAt = explicitPublishedAt.length > 0;
-  const publishedAt = hasExplicitPublishedAt
-    ? parseEssayPublishedAtInput(explicitPublishedAt)
-    : dateResult?.publishedAt;
-
-  if (hasExplicitPublishedAt && !publishedAt) {
-    issues.push(createIssue('publishedAt', 'essay.publishedAt 必须是带时区的 ISO 8601 日期时间'));
-  }
-
-  const explicitUpdatedAt = values.updatedAt.trim();
-  const hasExplicitUpdatedAt = explicitUpdatedAt.length > 0;
-  const updatedAtResult = hasExplicitUpdatedAt
-    ? parseEssayDateInput(explicitUpdatedAt)
-    : null;
-
-  if (hasExplicitUpdatedAt && !updatedAtResult) {
-    issues.push(createIssue('updatedAt', 'essay.updatedAt 必须是 YYYY-MM-DD 或带时区的 ISO 8601 日期时间'));
-  }
-
-  if (!dateResult || issues.length > 0) {
-    return { issues };
-  }
-
-  const slug = values.slug.trim();
-  const preservedPublishedAt = normalizeOptionalText(options.preservedPublishedAt);
-  const preservedUpdatedAt = normalizeOptionalText(options.preservedUpdatedAt);
-  const publishedAtText = hasExplicitPublishedAt
-    ? explicitPublishedAt
-    : dateResult.publishedAtText || preservedPublishedAt;
-  const updatedAtText = hasExplicitUpdatedAt
-    ? updatedAtResult?.dateText
-    : preservedUpdatedAt;
-  const publishedAtDateResult = publishedAtText ? parseEssayDateInput(publishedAtText) : null;
-  const date = publishedAtDateResult?.dateText ?? dateResult.dateText;
-  const effectiveDateResult = publishedAtDateResult ?? dateResult;
-  const finalUpdatedAtResult = hasExplicitUpdatedAt
-    ? updatedAtResult
-    : updatedAtText
-      ? parseEssayDateInput(updatedAtText)
-      : null;
-
-  if (finalUpdatedAtResult && finalUpdatedAtResult.date.valueOf() < effectiveDateResult.date.valueOf()) {
-    issues.push(createIssue('updatedAt', 'essay.updatedAt 不能早于 essay.date'));
-    return { issues };
-  }
-
-  return {
-    issues,
-    frontmatter: {
-      title,
-      ...(values.description.trim() ? { description: values.description.trim() } : {}),
-      date,
-      ...(publishedAtText ? { publishedAt: publishedAtText } : {}),
-      ...(updatedAtText ? { updatedAt: updatedAtText } : {}),
-      tags: parseTagsText(values.tagsText),
-      draft: values.draft === true,
-      archive: values.archive !== false,
-      ...(slug ? { slug } : {}),
-      ...(values.cover.trim() ? { cover: values.cover.trim() } : {}),
-      ...(values.badge.trim() ? { badge: values.badge.trim() } : {})
-    }
-  };
 };
 
 const parseBitsImages = (value: string): { images?: AdminBitsImage[]; issues: AdminContentValidationIssue[] } => {

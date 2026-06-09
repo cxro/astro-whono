@@ -165,10 +165,10 @@ const normalizeEntryId = (entryId: string): string => {
   return normalized;
 };
 
-export const resolveAdminContentEntrySourcePath = (
+export const getAdminContentEntrySourcePathCandidates = (
   collection: AdminContentCollectionKey,
   entryId: string
-): string => {
+): string[] => {
   const normalizedEntryId = normalizeEntryId(entryId);
   const fixedPage = getAdminContentFixedPageCapability(collection);
   if (fixedPage) {
@@ -178,19 +178,32 @@ export const resolveAdminContentEntrySourcePath = (
         `${collection} 仅支持固定源文件：${fixedPage.sourcePath}`
       );
     }
-    const fixedSourcePath = toAdminContentAbsoluteProjectPath(fixedPage.sourcePath);
-    if (existsSync(fixedSourcePath)) return fixedSourcePath;
+    return [toAdminContentAbsoluteProjectPath(fixedPage.sourcePath)];
+  }
+
+  const basePath = path.join(getContentRoot(), collection, ...normalizedEntryId.split('/'));
+  return CANONICAL_MARKDOWN_SOURCE_EXT_RE.test(normalizedEntryId)
+    ? [basePath]
+    : [`${basePath}.md`, path.join(basePath, 'index.md')];
+};
+
+export const resolveAdminContentEntrySourcePath = (
+  collection: AdminContentCollectionKey,
+  entryId: string
+): string => {
+  const normalizedEntryId = normalizeEntryId(entryId);
+  const candidates = getAdminContentEntrySourcePathCandidates(collection, normalizedEntryId);
+  const fixedPage = getAdminContentFixedPageCapability(collection);
+  const resolved = candidates.find((candidate) => existsSync(candidate));
+
+  if (fixedPage) {
+    if (resolved) return resolved;
     throw new AdminContentEntryResolutionError(
       'source-not-found',
       `${collection} 固定源文件不存在：${fixedPage.sourcePath}`
     );
   }
 
-  const basePath = path.join(getContentRoot(), collection, ...normalizedEntryId.split('/'));
-  const candidates = CANONICAL_MARKDOWN_SOURCE_EXT_RE.test(normalizedEntryId)
-    ? [basePath]
-    : [`${basePath}.md`, path.join(basePath, 'index.md')];
-  const resolved = candidates.find((candidate) => existsSync(candidate));
   if (!resolved) {
     throw new AdminContentEntryResolutionError(
       'source-not-found',

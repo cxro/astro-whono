@@ -726,6 +726,18 @@ export const runPreviewAdminBoundaryCheck = async () => {
     const getResponse = await request(baseUrl, '/api/admin/settings/');
     const exportResponse = await request(baseUrl, '/api/admin/data/settings/');
     const contentGetResponse = await request(baseUrl, '/api/admin/content/entry/');
+    const contentCreateResponse = await request(baseUrl, '/api/admin/content/create/', {
+      method: 'POST',
+      headers: {
+        'content-type': 'application/json',
+        origin: baseUrl
+      },
+      body: JSON.stringify({
+        collection: 'essay',
+        entryId: 'preview-boundary-create',
+        frontmatter: createAdminContentSmokeFrontmatter()
+      })
+    });
     const contentExportResponse = await request(baseUrl, '/api/admin/content/export/?collection=essay&entryId=admin-console-guide');
     const previewGetResponse = await request(baseUrl, '/api/admin/preview/');
     const imageListResponse = await request(baseUrl, '/api/admin/images/list/');
@@ -803,6 +815,7 @@ export const runPreviewAdminBoundaryCheck = async () => {
     assertAdminSettingsStaticResponse('GET /api/admin/settings/', getResponse);
     assertAdminSettingsStaticResponse('GET /api/admin/data/settings/', exportResponse, '/api/admin/data/settings/');
     assertAdminContentStaticResponse('GET /api/admin/content/entry/', contentGetResponse);
+    assertAdminContentStaticResponse('POST /api/admin/content/create/', contentCreateResponse, '/api/admin/content/create/');
     assertAdminContentStaticResponse('GET /api/admin/content/export/', contentExportResponse, '/api/admin/content/export/');
     assertAdminPreviewStaticResponse('GET /api/admin/preview/', previewGetResponse);
     assertAdminImageStaticResponse('GET /api/admin/images/list/', imageListResponse, '/api/admin/images/list/');

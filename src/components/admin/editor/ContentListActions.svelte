@@ -30,33 +30,46 @@ import {
   initAdminDetailsMenus
 } from '../../../scripts/admin-content/details-menu';
 import { createWithBase } from '../../../utils/format';
-import { flattenEntryIdToSlug } from '../../../utils/slug-rules';
+import {
+  ESSAY_PUBLIC_SLUG_RE,
+  contentSourceEntryIdToPublicEntryId,
+  flattenEntryIdToSlug
+} from '../../../utils/slug-rules';
 import ArticleInfoDialog from './ArticleInfoDialog.svelte';
 import {
   CONTENT_LIST_DELETE_FEEDBACK_STORAGE_KEY,
   CONTENT_LIST_DELETE_FEEDBACK_VALUE
 } from './content-list-feedback';
+import { createContentEntry } from './content-editor-client';
 
 type StatusState = 'idle' | 'loading' | 'ready' | 'ok' | 'warn' | 'error';
+type StatusOptions = {
+  autoClear?: boolean;
+};
+type DialogMode = 'edit' | 'create';
 
 type Props = {
   base?: string;
   endpoint: string;
+  createEndpoint: string;
   deleteEndpoint: string;
 };
 
 const STATUS_FEEDBACK_VISIBLE_MS = 2_000;
 
-let { base = '/', endpoint, deleteEndpoint }: Props = $props();
+let { base = '/', endpoint, createEndpoint, deleteEndpoint }: Props = $props();
 
 let dialog = $state<ArticleInfoDialog | null>(null);
 let open = $state(false);
+let dialogMode = $state<DialogMode>('edit');
 let busy = $state(false);
 let loadingEntry = $state(false);
 let loadRequestId = 0;
 let selectedEntryId = $state('');
 let selectedDefaultPublicSlug = $state('');
 let selectedTrigger = $state<HTMLElement | null>(null);
+let createEntryId = $state('');
+let createEntryIdEdited = $state(false);
 let revision = $state('');
 let baselineFrontmatter = $state<AdminEssayEditorValues | null>(null);
 let frontmatter = $state<AdminEssayEditorValues | null>(null);
@@ -80,15 +93,61 @@ const createEmptyFrontmatter = (): AdminEssayEditorValues => ({
   badge: ''
 });
 
+const createNewEssayFrontmatter = (): AdminEssayEditorValues => {
+  const now = new Date();
+  const month = String(now.getMonth() + 1).padStart(2, '0');
+  const day = String(now.getDate()).padStart(2, '0');
+  return {
+    ...createEmptyFrontmatter(),
+    date: `${now.getFullYear()}-${month}-${day}`,
+    draft: true
+  };
+};
+
 const dirty = $derived(!isEqualFrontmatter(frontmatter, baselineFrontmatter));
-const canSave = $derived(Boolean(frontmatter) && dirty && !busy);
-const slugPlaceholder = $derived(selectedDefaultPublicSlug || (selectedEntryId ? flattenEntryIdToSlug(selectedEntryId) : ''));
+const canSave = $derived(
+  Boolean(frontmatter)
+  && !busy
+  && (
+    dialogMode === 'create'
+      ? createEntryId.trim().length > 0 && (frontmatter?.title.trim().length ?? 0) > 0
+      : dirty
+  )
+);
 const withBase = $derived(createWithBase(base));
 
-const setStatus = (state: StatusState, text: string) => {
-  statusState = state;
-  statusText = text;
+const getShortDateSlugPart = (date: string): string => {
+  const match = /^(\d{4})-(\d{2})-(\d{2})$/.exec(date);
+  if (!match) return 'yymmdd';
+
+  const year = match[1] ?? '0000';
+  const month = match[2] ?? '00';
+  const day = match[3] ?? '00';
+  return `${year.slice(-2)}${month}${day}`;
 };
+
+const getCreateSlugFallbackPlaceholder = (): string =>
+  `essay-${getShortDateSlugPart(frontmatter?.date ?? '')}-xxxx`;
+
+const getCreateSlugPlaceholderPreview = (): string => {
+  const candidate = flattenEntryIdToSlug(contentSourceEntryIdToPublicEntryId(createEntryId) || createEntryId);
+  return ESSAY_PUBLIC_SLUG_RE.test(candidate) ? candidate : getCreateSlugFallbackPlaceholder();
+};
+
+const getCreateSlugPlaceholder = (): string =>
+  `留空自动生成：${getCreateSlugPlaceholderPreview()}`;
+
+const getEditSlugPlaceholder = (): string => {
+  const fallbackSlug = selectedEntryId ? flattenEntryIdToSlug(selectedEntryId) : '';
+  const defaultSlug = selectedDefaultPublicSlug || fallbackSlug;
+  return defaultSlug ? `留空使用默认：${defaultSlug}` : '';
+};
+
+const slugPlaceholder = $derived(
+  dialogMode === 'create'
+    ? getCreateSlugPlaceholder()
+    : getEditSlugPlaceholder()
+);
 
 const clearStatusFeedbackTimer = () => {
   if (statusFeedbackClearTimer === null) return;
@@ -96,14 +155,41 @@ const clearStatusFeedbackTimer = () => {
   statusFeedbackClearTimer = null;
 };
 
-const queueStatusFeedbackClear = (state: StatusState, text: string) => {
+const clearStatus = () => {
   clearStatusFeedbackTimer();
+  statusState = 'idle';
+  statusText = '';
+};
+
+const setStatus = (state: StatusState, text: string, { autoClear = false }: StatusOptions = {}) => {
+  clearStatusFeedbackTimer();
+  statusState = state;
+  statusText = text;
+
+  if (!autoClear || !text) return;
   statusFeedbackClearTimer = window.setTimeout(() => {
     statusFeedbackClearTimer = null;
     if (statusState === state && statusText === text) {
-      setStatus('idle', '');
+      clearStatus();
     }
   }, STATUS_FEEDBACK_VISIBLE_MS);
+};
+
+const deriveEssayEntryIdFromTitle = (title: string): string => {
+  const trimmed = title.trim();
+  if (!trimmed) return '';
+  return contentSourceEntryIdToPublicEntryId(trimmed) || 'untitled';
+};
+
+const syncCreateEntryIdFromTitle = () => {
+  if (dialogMode !== 'create' || createEntryIdEdited || !frontmatter) return;
+  createEntryId = deriveEssayEntryIdFromTitle(frontmatter.title);
+};
+
+const updateCreateEntryId = (value: string) => {
+  createEntryId = value;
+  createEntryIdEdited = true;
+  setStatus('ready', '源文件名已修改', { autoClear: true });
 };
 
 const takeStoredDeleteFeedback = (): boolean => {
@@ -128,10 +214,39 @@ const closeDialog = () => {
     loadRequestId += 1;
     loadingEntry = false;
     busy = false;
-    setStatus('idle', '');
+    clearStatus();
   }
   open = false;
   selectedTrigger = null;
+};
+
+const openCreateDialog = async (trigger: HTMLElement) => {
+  if (busy) {
+    errors = [];
+    setStatus('warn', '操作进行中');
+    return;
+  }
+
+  const nextFrontmatter = createNewEssayFrontmatter();
+  dialogMode = 'create';
+  busy = false;
+  loadingEntry = false;
+  open = false;
+  selectedEntryId = '';
+  selectedDefaultPublicSlug = '';
+  selectedTrigger = trigger;
+  createEntryId = '';
+  createEntryIdEdited = false;
+  revision = '';
+  baselineFrontmatter = cloneFrontmatter(nextFrontmatter);
+  frontmatter = cloneFrontmatter(nextFrontmatter);
+  issues = [];
+  errors = [];
+  clearStatus();
+
+  await tick();
+  dialog?.captureReturnFocus(trigger);
+  open = true;
 };
 
 const restoreFocusAndCloseDialog = () => {
@@ -150,9 +265,13 @@ const restoreFocusAndCloseDialog = () => {
 const resetToBaseline = () => {
   if (!baselineFrontmatter) return;
   frontmatter = cloneFrontmatter(baselineFrontmatter);
+  if (dialogMode === 'create') {
+    createEntryId = '';
+    createEntryIdEdited = false;
+  }
   issues = [];
   errors = [];
-  setStatus('ready', '已还原');
+  setStatus('ready', '已还原', { autoClear: true });
 };
 
 const closeActionMenu = (trigger: HTMLElement) => {
@@ -239,18 +358,21 @@ const syncSelectedRow = (result: AdminContentWriteResult) => {
 const openEditor = async (entryId: string, trigger: HTMLElement) => {
   const requestId = loadRequestId + 1;
   loadRequestId = requestId;
+  dialogMode = 'edit';
   busy = true;
   loadingEntry = true;
   open = false;
   selectedEntryId = entryId;
   selectedDefaultPublicSlug = '';
   selectedTrigger = trigger;
+  createEntryId = '';
+  createEntryIdEdited = false;
   revision = '';
   baselineFrontmatter = null;
   frontmatter = createEmptyFrontmatter();
   issues = [];
   errors = [];
-  setStatus('loading', '正在加载文章信息');
+  setStatus('loading', '正在加载');
 
   await tick();
   if (requestId !== loadRequestId) return;
@@ -277,7 +399,7 @@ const openEditor = async (entryId: string, trigger: HTMLElement) => {
       loadingEntry = false;
       open = false;
       frontmatter = null;
-      setStatus('error', payloadErrors.length > 0 ? '文章信息加载失败' : '加载失败，可进入编辑页处理');
+      setStatus('error', payloadErrors.length > 0 ? '加载失败' : '加载失败，可进入编辑页处理');
       return;
     }
 
@@ -288,7 +410,7 @@ const openEditor = async (entryId: string, trigger: HTMLElement) => {
     loadingEntry = false;
     await tick();
     if (requestId !== loadRequestId) return;
-    setStatus('ready', '文章信息已加载');
+    clearStatus();
   } catch {
     if (requestId !== loadRequestId) return;
     errors = [];
@@ -310,7 +432,7 @@ const saveEditor = async () => {
   busy = true;
   issues = [];
   errors = [];
-  setStatus('loading', '正在保存文章信息');
+  setStatus('loading', '正在保存');
 
   try {
     const response = await fetch(endpoint, {
@@ -338,7 +460,7 @@ const saveEditor = async () => {
       errors = payloadErrors;
       const state = response.status === 409 ? 'warn' : 'error';
       const fallbackText = response.status === 409 ? '检测到外部更新' : '保存失败，请检查当前表单与磁盘状态';
-      setStatus(state, payloadErrors.length > 0 ? (response.status === 409 ? '检测到外部更新' : '文章信息保存失败') : fallbackText);
+      setStatus(state, payloadErrors.length > 0 ? (response.status === 409 ? '检测到外部更新' : '保存失败') : fallbackText);
       return;
     }
 
@@ -354,7 +476,7 @@ const saveEditor = async () => {
     frontmatter = cloneFrontmatter(latestPayload.values);
     revision = latestPayload.revision;
     syncSelectedRow(result);
-    setStatus(result.changed ? 'ok' : 'ready', result.changed ? '文章信息已保存' : '当前文章信息没有变化');
+    setStatus(result.changed ? 'ok' : 'ready', result.changed ? '已保存' : '没有变化', { autoClear: true });
     if (result.changed) {
       restoreFocusAndCloseDialog();
     }
@@ -364,6 +486,48 @@ const saveEditor = async () => {
   } finally {
     busy = false;
   }
+};
+
+const saveCreate = async () => {
+  if (!frontmatter || busy) return;
+
+  busy = true;
+  issues = [];
+  errors = [];
+  frontmatter.draft = true;
+  setStatus('loading', '正在创建');
+
+  try {
+    const outcome = await createContentEntry({
+      endpoint: createEndpoint,
+      collection: 'essay',
+      entryId: createEntryId,
+      frontmatter
+    });
+
+    if (!outcome.responseOk || !outcome.payloadOk || !outcome.editHref) {
+      issues = outcome.issues;
+      errors = outcome.errors;
+      setStatus('error', outcome.errors.length > 0 ? '创建失败' : '创建响应异常，请检查开发日志');
+      return;
+    }
+
+    setStatus('ok', '已创建，进入编辑页');
+    window.location.assign(withBase(outcome.editHref));
+  } catch {
+    errors = [];
+    setStatus('error', '创建请求失败，请稍后重试');
+  } finally {
+    busy = false;
+  }
+};
+
+const saveDialog = () => {
+  if (dialogMode === 'create') {
+    void saveCreate();
+    return;
+  }
+  void saveEditor();
 };
 
 const deleteEntry = async (trigger: HTMLElement) => {
@@ -386,7 +550,7 @@ const deleteEntry = async (trigger: HTMLElement) => {
   busy = true;
   errors = [];
   issues = [];
-  setStatus('loading', '正在准备删除确认');
+  setStatus('loading', '正在确认删除');
 
   try {
     // 列表中的 revision 可能已经过期，确认前先读取一次最新文件状态。
@@ -425,11 +589,11 @@ const deleteEntry = async (trigger: HTMLElement) => {
     ].join('\n'));
 
     if (!confirmed) {
-      setStatus('ready', '已取消删除');
+      setStatus('ready', '已取消删除', { autoClear: true });
       return;
     }
 
-    setStatus('loading', '正在移动到回收站');
+    setStatus('loading', '正在删除');
     const deleteResponse = await fetch(deleteEndpoint, {
       method: 'POST',
       headers: {
@@ -464,7 +628,7 @@ const deleteEntry = async (trigger: HTMLElement) => {
     }
 
     removeDeletedRowFromList(trigger);
-    setStatus('ok', '已移到回收站，刷新页面可同步分页与计数');
+    setStatus('ok', '已移到回收站', { autoClear: true });
   } catch {
     errors = [];
     setStatus('error', '删除请求失败，请稍后重试');
@@ -475,6 +639,13 @@ const deleteEntry = async (trigger: HTMLElement) => {
 
 const handleClick = (event: MouseEvent) => {
   if (!(event.target instanceof Element)) return;
+
+  const createTrigger = event.target.closest<HTMLElement>('[data-admin-content-create-action]');
+  if (createTrigger) {
+    event.preventDefault();
+    void openCreateDialog(createTrigger);
+    return;
+  }
 
   const deleteTrigger = event.target.closest<HTMLElement>('[data-admin-content-delete-action]');
   if (deleteTrigger) {
@@ -497,19 +668,25 @@ const handleClick = (event: MouseEvent) => {
 
 onMount(() => {
   if (takeStoredDeleteFeedback()) {
-    const statusState: StatusState = 'ok';
-    const statusText = '已移到回收站';
-    setStatus(statusState, statusText);
-    queueStatusFeedbackClear(statusState, statusText);
+    setStatus('ok', '已移到回收站', { autoClear: true });
   }
 
   return clearStatusFeedbackTimer;
 });
 
 $effect(() => {
+  document.querySelectorAll<HTMLButtonElement>('[data-admin-content-create-action]').forEach((button) => {
+    button.disabled = busy;
+  });
   document.querySelectorAll<HTMLButtonElement>('[data-admin-content-delete-action]').forEach((button) => {
     button.disabled = busy;
   });
+});
+
+$effect(() => {
+  if (frontmatter?.title) {
+    syncCreateEntryIdFromTitle();
+  }
 });
 
 $effect(() => {
@@ -535,12 +712,18 @@ $effect(() => {
     loading={loadingEntry}
     {dirty}
     {canSave}
+    entryId={dialogMode === 'create' ? createEntryId : selectedEntryId}
+    showEntryId={dialogMode === 'create'}
     {slugPlaceholder}
-    dialogTitle="文章信息"
+    dialogTitle={dialogMode === 'create' ? '新增文章' : '文章信息'}
     fieldsAriaLabel="随笔字段"
+    draftLocked={dialogMode === 'create'}
+    draftLockHelp={dialogMode === 'create' ? '默认草稿，完善正文后发布。' : ''}
+    saveLabel={dialogMode === 'create' ? '创建' : '保存'}
+    onEntryIdInput={updateCreateEntryId}
     onClose={closeDialog}
     onReset={resetToBaseline}
-    onSave={() => void saveEditor()}
+    onSave={saveDialog}
   />
 {/if}
 

@@ -595,7 +595,7 @@
 }
 
 .admin-field__label {
-  color: var(--muted);
+  color: color-mix(in srgb, var(--muted) 78%, var(--text) 22%);
   font-size: var(--admin-text-sm);
 }
 

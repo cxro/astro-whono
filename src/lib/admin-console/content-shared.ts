@@ -8,6 +8,7 @@ export type { AdminContentValidationIssue } from './content-entry-contract';
 export {
   ADMIN_CONTENT_COLLECTION_KEYS,
   ADMIN_CONTENT_BODY_IMAGE_UPLOAD_COLLECTION_KEYS,
+  ADMIN_CONTENT_CREATABLE_COLLECTION_KEYS,
   ADMIN_CONTENT_DELETABLE_COLLECTION_KEYS,
   ADMIN_CONTENT_ENTRY_WRITE_COLLECTION_KEYS,
   ADMIN_CONTENT_EXPORTABLE_COLLECTION_KEYS,
@@ -17,6 +18,7 @@ export {
   getAdminContentFixedPageCapability,
   isAdminContentBodyImageUploadCollectionKey,
   isAdminContentCollectionKey,
+  isAdminContentCreatableCollectionKey,
   isAdminContentDeletableCollectionKey,
   isAdminContentEntryWriteCollectionKey,
   isAdminContentExportableCollectionKey,
@@ -26,6 +28,7 @@ export {
 export type {
   AdminContentBodyImageUploadCollectionKey,
   AdminContentCollectionKey,
+  AdminContentCreatableCollectionKey,
   AdminContentEntryWriteCollectionKey,
   AdminContentExportableCollectionKey,
   AdminContentImageUploadCollectionKey,

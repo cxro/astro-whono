@@ -111,6 +111,7 @@ export const runProductionArtifactCheck = async (options = {}) => {
     'dist/api/admin/settings',
     'dist/api/admin/data/settings',
     'dist/api/admin/content/entry',
+    'dist/api/admin/content/create',
     'dist/api/admin/content/export',
     'dist/api/admin/content/delete',
     'dist/api/admin/preview',
@@ -367,6 +368,12 @@ export const runProductionArtifactCheck = async (options = {}) => {
     'dist/api/admin/content/entry',
     adminContentEntryArtifact,
     '/api/admin/content/entry/'
+  );
+  const adminContentCreateArtifact = readText('dist/api/admin/content/create');
+  assertAdminContentStaticShell(
+    'dist/api/admin/content/create',
+    adminContentCreateArtifact,
+    '/api/admin/content/create/'
   );
   const adminContentExportArtifact = readText('dist/api/admin/content/export');
   assertAdminContentStaticShell(
