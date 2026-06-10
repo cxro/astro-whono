@@ -83,6 +83,63 @@ describe('content editor client', () => {
     expect(outcome.payload?.collection).toBe('essay');
   });
 
+  it('sends bits create payloads without client entry ids', async () => {
+    const requested = {
+      body: null as unknown
+    };
+    const fetchImpl = (async (_input: RequestInfo | URL, init?: RequestInit) => {
+      requested.body = JSON.parse(String(init?.body ?? '{}')) as unknown;
+      return new Response(JSON.stringify({
+        ok: true,
+        result: {
+          changed: true,
+          written: true,
+          changedFields: ['entry'],
+          relativePath: 'src/content/bits/bits-2026-06-09-1430.md',
+          editHref: '/admin/content/bits/_edit/bits-2026-06-09-1430/'
+        },
+        editHref: '/admin/content/bits/_edit/bits-2026-06-09-1430/',
+        payload: {
+          collection: 'bits',
+          entryId: 'bits-2026-06-09-1430',
+          publicEntryId: 'bits-2026-06-09-1430',
+          defaultPublicSlug: 'bits-2026-06-09-1430',
+          revision: 'rev',
+          relativePath: 'src/content/bits/bits-2026-06-09-1430.md',
+          writable: true,
+          readonlyReason: null,
+          bodyText: '\n',
+          values: {
+            ...bitsValues,
+            date: '2026-06-09T14:30:00+08:00',
+            draft: true
+          }
+        }
+      }), {
+        status: 200,
+        headers: { 'Content-Type': 'application/json' }
+      });
+    }) as typeof fetch;
+
+    const outcome = await createContentEntry({
+      endpoint: '/api/admin/content/create/',
+      collection: 'bits',
+      frontmatter: {
+        date: '2026-06-09T14:30:00-04:00'
+      },
+      fetchImpl
+    });
+
+    expect(requested.body).toEqual({
+      collection: 'bits',
+      frontmatter: {
+        date: '2026-06-09T14:30:00-04:00'
+      }
+    });
+    expect(outcome.editHref).toBe('/admin/content/bits/_edit/bits-2026-06-09-1430/');
+    expect(outcome.payload?.collection).toBe('bits');
+  });
+
   it('sends body-only payloads for about saves', async () => {
     const requested = {
       body: null as unknown

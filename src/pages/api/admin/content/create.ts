@@ -81,6 +81,7 @@ const extractCreateInput = (body: unknown): CreateInput => {
   const issues: AdminContentValidationIssue[] = [];
   const rawCollection = typeof body.collection === 'string' ? body.collection.trim() : '';
   const entryId = typeof body.entryId === 'string' ? body.entryId.trim() : undefined;
+  const hasEntryId = hasOwn(body, 'entryId');
   const hasFrontmatter = hasOwn(body, 'frontmatter');
   let collection: AdminContentCreatableCollectionKey | undefined;
 
@@ -100,8 +101,12 @@ const extractCreateInput = (body: unknown): CreateInput => {
     collection = rawCollection;
   }
 
-  if (!entryId) {
+  if (collection === 'essay' && !entryId) {
     const message = '请求体缺少 entryId';
+    errors.push(message);
+    issues.push({ path: 'entryId', message });
+  } else if (collection === 'bits' && hasEntryId) {
+    const message = 'bits 新增由 date 派生 entryId，不接收手动 entryId';
     errors.push(message);
     issues.push({ path: 'entryId', message });
   }
@@ -170,7 +175,7 @@ export const POST: APIRoute = async ({ request, url }) => {
   }
 
   const { collection, entryId, frontmatter, errors, issues } = extractCreateInput(bodyResult.body);
-  if (errors.length > 0 || !collection || !entryId) {
+  if (errors.length > 0 || !collection) {
     return createJsonErrorResponse(400, errors, issues);
   }
 
@@ -179,7 +184,9 @@ export const POST: APIRoute = async ({ request, url }) => {
   return withAdminContentWriteLock(async () => {
     let plan: Awaited<ReturnType<typeof buildAdminContentCreatePlan>>;
     try {
-      plan = await buildAdminContentCreatePlan({ collection, entryId, frontmatter });
+      plan = collection === 'essay'
+        ? await buildAdminContentCreatePlan({ collection, entryId: entryId ?? '', frontmatter })
+        : await buildAdminContentCreatePlan({ collection, frontmatter });
     } catch (error) {
       const errorResponse = createEntryResolutionErrorResponse(error);
       if (errorResponse) return errorResponse;

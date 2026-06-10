@@ -1,29 +1,23 @@
 <script lang="ts">
 import { onMount, tick } from 'svelte';
 import type {
+  AdminBitsEditorValues,
   AdminContentEditorPayload,
   AdminEssayEditorValues
 } from '../../../lib/admin-console/content-editor-payload';
 import {
-  cloneFrontmatter,
-  isEqualFrontmatter
-} from '../../../lib/admin-console/essay-editor-values';
-import {
   isAdminContentDeletableCollectionKey,
   type AdminContentDeletableCollectionKey
 } from '../../../lib/admin-console/content-delete-contract';
+import type { BitsCardAuthorInput } from '../../../lib/bits-card-view-model';
 import {
   getPayloadDeleteResult,
   getPayloadEditorPayload,
   getPayloadErrors,
-  getPayloadEssayPayload,
   getPayloadIssues,
-  getPayloadResult,
-  getPayloadRevision,
   isPayloadOk,
   parseResponseBody,
-  type AdminContentIssue,
-  type AdminContentWriteResult
+  type AdminContentIssue
 } from '../../../scripts/admin-content/entry-transport';
 import {
   closeClosestAdminDetailsMenu,
@@ -37,27 +31,33 @@ import {
 } from '../../../utils/slug-rules';
 import ArticleInfoDialog from './ArticleInfoDialog.svelte';
 import {
-  CONTENT_LIST_DELETE_FEEDBACK_STORAGE_KEY,
-  CONTENT_LIST_DELETE_FEEDBACK_VALUE
+  CONTENT_LIST_ACTION_FEEDBACK_DELETED,
+  CONTENT_LIST_ACTION_FEEDBACK_SAVED,
+  storeContentListActionFeedback,
+  takeContentListActionFeedback,
+  type ContentListActionFeedback
 } from './content-list-feedback';
-import { createContentEntry } from './content-editor-client';
+import {
+  createAdminStatusFeedback,
+  type StatusState
+} from './content-action-feedback';
+import { createContentEntry, saveContentEntry } from './content-editor-client';
+import { isBitsEditorValues, isEssayEditorValues } from './content-editor-adapters';
 
-type StatusState = 'idle' | 'loading' | 'ready' | 'ok' | 'warn' | 'error';
-type StatusOptions = {
-  autoClear?: boolean;
-};
 type DialogMode = 'edit' | 'create';
+type ContentInfoCollection = Extract<AdminContentDeletableCollectionKey, 'essay' | 'bits'>;
+type ContentInfoFrontmatter = AdminEssayEditorValues | AdminBitsEditorValues;
+type ContentInfoPayload = Extract<AdminContentEditorPayload, { collection: ContentInfoCollection }>;
 
 type Props = {
   base?: string;
   endpoint: string;
   createEndpoint: string;
   deleteEndpoint: string;
+  bitsDefaultAuthor?: BitsCardAuthorInput;
 };
 
-const STATUS_FEEDBACK_VISIBLE_MS = 2_000;
-
-let { base = '/', endpoint, createEndpoint, deleteEndpoint }: Props = $props();
+let { base = '/', endpoint, createEndpoint, deleteEndpoint, bitsDefaultAuthor = {} }: Props = $props();
 
 let dialog = $state<ArticleInfoDialog | null>(null);
 let open = $state(false);
@@ -65,19 +65,18 @@ let dialogMode = $state<DialogMode>('edit');
 let busy = $state(false);
 let loadingEntry = $state(false);
 let loadRequestId = 0;
+let selectedCollection = $state<ContentInfoCollection>('essay');
 let selectedEntryId = $state('');
 let selectedDefaultPublicSlug = $state('');
-let selectedTrigger = $state<HTMLElement | null>(null);
 let createEntryId = $state('');
 let createEntryIdEdited = $state(false);
 let revision = $state('');
-let baselineFrontmatter = $state<AdminEssayEditorValues | null>(null);
-let frontmatter = $state<AdminEssayEditorValues | null>(null);
+let baselineFrontmatter = $state<ContentInfoFrontmatter | null>(null);
+let frontmatter = $state<ContentInfoFrontmatter | null>(null);
 let issues = $state<AdminContentIssue[]>([]);
 let errors = $state<string[]>([]);
 let statusState = $state<StatusState>('idle');
 let statusText = $state('');
-let statusFeedbackClearTimer: number | null = null;
 
 const createEmptyFrontmatter = (): AdminEssayEditorValues => ({
   title: '',
@@ -104,7 +103,32 @@ const createNewEssayFrontmatter = (): AdminEssayEditorValues => {
   };
 };
 
-const dirty = $derived(!isEqualFrontmatter(frontmatter, baselineFrontmatter));
+const createEmptyBitsFrontmatter = (): AdminBitsEditorValues => ({
+  title: '',
+  description: '',
+  date: '',
+  tagsText: '',
+  draft: false,
+  authorName: '',
+  authorAvatar: '',
+  imagesText: ''
+});
+
+const createEmptyInfoFrontmatter = (collection: ContentInfoCollection): ContentInfoFrontmatter =>
+  collection === 'bits' ? createEmptyBitsFrontmatter() : createEmptyFrontmatter();
+
+const cloneInfoFrontmatter = <Values extends ContentInfoFrontmatter>(value: Values): Values => ({ ...value });
+
+const isEqualInfoFrontmatter = (
+  left: ContentInfoFrontmatter | null,
+  right: ContentInfoFrontmatter | null
+): boolean =>
+  JSON.stringify(left) === JSON.stringify(right);
+
+const isContentInfoCollection = (value: string): value is ContentInfoCollection =>
+  value === 'essay' || value === 'bits';
+
+const dirty = $derived(!isEqualInfoFrontmatter(frontmatter, baselineFrontmatter));
 const canSave = $derived(
   Boolean(frontmatter)
   && !busy
@@ -149,31 +173,16 @@ const slugPlaceholder = $derived(
     : getEditSlugPlaceholder()
 );
 
-const clearStatusFeedbackTimer = () => {
-  if (statusFeedbackClearTimer === null) return;
-  window.clearTimeout(statusFeedbackClearTimer);
-  statusFeedbackClearTimer = null;
-};
-
-const clearStatus = () => {
-  clearStatusFeedbackTimer();
-  statusState = 'idle';
-  statusText = '';
-};
-
-const setStatus = (state: StatusState, text: string, { autoClear = false }: StatusOptions = {}) => {
-  clearStatusFeedbackTimer();
-  statusState = state;
-  statusText = text;
-
-  if (!autoClear || !text) return;
-  statusFeedbackClearTimer = window.setTimeout(() => {
-    statusFeedbackClearTimer = null;
-    if (statusState === state && statusText === text) {
-      clearStatus();
-    }
-  }, STATUS_FEEDBACK_VISIBLE_MS);
-};
+const statusFeedback = createAdminStatusFeedback({
+  getState: () => statusState,
+  getText: () => statusText,
+  setStatus: (state, text) => {
+    statusState = state;
+    statusText = text;
+  }
+});
+const clearStatus = statusFeedback.clearStatus;
+const setStatus = statusFeedback.setStatus;
 
 const deriveEssayEntryIdFromTitle = (title: string): string => {
   const trimmed = title.trim();
@@ -192,21 +201,16 @@ const updateCreateEntryId = (value: string) => {
   setStatus('ready', '源文件名已修改', { autoClear: true });
 };
 
-const takeStoredDeleteFeedback = (): boolean => {
-  try {
-    const value = window.sessionStorage.getItem(CONTENT_LIST_DELETE_FEEDBACK_STORAGE_KEY);
-    window.sessionStorage.removeItem(CONTENT_LIST_DELETE_FEEDBACK_STORAGE_KEY);
-    return value === CONTENT_LIST_DELETE_FEEDBACK_VALUE;
-  } catch {
-    return false;
-  }
-};
-
 const buildEntryEndpoint = (collection: AdminContentDeletableCollectionKey, entryId: string): string => {
   const url = new URL(endpoint, window.location.href);
   url.searchParams.set('collection', collection);
   url.searchParams.set('entryId', entryId);
   return url.toString();
+};
+
+const reloadContentList = (feedback: ContentListActionFeedback) => {
+  storeContentListActionFeedback(feedback);
+  window.location.reload();
 };
 
 const closeDialog = () => {
@@ -217,7 +221,6 @@ const closeDialog = () => {
     clearStatus();
   }
   open = false;
-  selectedTrigger = null;
 };
 
 const openCreateDialog = async (trigger: HTMLElement) => {
@@ -232,14 +235,14 @@ const openCreateDialog = async (trigger: HTMLElement) => {
   busy = false;
   loadingEntry = false;
   open = false;
+  selectedCollection = 'essay';
   selectedEntryId = '';
   selectedDefaultPublicSlug = '';
-  selectedTrigger = trigger;
   createEntryId = '';
   createEntryIdEdited = false;
   revision = '';
-  baselineFrontmatter = cloneFrontmatter(nextFrontmatter);
-  frontmatter = cloneFrontmatter(nextFrontmatter);
+  baselineFrontmatter = cloneInfoFrontmatter(nextFrontmatter);
+  frontmatter = cloneInfoFrontmatter(nextFrontmatter);
   issues = [];
   errors = [];
   clearStatus();
@@ -249,22 +252,9 @@ const openCreateDialog = async (trigger: HTMLElement) => {
   open = true;
 };
 
-const restoreFocusAndCloseDialog = () => {
-  const trigger = selectedTrigger;
-  open = false;
-  dialog?.restoreFocus();
-  selectedTrigger = null;
-
-  if (!dialog && trigger && document.contains(trigger)) {
-    window.setTimeout(() => {
-      trigger.focus({ preventScroll: true });
-    }, 0);
-  }
-};
-
 const resetToBaseline = () => {
   if (!baselineFrontmatter) return;
-  frontmatter = cloneFrontmatter(baselineFrontmatter);
+  frontmatter = cloneInfoFrontmatter(baselineFrontmatter);
   if (dialogMode === 'create') {
     createEntryId = '';
     createEntryIdEdited = false;
@@ -291,22 +281,6 @@ const getRowCollectionLabel = (trigger: HTMLElement): string =>
     ?.trim()
   || '该分类';
 
-const removeDeletedRowFromList = (trigger: HTMLElement): void => {
-  const row = trigger.closest<HTMLElement>('[data-admin-content-item]');
-  const list = row?.parentElement;
-  if (!row || !list) return;
-
-  const collectionLabel = getRowCollectionLabel(trigger);
-  row.remove();
-
-  if (list.children.length > 0) return;
-
-  const empty = document.createElement('p');
-  empty.className = 'admin-content-empty';
-  empty.textContent = `${collectionLabel}中没有符合当前筛选条件的内容。`;
-  list.replaceWith(empty);
-};
-
 const getDeletePayload = (
   payload: unknown,
   collection: AdminContentDeletableCollectionKey,
@@ -318,58 +292,32 @@ const getDeletePayload = (
   return entryPayload;
 };
 
-const getEssayPublicHref = (value: AdminEssayEditorValues): string | null => {
-  if (value.draft === true) return null;
-  const slug = value.slug.trim() || selectedDefaultPublicSlug || flattenEntryIdToSlug(selectedEntryId);
-  return withBase(`/archive/${slug}/`);
+const getInfoPayload = (
+  payload: unknown,
+  collection: ContentInfoCollection,
+  entryId: string
+): ContentInfoPayload | null => {
+  const entryPayload = getPayloadEditorPayload(payload);
+  if (!entryPayload || entryPayload.collection !== collection || entryPayload.entryId !== entryId) return null;
+  if (!isEssayEditorValues(entryPayload.values) && !isBitsEditorValues(entryPayload.values)) return null;
+  return entryPayload;
 };
 
-const syncSelectedRow = (result: AdminContentWriteResult) => {
-  if (!result.changed || !selectedTrigger || !frontmatter) return;
-
-  const row = selectedTrigger.closest<HTMLElement>('[data-admin-content-item]');
-  const titleEl = row?.querySelector<HTMLElement>('[data-admin-content-row-title]');
-  const dateEl = row?.querySelector<HTMLElement>('[data-admin-content-row-date]');
-  const draftEl = row?.querySelector<HTMLElement>('[data-admin-content-row-draft]');
-  const archiveEl = row?.querySelector<HTMLElement>('[data-admin-content-row-archive]');
-  const publicLinkEl = row?.querySelector<HTMLAnchorElement>('[data-admin-content-row-public-link]');
-  const publicHref = getEssayPublicHref(frontmatter);
-
-  if (titleEl) titleEl.textContent = frontmatter.title || selectedEntryId;
-  if (dateEl) dateEl.textContent = frontmatter.date || '未设置日期';
-  if (draftEl) draftEl.hidden = frontmatter.draft !== true;
-  if (archiveEl) archiveEl.hidden = frontmatter.archive !== false;
-  if (publicLinkEl) {
-    if (publicHref) {
-      publicLinkEl.href = publicHref;
-      publicLinkEl.classList.remove('is-disabled');
-      publicLinkEl.removeAttribute('aria-disabled');
-      publicLinkEl.removeAttribute('title');
-    } else {
-      publicLinkEl.removeAttribute('href');
-      publicLinkEl.classList.add('is-disabled');
-      publicLinkEl.setAttribute('aria-disabled', 'true');
-      publicLinkEl.title = frontmatter.draft === true ? 'draft 条目默认不暴露公开页' : '当前条目未生成公开页链接';
-    }
-    publicLinkEl.tabIndex = publicHref ? 0 : -1;
-  }
-};
-
-const openEditor = async (entryId: string, trigger: HTMLElement) => {
+const openEditor = async (collection: ContentInfoCollection, entryId: string, trigger: HTMLElement) => {
   const requestId = loadRequestId + 1;
   loadRequestId = requestId;
   dialogMode = 'edit';
   busy = true;
   loadingEntry = true;
   open = false;
+  selectedCollection = collection;
   selectedEntryId = entryId;
   selectedDefaultPublicSlug = '';
-  selectedTrigger = trigger;
   createEntryId = '';
   createEntryIdEdited = false;
   revision = '';
   baselineFrontmatter = null;
-  frontmatter = createEmptyFrontmatter();
+  frontmatter = createEmptyInfoFrontmatter(collection);
   issues = [];
   errors = [];
   setStatus('loading', '正在加载');
@@ -380,7 +328,7 @@ const openEditor = async (entryId: string, trigger: HTMLElement) => {
   open = true;
 
   try {
-    const response = await fetch(buildEntryEndpoint('essay', entryId), {
+    const response = await fetch(buildEntryEndpoint(collection, entryId), {
       method: 'GET',
       headers: {
         Accept: 'application/json'
@@ -389,10 +337,10 @@ const openEditor = async (entryId: string, trigger: HTMLElement) => {
     });
 
     const payload = await parseResponseBody(response);
-    const essayPayload = getPayloadEssayPayload(payload);
+    const entryPayload = getInfoPayload(payload, collection, entryId);
     if (requestId !== loadRequestId) return;
 
-    if (!response.ok || !isPayloadOk(payload) || !essayPayload) {
+    if (!response.ok || !isPayloadOk(payload) || !entryPayload) {
       const payloadErrors = getPayloadErrors(payload);
       errors = payloadErrors;
       issues = getPayloadIssues(payload);
@@ -403,10 +351,10 @@ const openEditor = async (entryId: string, trigger: HTMLElement) => {
       return;
     }
 
-    revision = essayPayload.revision;
-    selectedDefaultPublicSlug = essayPayload.defaultPublicSlug;
-    baselineFrontmatter = cloneFrontmatter(essayPayload.values);
-    frontmatter = cloneFrontmatter(essayPayload.values);
+    revision = entryPayload.revision;
+    selectedDefaultPublicSlug = entryPayload.defaultPublicSlug;
+    baselineFrontmatter = cloneInfoFrontmatter(entryPayload.values);
+    frontmatter = cloneInfoFrontmatter(entryPayload.values);
     loadingEntry = false;
     await tick();
     if (requestId !== loadRequestId) return;
@@ -428,6 +376,7 @@ const openEditor = async (entryId: string, trigger: HTMLElement) => {
 
 const saveEditor = async () => {
   if (!frontmatter || !selectedEntryId || busy) return;
+  const collection = selectedCollection;
 
   busy = true;
   issues = [];
@@ -435,51 +384,66 @@ const saveEditor = async () => {
   setStatus('loading', '正在保存');
 
   try {
-    const response = await fetch(endpoint, {
-      method: 'POST',
-      headers: {
-        Accept: 'application/json',
-        'Content-Type': 'application/json; charset=utf-8'
-      },
-      cache: 'no-store',
-      body: JSON.stringify({
+    let saveOutcome: Awaited<ReturnType<typeof saveContentEntry>> | null = null;
+    if (collection === 'essay' && isEssayEditorValues(frontmatter)) {
+      saveOutcome = await saveContentEntry({
+        endpoint,
         collection: 'essay',
         entryId: selectedEntryId,
         revision,
         frontmatter
-      })
-    });
-
-    const payload = await parseResponseBody(response);
-    const nextRevision = getPayloadRevision(payload);
-    if (nextRevision && response.ok) revision = nextRevision;
-
-    if (!response.ok || !isPayloadOk(payload)) {
-      issues = getPayloadIssues(payload);
-      const payloadErrors = getPayloadErrors(payload);
-      errors = payloadErrors;
-      const state = response.status === 409 ? 'warn' : 'error';
-      const fallbackText = response.status === 409 ? '检测到外部更新' : '保存失败，请检查当前表单与磁盘状态';
-      setStatus(state, payloadErrors.length > 0 ? (response.status === 409 ? '检测到外部更新' : '保存失败') : fallbackText);
-      return;
+      });
+    } else if (collection === 'bits' && isBitsEditorValues(frontmatter)) {
+      saveOutcome = await saveContentEntry({
+        endpoint,
+        collection: 'bits',
+        entryId: selectedEntryId,
+        revision,
+        frontmatter
+      });
     }
 
-    const result = getPayloadResult(payload);
-    const latestPayload = getPayloadEssayPayload(payload);
-    if (!result || !latestPayload) {
+    if (!saveOutcome) {
       errors = [];
       setStatus('error', '保存响应异常，请检查开发日志');
       return;
     }
 
-    baselineFrontmatter = cloneFrontmatter(latestPayload.values);
-    frontmatter = cloneFrontmatter(latestPayload.values);
-    revision = latestPayload.revision;
-    syncSelectedRow(result);
-    setStatus(result.changed ? 'ok' : 'ready', result.changed ? '已保存' : '没有变化', { autoClear: true });
-    if (result.changed) {
-      restoreFocusAndCloseDialog();
+    if (saveOutcome.revision && saveOutcome.responseOk) revision = saveOutcome.revision;
+
+    if (!saveOutcome.responseOk || !saveOutcome.payloadOk) {
+      issues = saveOutcome.issues;
+      const payloadErrors = saveOutcome.errors;
+      errors = payloadErrors;
+      const state = saveOutcome.status === 409 ? 'warn' : 'error';
+      const fallbackText = saveOutcome.status === 409 ? '检测到外部更新' : '保存失败，请检查当前表单与磁盘状态';
+      setStatus(state, payloadErrors.length > 0 ? (saveOutcome.status === 409 ? '检测到外部更新' : '保存失败') : fallbackText);
+      return;
     }
+
+    const result = saveOutcome.result;
+    const latestValues = saveOutcome.latestValues;
+    let nextFrontmatter: ContentInfoFrontmatter | null = null;
+    if (collection === 'essay' && isEssayEditorValues(latestValues)) {
+      nextFrontmatter = latestValues;
+    } else if (collection === 'bits' && isBitsEditorValues(latestValues)) {
+      nextFrontmatter = latestValues;
+    }
+
+    if (!result || !nextFrontmatter) {
+      errors = [];
+      setStatus('error', '保存响应异常，请检查开发日志');
+      return;
+    }
+
+    baselineFrontmatter = cloneInfoFrontmatter(nextFrontmatter);
+    frontmatter = cloneInfoFrontmatter(nextFrontmatter);
+    if (saveOutcome.revision) revision = saveOutcome.revision;
+    if (result.changed) {
+      reloadContentList(CONTENT_LIST_ACTION_FEEDBACK_SAVED);
+      return;
+    }
+    setStatus('ready', '没有变化', { autoClear: true });
   } catch {
     errors = [];
     setStatus('error', '保存请求失败，请稍后重试');
@@ -489,12 +453,13 @@ const saveEditor = async () => {
 };
 
 const saveCreate = async () => {
-  if (!frontmatter || busy) return;
+  if (!frontmatter || busy || !isEssayEditorValues(frontmatter)) return;
+  const createFrontmatter = frontmatter;
 
   busy = true;
   issues = [];
   errors = [];
-  frontmatter.draft = true;
+  createFrontmatter.draft = true;
   setStatus('loading', '正在创建');
 
   try {
@@ -502,7 +467,7 @@ const saveCreate = async () => {
       endpoint: createEndpoint,
       collection: 'essay',
       entryId: createEntryId,
-      frontmatter
+      frontmatter: createFrontmatter
     });
 
     if (!outcome.responseOk || !outcome.payloadOk || !outcome.editHref) {
@@ -627,8 +592,7 @@ const deleteEntry = async (trigger: HTMLElement) => {
       return;
     }
 
-    removeDeletedRowFromList(trigger);
-    setStatus('ok', '已移到回收站', { autoClear: true });
+    reloadContentList(CONTENT_LIST_ACTION_FEEDBACK_DELETED);
   } catch {
     errors = [];
     setStatus('error', '删除请求失败，请稍后重试');
@@ -658,20 +622,24 @@ const handleClick = (event: MouseEvent) => {
   const trigger = event.target.closest<HTMLElement>('[data-admin-content-info-action]');
   if (!trigger) return;
 
+  const collection = trigger.dataset.collection?.trim() ?? '';
   const entryId = trigger.dataset.entryId?.trim() ?? '';
-  if (!entryId) return;
+  if (!isContentInfoCollection(collection) || !entryId) return;
 
   event.preventDefault();
   closeActionMenu(trigger);
-  void openEditor(entryId, trigger);
+  void openEditor(collection, entryId, trigger);
 };
 
 onMount(() => {
-  if (takeStoredDeleteFeedback()) {
+  const feedback = takeContentListActionFeedback();
+  if (feedback === CONTENT_LIST_ACTION_FEEDBACK_SAVED) {
+    setStatus('ok', '已保存', { autoClear: true });
+  } else if (feedback === CONTENT_LIST_ACTION_FEEDBACK_DELETED) {
     setStatus('ok', '已移到回收站', { autoClear: true });
   }
 
-  return clearStatusFeedbackTimer;
+  return statusFeedback.dispose;
 });
 
 $effect(() => {
@@ -705,7 +673,7 @@ $effect(() => {
   <ArticleInfoDialog
     bind:this={dialog}
     bind:value={frontmatter}
-    collection="essay"
+    collection={selectedCollection}
     {open}
     {issues}
     disabled={busy}
@@ -715,8 +683,10 @@ $effect(() => {
     entryId={dialogMode === 'create' ? createEntryId : selectedEntryId}
     showEntryId={dialogMode === 'create'}
     {slugPlaceholder}
-    dialogTitle={dialogMode === 'create' ? '新增文章' : '文章信息'}
-    fieldsAriaLabel="随笔字段"
+    dialogTitle={dialogMode === 'create' ? '新建文章' : selectedCollection === 'bits' ? '修改信息' : '文章信息'}
+    fieldsAriaLabel={selectedCollection === 'bits' ? '标题、摘要与作者' : '随笔字段'}
+    {bitsDefaultAuthor}
+    fieldScope={selectedCollection === 'bits' ? 'bits-summary' : 'all'}
     draftLocked={dialogMode === 'create'}
     draftLockHelp={dialogMode === 'create' ? '默认草稿，完善正文后发布。' : ''}
     saveLabel={dialogMode === 'create' ? '创建' : '保存'}

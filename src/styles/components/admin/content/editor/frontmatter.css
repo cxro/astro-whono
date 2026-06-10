@@ -271,6 +271,70 @@
   color: var(--admin-error-accent);
 }
 
+.admin-editor-frontmatter__readonly-author {
+  display: grid;
+  grid-template-columns: 46px minmax(0, 1fr);
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+  min-height: 68px;
+  padding: 10px 12px;
+  border: 1px solid var(--admin-row-border);
+  border-radius: 7px;
+  background: color-mix(in srgb, var(--panel) 68%, var(--admin-control-bg-disabled) 32%);
+}
+
+.admin-editor-frontmatter__readonly-author-copy {
+  display: grid;
+  align-content: center;
+  gap: 4px;
+  min-width: 0;
+}
+
+.admin-editor-frontmatter__readonly-author-name,
+.admin-editor-frontmatter__readonly-author-path {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.admin-editor-frontmatter__readonly-author-name {
+  color: var(--text);
+  font-size: var(--admin-text-base);
+  font-weight: 600;
+  line-height: 1.25;
+}
+
+.admin-editor-frontmatter__readonly-author-path {
+  color: color-mix(in srgb, var(--muted) 88%, var(--text) 12%);
+  font-family: var(--admin-font-mono);
+  font-weight: 400;
+  font-size: var(--admin-text-sm);
+  line-height: 1.3;
+}
+
+.admin-editor-frontmatter__readonly-author-avatar {
+  display: inline-grid;
+  width: 46px;
+  height: 46px;
+  place-items: center;
+  border: 1px solid var(--admin-row-border);
+  border-radius: 50%;
+  background: color-mix(in srgb, var(--panel) 84%, var(--bg) 16%);
+  box-shadow: 0 1px 2px color-mix(in srgb, #000 8%, transparent);
+  color: var(--muted);
+  font-size: var(--admin-text-sm);
+  font-weight: 700;
+  overflow: hidden;
+}
+
+.admin-editor-frontmatter__readonly-author-avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
 .admin-editor-frontmatter__tooltip {
   position: absolute;
   inset-block-start: calc(100% + 4px);
@@ -381,11 +445,15 @@
 }
 
 .admin-editor-frontmatter-popover__actions--locked {
+  align-items: center;
   flex-wrap: nowrap;
+  min-height: 50px;
+  padding-block: 10px;
 }
 
 .admin-editor-frontmatter-popover__publish-state {
   display: grid;
+  align-items: center;
   flex: 1 1 260px;
   gap: 6px;
   min-width: 0;

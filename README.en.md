@@ -27,7 +27,7 @@ A minimal two-column Astro theme for personal writing and lightweight publishing
 - Two-column layout (sidebar navigation + content area)
 - Responsive design for mobile devices
 - Content collections: essay / bits / memo / about (archive is generated from essay)
-- Built-in local Admin Console (`/admin`): use Theme / Images / Checks / Data Console in development to manage site settings and assets, and take over the theme after forking or cloning
+- Built-in local Admin Console (`/admin`): use Theme / Content / Images / Checks / Data Console in development to manage site settings, content, and assets, and take over the theme after forking or cloning
 - Bits draft generator on `/bits/`: one-click Markdown output (copy/download), with multi-image support and automatic image dimension detection
 - RSS: default archive feed + section feeds
 - Light / dark theme + reading mode
@@ -171,7 +171,7 @@ Then open `http://localhost:4321/admin/` in your browser.
 | `/admin/images/` | Available | Image resource browser and path helper |
 | `/admin/checks/` | Available | Structured diagnostics and pre-release checks |
 | `/admin/data/` | Available | Settings snapshot export / dry-run import / confirmed write |
-| `/admin/content/` | Available | Content management, article creation, local editing for essay / bits / memo / about page, and source export |
+| `/admin/content/` | Available | Content management, essay / bits draft creation, local editing for essay / bits / memo / about page, and source export |
 
 
 <details>
@@ -201,7 +201,7 @@ For more details, see the [Theme Console configuration guide](https://astro.whon
 #### Production behavior
 
 - Admin Console write capabilities are available only in local development, including theme settings, content editing, settings import/export, and supported content image uploads.
-- `/admin/content/` provides the content list, filters, search, essay draft creation, and row-level actions. In development, edit pages support local editing and preview for essay, bits, memo, and about content.
+- `/admin/content/` provides the content list, filters, search, essay / bits draft creation, and row-level actions. In development, edit pages support local editing and preview for essay, bits, memo, and about content.
 - Production builds remain static output. `/admin/` can show a read-only public Overview or a hidden-state message based on Theme settings; production does not show Admin tabs, and other Admin subroutes only keep a local-development notice.
 - `/api/admin/**` is for local development only and should not be treated as a production API
 

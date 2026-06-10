@@ -380,7 +380,7 @@
 
 .admin-content-modules {
   display: grid;
-  gap: 22px;
+  gap: 32px;
 }
 
 .admin-content-module {
@@ -424,9 +424,108 @@
 }
 
 .admin-content-create-action.admin-btn {
-  inline-size: var(--admin-content-action-inline-size);
+  inline-size: auto;
   min-height: 24px;
-  background: var(--admin-button-secondary-bg);
+  padding-inline: 4px;
+  border-color: transparent;
+  background: transparent;
+  color: var(--text);
+  font-weight: 600;
+}
+
+.admin-content-create-action.admin-btn:not(:disabled):hover {
+  border-color: transparent;
+  background: var(--admin-row-hover-bg);
+  color: var(--text);
+}
+
+.admin-content-create-action.admin-btn:disabled {
+  border-color: transparent;
+  background: transparent;
+  color: var(--faint);
+}
+
+.admin-content-create-action.admin-btn:focus-visible {
+  border-color: transparent;
+}
+
+.admin-content-create-action__icon {
+  flex: 0 0 auto;
+}
+
+.admin-content-bits-create-dialog {
+  --admin-modal-width: 420px;
+}
+
+.admin-content-bits-create-dialog .admin-editor-frontmatter__datetime-grid {
+  grid-template-columns: minmax(0, 1fr) minmax(112px, 0.8fr);
+}
+
+.admin-content-bits-create-dialog__form {
+  display: grid;
+  grid-row: 1 / -1;
+  grid-template-rows: auto minmax(0, 1fr) auto;
+  gap: 10px;
+  max-height: var(--admin-modal-max-height);
+  min-width: 0;
+}
+
+.admin-content-bits-create-dialog__actions {
+  align-items: center;
+  flex-wrap: nowrap;
+  gap: 8px 12px;
+  min-height: 50px;
+  padding-block: 10px;
+}
+
+.admin-content-bits-create-dialog__publish-state {
+  display: grid;
+  align-items: center;
+  flex: 1 1 260px;
+  gap: 6px;
+  min-width: 0;
+}
+
+.admin-content-bits-create-dialog__toggles,
+.admin-content-bits-create-dialog__buttons {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+}
+
+.admin-content-bits-create-dialog__toggles {
+  gap: 10px;
+}
+
+.admin-content-bits-create-dialog__state-badge {
+  min-height: 20px;
+  border-radius: 5px;
+}
+
+.admin-content-bits-create-dialog__source {
+  display: flex;
+  align-items: center;
+  min-width: 0;
+  min-height: var(--admin-control-height);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  background: var(--admin-control-bg-disabled);
+  color: var(--muted);
+  font-family: var(--admin-font-mono);
+  font-size: var(--admin-text-sm);
+}
+
+@media (max-width: 560px) {
+  .admin-content-bits-create-dialog .admin-editor-frontmatter__datetime-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .admin-content-bits-create-dialog__actions {
+    flex-wrap: wrap;
+  }
 }
 
 .admin-content-module__route {

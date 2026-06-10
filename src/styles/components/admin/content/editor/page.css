@@ -208,7 +208,11 @@ body.admin-page--content-editor .admin-editor-shell__actions {
 
 .admin-editor-recovery-modal__body {
   display: grid;
-  gap: 12px;
+  gap: 10px;
+}
+
+.admin-editor-recovery-modal__body [hidden] {
+  display: none;
 }
 
 .admin-editor-recovery-modal__command {

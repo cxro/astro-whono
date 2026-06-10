@@ -83,6 +83,7 @@ const getRecoveryRoot = (documentRoot: Document = document): RecoveryRoot | null
 const setStatus = (root: RecoveryRoot, text: string) => {
   if (!root.status) return;
   root.status.textContent = text;
+  root.status.hidden = text.length === 0;
 };
 
 const openModal = (root: RecoveryRoot) => {

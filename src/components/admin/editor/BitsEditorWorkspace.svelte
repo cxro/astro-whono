@@ -869,6 +869,7 @@ onMount(() => {
     canSave={!editorBusy && bitsInfoDirty}
     dialogTitle="修改信息"
     fieldsAriaLabel="标题、摘要与作者"
+    bitsDefaultAuthor={defaultAuthor}
     fieldScope="bits-summary"
     onDirty={markDirty}
     onClose={closeBitsInfoPanel}

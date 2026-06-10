@@ -1,11 +1,14 @@
 ---
+import BitsCreateAction from './BitsCreateAction.svelte';
 import ContentListActions from './ContentListActions.svelte';
+import type { BitsCardAuthorInput } from '../../../lib/bits-card-view-model';
 
 type Props = {
   base?: string;
   endpoint: string;
   createEndpoint: string;
   deleteEndpoint: string;
+  bitsDefaultAuthor?: BitsCardAuthorInput;
 };
 
 const props = Astro.props;
@@ -13,4 +16,5 @@ const props = Astro.props;
 
 <div data-admin-content-list-actions-island>
   <ContentListActions client:only="svelte" {...props} />
+  <BitsCreateAction client:only="svelte" base={props.base ?? '/'} createEndpoint={props.createEndpoint} />
 </div>

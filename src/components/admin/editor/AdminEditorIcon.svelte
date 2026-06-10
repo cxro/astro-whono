@@ -35,6 +35,7 @@ import MSquare from '@lucide/svelte/icons/m-square';
 import MapPin from '@lucide/svelte/icons/map-pin';
 import NotebookPen from '@lucide/svelte/icons/notebook-pen';
 import Minus from '@lucide/svelte/icons/minus';
+import Pencil from '@lucide/svelte/icons/pencil';
 import Plus from '@lucide/svelte/icons/plus';
 import Quote from '@lucide/svelte/icons/quote';
 import RotateCcw from '@lucide/svelte/icons/rotate-ccw';
@@ -95,6 +96,7 @@ const icons = {
   minus: Minus,
   'notebook-pen': NotebookPen,
   'ordered-list': ListOrdered,
+  pencil: Pencil,
   plus: Plus,
   quote: Quote,
   'rotate-ccw': RotateCcw,

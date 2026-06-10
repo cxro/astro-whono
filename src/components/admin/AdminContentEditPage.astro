@@ -268,13 +268,16 @@ const infoTrigger = shouldUseEditorPageLayout ? editorRegistration?.infoTrigger 
                   </header>
                   <div class="admin-modal__body admin-editor-recovery-modal__body">
                     <p class="admin-content-copy">
-                      编辑器模块加载失败，通常由 Vite dev 依赖缓存失配导致。
+                      本地开发缓存可能已过期，编辑器未能加载。
                     </p>
                     <p class="admin-content-copy">
-                      请停止当前 dev server 后运行：
+                      请先停止开发服务，重新运行 <code>npm run dev</code>，然后刷新本页。
+                    </p>
+                    <p class="admin-content-copy">
+                      如果仍无法加载，请停止开发服务并运行：
                     </p>
                     <code class="admin-editor-recovery-modal__command" data-admin-editor-recovery-command>npm run dev:clean</code>
-                    <p class="admin-content-muted" data-admin-editor-recovery-status aria-live="polite"></p>
+                    <p class="admin-content-muted" data-admin-editor-recovery-status aria-live="polite" hidden></p>
                   </div>
                   <footer class="admin-modal__actions">
                     <button

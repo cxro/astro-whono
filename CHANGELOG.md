@@ -9,7 +9,7 @@ The format is based on Keep a Changelog, and this project aims to follow Semanti
 
 ### Added
 - `/about/` 新增友链区块，支持展示友链列表、申请入口和说明文案。
-- 新增本地文章管理与写作 Content Console，可在开发环境中浏览、新增 essay 草稿、编辑、导出和删除文章。
+- 新增本地文章管理与写作 Content Console，可在开发环境中浏览、新增 essay / bits 草稿、编辑、导出和删除内容。
 - `essay` 内容支持可选 `updatedAt` 更新日期；前台存在时显示“更新于”，本地后台可编辑并会在保存时校验日期一致性（[PR #36](https://github.com/cxro/astro-whono/pull/36)，by [@ZephyrCICD](https://github.com/ZephyrCICD)）。
 - 文章编辑器引入 CodeMirror 编辑区，内置5种语法高亮主题，提升长文编辑体验。
 - 文章编辑器支持编辑 / 预览布局切换、目录与语法侧栏、编辑器语法高亮、行号选项，以及常用 Markdown、数学公式、emoji、图片与画廊写作辅助。

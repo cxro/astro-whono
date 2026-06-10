@@ -5,6 +5,7 @@ import type {
 import type {
   AdminContentWorkspaceEditorValues
 } from '../../../lib/admin-console/content-editor-payload';
+import type { BitsCardAuthorInput } from '../../../lib/bits-card-view-model';
 import { createModalDialogFocusController } from '../../../scripts/admin-console/modal-dialog-focus';
 import AdminEditorIcon from './AdminEditorIcon.svelte';
 import FrontmatterSidebar from './FrontmatterSidebar.svelte';
@@ -28,6 +29,7 @@ type Props = {
   showEntryId?: boolean;
   slugPlaceholder?: string;
   relativePath?: string;
+  bitsDefaultAuthor?: BitsCardAuthorInput;
   dialogTitle?: string;
   fieldsAriaLabel?: string;
   fieldScope?: 'all' | 'bits-summary';
@@ -55,6 +57,7 @@ let {
   showEntryId = false,
   slugPlaceholder = '',
   relativePath = '',
+  bitsDefaultAuthor = {},
   dialogTitle = '文章信息',
   fieldsAriaLabel = '随笔字段',
   fieldScope = 'all',
@@ -132,7 +135,7 @@ $effect(() => {
       <header class="admin-modal__head admin-editor-frontmatter-popover__head">
         <div class="admin-editor-frontmatter-popover__title-wrap">
           <span class="admin-editor-frontmatter-popover__icon" aria-hidden="true">
-            <AdminEditorIcon name="notebook-pen" size={16} strokeWidth={1.9} />
+            <AdminEditorIcon name="pencil" size={16} strokeWidth={1.9} />
           </span>
           <div class="admin-editor-frontmatter-popover__title-copy">
             <h3 id="admin-editor-frontmatter-panel-title" class="admin-modal__title admin-content-section-title">{dialogTitle}</h3>
@@ -166,6 +169,7 @@ $effect(() => {
             {entryId}
             {showEntryId}
             {slugPlaceholder}
+            {bitsDefaultAuthor}
             ariaLabel={fieldsAriaLabel}
             {fieldScope}
             {onEntryIdInput}

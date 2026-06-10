@@ -48,6 +48,35 @@ describe('admin content create contract', () => {
     expect(source).toContain('tags:');
   });
 
+  it('creates draft bits entries from a selected minute', async () => {
+    const { POST } = await import('../src/pages/api/admin/content/create');
+
+    const response = await POST({
+      request: createJsonRequest('http://127.0.0.1:4321/api/admin/content/create', {
+        collection: 'bits',
+        frontmatter: {
+          date: '2026-06-09T14:30:00-04:00'
+        }
+      }),
+      url: new URL('http://127.0.0.1:4321/api/admin/content/create')
+    } as never);
+
+    expect(response.status).toBe(200);
+    const payload = JSON.parse(await response.text());
+    expect(payload.ok).toBe(true);
+    expect(payload.result.written).toBe(true);
+    expect(payload.result.relativePath).toBe('src/content/bits/bits-2026-06-09-1430.md');
+    expect(payload.editHref).toBe('/admin/content/bits/_edit/bits-2026-06-09-1430/');
+    expect(payload.payload.collection).toBe('bits');
+    expect(payload.payload.entryId).toBe('bits-2026-06-09-1430');
+    expect(payload.payload.values.date).toBe('2026-06-09T14:30:00-04:00');
+    expect(payload.payload.values.draft).toBe(true);
+
+    const source = await readFile(path.join(getTempRoot(), 'src', 'content', 'bits', 'bits-2026-06-09-1430.md'), 'utf8');
+    expect(source).toContain('date: 2026-06-09T14:30:00-04:00');
+    expect(source).toContain('draft: true');
+  });
+
   it('auto-fills valid public slug when create defaults cannot produce one', async () => {
     const { POST } = await import('../src/pages/api/admin/content/create');
 
@@ -188,17 +217,17 @@ describe('admin content create contract', () => {
   it('rejects non-creatable collections and malformed entry ids', async () => {
     const { POST } = await import('../src/pages/api/admin/content/create');
 
-    const bitsResponse = await POST({
+    const memoResponse = await POST({
       request: createJsonRequest('http://127.0.0.1:4321/api/admin/content/create', {
-        collection: 'bits',
-        entryId: 'new-bit',
+        collection: 'memo',
+        entryId: 'new-memo',
         frontmatter: createEssayFrontmatter()
       }),
       url: new URL('http://127.0.0.1:4321/api/admin/content/create')
     } as never);
 
-    expect(bitsResponse.status).toBe(400);
-    expect(JSON.parse(await bitsResponse.text()).issues).toEqual(
+    expect(memoResponse.status).toBe(400);
+    expect(JSON.parse(await memoResponse.text()).issues).toEqual(
       expect.arrayContaining([expect.objectContaining({ path: 'collection' })])
     );
 
@@ -213,6 +242,31 @@ describe('admin content create contract', () => {
 
     expect(invalidEntryResponse.status).toBe(400);
     expect(JSON.parse(await invalidEntryResponse.text()).issues).toEqual(
+      expect.arrayContaining([expect.objectContaining({ path: 'entryId' })])
+    );
+  });
+
+  it('rejects duplicate bits filenames derived from the selected minute', async () => {
+    const { POST } = await import('../src/pages/api/admin/content/create');
+
+    await writeFile(
+      path.join(getTempRoot(), 'src', 'content', 'bits', 'bits-2026-06-09-1430.md'),
+      ['---', 'date: 2026-06-09T14:30:00+08:00', '---', '', 'existing bit', ''].join('\n'),
+      'utf8'
+    );
+
+    const response = await POST({
+      request: createJsonRequest('http://127.0.0.1:4321/api/admin/content/create', {
+        collection: 'bits',
+        frontmatter: {
+          date: '2026-06-09T14:30:00+08:00'
+        }
+      }),
+      url: new URL('http://127.0.0.1:4321/api/admin/content/create')
+    } as never);
+
+    expect(response.status).toBe(400);
+    expect(JSON.parse(await response.text()).issues).toEqual(
       expect.arrayContaining([expect.objectContaining({ path: 'entryId' })])
     );
   });

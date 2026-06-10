@@ -107,11 +107,18 @@ export type ContentEditorDeleteOutcome = ContentEditorRequestOutcome & {
 
 export type ContentEditorCreateInput = {
   endpoint: string;
-  collection: 'essay';
-  entryId: string;
-  frontmatter: AdminEssayEditorValues;
   fetchImpl?: FetchLike;
-};
+} & (
+  | {
+      collection: 'essay';
+      entryId: string;
+      frontmatter: AdminEssayEditorValues;
+    }
+  | {
+      collection: 'bits';
+      frontmatter: Pick<AdminBitsEditorValues, 'date'>;
+    }
+);
 
 export type ContentEditorCreateOutcome = Omit<ContentEditorRequestOutcome, 'revision'> & {
   result: AdminContentWriteResult | null;
@@ -239,22 +246,21 @@ export const deleteContentEntry = async ({
   };
 };
 
-export const createContentEntry = async ({
-  endpoint,
-  collection,
-  entryId,
-  frontmatter,
-  fetchImpl
-}: ContentEditorCreateInput): Promise<ContentEditorCreateOutcome> => {
+export const createContentEntry = async (input: ContentEditorCreateInput): Promise<ContentEditorCreateOutcome> => {
+  const { endpoint, collection, frontmatter, fetchImpl } = input;
+  const requestBody: Record<string, unknown> = {
+    collection,
+    frontmatter
+  };
+  if (collection === 'essay') {
+    requestBody.entryId = input.entryId;
+  }
+
   const response = await getFetch(fetchImpl)(endpoint, {
     method: 'POST',
     headers: JSON_REQUEST_HEADERS,
     cache: 'no-store',
-    body: JSON.stringify({
-      collection,
-      entryId,
-      frontmatter
-    })
+    body: JSON.stringify(requestBody)
   });
   const payload = await parseResponseBody(response);
 

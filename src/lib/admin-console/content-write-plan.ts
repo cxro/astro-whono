@@ -40,14 +40,14 @@ import {
   normalizeOptionalText
 } from './content-entry-utils';
 
-type AdminBitsImage = {
+export type AdminBitsImage = {
   src: string;
   width?: number;
   height?: number;
   alt?: string;
 };
 
-type AdminBitsFrontmatter = {
+export type AdminBitsFrontmatter = {
   title?: string;
   description?: string;
   date: string;
@@ -214,7 +214,7 @@ const parseBitsImages = (value: string): { images?: AdminBitsImage[]; issues: Ad
   return issues.length > 0 ? { issues } : { issues, images };
 };
 
-const buildBitsFrontmatterFromValues = (
+export const buildBitsFrontmatterFromValues = (
   values: AdminBitsEditorValues
 ): { frontmatter?: AdminBitsFrontmatter; issues: AdminContentValidationIssue[] } => {
   const issues: AdminContentValidationIssue[] = [];

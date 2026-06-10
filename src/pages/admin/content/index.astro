@@ -20,6 +20,7 @@ import type {
   AdminContentScopeKey,
   AdminContentSortKey
 } from '../../../lib/admin-console/content';
+import type { AdminContentCreatableCollectionKey } from '../../../lib/admin-console/content-collections';
 import {
   ADMIN_CONTENT_CREATE_API_PATH,
   ADMIN_CONTENT_DELETE_API_PATH,
@@ -27,6 +28,7 @@ import {
   ADMIN_CONTENT_EXPORT_API_PATH
 } from '../../../lib/admin-console/admin-api-paths';
 import { isAdminContentDeletableCollectionKey } from '../../../lib/admin-console/content-delete-contract';
+import { getThemeSettings } from '../../../lib/theme-settings';
 import { createWithBase, formatISODate } from '../../../utils/format';
 
 const isDev = import.meta.env.DEV;
@@ -34,6 +36,8 @@ const shouldShowContentConsole = isDev;
 const shouldShowAdminNav = isDev;
 const base = import.meta.env.BASE_URL ?? '/';
 const withBase = createWithBase(base);
+const { settings } = getThemeSettings();
+const bitsDefaultAuthor = settings.page.bits.defaultAuthor;
 const { default: adminShellStylesHref } = await import('../../../styles/components/admin/shell.css?url');
 const contentHref = '/admin/content/';
 
@@ -94,17 +98,20 @@ const getContentRowDateLabel = (
 const getContentPublicLinkLabel = (item: Pick<AdminContentIndexItem, 'collection'>): string => {
   const capability = getAdminContentCollectionCapability(item.collection);
   if (capability.fixedPage) return `转到${capability.label}`;
-  if (item.collection === 'bits') return '转到絮语';
+  if (item.collection === 'bits') return '前台查看';
   return '转到文章';
 };
 
 const getContentInfoActionLabel = (item: Pick<AdminContentIndexItem, 'collection'>): string => {
   const capability = getAdminContentCollectionCapability(item.collection);
   if (!capability.writable) return '查看源信息';
-  if (item.collection === 'essay') return '修改信息';
+  if (item.collection === 'essay' || item.collection === 'bits') return '修改信息';
   if (capability.fixedPage) return `${capability.label}信息`;
   return '编辑信息';
 };
+
+const hasListInfoAction = (collection: AdminContentCollectionKey): collection is 'essay' | 'bits' =>
+  collection === 'essay' || collection === 'bits';
 
 const getContentPaginationHref = (page: number): string => {
   // 分页只属于具体 collection scope；总览和全部内容搜索不生成分页链接。
@@ -177,6 +184,29 @@ const getContentEmptyMessage = (sectionLabel: string): string => {
   if (pageData?.hasActiveFilters) return `${sectionLabel}中没有符合当前筛选条件的内容。`;
   return `${sectionLabel}中暂无内容。`;
 };
+
+const CONTENT_CREATE_ACTIONS = {
+  essay: {
+    attribute: 'data-admin-content-create-action',
+    label: '新建文章'
+  },
+  bits: {
+    attribute: 'data-admin-content-bits-create-action',
+    label: '新建动态'
+  }
+} as const satisfies Record<AdminContentCreatableCollectionKey, { attribute: string; label: string }>;
+
+const hasContentCreateAction = (
+  collection: AdminContentCollectionKey
+): collection is AdminContentCreatableCollectionKey =>
+  collection in CONTENT_CREATE_ACTIONS;
+
+const getContentCreateAction = (
+  collection: AdminContentCollectionKey
+): { attribute: string; label: string } | null => {
+  if (!hasContentCreateAction(collection)) return null;
+  return CONTENT_CREATE_ACTIONS[collection];
+};
 ---
 
 <AdminLayout title="Content Console" stylesHref={adminStylesHref}>
@@ -193,6 +223,7 @@ const getContentEmptyMessage = (sectionLabel: string): string => {
           endpoint={adminContentEntryEndpoint}
           createEndpoint={adminContentCreateEndpoint}
           deleteEndpoint={adminContentDeleteEndpoint}
+          bitsDefaultAuthor={bitsDefaultAuthor}
         />
       </div>
     ) : null}
@@ -399,7 +430,10 @@ const getContentEmptyMessage = (sectionLabel: string): string => {
               pageData.sections.map((section) => {
                 const sectionTitleId = `admin-content-${section.collection}-title`;
                 const sectionCapability = getAdminContentCollectionCapability(section.collection);
-                const shouldShowSectionCreateAction = section.collection === 'essay' && sectionCapability.create;
+                const createAction = sectionCapability.create
+                  ? getContentCreateAction(section.collection)
+                  : null;
+                const shouldShowSectionCreateAction = Boolean(createAction);
                 const shouldShowSectionListAction = pageData.mode === 'overview' && section.filteredCount > section.items.length;
                 return (
                   <section class="admin-content-module" aria-labelledby={sectionTitleId}>
@@ -419,14 +453,16 @@ const getContentEmptyMessage = (sectionLabel: string): string => {
                               ) : null
                             }
                             {
-                              shouldShowSectionCreateAction ? (
+                              shouldShowSectionCreateAction && createAction ? (
                                 <button
                                   class="admin-btn admin-btn--ghost admin-btn--compact admin-content-create-action"
                                   type="button"
-                                  data-admin-content-create-action
+                                  {...{ [createAction.attribute]: true }}
+                                  data-create-action-label={createAction.label}
                                   disabled
                                 >
-                                  新增文章
+                                  <AdminIcon name="plus" size={13} strokeWidth={2.2} class="admin-content-create-action__icon" />
+                                  <span>{createAction.label}</span>
                                 </button>
                               ) : null
                             }
@@ -443,6 +479,7 @@ const getContentEmptyMessage = (sectionLabel: string): string => {
                               const capability = getAdminContentCollectionCapability(item.collection);
                               const editPath = getAdminContentEntryEditHref(item.collection, item.id);
                               const editHref = withBase(editPath);
+                              const supportsListInfoAction = capability.writable && hasListInfoAction(item.collection);
                               const articleInfoHref = capability.writable
                                 ? item.collection === 'essay'
                                   ? withBase(`${editPath}?panel=info`)
@@ -529,8 +566,9 @@ const getContentEmptyMessage = (sectionLabel: string): string => {
                                             !articleInfoHref && 'is-disabled'
                                           ]}
                                           href={articleInfoHref ?? undefined}
-                                          data-admin-content-info-action={item.collection === 'essay' ? true : undefined}
-                                          data-entry-id={item.collection === 'essay' ? item.id : undefined}
+                                          data-admin-content-info-action={supportsListInfoAction ? true : undefined}
+                                          data-collection={supportsListInfoAction ? item.collection : undefined}
+                                          data-entry-id={supportsListInfoAction ? item.id : undefined}
                                           aria-disabled={articleInfoHref ? undefined : 'true'}
                                           title={articleInfoHref ? undefined : capability.readonlyReason ?? '当前内容暂不支持编辑'}
                                           tabindex={articleInfoHref ? undefined : '-1'}

@@ -5,6 +5,8 @@ import type {
 import type {
   AdminContentWorkspaceEditorValues
 } from '../../../lib/admin-console/content-editor-payload';
+import type { BitsCardAuthorInput } from '../../../lib/bits-card-view-model';
+import { getAdminImageFieldPreviewSrc } from '../../../lib/admin-console/image-params';
 import { parseEssayDateInput } from '../../../utils/date-only';
 import AdminEditorIcon from './AdminEditorIcon.svelte';
 import FrontmatterTagsInput from './FrontmatterTagsInput.svelte';
@@ -26,6 +28,7 @@ type Props = {
   entryId?: string;
   showEntryId?: boolean;
   slugPlaceholder?: string;
+  bitsDefaultAuthor?: BitsCardAuthorInput;
   ariaLabel?: string;
   fieldScope?: 'all' | 'bits-summary';
   onEntryIdInput?: (value: string) => void;
@@ -40,6 +43,7 @@ let {
   entryId = '',
   showEntryId = false,
   slugPlaceholder = '',
+  bitsDefaultAuthor = {},
   ariaLabel = '内容字段',
   fieldScope = 'all',
   onEntryIdInput = () => {},
@@ -51,6 +55,8 @@ const getIssue = (path: string): string =>
 
 const getIssueByPrefix = (prefix: string): string =>
   issues.find((issue) => issue.path.startsWith(prefix))?.message ?? '';
+
+const base = import.meta.env.BASE_URL ?? '/';
 
 const padDatePart = (value: number): string => String(value).padStart(2, '0');
 
@@ -140,6 +146,25 @@ const setUpdatedAtToday = () => {
 };
 
 const bitsImagesIssue = $derived(getIssue('imagesText') || getIssueByPrefix('images['));
+const bitsAuthorIssue = $derived(getIssue('authorName') || getIssue('authorAvatar'));
+const bitsAuthorNameText = $derived(
+  isBitsEditorValues(value)
+    ? value.authorName.trim() || bitsDefaultAuthor.name?.trim() || '未设置'
+    : ''
+);
+const bitsAuthorAvatarText = $derived(
+  isBitsEditorValues(value)
+    ? value.authorAvatar.trim() || bitsDefaultAuthor.avatar?.trim() || ''
+    : ''
+);
+const bitsAuthorAvatarPreviewSrc = $derived(
+  bitsAuthorAvatarText
+    ? getAdminImageFieldPreviewSrc('page.bits.defaultAuthor.avatar', bitsAuthorAvatarText, base)
+    : null
+);
+const bitsAuthorAvatarFallback = $derived(
+  Array.from(bitsAuthorNameText.trim()).at(0)?.toUpperCase() ?? '?'
+);
 </script>
 
 <aside class="admin-editor-frontmatter" aria-label={ariaLabel}>
@@ -308,40 +333,72 @@ const bitsImagesIssue = $derived(getIssue('imagesText') || getIssueByPrefix('ima
       </div>
     {:else if collection === 'bits' && isBitsEditorValues(value)}
       <label class="admin-field admin-content-editor__field" class:is-invalid={Boolean(getIssue('title'))}>
-        <span class="admin-field__label">title（可选）</span>
+        <span class="admin-field__label">标题（可选）</span>
         <input class="admin-field__control" name="title" type="text" bind:value={value.title} oninput={onDirty} {disabled} />
         <p class="admin-content-editor__error" hidden={!getIssue('title')}>{getIssue('title')}</p>
       </label>
 
       {#if fieldScope !== 'bits-summary'}
         <label class="admin-field admin-content-editor__field" class:is-invalid={Boolean(getIssue('date'))}>
-          <span class="admin-field__label">date</span>
+          <span class="admin-field__label">发布时间</span>
           <input class="admin-field__control" name="date" type="text" bind:value={value.date} {disabled} />
           <p class="admin-content-editor__error" hidden={!getIssue('date')}>{getIssue('date')}</p>
         </label>
       {/if}
 
-      <label class="admin-field admin-content-editor__field" class:is-invalid={Boolean(getIssue('authorName'))}>
-        <span class="admin-field__label">author.name</span>
-        <input class="admin-field__control" name="authorName" type="text" bind:value={value.authorName} oninput={onDirty} {disabled} />
-        <p class="admin-content-editor__error" hidden={!getIssue('authorName')}>{getIssue('authorName')}</p>
-      </label>
+      {#if fieldScope !== 'bits-summary' || bitsAuthorIssue}
+        <label class="admin-field admin-content-editor__field" class:is-invalid={Boolean(getIssue('authorName'))}>
+          <span class="admin-field__label">作者名（单条覆盖）</span>
+          <input class="admin-field__control" name="authorName" type="text" bind:value={value.authorName} oninput={onDirty} {disabled} />
+          <p class="admin-content-editor__error" hidden={!getIssue('authorName')}>{getIssue('authorName')}</p>
+        </label>
 
-      <label class="admin-field admin-content-editor__field" class:is-invalid={Boolean(getIssue('authorAvatar'))}>
-        <span class="admin-field__label">author.avatar</span>
-        <input class="admin-field__control" name="authorAvatar" type="text" bind:value={value.authorAvatar} spellcheck="false" oninput={onDirty} {disabled} />
-        <p class="admin-content-editor__error" hidden={!getIssue('authorAvatar')}>{getIssue('authorAvatar')}</p>
-      </label>
+        <label class="admin-field admin-content-editor__field" class:is-invalid={Boolean(getIssue('authorAvatar'))}>
+          <span class="admin-field__label">作者头像（单条覆盖）</span>
+          <input
+            class="admin-field__control"
+            name="authorAvatar"
+            type="text"
+            bind:value={value.authorAvatar}
+            placeholder="author/avatar.webp"
+            spellcheck="false"
+            oninput={onDirty}
+            {disabled}
+          />
+          <p class="admin-content-editor__error" hidden={!getIssue('authorAvatar')}>{getIssue('authorAvatar')}</p>
+        </label>
+      {/if}
 
       <label class="admin-field admin-content-editor__field" class:is-invalid={Boolean(getIssue('description'))}>
-        <span class="admin-field__label">description</span>
+        <span class="admin-field__label">摘要</span>
         <textarea class="admin-field__control" name="description" bind:value={value.description} rows="3" oninput={onDirty} {disabled}></textarea>
         <p class="admin-content-editor__error" hidden={!getIssue('description')}>{getIssue('description')}</p>
       </label>
 
+      {#if fieldScope === 'bits-summary' && !bitsAuthorIssue}
+        <div class="admin-field admin-content-editor__field">
+          <span class="admin-field__label">作者（只读）</span>
+          <div class="admin-editor-frontmatter__readonly-author" role="group" aria-label="作者（只读）">
+            <span class="admin-editor-frontmatter__readonly-author-avatar" aria-hidden="true">
+              {#if bitsAuthorAvatarPreviewSrc}
+                <img src={bitsAuthorAvatarPreviewSrc} alt="" loading="lazy" decoding="async" />
+              {:else}
+                <span>{bitsAuthorAvatarFallback}</span>
+              {/if}
+            </span>
+            <div class="admin-editor-frontmatter__readonly-author-copy">
+              <strong class="admin-editor-frontmatter__readonly-author-name">{bitsAuthorNameText}</strong>
+              <code class="admin-editor-frontmatter__readonly-author-path" title={bitsAuthorAvatarText || '未设置'}>
+                {bitsAuthorAvatarText || '未设置'}
+              </code>
+            </div>
+          </div>
+        </div>
+      {/if}
+
       {#if fieldScope !== 'bits-summary'}
         <div class="admin-field admin-content-editor__field" class:is-invalid={Boolean(getIssue('tags'))}>
-          <label class="admin-field__label" for="admin-bits-tags">tags</label>
+          <label class="admin-field__label" for="admin-bits-tags">标签</label>
           <FrontmatterTagsInput
             id="admin-bits-tags"
             bind:value={value.tagsText}
@@ -353,7 +410,7 @@ const bitsImagesIssue = $derived(getIssue('imagesText') || getIssueByPrefix('ima
         </div>
 
         <label class="admin-field admin-content-editor__field" class:is-invalid={Boolean(bitsImagesIssue)}>
-          <span class="admin-field__label">images</span>
+          <span class="admin-field__label">图片 JSON</span>
           <textarea class="admin-field__control" name="imagesText" bind:value={value.imagesText} rows="8" spellcheck="false" {disabled}></textarea>
           <p class="admin-content-editor__error" hidden={!bitsImagesIssue}>{bitsImagesIssue}</p>
         </label>

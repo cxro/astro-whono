@@ -6,7 +6,7 @@ import {
   flattenEntryIdToSlug
 } from '../../utils/slug-rules';
 import { buildAdminContentEntryEditorPayloadFromState } from './content-editor-payload';
-import type { AdminEssayEditorValues } from './content-editor-payload';
+import type { AdminBitsEditorValues, AdminEssayEditorValues } from './content-editor-payload';
 import {
   buildEssayFrontmatterFromValues,
   loadEssayPublicSlugUsage,
@@ -29,13 +29,25 @@ import {
   createAdminContentValidationIssue as createIssue
 } from './content-entry-utils';
 import { getAdminContentEntryEditHref } from './content-routes';
+import { buildBitsFrontmatterFromValues } from './content-write-plan';
 import { patchMarkdownFrontmatter } from './frontmatter';
 
-export type AdminContentCreateInput = {
-  collection: AdminContentCreatableCollectionKey;
-  entryId: string;
+type AdminContentCreateBaseInput = {
   frontmatter: unknown;
 };
+
+type AdminEssayContentCreateInput = AdminContentCreateBaseInput & {
+  collection: 'essay';
+  entryId: string;
+};
+
+type AdminBitsContentCreateInput = AdminContentCreateBaseInput & {
+  collection: 'bits';
+};
+
+export type AdminContentCreateInput =
+  | AdminEssayContentCreateInput
+  | AdminBitsContentCreateInput;
 
 export type AdminContentCreatePlan = {
   collection: AdminContentCreatableCollectionKey;
@@ -49,12 +61,12 @@ export type AdminContentCreatePlan = {
   issues: AdminContentValidationIssue[];
 };
 
-type AdminEssayContentCreateInput = Omit<AdminContentCreateInput, 'collection'> & {
-  collection: 'essay';
-};
-
 const EMPTY_MARKDOWN_SOURCE = '---\n---\n\n';
 const AUTO_SLUG_HASH_LENGTHS = [4, 5, 6] as const;
+const BITS_CREATE_DATETIME_RE = /^(\d{4})-(0[1-9]|1[0-2])-(\d{2})T([01]\d|2[0-3]):([0-5]\d)(?::00)?(Z|[+-](?:[01]\d|2[0-3]):?[0-5]\d)$/;
+
+const isRecord = (value: unknown): value is Record<string, unknown> =>
+  typeof value === 'object' && value !== null && !Array.isArray(value);
 
 const normalizeCreateEntryId = (entryId: string): string => {
   const withoutExtension = entryId.trim().replace(/\\/g, '/').replace(/\.md$/i, '');
@@ -76,6 +88,17 @@ const normalizeCreateEntryId = (entryId: string): string => {
 const buildEssayCreateValues = (values: AdminEssayEditorValues): AdminEssayEditorValues => ({
   ...values,
   draft: true
+});
+
+const buildBitsCreateValues = (date: string): AdminBitsEditorValues => ({
+  title: '',
+  description: '',
+  date,
+  tagsText: '',
+  draft: true,
+  authorName: '',
+  authorAvatar: '',
+  imagesText: ''
 });
 
 const getShortEssayDateSlugPart = (date: string): string => {
@@ -165,6 +188,45 @@ const findExistingFile = async (filePaths: readonly string[]): Promise<string | 
     if (await fileExists(filePath)) return filePath;
   }
   return null;
+};
+
+const isValidCalendarDate = (year: string, month: string, day: string): boolean => {
+  const normalized = new Date(Date.UTC(Number(year), Number(month) - 1, Number(day)));
+  return normalized.getUTCFullYear() === Number(year)
+    && normalized.getUTCMonth() + 1 === Number(month)
+    && normalized.getUTCDate() === Number(day);
+};
+
+const normalizeBitsCreateOffset = (offset: string): string =>
+  offset === 'Z' || offset.includes(':') ? offset : `${offset.slice(0, 3)}:${offset.slice(3)}`;
+
+const parseBitsCreateDate = (
+  frontmatter: unknown
+): { entryId?: string; date?: string; issues: AdminContentValidationIssue[] } => {
+  if (!isRecord(frontmatter)) {
+    return { issues: [createIssue('frontmatter', 'frontmatter 必须是对象')] };
+  }
+
+  const input = typeof frontmatter.date === 'string' ? frontmatter.date.trim() : '';
+  if (!input) {
+    return { issues: [createIssue('date', 'bits.date 不能为空')] };
+  }
+
+  const match = BITS_CREATE_DATETIME_RE.exec(input);
+  if (!match) {
+    return { issues: [createIssue('date', 'bits.date 必须是带时区的 YYYY-MM-DDTHH:mm:ss±HH:mm 格式')] };
+  }
+
+  const [, year, month, day, hour, minute, offset] = match;
+  if (!year || !month || !day || !hour || !minute || !offset || !isValidCalendarDate(year, month, day)) {
+    return { issues: [createIssue('date', 'bits.date 不是合法日期时间')] };
+  }
+
+  return {
+    entryId: `bits-${year}-${month}-${day}-${hour}${minute}`,
+    date: `${year}-${month}-${day}T${hour}:${minute}:00${normalizeBitsCreateOffset(offset)}`,
+    issues: []
+  };
 };
 
 const assertUnsupportedCreateCollection = (collection: never): never => {
@@ -273,14 +335,96 @@ const buildEssayContentCreatePlan = async (
   };
 };
 
+const buildBitsContentCreatePlan = async (
+  input: AdminBitsContentCreateInput
+): Promise<AdminContentCreatePlan> => {
+  const collection = input.collection;
+  const parsedDate = parseBitsCreateDate(input.frontmatter);
+  if (!parsedDate.entryId || !parsedDate.date) {
+    return {
+      collection,
+      entryId: '',
+      publicEntryId: '',
+      defaultPublicSlug: '',
+      sourcePath: '',
+      relativePath: '',
+      sourceText: '',
+      editHref: '',
+      issues: parsedDate.issues
+    };
+  }
+
+  const entryId = parsedDate.entryId;
+  const sourcePathCandidates = getAdminContentEntrySourcePathCandidates(collection, entryId);
+  const [sourcePath] = sourcePathCandidates;
+  if (!sourcePath) {
+    throw new AdminContentEntryResolutionError('source-not-found', `未找到 content 源文件候选：${collection}/${entryId}`);
+  }
+  const relativePath = toAdminContentRelativeProjectPath(sourcePath);
+  const publicEntryId = contentSourceEntryIdToPublicEntryId(entryId) || entryId;
+  const defaultPublicSlug = flattenEntryIdToSlug(publicEntryId);
+  const editHref = getAdminContentEntryEditHref(collection, entryId);
+
+  const existingSourcePath = await findExistingFile(sourcePathCandidates);
+  if (existingSourcePath) {
+    return {
+      collection,
+      entryId,
+      publicEntryId,
+      defaultPublicSlug,
+      sourcePath,
+      relativePath,
+      sourceText: '',
+      editHref,
+      issues: [createIssue('entryId', `源文件已存在：${toAdminContentRelativeProjectPath(existingSourcePath)}`)]
+    };
+  }
+
+  const next = buildBitsFrontmatterFromValues(buildBitsCreateValues(parsedDate.date));
+  if (!next.frontmatter) {
+    return {
+      collection,
+      entryId,
+      publicEntryId,
+      defaultPublicSlug,
+      sourcePath,
+      relativePath,
+      sourceText: '',
+      editHref,
+      issues: next.issues
+    };
+  }
+
+  return {
+    collection,
+    entryId,
+    publicEntryId,
+    defaultPublicSlug,
+    sourcePath,
+    relativePath,
+    sourceText: patchMarkdownFrontmatter(
+      EMPTY_MARKDOWN_SOURCE,
+      Object.entries(next.frontmatter).map(([key, value]) => ({
+        path: [key],
+        value,
+        action: 'set' as const
+      }))
+    ),
+    editHref,
+    issues: []
+  };
+};
+
 export const buildAdminContentCreatePlan = async (
   input: AdminContentCreateInput
 ): Promise<AdminContentCreatePlan> => {
   switch (input.collection) {
     case 'essay':
       return buildEssayContentCreatePlan(input);
+    case 'bits':
+      return buildBitsContentCreatePlan(input);
     default:
-      return assertUnsupportedCreateCollection(input.collection);
+      return assertUnsupportedCreateCollection(input);
   }
 };
 

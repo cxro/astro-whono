@@ -28,7 +28,7 @@
 - 双栏布局（侧栏导航 + 内容区）
 - 移动端适配
 - 内容集合：随笔 / 絮语 / 小记 / 关于（归档为目录视图）
-- 内置本地 Admin Console（/admin）：开发环境下可使用 Theme / Images / Checks / Data Console 管理站点配置与资源，fork / clone 后可快速完成站点接管
+- 内置本地 Admin Console（/admin）：开发环境下可使用 Theme / Content / Images / Checks / Data Console 管理站点配置、内容与资源，fork / clone 后可快速完成站点接管
 - 絮语草稿生成器：/bits 页面一键生成 Markdown（复制/下载），支持多图与自动读取尺寸
 - RSS：默认归档订阅 + 分栏订阅
 - 浅色 / 深色模式 + 阅读模式
@@ -172,7 +172,7 @@ npm run dev
 | `/admin/images/` | 可用 | 图片资源浏览与路径辅助 |
 | `/admin/checks/` | 可用 | 结构化诊断与发布前自检 |
 | `/admin/data/` | 可用 | settings 快照导出 / dry-run 导入 / 确认写入 |
-| `/admin/content/` | 可用 | 内容管理、文章新建、支持随笔 / 絮语 / 小记 / 关于页的本地编辑与源文件导出 |
+| `/admin/content/` | 可用 | 内容管理、新建随笔 / 絮语草稿，支持随笔 / 絮语 / 小记 / 关于页的本地编辑与源文件导出 |
 
 
 <details>
@@ -201,7 +201,7 @@ Theme Console 主要面向**站点级**和**页面级**配置，支持内容：
 #### 生产环境说明
 
 - Admin Console 的写入能力仅面向本地开发环境，包括主题配置、内容编辑、settings 导入导出和受支持内容图片上传
-- `/admin/content/` 提供内容列表、筛选、搜索、随笔草稿新增和行级操作。开发态编辑页支持随笔、絮语、小记和关于页的本地编辑与预览
+- `/admin/content/` 提供内容列表、筛选、搜索、新建随笔 / 絮语草稿和行级操作。开发态编辑页支持随笔、絮语、小记和关于页的本地编辑与预览
 - 生产构建保持静态站点输出；`/admin/` 可按 Theme 设置显示只读公开 Overview 或关闭态文案，其他后台子路由仅保留本地开发提示
 - `/api/admin/**` 仅作为本地开发接口使用，不属于生产环境公开 API
 
