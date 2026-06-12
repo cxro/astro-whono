@@ -6,6 +6,7 @@ import ArrowDown from '@lucide/svelte/icons/arrow-down';
 import ArrowUp from '@lucide/svelte/icons/arrow-up';
 import ArrowUpToLine from '@lucide/svelte/icons/arrow-up-to-line';
 import BadgeQuestionMark from '@lucide/svelte/icons/badge-question-mark';
+import Check from '@lucide/svelte/icons/check';
 import CircleCheck from '@lucide/svelte/icons/circle-check';
 import CalendarDays from '@lucide/svelte/icons/calendar-days';
 import CodeXml from '@lucide/svelte/icons/code-xml';
@@ -68,6 +69,7 @@ const icons = {
   bold: Bold,
   'book-open-text': BookOpenText,
   check: CircleCheck,
+  'check-mark': Check,
   close: X,
   code: CodeXml,
   'code-block': Braces,

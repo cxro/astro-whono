@@ -777,6 +777,56 @@ export const runPreviewAdminBoundaryCheck = async () => {
         expectedRelativePath: 'src/content/essay/preview-boundary-demo.md'
       })
     });
+    const contentBulkStatusResponse = await request(baseUrl, '/api/admin/content/bulk-status/', {
+      method: 'POST',
+      headers: {
+        'content-type': 'application/json',
+        origin: baseUrl
+      },
+      body: JSON.stringify({
+        targetDraft: true,
+        entries: [
+          {
+            collection: 'essay',
+            entryId: 'preview-boundary-demo',
+            expectedRelativePath: 'src/content/essay/preview-boundary-demo.md'
+          }
+        ]
+      })
+    });
+    const contentBulkDeleteResponse = await request(baseUrl, '/api/admin/content/bulk-delete/', {
+      method: 'POST',
+      headers: {
+        'content-type': 'application/json',
+        origin: baseUrl
+      },
+      body: JSON.stringify({
+        entries: [
+          {
+            collection: 'essay',
+            entryId: 'preview-boundary-demo',
+            revision: 'invalid',
+            expectedRelativePath: 'src/content/essay/preview-boundary-demo.md'
+          }
+        ]
+      })
+    });
+    const contentBulkExportResponse = await request(baseUrl, '/api/admin/content/bulk-export/', {
+      method: 'POST',
+      headers: {
+        'content-type': 'application/json',
+        origin: baseUrl
+      },
+      body: JSON.stringify({
+        entries: [
+          {
+            collection: 'essay',
+            entryId: 'preview-boundary-demo',
+            expectedRelativePath: 'src/content/essay/preview-boundary-demo.md'
+          }
+        ]
+      })
+    });
     const previewPostResponse = await request(baseUrl, '/api/admin/preview/', {
       method: 'POST',
       headers: {
@@ -823,6 +873,9 @@ export const runPreviewAdminBoundaryCheck = async () => {
     assertAdminImageUploadStaticResponse('GET /api/admin/images/upload/', imageUploadGetResponse);
     assertAdminContentStaticResponse('POST /api/admin/content/entry/', contentPostResponse);
     assertAdminContentStaticResponse('POST /api/admin/content/delete/', contentDeleteResponse, '/api/admin/content/delete/');
+    assertAdminContentStaticResponse('POST /api/admin/content/bulk-status/', contentBulkStatusResponse, '/api/admin/content/bulk-status/');
+    assertAdminContentStaticResponse('POST /api/admin/content/bulk-delete/', contentBulkDeleteResponse, '/api/admin/content/bulk-delete/');
+    assertAdminContentStaticResponse('POST /api/admin/content/bulk-export/', contentBulkExportResponse, '/api/admin/content/bulk-export/');
     assertAdminPreviewStaticResponse('POST /api/admin/preview/', previewPostResponse);
     assertAdminImageUploadStaticResponse('POST /api/admin/images/upload/', imageUploadPostResponse);
     assertAdminSettingsStaticResponse('POST /api/admin/settings/', postResponse);

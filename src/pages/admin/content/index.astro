@@ -25,7 +25,10 @@ import {
   ADMIN_CONTENT_CREATE_API_PATH,
   ADMIN_CONTENT_DELETE_API_PATH,
   ADMIN_CONTENT_ENTRY_API_PATH,
-  ADMIN_CONTENT_EXPORT_API_PATH
+  ADMIN_CONTENT_EXPORT_API_PATH,
+  ADMIN_CONTENT_BULK_STATUS_API_PATH,
+  ADMIN_CONTENT_BULK_DELETE_API_PATH,
+  ADMIN_CONTENT_BULK_EXPORT_API_PATH
 } from '../../../lib/admin-console/admin-api-paths';
 import { isAdminContentDeletableCollectionKey } from '../../../lib/admin-console/content-delete-contract';
 import { getThemeSettings } from '../../../lib/theme-settings';
@@ -62,8 +65,14 @@ const pageData = contentDevState?.pageData ?? null;
 // Keep the Svelte list-action island behind a DEV-only dynamic import; production
 // builds intentionally skip the Svelte integration.
 let ContentListActionsIsland: any = null;
+let ContentBulkActionsIsland: any = null;
 if (import.meta.env.DEV && pageData) {
-  ContentListActionsIsland = (await import('../../../components/admin/editor/ContentListActionsIsland.astro')).default;
+  const actions = await Promise.all([
+    import('../../../components/admin/editor/ContentListActionsIsland.astro'),
+    import('../../../components/admin/editor/ContentBulkActionsIsland.astro')
+  ]);
+  ContentListActionsIsland = actions[0].default;
+  ContentBulkActionsIsland = actions[1].default;
 }
 const adminStylesHref = contentDevState?.stylesHref ?? adminShellStylesHref;
 const contentConsoleSubtitle = '内容管理';
@@ -72,6 +81,9 @@ const adminContentEntryEndpoint = withBase(ADMIN_CONTENT_ENTRY_API_PATH);
 const adminContentCreateEndpoint = withBase(ADMIN_CONTENT_CREATE_API_PATH);
 const adminContentExportEndpoint = withBase(ADMIN_CONTENT_EXPORT_API_PATH);
 const adminContentDeleteEndpoint = withBase(ADMIN_CONTENT_DELETE_API_PATH);
+const adminContentBulkStatusEndpoint = withBase(ADMIN_CONTENT_BULK_STATUS_API_PATH);
+const adminContentBulkDeleteEndpoint = withBase(ADMIN_CONTENT_BULK_DELETE_API_PATH);
+const adminContentBulkExportEndpoint = withBase(ADMIN_CONTENT_BULK_EXPORT_API_PATH);
 const adminContentFilterMenusScriptHref = contentDevState?.filterMenusScriptHref ?? null;
 const shouldOpenContentFilters = pageData?.hasActiveFilters ?? false;
 const clearScopedStateHref = pageData && pageData.collection !== 'all'
@@ -261,9 +273,17 @@ const getContentCreateAction = (
                   ) : null
                 }
               </label>
-              <span class="admin-content-home-toolbar__separator admin-content-home-toolbar__separator--search" aria-hidden="true">｜</span>
+              <div class="admin-content-bulk-slot">
+                {ContentBulkActionsIsland ? (
+                  <ContentBulkActionsIsland
+                    entryEndpoint={adminContentEntryEndpoint}
+                    statusEndpoint={adminContentBulkStatusEndpoint}
+                    deleteEndpoint={adminContentBulkDeleteEndpoint}
+                    exportEndpoint={adminContentBulkExportEndpoint}
+                  />
+                ) : null}
+              </div>
               <label class="admin-content-toolbar-search">
-                <AdminIcon name="search" size={17} />
                 <span class="admin-sr-only">搜索</span>
                 <input
                   class="admin-content-toolbar-search__input"
@@ -272,6 +292,7 @@ const getContentCreateAction = (
                   value={pageData.filterState.query}
                   placeholder={searchPlaceholder}
                 />
+                <AdminIcon name="search" size={17} />
               </label>
               {hiddenFilterInputs.map((input) => (
                 <input type="hidden" name={input.name} value={input.value} />
@@ -434,24 +455,34 @@ const getContentCreateAction = (
                   ? getContentCreateAction(section.collection)
                   : null;
                 const shouldShowSectionCreateAction = Boolean(createAction);
-                const shouldShowSectionListAction = pageData.mode === 'overview' && section.filteredCount > section.items.length;
+                const isSectionTitleLinked = pageData.mode === 'overview';
                 return (
                   <section class="admin-content-module" aria-labelledby={sectionTitleId}>
                     <div class="admin-content-module__head">
                       <h3 id={sectionTitleId}>
-                        <span>{section.collectionLabel}</span>
+                        {
+                          isSectionTitleLinked ? (
+                            <a
+                              class="admin-content-module__title-link"
+                              href={getCollectionListHref(section.collection)}
+                              title={`查看全部${section.collectionLabel}`}
+                            >
+                              <span>{section.collectionLabel}</span>
+                              {
+                                !sectionCapability.fixedPage ? (
+                                  <span class="admin-content-module__title-count">{section.filteredCount}</span>
+                                ) : null
+                              }
+                            </a>
+                          ) : (
+                            <span>{section.collectionLabel}</span>
+                          )
+                        }
                         <span class="admin-content-module__route">{sectionCapability.consoleSectionHref}</span>
                       </h3>
                       {
-                        shouldShowSectionCreateAction || shouldShowSectionListAction ? (
+                        shouldShowSectionCreateAction ? (
                           <div class="admin-content-module__actions">
-                            {
-                              shouldShowSectionListAction ? (
-                                <a class="admin-btn admin-btn--ghost admin-btn--compact" href={getCollectionListHref(section.collection)}>
-                                  查看全部
-                                </a>
-                              ) : null
-                            }
                             {
                               shouldShowSectionCreateAction && createAction ? (
                                 <button
@@ -474,34 +505,51 @@ const getContentCreateAction = (
                     {
                       section.items.length > 0 ? (
                         <ol class="admin-content-list" aria-label={`${section.collectionLabel}内容条目`}>
-                          {
-                            section.items.map((item, itemIndex) => {
-                              const capability = getAdminContentCollectionCapability(item.collection);
-                              const editPath = getAdminContentEntryEditHref(item.collection, item.id);
-                              const editHref = withBase(editPath);
-                              const supportsListInfoAction = capability.writable && hasListInfoAction(item.collection);
-                              const articleInfoHref = capability.writable
-                                ? item.collection === 'essay'
-                                  ? withBase(`${editPath}?panel=info`)
-                                  : editHref
-                                : null;
-                              const entryTitleHref = capability.writable ? editHref : getCollectionListHref(item.collection);
-                              const publicHref = item.publicHref ? withBase(item.publicHref) : null;
-                              const publicFallbackLabel = getAdminContentPublicFallbackLabel(item);
-                              const exportHref = getContentEntryExportHref(item.collection, item.id);
-                              const deleteUnsupportedReason = capability.deleteUnsupportedReason ?? `当前 collection 暂不支持删除：${item.collection}`;
-                              const sourceErrorPanelId = item.sourceError
-                                ? `admin-content-source-error-${section.collection}-${itemIndex}`
-                                : null;
-                              return (
-                                <li
-                                  class="admin-row admin-row--plain admin-row--interactive admin-row--table admin-content-item"
-                                  data-collection={item.collection}
-                                  data-admin-content-item
-                                >
-                                  <p class="admin-content-row-meta">
-                                    <span data-admin-content-row-date>{getContentRowDateLabel(item)}</span>
-                                  </p>
+                            {
+                              section.items.map((item, itemIndex) => {
+                                const capability = getAdminContentCollectionCapability(item.collection);
+                                const editPath = getAdminContentEntryEditHref(item.collection, item.id);
+                                const editHref = withBase(editPath);
+                                const supportsListInfoAction = capability.writable && hasListInfoAction(item.collection);
+                                const articleInfoHref = capability.writable
+                                  ? item.collection === 'essay'
+                                    ? withBase(`${editPath}?panel=info`)
+                                    : editHref
+                                  : null;
+                                const entryTitleHref = capability.writable ? editHref : getCollectionListHref(item.collection);
+                                const publicHref = item.publicHref ? withBase(item.publicHref) : null;
+                                const publicFallbackLabel = getAdminContentPublicFallbackLabel(item);
+                                const exportHref = getContentEntryExportHref(item.collection, item.id);
+                                const deleteUnsupportedReason = capability.deleteUnsupportedReason ?? `当前 collection 暂不支持删除：${item.collection}`;
+                                const sourceErrorPanelId = item.sourceError
+                                  ? `admin-content-source-error-${section.collection}-${itemIndex}`
+                                  : null;
+                                const hasBulkIdentity = Boolean(item.collection && item.id && item.relativePath);
+                                const bulkCheckboxLabel = hasBulkIdentity
+                                  ? `选择${item.title}`
+                                  : '缺少源文件身份，无法批量操作';
+                                return (
+                                  <li
+                                    class="admin-row admin-row--plain admin-row--interactive admin-row--table admin-content-item"
+                                    data-collection={item.collection}
+                                    data-admin-content-item
+                                  >
+                                    <label class="admin-content-bulk-select" title={bulkCheckboxLabel}>
+                                      <input
+                                        class="admin-content-bulk-checkbox"
+                                        type="checkbox"
+                                        data-admin-content-bulk-entry={hasBulkIdentity ? true : undefined}
+                                        data-collection={hasBulkIdentity ? item.collection : undefined}
+                                        data-entry-id={hasBulkIdentity ? item.id : undefined}
+                                        data-relative-path={hasBulkIdentity ? item.relativePath : undefined}
+                                        data-title={hasBulkIdentity ? item.title : undefined}
+                                        disabled={!hasBulkIdentity}
+                                        aria-label={bulkCheckboxLabel}
+                                      />
+                                    </label>
+                                    <p class="admin-content-row-meta">
+                                      <span data-admin-content-row-date>{getContentRowDateLabel(item)}</span>
+                                    </p>
 
                                   <div class="admin-content-item__title-row">
                                     <a class="admin-content-row-title" href={entryTitleHref} data-admin-content-row-title>{item.title}</a>
@@ -529,7 +577,6 @@ const getContentCreateAction = (
                                     }
                                     <span
                                       class="admin-content-row-mark admin-content-row-mark--draft"
-                                      data-admin-content-row-draft
                                       hidden={!item.isDraft}
                                     >
                                       [draft]
@@ -619,11 +666,11 @@ const getContentCreateAction = (
                                       </div>
                                     </details>
                                   </div>
-                                </li>
-                              );
-                            })
-                          }
-                        </ol>
+                                  </li>
+                                );
+                              })
+                            }
+                          </ol>
                       ) : (
                         <p class="admin-content-empty">
                           {getContentEmptyMessage(section.collectionLabel)}

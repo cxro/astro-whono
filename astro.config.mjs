@@ -82,7 +82,16 @@ export default defineConfig({
       }
     },
     optimizeDeps: {
-      include: ['emoji-picker-element', '@lucide/svelte/icons/*']
+      include: [
+        'emoji-picker-element',
+        '@lucide/svelte/icons/*',
+        '@codemirror/commands',
+        '@codemirror/lang-markdown',
+        '@codemirror/language',
+        '@codemirror/state',
+        '@codemirror/view',
+        '@lezer/highlight'
+      ]
     }
   },
   markdown: {

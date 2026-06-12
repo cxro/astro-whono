@@ -1,4 +1,5 @@
 import { access, rename, rm, writeFile } from 'node:fs/promises';
+import type { AdminContentValidationIssue } from './content-entry-contract';
 
 export type AdminWriteRequestValidation = {
   status: number;
@@ -34,6 +35,27 @@ export const ADMIN_JSON_HEADERS = {
   'content-type': 'application/json; charset=utf-8',
   'cache-control': 'no-store'
 };
+
+export const createAdminJsonErrorResponse = (
+  status: number,
+  errors: readonly string[],
+  issues: readonly AdminContentValidationIssue[] = []
+): Response =>
+  new Response(
+    JSON.stringify(
+      {
+        ok: false,
+        errors,
+        ...(issues.length > 0 ? { issues } : {})
+      },
+      null,
+      2
+    ),
+    {
+      status,
+      headers: ADMIN_JSON_HEADERS
+    }
+  );
 
 const parseHeaderOrigin = (value: string | null): string | null => {
   if (!value) return null;

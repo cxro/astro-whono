@@ -201,6 +201,23 @@ describe('admin editor recovery', () => {
     expect(documentRoot.elements.modal.hidden).toBe(false);
   });
 
+  it('reveals recovery for Astro hydration errors on editor islands', async () => {
+    const { initAdminEditorRecovery } = await import('../src/scripts/admin-content/editor-recovery');
+    const documentRoot = createDocumentRoot();
+    const windowRef = createWindowRef();
+
+    initAdminEditorRecovery(windowRef, documentRoot);
+    windowRef.listeners.get('astro:hydration-error')?.({
+      detail: {
+        error: new Error('Failed to fetch dynamically imported module: http://localhost:4321/src/components/admin/editor/EditorShell.svelte#astro-retry=1'),
+        componentUrl: '/src/components/admin/editor/EditorShell.svelte'
+      }
+    } as unknown as Event);
+
+    expect(documentRoot.elements.root.hidden).toBe(false);
+    expect(documentRoot.elements.modal.hidden).toBe(false);
+  });
+
   it('waits a frame before showing recovery so a late-mounted shell can suppress it', async () => {
     const { initAdminEditorRecovery } = await import('../src/scripts/admin-content/editor-recovery');
     const documentRoot = createDocumentRoot();

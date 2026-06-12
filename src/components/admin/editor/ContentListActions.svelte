@@ -37,10 +37,8 @@ import {
   takeContentListActionFeedback,
   type ContentListActionFeedback
 } from './content-list-feedback';
-import {
-  createAdminStatusFeedback,
-  type StatusState
-} from './content-action-feedback';
+import type { AdminStatusFeedbackOptions, StatusState } from './content-action-feedback';
+import { dispatchAdminContentStatus } from './content-action-status-events';
 import { createContentEntry, saveContentEntry } from './content-editor-client';
 import { isBitsEditorValues, isEssayEditorValues } from './content-editor-adapters';
 
@@ -75,8 +73,6 @@ let baselineFrontmatter = $state<ContentInfoFrontmatter | null>(null);
 let frontmatter = $state<ContentInfoFrontmatter | null>(null);
 let issues = $state<AdminContentIssue[]>([]);
 let errors = $state<string[]>([]);
-let statusState = $state<StatusState>('idle');
-let statusText = $state('');
 
 const createEmptyFrontmatter = (): AdminEssayEditorValues => ({
   title: '',
@@ -173,16 +169,16 @@ const slugPlaceholder = $derived(
     : getEditSlugPlaceholder()
 );
 
-const statusFeedback = createAdminStatusFeedback({
-  getState: () => statusState,
-  getText: () => statusText,
-  setStatus: (state, text) => {
-    statusState = state;
-    statusText = text;
-  }
-});
-const clearStatus = statusFeedback.clearStatus;
-const setStatus = statusFeedback.setStatus;
+const clearStatus = () => {
+  dispatchAdminContentStatus('idle', '');
+};
+const setStatus = (
+  state: StatusState,
+  text: string,
+  options: AdminStatusFeedbackOptions = {}
+) => {
+  dispatchAdminContentStatus(state, text, options);
+};
 
 const deriveEssayEntryIdFromTitle = (title: string): string => {
   const trimmed = title.trim();
@@ -638,8 +634,6 @@ onMount(() => {
   } else if (feedback === CONTENT_LIST_ACTION_FEEDBACK_DELETED) {
     setStatus('ok', '已移到回收站', { autoClear: true });
   }
-
-  return statusFeedback.dispose;
 });
 
 $effect(() => {
@@ -697,16 +691,10 @@ $effect(() => {
   />
 {/if}
 
-<div class="admin-content-action-feedback">
-  <p class="admin-status admin-content-action-status" data-state={statusState} role="status" aria-live="polite" aria-atomic="true">
-    {statusText}
-  </p>
-
-  {#if errors.length > 0}
-    <div class="admin-content-action-errors" role="alert">
-      {#each errors as error}
-        <p>{error}</p>
-      {/each}
-    </div>
-  {/if}
-</div>
+{#if errors.length > 0}
+  <div class="admin-content-action-errors" role="alert">
+    {#each errors as error}
+      <p>{error}</p>
+    {/each}
+  </div>
+{/if}

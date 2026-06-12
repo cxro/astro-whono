@@ -13,11 +13,9 @@ import {
   AdminContentEntryResolutionError
 } from '../../../../lib/admin-console/content-entry-source';
 import {
-  readAdminContentEntryEditorPayload
-} from '../../../../lib/admin-console/content-editor-payload';
-import {
-  getAdminContentDeleteUnsupportedReason,
-  moveAdminContentEntryToTrash
+  AdminContentDeleteConfirmationError,
+  deleteAdminContentEntryWithConfirmation,
+  getAdminContentDeleteUnsupportedReason
 } from '../../../../lib/admin-console/content-delete';
 import {
   isAdminContentDeletableCollectionKey,
@@ -171,48 +169,8 @@ export const POST: APIRoute = async ({ request, url }) => {
   }
 
   return withAdminContentWriteLock(async () => {
-    let currentPayload: Awaited<ReturnType<typeof readAdminContentEntryEditorPayload>>;
     try {
-      currentPayload = await readAdminContentEntryEditorPayload(collection, entryId);
-    } catch (error) {
-      const errorResponse = createEntryResolutionErrorResponse(error);
-      if (errorResponse) return errorResponse;
-      throw error;
-    }
-
-    // 删除前重新读取文件状态，避免基于过期列表或过期确认信息移动文件。
-    if (currentPayload.revision !== revision) {
-      return new Response(
-        JSON.stringify(
-          {
-            ok: false,
-            errors: ['检测到内容文件已在外部更新，已拒绝删除，请刷新列表后再操作'],
-            payload: currentPayload
-          },
-          null,
-          2
-        ),
-        { status: 409, headers: JSON_HEADERS }
-      );
-    }
-
-    if (currentPayload.relativePath !== expectedRelativePath) {
-      return new Response(
-        JSON.stringify(
-          {
-            ok: false,
-            errors: ['检测到内容文件路径与确认时不一致，已拒绝删除，请刷新列表后再操作'],
-            payload: currentPayload
-          },
-          null,
-          2
-        ),
-        { status: 409, headers: JSON_HEADERS }
-      );
-    }
-
-    try {
-      const result = await moveAdminContentEntryToTrash(collection, entryId);
+      const result = await deleteAdminContentEntryWithConfirmation(collection, entryId, revision, expectedRelativePath);
       return new Response(
         JSON.stringify(
           {
@@ -225,6 +183,21 @@ export const POST: APIRoute = async ({ request, url }) => {
         { headers: JSON_HEADERS }
       );
     } catch (error) {
+      if (error instanceof AdminContentDeleteConfirmationError) {
+        return new Response(
+          JSON.stringify(
+            {
+              ok: false,
+              errors: [error.message],
+              payload: error.payload
+            },
+            null,
+            2
+          ),
+          { status: 409, headers: JSON_HEADERS }
+        );
+      }
+
       const errorResponse = createEntryResolutionErrorResponse(error);
       if (errorResponse) return errorResponse;
 

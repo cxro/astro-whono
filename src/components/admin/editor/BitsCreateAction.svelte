@@ -3,10 +3,8 @@ import { onMount } from 'svelte';
 import { createModalDialogFocusController } from '../../../scripts/admin-console/modal-dialog-focus';
 import { createWithBase } from '../../../utils/format';
 import AdminEditorIcon from './AdminEditorIcon.svelte';
-import {
-  createAdminStatusFeedback,
-  type StatusState
-} from './content-action-feedback';
+import type { AdminStatusFeedbackOptions, StatusState } from './content-action-feedback';
+import { dispatchAdminContentStatus } from './content-action-status-events';
 import { createContentEntry, type AdminContentIssue } from './content-editor-client';
 
 type Props = {
@@ -28,8 +26,6 @@ let dateValue = $state('');
 let timeValue = $state('');
 let createActionLabel = $state('新建内容');
 let issues = $state<AdminContentIssue[]>([]);
-let statusState = $state<StatusState>('idle');
-let statusText = $state('');
 let panelEl = $state<HTMLElement | null>(null);
 let dateInputEl = $state<HTMLInputElement | null>(null);
 let closeButtonEl = $state<HTMLButtonElement | null>(null);
@@ -93,16 +89,16 @@ const dateIssue = $derived(
   issues.find((issue) => issue.path === 'date')?.message
   ?? (issues.some((issue) => issue.path === 'entryId') ? ENTRY_ID_CONFLICT_MESSAGE : '')
 );
-const statusFeedback = createAdminStatusFeedback({
-  getState: () => statusState,
-  getText: () => statusText,
-  setStatus: (state, text) => {
-    statusState = state;
-    statusText = text;
-  }
-});
-const clearStatus = statusFeedback.clearStatus;
-const setStatus = statusFeedback.setStatus;
+const clearStatus = () => {
+  dispatchAdminContentStatus('idle', '');
+};
+const setStatus = (
+  state: StatusState,
+  text: string,
+  options: AdminStatusFeedbackOptions = {}
+) => {
+  dispatchAdminContentStatus(state, text, options);
+};
 
 const closeDialog = () => {
   if (busy) return;
@@ -185,7 +181,6 @@ const handleClick = (event: MouseEvent) => {
 onMount(() => {
   document.addEventListener('click', handleClick);
   return () => {
-    statusFeedback.dispose();
     document.removeEventListener('click', handleClick);
   };
 });
@@ -315,9 +310,3 @@ $effect(() => {
     </div>
   </div>
 {/if}
-
-<div class="admin-content-action-feedback">
-  <p class="admin-status admin-content-action-status" data-state={statusState} role="status" aria-live="polite" aria-atomic="true">
-    {statusText}
-  </p>
-</div>

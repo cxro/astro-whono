@@ -1,0 +1,16 @@
+---
+import ContentBulkActions from './ContentBulkActions.svelte';
+
+type Props = {
+  entryEndpoint: string;
+  statusEndpoint: string;
+  deleteEndpoint: string;
+  exportEndpoint: string;
+};
+
+const props = Astro.props;
+---
+
+<div class="admin-content-bulk-actions-island">
+  <ContentBulkActions client:only="svelte" {...props} />
+</div>

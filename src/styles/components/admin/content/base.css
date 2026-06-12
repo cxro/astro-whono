@@ -93,7 +93,8 @@
 
 .admin-content-menu-panel,
 .admin-content-more-panel,
-.admin-content-filter-menu__panel {
+.admin-content-filter-menu__panel,
+.admin-content-bulk-menu__panel {
   display: grid;
   gap: 2px;
   width: 102px;

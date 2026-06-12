@@ -157,6 +157,14 @@ export const initAdminEditorRecovery = (
       href: typeof target?.href === 'string' ? target.href : undefined
     });
   };
+  const handleHydrationError = (event: Event) => {
+    const detail = isRecord(event) ? event.detail : undefined;
+    if (!isRecord(detail)) return;
+    handleDetected({
+      message: toMessage(detail.error),
+      url: getNonEmptyString(detail.componentUrl) ?? getNonEmptyString(detail.url) ?? ''
+    });
+  };
   const handleTriggerClick = () => openModal(root);
   const handleCopyClick = () => {
     void copyCommand(root);
@@ -175,6 +183,7 @@ export const initAdminEditorRecovery = (
   windowRef.addEventListener('vite:preloadError', handlePreloadError);
   windowRef.addEventListener('unhandledrejection', handleUnhandledRejection);
   windowRef.addEventListener('error', handleError);
+  windowRef.addEventListener('astro:hydration-error', handleHydrationError);
   documentRoot.addEventListener('keydown', handleKeydown);
   root.trigger.addEventListener('click', handleTriggerClick);
   root.copyButton?.addEventListener('click', handleCopyClick);
@@ -187,6 +196,7 @@ export const initAdminEditorRecovery = (
     windowRef.removeEventListener('vite:preloadError', handlePreloadError);
     windowRef.removeEventListener('unhandledrejection', handleUnhandledRejection);
     windowRef.removeEventListener('error', handleError);
+    windowRef.removeEventListener('astro:hydration-error', handleHydrationError);
     documentRoot.removeEventListener('keydown', handleKeydown);
     root.trigger.removeEventListener('click', handleTriggerClick);
     root.copyButton?.removeEventListener('click', handleCopyClick);

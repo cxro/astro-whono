@@ -4,6 +4,10 @@ import {
   resolveAdminContentEntrySourcePath
 } from './content-entry-source';
 import {
+  readAdminContentEntryEditorPayload,
+  type AdminContentEditorPayload
+} from './content-editor-payload';
+import {
   getAdminContentCollectionCapability,
   type AdminContentCollectionKey
 } from './content-collections';
@@ -23,6 +27,23 @@ export type AdminContentDeleteResult = {
   relativePath: string;
   trashedPath: string;
 };
+
+export class AdminContentDeleteConfirmationError extends Error {
+  readonly code: 'revision-conflict' | 'relative-path-mismatch';
+  readonly payload: AdminContentEditorPayload;
+
+  constructor(
+    code: 'revision-conflict' | 'relative-path-mismatch',
+    payload: AdminContentEditorPayload
+  ) {
+    super(code === 'revision-conflict'
+      ? '检测到内容文件已在外部更新，已拒绝删除，请刷新列表后再操作'
+      : '检测到内容文件路径与确认时不一致，已拒绝删除，请刷新列表后再操作');
+    this.name = 'AdminContentDeleteConfirmationError';
+    this.code = code;
+    this.payload = payload;
+  }
+}
 
 export const getAdminContentDeleteUnsupportedReason = (collection: AdminContentCollectionKey): string | null =>
   getAdminContentCollectionCapability(collection).deleteUnsupportedReason;
@@ -100,4 +121,23 @@ export const moveAdminContentEntryToTrash = async (
     relativePath,
     trashedPath: toRelativeProjectPath(destinationPath)
   };
+};
+
+export const deleteAdminContentEntryWithConfirmation = async (
+  collection: AdminContentDeletableCollectionKey,
+  entryId: string,
+  revision: string,
+  expectedRelativePath: string
+): Promise<AdminContentDeleteResult> => {
+  const currentPayload = await readAdminContentEntryEditorPayload(collection, entryId);
+
+  if (currentPayload.revision !== revision) {
+    throw new AdminContentDeleteConfirmationError('revision-conflict', currentPayload);
+  }
+
+  if (currentPayload.relativePath !== expectedRelativePath) {
+    throw new AdminContentDeleteConfirmationError('relative-path-mismatch', currentPayload);
+  }
+
+  return moveAdminContentEntryToTrash(collection, entryId);
 };

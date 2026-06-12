@@ -59,6 +59,7 @@
     "@types/node": "^22.0.0",
     "emoji-picker-element": "^1.29.1",
     "emoji-picker-element-data": "^1.8.0",
+    "fflate": "^0.8.3",
     "katex": "^0.16.47",
     "rehype-katex": "^7.0.1",
     "rehype-raw": "^7.0.0",

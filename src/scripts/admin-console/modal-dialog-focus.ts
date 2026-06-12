@@ -37,6 +37,12 @@ const isFocusableElement = (element: HTMLElement): boolean => {
   return true;
 };
 
+const canReceiveProgrammaticFocus = (element: HTMLElement): boolean => {
+  if (element.hidden || isDisabledControl(element)) return false;
+  if (element.closest('[hidden], [inert], [aria-hidden="true"]')) return false;
+  return true;
+};
+
 const focusElement = (element: HTMLElement | null): void => {
   if (!element) return;
   element.focus({ preventScroll: true });
@@ -73,7 +79,7 @@ export const createModalDialogFocusController = ({
 
       const preferredTarget = getInitialFocus?.() ?? null;
       const fallbackTarget = getFocusableElements()[0] ?? dialog;
-      const target = preferredTarget && isFocusableElement(preferredTarget)
+      const target = preferredTarget && canReceiveProgrammaticFocus(preferredTarget)
         ? preferredTarget
         : fallbackTarget;
 

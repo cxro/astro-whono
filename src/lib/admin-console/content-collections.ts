@@ -16,6 +16,7 @@ export type AdminContentCollectionCapability = {
   writable: boolean;
   exportable: boolean;
   deletable: boolean;
+  draftStatus: boolean;
   create: boolean;
   multiEntry: boolean;
   articleFilters: boolean;
@@ -41,6 +42,7 @@ export const ADMIN_CONTENT_COLLECTION_CAPABILITIES = {
     writable: true,
     exportable: true,
     deletable: true,
+    draftStatus: true,
     create: true,
     multiEntry: true,
     articleFilters: true,
@@ -62,6 +64,7 @@ export const ADMIN_CONTENT_COLLECTION_CAPABILITIES = {
     writable: true,
     exportable: true,
     deletable: true,
+    draftStatus: true,
     create: true,
     multiEntry: true,
     articleFilters: true,
@@ -86,6 +89,7 @@ export const ADMIN_CONTENT_COLLECTION_CAPABILITIES = {
     writable: true,
     exportable: true,
     deletable: false,
+    draftStatus: false,
     create: false,
     multiEntry: false,
     articleFilters: false,
@@ -110,6 +114,7 @@ export const ADMIN_CONTENT_COLLECTION_CAPABILITIES = {
     writable: true,
     exportable: true,
     deletable: false,
+    draftStatus: false,
     create: false,
     multiEntry: false,
     articleFilters: false,
@@ -136,6 +141,7 @@ export type AdminContentBodyImageUploadCollectionKey = CollectionKeysWithCapabil
 export type AdminContentImageUploadCollectionKey = CollectionKeysWithCapability<'imageUpload'>;
 export type AdminContentDeletableCollectionKey = CollectionKeysWithCapability<'deletable'>;
 export type AdminContentExportableCollectionKey = CollectionKeysWithCapability<'exportable'>;
+export type AdminContentDraftStatusCollectionKey = CollectionKeysWithCapability<'draftStatus'>;
 export type AdminContentCreatableCollectionKey = CollectionKeysWithCapability<'create'>;
 
 export const ADMIN_CONTENT_WRITE_COLLECTION_KEYS = ADMIN_CONTENT_COLLECTION_KEYS
@@ -161,6 +167,10 @@ export const ADMIN_CONTENT_DELETABLE_COLLECTION_KEYS = ADMIN_CONTENT_COLLECTION_
 export const ADMIN_CONTENT_EXPORTABLE_COLLECTION_KEYS = ADMIN_CONTENT_COLLECTION_KEYS
   .filter((collection): collection is AdminContentExportableCollectionKey =>
     ADMIN_CONTENT_COLLECTION_CAPABILITIES[collection].exportable);
+
+export const ADMIN_CONTENT_DRAFT_STATUS_COLLECTION_KEYS = ADMIN_CONTENT_COLLECTION_KEYS
+  .filter((collection): collection is AdminContentDraftStatusCollectionKey =>
+    ADMIN_CONTENT_COLLECTION_CAPABILITIES[collection].draftStatus);
 
 export const ADMIN_CONTENT_CREATABLE_COLLECTION_KEYS = ADMIN_CONTENT_COLLECTION_KEYS
   .filter((collection): collection is AdminContentCreatableCollectionKey =>
@@ -196,6 +206,9 @@ export const isAdminContentDeletableCollectionKey = (value: string): value is Ad
 
 export const isAdminContentExportableCollectionKey = (value: string): value is AdminContentExportableCollectionKey =>
   isAdminContentCollectionKey(value) && getAdminContentCollectionCapability(value).exportable;
+
+export const isAdminContentDraftStatusCollectionKey = (value: string): value is AdminContentDraftStatusCollectionKey =>
+  isAdminContentCollectionKey(value) && getAdminContentCollectionCapability(value).draftStatus;
 
 export const isAdminContentCreatableCollectionKey = (value: string): value is AdminContentCreatableCollectionKey =>
   isAdminContentCollectionKey(value) && getAdminContentCollectionCapability(value).create;
