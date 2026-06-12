@@ -9,6 +9,7 @@ type Props = {
   disabled?: boolean;
   invalid?: boolean;
   ariaLabel?: string;
+  ariaDescribedby?: string | undefined;
   onDirty?: (() => void) | undefined;
 };
 
@@ -20,6 +21,7 @@ let {
   disabled = false,
   invalid = false,
   ariaLabel = '标签',
+  ariaDescribedby,
   onDirty
 }: Props = $props();
 
@@ -117,6 +119,7 @@ $effect(() => {
   data-invalid={invalid ? 'true' : undefined}
   aria-disabled={disabled ? 'true' : undefined}
   aria-label={ariaLabel}
+  aria-describedby={ariaDescribedby}
   role="group"
   onpointerdown={handleControlPointerdown}
 >
@@ -149,6 +152,7 @@ $effect(() => {
     spellcheck="false"
     autocomplete="off"
     aria-invalid={invalid ? 'true' : undefined}
+    aria-describedby={ariaDescribedby}
     {disabled}
     onkeydown={handleKeydown}
     onpaste={handlePaste}

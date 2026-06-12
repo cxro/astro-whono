@@ -116,7 +116,13 @@ describe('admin content editor page registry', () => {
     const about = getAdminContentEditorPageRegistration('about');
 
     expect(essay.island).toBe('essay');
-    expect(essay.styleSlots).toEqual(['article', 'adminContentEditor']);
+    expect(essay.styleSlots).toEqual([
+      'article',
+      'adminContentEditor',
+      'adminContentEditorFrontmatter',
+      'adminContentEditorImageInsert',
+      'adminContentEditorGalleryInsert'
+    ]);
     expect(essay.outlineKind).toBe('essay');
     expect(essay.resolveReturnHref({
       withBase: (path) => `/base${path}`,
@@ -130,7 +136,12 @@ describe('admin content editor page registry', () => {
     expect(essay.usesImagePicker).toBe(false);
 
     expect(bits.island).toBe('bits');
-    expect(bits.styleSlots).toEqual(['adminContentEditor', 'adminImageShared']);
+    expect(bits.styleSlots).toEqual([
+      'adminContentEditor',
+      'adminContentEditorBits',
+      'adminContentEditorFrontmatter',
+      'adminImageShared'
+    ]);
     expect(bits.outlineKind).toBe('list');
     expect(bits.resolveReturnHref({
       withBase: (path) => `/base${path}`,
@@ -140,13 +151,19 @@ describe('admin content editor page registry', () => {
     expect(bits.usesImagePicker).toBe(true);
 
     expect(memo.island).toBe('memo');
-    expect(memo.styleSlots).toEqual(['article', 'memo', 'adminContentEditor']);
+    expect(memo.styleSlots).toEqual([
+      'article',
+      'memo',
+      'adminContentEditor',
+      'adminContentEditorMemo',
+      'adminContentEditorImageInsert'
+    ]);
     expect(memo.outlineKind).toBe('none');
     expect(memo.infoTrigger).toBeNull();
     expect(memo.usesImagePicker).toBe(false);
 
     expect(about.island).toBe('about');
-    expect(about.styleSlots).toEqual(['about', 'adminContentEditor']);
+    expect(about.styleSlots).toEqual(['about', 'adminContentEditor', 'adminContentEditorAbout']);
     expect(about.outlineKind).toBe('none');
     expect(about.resolveReturnHref({
       withBase: (path) => `/base${path}`,
@@ -174,16 +191,25 @@ describe('admin content editor page registry', () => {
 
     await expect(loadAdminContentEditorBaseStyleHrefs(loadStyleSlot)).resolves.toEqual(['adminContentEditor.css']);
     await expect(loadAdminContentEditorStyleHrefs(getAdminContentEditorStyleSlots('memo'), loadStyleSlot))
-      .resolves.toEqual(['article.css', 'memo.css', 'adminContentEditor.css']);
+      .resolves.toEqual([
+        'article.css',
+        'memo.css',
+        'adminContentEditor.css',
+        'adminContentEditorMemo.css',
+        'adminContentEditorImageInsert.css'
+      ]);
     await expect(loadAdminContentEditorStyleHrefs(getAdminContentEditorStyleSlots('about'), loadStyleSlot))
-      .resolves.toEqual(['about.css', 'adminContentEditor.css']);
+      .resolves.toEqual(['about.css', 'adminContentEditor.css', 'adminContentEditorAbout.css']);
     expect(requested).toEqual([
       'adminContentEditor',
       'article',
       'memo',
       'adminContentEditor',
+      'adminContentEditorMemo',
+      'adminContentEditorImageInsert',
       'about',
-      'adminContentEditor'
+      'adminContentEditor',
+      'adminContentEditorAbout'
     ]);
   });
 

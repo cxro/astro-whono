@@ -56,6 +56,19 @@ const getIssue = (path: string): string =>
 const getIssueByPrefix = (prefix: string): string =>
   issues.find((issue) => issue.path.startsWith(prefix))?.message ?? '';
 
+const getFieldIssueId = (path: string): string =>
+  `admin-frontmatter-${path.replace(/[^a-zA-Z0-9_-]+/g, '-')}-error`;
+
+const getFieldDescribedBy = (
+  path: string,
+  issue = getIssue(path),
+  extraIds: readonly string[] = []
+): string | undefined => {
+  const ids = [...extraIds];
+  if (issue) ids.push(getFieldIssueId(path));
+  return ids.length > 0 ? ids.join(' ') : undefined;
+};
+
 const base = import.meta.env.BASE_URL ?? '/';
 
 const padDatePart = (value: number): string => String(value).padStart(2, '0');
@@ -172,8 +185,16 @@ const bitsAuthorAvatarFallback = $derived(
     {#if collection === 'essay' && isEssayEditorValues(value)}
       <label class="admin-field admin-content-editor__field" class:is-invalid={Boolean(getIssue('title'))}>
         <span class="admin-field__label">文章标题</span>
-        <input class="admin-field__control" name="title" type="text" bind:value={value.title} {disabled} />
-        <p class="admin-content-editor__error" hidden={!getIssue('title')}>{getIssue('title')}</p>
+        <input
+          class="admin-field__control"
+          name="title"
+          type="text"
+          bind:value={value.title}
+          aria-invalid={getIssue('title') ? 'true' : undefined}
+          aria-describedby={getFieldDescribedBy('title')}
+          {disabled}
+        />
+        <p id={getFieldIssueId('title')} class="admin-content-editor__error" hidden={!getIssue('title')}>{getIssue('title')}</p>
       </label>
 
       {#if showEntryId}
@@ -185,18 +206,29 @@ const bitsAuthorAvatarFallback = $derived(
             type="text"
             value={entryId}
             spellcheck="false"
+            aria-invalid={getIssue('entryId') ? 'true' : undefined}
+            aria-describedby={getFieldDescribedBy('entryId')}
             {disabled}
             oninput={(event) => onEntryIdInput(event.currentTarget.value)}
           />
-          <p class="admin-content-editor__error" hidden={!getIssue('entryId')}>{getIssue('entryId')}</p>
+          <p id={getFieldIssueId('entryId')} class="admin-content-editor__error" hidden={!getIssue('entryId')}>{getIssue('entryId')}</p>
         </label>
       {/if}
 
       <div class="admin-editor-frontmatter__datetime-grid">
         <div class="admin-field admin-content-editor__field" class:is-invalid={Boolean(getIssue('date'))}>
           <label class="admin-field__label" for="admin-essay-date">发布日期</label>
-          <input id="admin-essay-date" class="admin-field__control" name="date" type="date" bind:value={value.date} {disabled} />
-          <p class="admin-content-editor__error" hidden={!getIssue('date')}>{getIssue('date')}</p>
+          <input
+            id="admin-essay-date"
+            class="admin-field__control"
+            name="date"
+            type="date"
+            bind:value={value.date}
+            aria-invalid={getIssue('date') ? 'true' : undefined}
+            aria-describedby={getFieldDescribedBy('date')}
+            {disabled}
+          />
+          <p id={getFieldIssueId('date')} class="admin-content-editor__error" hidden={!getIssue('date')}>{getIssue('date')}</p>
         </div>
 
         <div class="admin-field admin-content-editor__field" class:is-invalid={Boolean(publishedAtIssue)}>
@@ -231,12 +263,13 @@ const bitsAuthorAvatarFallback = $derived(
             type="text"
             bind:value={value.publishedAt}
             placeholder="2024-11-23T18:00:00+08:00"
-            aria-describedby="admin-essay-published-at-tip"
+            aria-invalid={publishedAtIssue ? 'true' : undefined}
+            aria-describedby={getFieldDescribedBy('publishedAt', publishedAtIssue, ['admin-essay-published-at-tip'])}
             {disabled}
           />
         </div>
 
-        <p class="admin-editor-frontmatter__note admin-editor-frontmatter__note--error admin-editor-frontmatter__note--wide" hidden={!publishedAtIssue}>
+        <p id={getFieldIssueId('publishedAt')} class="admin-editor-frontmatter__note admin-editor-frontmatter__note--error admin-editor-frontmatter__note--wide" hidden={!publishedAtIssue}>
           {publishedAtIssue}
         </p>
         <p class="admin-editor-frontmatter__note admin-editor-frontmatter__note--wide" hidden={!publishedAtSyncMessage}>
@@ -247,8 +280,16 @@ const bitsAuthorAvatarFallback = $derived(
       <div class="admin-editor-frontmatter__datetime-grid">
         <label class="admin-field admin-content-editor__field" class:is-invalid={Boolean(getIssue('badge'))}>
           <span class="admin-field__label">badge</span>
-          <input class="admin-field__control" name="badge" type="text" bind:value={value.badge} {disabled} />
-          <p class="admin-content-editor__error" hidden={!getIssue('badge')}>{getIssue('badge')}</p>
+          <input
+            class="admin-field__control"
+            name="badge"
+            type="text"
+            bind:value={value.badge}
+            aria-invalid={getIssue('badge') ? 'true' : undefined}
+            aria-describedby={getFieldDescribedBy('badge')}
+            {disabled}
+          />
+          <p id={getFieldIssueId('badge')} class="admin-content-editor__error" hidden={!getIssue('badge')}>{getIssue('badge')}</p>
         </label>
 
         <div class="admin-field admin-content-editor__field" class:is-invalid={Boolean(updatedAtIssue)}>
@@ -283,20 +324,29 @@ const bitsAuthorAvatarFallback = $derived(
             type="text"
             bind:value={value.updatedAt}
             placeholder="2026-01-02"
-            aria-describedby="admin-essay-updated-at-tip"
+            aria-invalid={updatedAtIssue ? 'true' : undefined}
+            aria-describedby={getFieldDescribedBy('updatedAt', updatedAtIssue, ['admin-essay-updated-at-tip'])}
             {disabled}
           />
         </div>
 
-        <p class="admin-editor-frontmatter__note admin-editor-frontmatter__note--error admin-editor-frontmatter__note--wide" hidden={!updatedAtIssue}>
+        <p id={getFieldIssueId('updatedAt')} class="admin-editor-frontmatter__note admin-editor-frontmatter__note--error admin-editor-frontmatter__note--wide" hidden={!updatedAtIssue}>
           {updatedAtIssue}
         </p>
       </div>
 
       <label class="admin-field admin-content-editor__field" class:is-invalid={Boolean(getIssue('description'))}>
         <span class="admin-field__label">摘要</span>
-        <textarea class="admin-field__control" name="description" bind:value={value.description} rows="3" {disabled}></textarea>
-        <p class="admin-content-editor__error" hidden={!getIssue('description')}>{getIssue('description')}</p>
+        <textarea
+          class="admin-field__control"
+          name="description"
+          bind:value={value.description}
+          rows="3"
+          aria-invalid={getIssue('description') ? 'true' : undefined}
+          aria-describedby={getFieldDescribedBy('description')}
+          {disabled}
+        ></textarea>
+        <p id={getFieldIssueId('description')} class="admin-content-editor__error" hidden={!getIssue('description')}>{getIssue('description')}</p>
       </label>
 
       <div class="admin-field admin-content-editor__field" class:is-invalid={Boolean(getIssue('slug'))}>
@@ -309,15 +359,26 @@ const bitsAuthorAvatarFallback = $derived(
           bind:value={value.slug}
           placeholder={slugPlaceholder}
           spellcheck="false"
+          aria-invalid={getIssue('slug') ? 'true' : undefined}
+          aria-describedby={getFieldDescribedBy('slug')}
           {disabled}
         />
-        <p class="admin-content-editor__error" hidden={!getIssue('slug')}>{getIssue('slug')}</p>
+        <p id={getFieldIssueId('slug')} class="admin-content-editor__error" hidden={!getIssue('slug')}>{getIssue('slug')}</p>
       </div>
 
       <label class="admin-field admin-content-editor__field" class:is-invalid={Boolean(getIssue('cover'))}>
         <span class="admin-field__label">封面图</span>
-        <input class="admin-field__control" name="cover" type="text" bind:value={value.cover} spellcheck="false" {disabled} />
-        <p class="admin-content-editor__error" hidden={!getIssue('cover')}>{getIssue('cover')}</p>
+        <input
+          class="admin-field__control"
+          name="cover"
+          type="text"
+          bind:value={value.cover}
+          spellcheck="false"
+          aria-invalid={getIssue('cover') ? 'true' : undefined}
+          aria-describedby={getFieldDescribedBy('cover')}
+          {disabled}
+        />
+        <p id={getFieldIssueId('cover')} class="admin-content-editor__error" hidden={!getIssue('cover')}>{getIssue('cover')}</p>
       </label>
 
       <div class="admin-field admin-content-editor__field" class:is-invalid={Boolean(getIssue('tags'))}>
@@ -327,30 +388,57 @@ const bitsAuthorAvatarFallback = $derived(
           bind:value={value.tagsText}
           {disabled}
           invalid={Boolean(getIssue('tags'))}
+          ariaDescribedby={getFieldDescribedBy('tags')}
           onDirty={onDirty}
         />
-        <p class="admin-content-editor__error" hidden={!getIssue('tags')}>{getIssue('tags')}</p>
+        <p id={getFieldIssueId('tags')} class="admin-content-editor__error" hidden={!getIssue('tags')}>{getIssue('tags')}</p>
       </div>
     {:else if collection === 'bits' && isBitsEditorValues(value)}
       <label class="admin-field admin-content-editor__field" class:is-invalid={Boolean(getIssue('title'))}>
         <span class="admin-field__label">标题（可选）</span>
-        <input class="admin-field__control" name="title" type="text" bind:value={value.title} oninput={onDirty} {disabled} />
-        <p class="admin-content-editor__error" hidden={!getIssue('title')}>{getIssue('title')}</p>
+        <input
+          class="admin-field__control"
+          name="title"
+          type="text"
+          bind:value={value.title}
+          aria-invalid={getIssue('title') ? 'true' : undefined}
+          aria-describedby={getFieldDescribedBy('title')}
+          oninput={onDirty}
+          {disabled}
+        />
+        <p id={getFieldIssueId('title')} class="admin-content-editor__error" hidden={!getIssue('title')}>{getIssue('title')}</p>
       </label>
 
       {#if fieldScope !== 'bits-summary'}
         <label class="admin-field admin-content-editor__field" class:is-invalid={Boolean(getIssue('date'))}>
           <span class="admin-field__label">发布时间</span>
-          <input class="admin-field__control" name="date" type="text" bind:value={value.date} {disabled} />
-          <p class="admin-content-editor__error" hidden={!getIssue('date')}>{getIssue('date')}</p>
+          <input
+            class="admin-field__control"
+            name="date"
+            type="text"
+            bind:value={value.date}
+            aria-invalid={getIssue('date') ? 'true' : undefined}
+            aria-describedby={getFieldDescribedBy('date')}
+            {disabled}
+          />
+          <p id={getFieldIssueId('date')} class="admin-content-editor__error" hidden={!getIssue('date')}>{getIssue('date')}</p>
         </label>
       {/if}
 
       {#if fieldScope !== 'bits-summary' || bitsAuthorIssue}
         <label class="admin-field admin-content-editor__field" class:is-invalid={Boolean(getIssue('authorName'))}>
           <span class="admin-field__label">作者名（单条覆盖）</span>
-          <input class="admin-field__control" name="authorName" type="text" bind:value={value.authorName} oninput={onDirty} {disabled} />
-          <p class="admin-content-editor__error" hidden={!getIssue('authorName')}>{getIssue('authorName')}</p>
+          <input
+            class="admin-field__control"
+            name="authorName"
+            type="text"
+            bind:value={value.authorName}
+            aria-invalid={getIssue('authorName') ? 'true' : undefined}
+            aria-describedby={getFieldDescribedBy('authorName')}
+            oninput={onDirty}
+            {disabled}
+          />
+          <p id={getFieldIssueId('authorName')} class="admin-content-editor__error" hidden={!getIssue('authorName')}>{getIssue('authorName')}</p>
         </label>
 
         <label class="admin-field admin-content-editor__field" class:is-invalid={Boolean(getIssue('authorAvatar'))}>
@@ -362,17 +450,28 @@ const bitsAuthorAvatarFallback = $derived(
             bind:value={value.authorAvatar}
             placeholder="author/avatar.webp"
             spellcheck="false"
+            aria-invalid={getIssue('authorAvatar') ? 'true' : undefined}
+            aria-describedby={getFieldDescribedBy('authorAvatar')}
             oninput={onDirty}
             {disabled}
           />
-          <p class="admin-content-editor__error" hidden={!getIssue('authorAvatar')}>{getIssue('authorAvatar')}</p>
+          <p id={getFieldIssueId('authorAvatar')} class="admin-content-editor__error" hidden={!getIssue('authorAvatar')}>{getIssue('authorAvatar')}</p>
         </label>
       {/if}
 
       <label class="admin-field admin-content-editor__field" class:is-invalid={Boolean(getIssue('description'))}>
         <span class="admin-field__label">摘要</span>
-        <textarea class="admin-field__control" name="description" bind:value={value.description} rows="3" oninput={onDirty} {disabled}></textarea>
-        <p class="admin-content-editor__error" hidden={!getIssue('description')}>{getIssue('description')}</p>
+        <textarea
+          class="admin-field__control"
+          name="description"
+          bind:value={value.description}
+          rows="3"
+          aria-invalid={getIssue('description') ? 'true' : undefined}
+          aria-describedby={getFieldDescribedBy('description')}
+          oninput={onDirty}
+          {disabled}
+        ></textarea>
+        <p id={getFieldIssueId('description')} class="admin-content-editor__error" hidden={!getIssue('description')}>{getIssue('description')}</p>
       </label>
 
       {#if fieldScope === 'bits-summary' && !bitsAuthorIssue}
@@ -404,15 +503,25 @@ const bitsAuthorAvatarFallback = $derived(
             bind:value={value.tagsText}
             {disabled}
             invalid={Boolean(getIssue('tags'))}
+            ariaDescribedby={getFieldDescribedBy('tags')}
             onDirty={onDirty}
           />
-          <p class="admin-content-editor__error" hidden={!getIssue('tags')}>{getIssue('tags')}</p>
+          <p id={getFieldIssueId('tags')} class="admin-content-editor__error" hidden={!getIssue('tags')}>{getIssue('tags')}</p>
         </div>
 
         <label class="admin-field admin-content-editor__field" class:is-invalid={Boolean(bitsImagesIssue)}>
           <span class="admin-field__label">图片 JSON</span>
-          <textarea class="admin-field__control" name="imagesText" bind:value={value.imagesText} rows="8" spellcheck="false" {disabled}></textarea>
-          <p class="admin-content-editor__error" hidden={!bitsImagesIssue}>{bitsImagesIssue}</p>
+          <textarea
+            class="admin-field__control"
+            name="imagesText"
+            bind:value={value.imagesText}
+            rows="8"
+            spellcheck="false"
+            aria-invalid={bitsImagesIssue ? 'true' : undefined}
+            aria-describedby={getFieldDescribedBy('imagesText', bitsImagesIssue)}
+            {disabled}
+          ></textarea>
+          <p id={getFieldIssueId('imagesText')} class="admin-content-editor__error" hidden={!bitsImagesIssue}>{bitsImagesIssue}</p>
         </label>
       {/if}
     {/if}

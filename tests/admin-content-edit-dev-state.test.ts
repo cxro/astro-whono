@@ -142,9 +142,20 @@ describe('admin content edit dev state', () => {
     });
 
     expect(state.payload).toBe(bitsPayload);
-    expect(state.stylesHref).toEqual(['admin-shell.css', 'adminContentEditor.css', 'adminImageShared.css']);
+    expect(state.stylesHref).toEqual([
+      'admin-shell.css',
+      'adminContentEditor.css',
+      'adminContentEditorBits.css',
+      'adminContentEditorFrontmatter.css',
+      'adminImageShared.css'
+    ]);
     expect(state.outlines).toBe(outlineFixture);
-    expect(styleSlots).toEqual(['adminContentEditor', 'adminImageShared']);
+    expect(styleSlots).toEqual([
+      'adminContentEditor',
+      'adminContentEditorBits',
+      'adminContentEditorFrontmatter',
+      'adminImageShared'
+    ]);
     expect(outlineRequests).toEqual([
       {
         collection: 'bits',
@@ -155,9 +166,21 @@ describe('admin content edit dev state', () => {
   });
 
   it.each([
-    ['essay', essayPayload, ['article', 'adminContentEditor']],
-    ['memo', memoPayload, ['article', 'memo', 'adminContentEditor']],
-    ['about', aboutPayload, ['about', 'adminContentEditor']]
+    ['essay', essayPayload, [
+      'article',
+      'adminContentEditor',
+      'adminContentEditorFrontmatter',
+      'adminContentEditorImageInsert',
+      'adminContentEditorGalleryInsert'
+    ]],
+    ['memo', memoPayload, [
+      'article',
+      'memo',
+      'adminContentEditor',
+      'adminContentEditorMemo',
+      'adminContentEditorImageInsert'
+    ]],
+    ['about', aboutPayload, ['about', 'adminContentEditor', 'adminContentEditorAbout']]
   ] as const)('uses %s registry style slots', async (_collection, payload, expectedSlots) => {
     const styleSlots: AdminContentEditorStyleSlot[] = [];
     const state = await loadAdminContentEditDevState({

@@ -34,6 +34,12 @@ export type AdminContentEditorEndpoints = {
 
 export type AdminContentEditorStyleSlot =
   | 'adminContentEditor'
+  | 'adminContentEditorAbout'
+  | 'adminContentEditorBits'
+  | 'adminContentEditorFrontmatter'
+  | 'adminContentEditorGalleryInsert'
+  | 'adminContentEditorImageInsert'
+  | 'adminContentEditorMemo'
   | 'adminImageShared'
   | 'about'
   | 'article'
@@ -112,11 +118,6 @@ export type AdminContentEditorOutlineRegistration = {
   outlineKind: AdminContentEditorOutlineKind;
 };
 
-const loadAdminContentEditorStylesHref = async (): Promise<string> => {
-  const { default: adminContentEditorStylesHref } = await import('../../styles/components/admin/content/edit.css?url');
-  return adminContentEditorStylesHref;
-};
-
 const loadArticleStylesHref = async (): Promise<string> => {
   const { default: articleStylesHref } = await import('../../styles/article.css?url');
   return articleStylesHref;
@@ -138,7 +139,20 @@ const loadAdminImageSharedStylesHref = async (): Promise<string> => {
 };
 
 const STYLE_SLOT_LOADERS = {
-  adminContentEditor: loadAdminContentEditorStylesHref,
+  adminContentEditor: async () =>
+    (await import('../../styles/components/admin/content/edit-core.css?url')).default,
+  adminContentEditorAbout: async () =>
+    (await import('../../styles/components/admin/content/edit-about.css?url')).default,
+  adminContentEditorBits: async () =>
+    (await import('../../styles/components/admin/content/edit-bits.css?url')).default,
+  adminContentEditorFrontmatter: async () =>
+    (await import('../../styles/components/admin/content/edit-frontmatter.css?url')).default,
+  adminContentEditorGalleryInsert: async () =>
+    (await import('../../styles/components/admin/content/edit-gallery-insert.css?url')).default,
+  adminContentEditorImageInsert: async () =>
+    (await import('../../styles/components/admin/content/edit-image-insert.css?url')).default,
+  adminContentEditorMemo: async () =>
+    (await import('../../styles/components/admin/content/edit-memo.css?url')).default,
   adminImageShared: loadAdminImageSharedStylesHref,
   about: loadAboutStylesHref,
   article: loadArticleStylesHref,
@@ -287,7 +301,13 @@ const CONTENT_EDITOR_PAGE_REGISTRY = {
     workspaceClassName: 'admin-content-edit-page--essay',
     articleClassName: 'admin-content-editor--svelte',
     island: 'essay',
-    styleSlots: ['article', 'adminContentEditor'],
+    styleSlots: [
+      'article',
+      'adminContentEditor',
+      'adminContentEditorFrontmatter',
+      'adminContentEditorImageInsert',
+      'adminContentEditorGalleryInsert'
+    ],
     outlineKind: 'essay',
     infoTrigger: {
       attribute: 'data-admin-article-info-trigger',
@@ -303,7 +323,12 @@ const CONTENT_EDITOR_PAGE_REGISTRY = {
     workspaceClassName: 'admin-content-edit-page--bits',
     articleClassName: 'admin-content-editor--bits',
     island: 'bits',
-    styleSlots: ['adminContentEditor', 'adminImageShared'],
+    styleSlots: [
+      'adminContentEditor',
+      'adminContentEditorBits',
+      'adminContentEditorFrontmatter',
+      'adminImageShared'
+    ],
     outlineKind: 'list',
     infoTrigger: {
       attribute: 'data-admin-bits-info-trigger',
@@ -319,7 +344,13 @@ const CONTENT_EDITOR_PAGE_REGISTRY = {
     workspaceClassName: 'admin-content-edit-page--memo',
     articleClassName: 'admin-content-editor--memo',
     island: 'memo',
-    styleSlots: ['article', 'memo', 'adminContentEditor'],
+    styleSlots: [
+      'article',
+      'memo',
+      'adminContentEditor',
+      'adminContentEditorMemo',
+      'adminContentEditorImageInsert'
+    ],
     outlineKind: 'none',
     infoTrigger: null,
     usesImagePicker: getAdminContentCollectionCapability('memo').imagePicker,
@@ -331,7 +362,7 @@ const CONTENT_EDITOR_PAGE_REGISTRY = {
     workspaceClassName: 'admin-content-edit-page--about',
     articleClassName: 'admin-content-editor--about',
     island: 'about',
-    styleSlots: ['about', 'adminContentEditor'],
+    styleSlots: ['about', 'adminContentEditor', 'adminContentEditorAbout'],
     outlineKind: 'none',
     infoTrigger: null,
     usesImagePicker: getAdminContentCollectionCapability('about').imagePicker,

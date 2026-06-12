@@ -1,15 +1,13 @@
 /* Admin Content Editor Shared Form Surfaces
-   保留非 Svelte 编辑表单、只读详情、写入预览，以及当前 workspace 仍复用的错误文本与 reset 外壳。
+   保留只读详情，以及当前 workspace 仍复用的字段与错误文本。
 */
 
-.admin-content-editor,
 .admin-content-readonly {
   gap: 16px;
   padding-top: 18px;
   border-top: 1px solid color-mix(in srgb, var(--border) 76%, transparent);
 }
 
-.admin-content-editor:not(.admin-content-editor--workspace),
 .admin-content-readonly {
   max-inline-size: 100%;
   overflow-x: auto;
@@ -17,32 +15,12 @@
   scrollbar-width: thin;
 }
 
-.admin-content-editor:not(.admin-content-editor--workspace) > :where(
-  .admin-content-section-head,
-  .admin-banner,
-  form,
-  .admin-content-write-preview,
-  .admin-content-editor__actions
-),
 .admin-content-readonly > :where(.admin-content-section-head, .admin-data-meta) {
   min-inline-size: var(--admin-content-editor-min-inline-size);
 }
 
-.admin-content-editor__grid {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 12px 14px;
-}
-
 .admin-content-editor__field {
   min-width: 0;
-}
-
-.admin-content-editor__toggles {
-  grid-column: 1 / -1;
-  display: flex;
-  flex-wrap: wrap;
-  gap: 10px 16px;
 }
 
 .admin-content-editor__error {
@@ -51,33 +29,6 @@
   color: var(--admin-error-accent);
   font-size: 12px;
   line-height: 1.45;
-}
-
-.admin-content-write-preview {
-  display: grid;
-  gap: 10px;
-  padding: 12px;
-  border: 1px solid var(--admin-row-border);
-  border-radius: var(--admin-row-radius);
-  background: var(--admin-row-bg-muted);
-}
-
-.admin-content-editor__preview-list {
-  margin: 0;
-  padding-left: 18px;
-  display: grid;
-  gap: 6px;
-}
-
-.admin-content-editor__preview-item {
-  color: var(--text);
-  font-size: var(--admin-text-sm);
-  line-height: 1.55;
-}
-
-.admin-content-editor__actions {
-  padding-top: 12px;
-  border-top: 1px solid var(--admin-row-divider);
 }
 
 .admin-content-editor--workspace {

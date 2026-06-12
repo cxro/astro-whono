@@ -1,0 +1,16 @@
+/* Admin Content Edit Core
+   _edit 编辑页共享壳层、工作台与 Markdown 面板样式；collection/feature 私有样式由 registry 追加。
+*/
+
+@import "./base.css";
+@import "./editor/base.css";
+@import "./editor/page.css";
+@import "./editor/shared-form.css";
+@import "./editor/shell.css";
+@import "./editor/workspace.css";
+@import "./editor/toolbar.css";
+@import "./editor/side-panels.css";
+@import "./editor/outline.css";
+@import "./editor/syntax.css";
+@import "./editor/pane-content.css";
+@import "./editor/layout-modes.css";

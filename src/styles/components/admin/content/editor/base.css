@@ -8,16 +8,6 @@
   min-width: 0;
 }
 
-.admin-content-editor__revision {
-  font-family: var(--admin-font-mono);
-  display: inline-block;
-  max-width: 28ch;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-  font-size: var(--admin-text-xs);
-}
-
 .admin-content-detail-meta {
   gap: 7px 12px;
 }

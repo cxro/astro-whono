@@ -127,7 +127,11 @@ const canWriteContent = $derived(!busy && dirty);
 const bodyLineCount = $derived(body.length === 0 ? 1 : body.split(/\r\n|\r|\n/).length);
 const bodyCharCount = $derived(getEditorBodyCharCount(body));
 const visibleWriteResult = $derived(!dirty ? writeResult : null);
-const markdownOutlineItems = $derived(extractMarkdownOutline(body));
+const markdownOutlineItems = $derived(
+  shell.outlineVisible && shell.outlineActiveTab === 'headings'
+    ? extractMarkdownOutline(body)
+    : []
+);
 const outlineListItems = $derived([]);
 const scrollSyncAvailable = $derived(
   shell.effectiveViewMode === 'both' && Boolean(bodyScrollElement && previewScrollElement)

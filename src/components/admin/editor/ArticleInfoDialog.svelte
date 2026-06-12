@@ -1,4 +1,5 @@
 <script lang="ts">
+import { tick } from 'svelte';
 import type {
   AdminContentCollectionKey
 } from '../../../lib/admin-console/content-collections';
@@ -76,16 +77,22 @@ let panelEl = $state<HTMLElement | null>(null);
 let closeButtonEl = $state<HTMLButtonElement | null>(null);
 const closeLabel = $derived(`关闭${dialogTitle}`);
 const loadingText = $derived(`正在加载${dialogTitle}`);
+const issueFocusKey = $derived(issues.map((issue) => `${issue.path}:${issue.message}`).join('\n'));
+let focusedIssueKey = '';
 
 const closeDialog = () => {
   onClose();
   dialogFocus.restoreFocus();
 };
 
+const getFirstInvalidFieldControl = (): HTMLElement | null =>
+  panelEl?.querySelector<HTMLElement>('.admin-field.is-invalid .admin-frontmatter-tags-input__input:not([disabled])')
+  ?? panelEl?.querySelector<HTMLElement>('.admin-field.is-invalid .admin-field__control:not([disabled])')
+  ?? null;
+
 const getInitialFocus = (): HTMLElement | null => {
   if (loading) return closeButtonEl;
-  return panelEl?.querySelector<HTMLElement>('.admin-field.is-invalid .admin-frontmatter-tags-input__input:not([disabled])')
-    ?? panelEl?.querySelector<HTMLElement>('.admin-field.is-invalid .admin-field__control:not([disabled])')
+  return getFirstInvalidFieldControl()
     ?? panelEl?.querySelector<HTMLElement>('[name="title"]:not([disabled])')
     ?? closeButtonEl;
 };
@@ -112,6 +119,21 @@ $effect(() => {
   return () => {
     document.removeEventListener('keydown', dialogFocus.handleKeydown);
   };
+});
+
+$effect(() => {
+  if (!open || loading || !issueFocusKey) {
+    focusedIssueKey = '';
+    return;
+  }
+  if (focusedIssueKey === issueFocusKey) return;
+
+  const nextIssueFocusKey = issueFocusKey;
+  focusedIssueKey = nextIssueFocusKey;
+  void tick().then(() => {
+    if (!open || loading || issueFocusKey !== nextIssueFocusKey) return;
+    getFirstInvalidFieldControl()?.focus();
+  });
 });
 </script>
 
