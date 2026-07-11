@@ -37,6 +37,10 @@ import {
   normalizeHeroImageSrc,
   toSafeHttpUrl
 } from '../../utils/format';
+import {
+  listAdminCloudStorageImages,
+  type AdminImageCloudListItem
+} from './image-cloud-storage';
 
 export type { AdminImageBrowseGroup, AdminImageOrigin, AdminImageScopeKey } from './image-contract';
 export type { AdminImageScopeIndex } from './image-browse';
@@ -79,6 +83,7 @@ export type AdminImageBrowseIndexItem = {
   path: string;
   origin: AdminImageOrigin;
   fileName: string;
+  cloudKey?: string | null;
   owner: string | null;
   ownerLabel: string | null;
   browseGroup: Exclude<AdminImageBrowseGroup, 'all'>;
@@ -94,6 +99,7 @@ export type AdminImageListItem = {
   value: string;
   origin: AdminImageOrigin;
   fileName: string;
+  cloudKey?: string | null;
   owner: string | null;
   ownerLabel: string | null;
   browseGroup: Exclude<AdminImageBrowseGroup, 'all'>;
@@ -141,8 +147,10 @@ type AdminImageAssetRecord = {
   path: string;
   origin: AdminImageOrigin;
   fileName: string;
+  cloudKey?: string | null;
   owner: string | null;
   ownerLabel: string | null;
+  cloudMeta?: Pick<AdminImageCloudListItem, 'url' | 'size' | 'mimeType' | 'lastModified'>;
 };
 
 type AdminImageAssetBrowseMeta = {
@@ -308,6 +316,8 @@ const toDevFsPreviewSrc = (assetPath: string): string =>
   `/@fs/${encodeURI(toAbsoluteAssetPath(assetPath).replace(/\\/g, '/'))}`;
 
 const getPreviewSrcFromPath = (assetPath: string): string | null => {
+  const safeRemoteUrl = toSafeHttpUrl(assetPath);
+  if (safeRemoteUrl.startsWith('https://')) return safeRemoteUrl;
   if (assetPath.startsWith('public/')) return `/${assetPath.slice('public/'.length)}`;
   if (assetPath.startsWith('src/assets/') || assetPath.startsWith('src/content/')) {
     return toDevFsPreviewSrc(assetPath);
@@ -501,6 +511,7 @@ const resolveImageScanTargets = (
 };
 
 const getOriginSortRank = (assetPath: string): number => {
+  if (assetPath.startsWith('https://')) return ADMIN_IMAGE_SCAN_ROOTS.length;
   const index = ADMIN_IMAGE_SCAN_ROOTS.findIndex((root) => assetPath.startsWith(`${root.prefix}/`));
   return index === -1 ? ADMIN_IMAGE_SCAN_ROOTS.length : index;
 };
@@ -557,7 +568,9 @@ const sortImageAssets = (field: AdminImageFieldContext | null, left: AdminImageA
 };
 
 const getCompatibleFieldValues = (record: AdminImageAssetRecord): string[] =>
-  getAdminImageCompatibleFieldValues(record.path, record.origin);
+  record.origin === 'cloud'
+    ? [record.cloudMeta?.url ?? record.path].filter((value) => value.length > 0)
+    : getAdminImageCompatibleFieldValues(record.path, record.origin);
 
 const getPreferredFieldValue = (record: AdminImageAssetRecord): string | null => {
   const compatibleValues = getCompatibleFieldValues(record);
@@ -593,6 +606,17 @@ const getBitsBrowseSubgroup = (assetPath: string): { browseSubgroup: string; bro
 
 const resolveBrowseMeta = (record: AdminImageAssetRecord): AdminImageAssetBrowseMeta => {
   const preferredValue = getPreferredFieldValue(record);
+  if (record.origin === 'cloud') {
+    return {
+      browseGroup: 'cloud',
+      browseGroupLabel: ADMIN_IMAGE_BROWSE_GROUP_LABELS.cloud,
+      browseSubgroup: '',
+      browseSubgroupLabel: null,
+      preferredValue,
+      hiddenFromBrowse: false
+    };
+  }
+
   if (isSystemAssetPath(record.path)) {
     return {
       browseGroup: 'uncategorized',
@@ -704,12 +728,33 @@ const toAdminImageBrowseAsset = (asset: AdminImageAssetRecord): AdminImageBrowse
 };
 
 const listAdminImageBrowseAssets = async (): Promise<AdminImageBrowseAsset[]> => {
-  const assets = await listAdminImageAssets('');
+  const localAssets = await listAdminImageAssets('');
+  const cloudAssets = await listAdminCloudStorageImages()
+    .then((items) => items.map((item) => ({
+      path: item.url,
+      origin: 'cloud' as const,
+      fileName: item.fileName,
+      cloudKey: item.key,
+      owner: null,
+      ownerLabel: null,
+      cloudMeta: {
+        url: item.url,
+        size: item.size,
+        mimeType: item.mimeType,
+        lastModified: item.lastModified
+      }
+    } satisfies AdminImageAssetRecord)))
+    .catch(() => []);
+  const assets = [...localAssets, ...cloudAssets];
   return assets
     .map(toAdminImageBrowseAsset)
     .filter((asset): asset is AdminImageBrowseAsset => asset !== null)
     .sort((left, right) => sortImageAssets(null, left, right));
 };
+
+const withoutCloudBrowseGroupOption = (
+  options: readonly AdminImageBrowseGroupOption[]
+): AdminImageBrowseGroupOption[] => options.filter((option) => option.value !== 'cloud');
 
 export const listAdminImageBrowseIndex = async (): Promise<AdminImageBrowseIndexItem[]> => {
   const browseAssets = await listAdminImageBrowseAssets();
@@ -717,6 +762,7 @@ export const listAdminImageBrowseIndex = async (): Promise<AdminImageBrowseIndex
     path: asset.path,
     origin: asset.origin,
     fileName: asset.fileName,
+    cloudKey: asset.cloudKey ?? null,
     owner: asset.owner,
     ownerLabel: asset.ownerLabel,
     browseGroup: asset.browseGroup,
@@ -741,15 +787,23 @@ export const listAdminImageScopeIndex = async (): Promise<AdminImageScopeIndex> 
         await Promise.all(
           browseAssets.map(async (asset) => {
             try {
-              const fileStat = await stat(toAbsoluteAssetPath(asset.path));
-              return {
-                path: asset.path,
-                mtimeMs: fileStat.mtimeMs
-              };
+          const fileStat = await stat(toAbsoluteAssetPath(asset.path));
+          return {
+            path: asset.path,
+            mtimeMs: fileStat.mtimeMs
+          };
             } catch {
-              return null;
-            }
-          })
+            const lastModifiedTime = asset.cloudMeta?.lastModified
+              ? Date.parse(asset.cloudMeta.lastModified)
+              : Number.NaN;
+            return Number.isFinite(lastModifiedTime)
+              ? {
+                  path: asset.path,
+                  mtimeMs: lastModifiedTime
+                }
+              : null;
+          }
+        })
         )
       )
         .filter((entry): entry is { path: string; mtimeMs: number } => entry !== null)
@@ -770,6 +824,29 @@ const toAdminImageListItem = async (
   item: AdminImageAssetRecord & { value: string },
   browseMeta: AdminImageAssetBrowseMeta = resolveBrowseMeta(item)
 ): Promise<AdminImageListItem> => {
+  if (item.origin === 'cloud') {
+    const previewSrc = item.cloudMeta?.url ?? item.value;
+    return {
+      path: item.path,
+      value: item.value,
+      origin: item.origin,
+      fileName: item.fileName,
+      cloudKey: item.cloudKey ?? null,
+      owner: item.owner,
+      ownerLabel: item.ownerLabel,
+      browseGroup: browseMeta.browseGroup,
+      browseGroupLabel: browseMeta.browseGroupLabel,
+      browseSubgroup: browseMeta.browseSubgroup,
+      browseSubgroupLabel: browseMeta.browseSubgroupLabel,
+      preferredValue: browseMeta.preferredValue,
+      width: null,
+      height: null,
+      size: item.cloudMeta?.size ?? null,
+      mimeType: item.cloudMeta?.mimeType ?? null,
+      previewSrc
+    } satisfies AdminImageListItem;
+  }
+
   const meta = await readAdminLocalImageInspectionMeta(item.path);
 
   return {
@@ -777,6 +854,7 @@ const toAdminImageListItem = async (
     value: item.value,
     origin: item.origin,
     fileName: item.fileName,
+    cloudKey: item.cloudKey ?? null,
     owner: item.owner,
     ownerLabel: item.ownerLabel,
     browseGroup: browseMeta.browseGroup,
@@ -1078,6 +1156,21 @@ const resolveLocalTargetFromPath = (assetPath: string): LocalImageTarget => {
 export const getAdminImageMeta = async (input: AdminImageMetaInput): Promise<AdminImageMetaResult> => {
   const rawPath = 'path' in input && typeof input.path === 'string' ? input.path.trim() : '';
   if (rawPath) {
+    const safeRemoteUrl = toSafeHttpUrl(rawPath);
+    if (safeRemoteUrl.startsWith('https://')) {
+      return {
+        kind: 'remote',
+        path: null,
+        value: safeRemoteUrl,
+        origin: 'cloud',
+        width: null,
+        height: null,
+        size: null,
+        mimeType: null,
+        previewSrc: safeRemoteUrl
+      };
+    }
+
     return readLocalImageMeta(resolveLocalTargetFromPath(rawPath));
   }
 
@@ -1181,7 +1274,7 @@ export const listAdminImageItems = async ({
       scope: '',
       group: browsePage.activeGroup,
       subgroup: browsePage.activeGroup && browsePage.activeGroup !== 'all' ? browsePage.activeSubgroup : '',
-      groupOptions: browsePage.groupOptions,
+      groupOptions: withoutCloudBrowseGroupOption(browsePage.groupOptions),
       subgroupOptions: browsePage.subgroupOptions,
       page: browsePage.page,
       limit: safeLimit,

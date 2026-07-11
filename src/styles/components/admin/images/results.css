@@ -53,6 +53,22 @@
   min-width: 0;
 }
 
+.admin-images-browser__source-heading {
+  display: flex;
+  align-items: center;
+  min-width: 0;
+  color: var(--muted);
+  font-size: var(--admin-text-xs);
+  font-weight: 700;
+  letter-spacing: var(--admin-tracking-wide);
+  line-height: 1.2;
+  text-transform: uppercase;
+}
+
+.admin-images-browser__items[data-view='grid'] .admin-images-browser__source-heading {
+  grid-column: 1 / -1;
+}
+
 .admin-images-browser__card {
   display: grid;
   grid-template-columns: 128px minmax(0, 1fr);

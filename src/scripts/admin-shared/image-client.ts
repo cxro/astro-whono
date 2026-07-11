@@ -8,6 +8,7 @@ export type AdminImageClientItem = {
   value: string;
   origin: AdminImageOrigin;
   fileName: string;
+  cloudKey?: string | null;
   width: number | null;
   height: number | null;
   size: number | null;
@@ -86,6 +87,7 @@ const isAdminImageClientItem = (item: unknown): item is AdminImageClientItem =>
   && typeof item.value === 'string'
   && isAdminImageOrigin(item.origin)
   && typeof item.fileName === 'string'
+  && (item.cloudKey === undefined || isNullableString(item.cloudKey))
   && isNullableNumber(item.width)
   && isNullableNumber(item.height)
   && isNullableNumber(item.size)

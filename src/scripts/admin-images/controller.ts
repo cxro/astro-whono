@@ -12,6 +12,7 @@ import {
 import { type AdminImageClientMeta } from '../admin-shared/image-client';
 import {
   copyText,
+  deleteCloudImage,
   fetchList,
   fetchMetaByPath,
   navigateToRefresh,
@@ -185,7 +186,8 @@ export const initAdminImagesConsole = () => {
   const icons = {
     copy: getIconMarkup('copy'),
     link: getIconMarkup('link'),
-    eye: getIconMarkup('eye')
+    eye: getIconMarkup('eye'),
+    trash: getIconMarkup('trash')
   };
 
   const getCurrentPageSize = (): number =>
@@ -237,6 +239,9 @@ export const initAdminImagesConsole = () => {
     currentState.scope === DEFAULT_SCOPE
     && (currentState.group !== DEFAULT_GROUP || currentState.subgroup.trim().length > 0);
 
+  const withoutCloudGroupOption = (options: readonly AdminImageFilterOption[]): AdminImageFilterOption[] =>
+    options.filter((option) => option.value !== 'cloud');
+
   const renderCurrentItems = () => {
     renderItems({
       resultListEl,
@@ -258,6 +263,7 @@ export const initAdminImagesConsole = () => {
       copyIcon: icons.copy,
       linkIcon: icons.link,
       eyeIcon: icons.eye,
+      trashIcon: icons.trash,
       largeFileThreshold: LARGE_FILE_THRESHOLD
     });
   };
@@ -593,7 +599,7 @@ export const initAdminImagesConsole = () => {
         page: browsePage.page
       },
       items: browsePage.items,
-      groupOptions: browsePage.groupOptions,
+      groupOptions: withoutCloudGroupOption(browsePage.groupOptions),
       subgroupOptions: browsePage.subgroupOptions,
       totalCount: browsePage.totalCount,
       totalPages: browsePage.totalPages,
@@ -831,6 +837,41 @@ export const initAdminImagesConsole = () => {
   });
 
   detailEl.addEventListener('click', async (event) => {
+    const deleteTarget = event.target instanceof Element
+      ? event.target.closest<HTMLButtonElement>('[data-cloud-delete-key]')
+      : null;
+    if (deleteTarget instanceof HTMLButtonElement) {
+      if (busy) return;
+      const key = deleteTarget.dataset.cloudDeleteKey?.trim() ?? '';
+      const label = deleteTarget.dataset.cloudDeleteLabel?.trim() || '该云端图片';
+      if (!key) {
+        setStatus('error', '云端图片 key 为空，无法删除');
+        return;
+      }
+      if (!window.confirm(`确定删除云端图片「${label}」吗？如果文章或页面仍引用这个 URL，已发布内容中的图片会失效。`)) {
+        return;
+      }
+
+      busy = true;
+      syncControls();
+      setStatus('loading', '正在删除云端图片...');
+      try {
+        await deleteCloudImage(bootstrap.cloudDeleteEndpoint, key);
+        selectedPath = null;
+        detailMetaCache.clear();
+        detailMetaErrors.clear();
+        detailMetaPending.clear();
+        setStatus('ok', '云端图片已删除，正在刷新图库');
+        await loadList({ updateLocation: true });
+      } catch (error) {
+        setStatus('error', error instanceof Error ? error.message : '云端图片删除失败');
+      } finally {
+        busy = false;
+        syncControls();
+      }
+      return;
+    }
+
     const target = event.target instanceof Element ? event.target.closest<HTMLButtonElement>('[data-copy-value]') : null;
     if (!(target instanceof HTMLButtonElement)) return;
 

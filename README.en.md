@@ -235,6 +235,20 @@ Main routes:
 - Default avatar for `/bits/`: place it under `public/author/**` and use the actual file path, for example `author/your-avatar.png`
 - Home Hero: supports `src/assets/**`, `public/**`, and `https://` image URLs
 - If you need a public direct URL, or do not want Astro to process the asset, place it under `public/**`
+- Admin Console image uploads write local files by default. To upload new images to S3-compatible cloud storage instead, set these variables in your local development environment:
+
+```bash
+ASTRO_WHONO_IMAGE_STORAGE=s3
+ASTRO_WHONO_S3_ENDPOINT=https://your-s3-endpoint
+ASTRO_WHONO_S3_REGION=auto
+ASTRO_WHONO_S3_BUCKET=your-bucket
+ASTRO_WHONO_S3_ACCESS_KEY_ID=your-access-key
+ASTRO_WHONO_S3_SECRET_ACCESS_KEY=your-secret-key
+ASTRO_WHONO_S3_PUBLIC_BASE_URL=https://your-cdn-domain
+# Optional: ASTRO_WHONO_S3_PREFIX=blog
+```
+
+When enabled, essay / memo body image uploads and `/bits/` image uploads return an `https://` image URL and save that value into content. Existing local images are not migrated automatically.
 
 
 ### Core Frontmatter Fields

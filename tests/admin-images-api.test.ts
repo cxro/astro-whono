@@ -1,4 +1,4 @@
-import { afterEach, beforeEach, describe, expect, it } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { mkdtemp, mkdir, readFile, rm, utimes, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
@@ -15,6 +15,16 @@ const createUploadRequest = (url: string, formData: FormData) =>
       origin: new URL(url).origin
     },
     body: formData
+  });
+
+const createJsonWriteRequest = (url: string, body: unknown) =>
+  new Request(url, {
+    method: 'POST',
+    headers: {
+      'content-type': 'application/json',
+      origin: new URL(url).origin
+    },
+    body: JSON.stringify(body)
   });
 
 describe('admin images api', () => {
@@ -65,6 +75,15 @@ describe('admin images api', () => {
 
   afterEach(async () => {
     delete process.env.ASTRO_WHONO_INTERNAL_TEST_PROJECT_ROOT;
+    delete process.env.ASTRO_WHONO_IMAGE_STORAGE;
+    delete process.env.ASTRO_WHONO_S3_ENDPOINT;
+    delete process.env.ASTRO_WHONO_S3_REGION;
+    delete process.env.ASTRO_WHONO_S3_BUCKET;
+    delete process.env.ASTRO_WHONO_S3_ACCESS_KEY_ID;
+    delete process.env.ASTRO_WHONO_S3_SECRET_ACCESS_KEY;
+    delete process.env.ASTRO_WHONO_S3_PUBLIC_BASE_URL;
+    delete process.env.ASTRO_WHONO_S3_PREFIX;
+    vi.unstubAllGlobals();
     try {
       const imageShared = await import('../src/lib/admin-console/image-shared');
       imageShared.invalidateAdminImageCaches();
@@ -121,6 +140,84 @@ describe('admin images api', () => {
         })
       ])
     );
+  });
+
+  it('includes configured cloud images in browse mode alongside local images', async () => {
+    process.env.ASTRO_WHONO_IMAGE_STORAGE = 's3';
+    process.env.ASTRO_WHONO_S3_ENDPOINT = 'https://s3.example.test';
+    process.env.ASTRO_WHONO_S3_REGION = 'auto';
+    process.env.ASTRO_WHONO_S3_BUCKET = 'site-images';
+    process.env.ASTRO_WHONO_S3_ACCESS_KEY_ID = 'test-access-key';
+    process.env.ASTRO_WHONO_S3_SECRET_ACCESS_KEY = 'test-secret-key';
+    process.env.ASTRO_WHONO_S3_PUBLIC_BASE_URL = 'https://cdn.example.test';
+    process.env.ASTRO_WHONO_S3_PREFIX = 'uploads';
+
+    const listRequests: Array<{ url: string; headers: Headers }> = [];
+    vi.stubGlobal('fetch', vi.fn(async (input: RequestInfo | URL, init?: RequestInit) => {
+      listRequests.push({
+        url: String(input),
+        headers: new Headers(init?.headers)
+      });
+      return new Response(
+        [
+          '<?xml version="1.0" encoding="UTF-8"?>',
+          '<ListBucketResult>',
+          '<Contents>',
+          '<Key>uploads/essay/guide/cloud-shot.webp</Key>',
+          '<LastModified>2026-07-11T02:00:00.000Z</LastModified>',
+          '<Size>2048</Size>',
+          '</Contents>',
+          '<Contents>',
+          '<Key>uploads/essay/guide/readme.txt</Key>',
+          '<Size>10</Size>',
+          '</Contents>',
+          '</ListBucketResult>'
+        ].join(''),
+        {
+          status: 200,
+          headers: { 'content-type': 'application/xml' }
+        }
+      );
+    }));
+
+    const { GET } = await import('../src/pages/api/admin/images/list');
+
+    const response = await GET({
+      url: new URL('http://127.0.0.1:4321/api/admin/images/list?group=all&page=1&limit=60')
+    } as never);
+
+    expect(response.status).toBe(200);
+    const payload = JSON.parse(await response.text());
+    expect(payload.ok).toBe(true);
+    expect(payload.result.groupOptions).not.toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          value: 'cloud'
+        })
+      ])
+    );
+    expect(payload.result.items).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          path: 'https://cdn.example.test/uploads/essay/guide/cloud-shot.webp',
+          value: 'https://cdn.example.test/uploads/essay/guide/cloud-shot.webp',
+          origin: 'cloud',
+          browseGroup: 'cloud',
+          browseGroupLabel: '云端图片',
+          fileName: 'cloud-shot.webp',
+          size: 2048,
+          mimeType: 'image/webp',
+          previewSrc: 'https://cdn.example.test/uploads/essay/guide/cloud-shot.webp'
+        }),
+        expect.objectContaining({
+          origin: 'public',
+          path: 'public/bits/demo.png'
+        })
+      ])
+    );
+    expect(listRequests).toHaveLength(1);
+    expect(listRequests[0]?.url).toBe('https://s3.example.test/site-images?list-type=2&max-keys=1000&prefix=uploads%2F');
+    expect(listRequests[0]?.headers.get('authorization')).toContain('AWS4-HMAC-SHA256');
   });
 
   it('filters content attachments by owner and resolves relative asset references', async () => {
@@ -321,6 +418,98 @@ describe('admin images api', () => {
       })
     );
     await expect(readFile(path.join(tempRoot, 'public', 'bits', 'bit-cover.png'))).resolves.toEqual(PNG_1X1);
+  });
+
+  it('uploads images to configured S3-compatible cloud storage and returns a public url', async () => {
+    process.env.ASTRO_WHONO_IMAGE_STORAGE = 's3';
+    process.env.ASTRO_WHONO_S3_ENDPOINT = 'https://s3.example.test';
+    process.env.ASTRO_WHONO_S3_REGION = 'auto';
+    process.env.ASTRO_WHONO_S3_BUCKET = 'site-images';
+    process.env.ASTRO_WHONO_S3_ACCESS_KEY_ID = 'test-access-key';
+    process.env.ASTRO_WHONO_S3_SECRET_ACCESS_KEY = 'test-secret-key';
+    process.env.ASTRO_WHONO_S3_PUBLIC_BASE_URL = 'https://cdn.example.test';
+    process.env.ASTRO_WHONO_S3_PREFIX = 'blog';
+
+    const uploadRequests: Array<{ url: string; headers: Headers; body: ArrayBuffer }> = [];
+    vi.stubGlobal('fetch', vi.fn(async (input: RequestInfo | URL, init?: RequestInit) => {
+      uploadRequests.push({
+        url: String(input),
+        headers: new Headers(init?.headers),
+        body: await new Response(init?.body).arrayBuffer()
+      });
+      return new Response('', { status: 200 });
+    }));
+
+    const { POST } = await import('../src/pages/api/admin/images/upload');
+    const formData = new FormData();
+    formData.set('collection', 'bits');
+    formData.set('entryId', 'demo');
+    formData.set('image', new File([PNG_1X1], 'Cloud Cover.PNG', { type: 'image/png' }));
+
+    const response = await POST({
+      request: createUploadRequest('http://127.0.0.1:4321/api/admin/images/upload', formData),
+      url: new URL('http://127.0.0.1:4321/api/admin/images/upload')
+    } as never);
+
+    expect(response.status).toBe(200);
+    const payload = JSON.parse(await response.text());
+    expect(payload.ok).toBe(true);
+    expect(payload.result).toEqual(
+      expect.objectContaining({
+        src: expect.stringMatching(/^https:\/\/cdn\.example\.test\/blog\/bits\/demo\/cloud-cover-[0-9a-f-]+\.png$/),
+        path: expect.stringMatching(/^blog\/bits\/demo\/cloud-cover-[0-9a-f-]+\.png$/),
+        fileName: expect.stringMatching(/^cloud-cover-[0-9a-f-]+\.png$/),
+        width: null,
+        height: null,
+        size: PNG_1X1.length,
+        mimeType: 'image/png'
+      })
+    );
+    expect(uploadRequests).toHaveLength(1);
+    expect(uploadRequests[0]?.url).toMatch(/^https:\/\/s3\.example\.test\/site-images\/blog\/bits\/demo\/cloud-cover-/);
+    expect(uploadRequests[0]?.headers.get('authorization')).toContain('AWS4-HMAC-SHA256');
+    expect(uploadRequests[0]?.headers.get('content-type')).toBe('image/png');
+    expect(Buffer.from(uploadRequests[0]?.body ?? new ArrayBuffer(0))).toEqual(PNG_1X1);
+    await expect(readFile(path.join(tempRoot, 'public', 'bits', 'cloud-cover.png'))).rejects.toThrow();
+  });
+
+  it('deletes configured cloud images by key', async () => {
+    process.env.ASTRO_WHONO_IMAGE_STORAGE = 's3';
+    process.env.ASTRO_WHONO_S3_ENDPOINT = 'https://s3.example.test';
+    process.env.ASTRO_WHONO_S3_REGION = 'auto';
+    process.env.ASTRO_WHONO_S3_BUCKET = 'site-images';
+    process.env.ASTRO_WHONO_S3_ACCESS_KEY_ID = 'test-access-key';
+    process.env.ASTRO_WHONO_S3_SECRET_ACCESS_KEY = 'test-secret-key';
+    process.env.ASTRO_WHONO_S3_PUBLIC_BASE_URL = 'https://cdn.example.test';
+    process.env.ASTRO_WHONO_S3_PREFIX = 'uploads';
+
+    const deleteRequests: Array<{ url: string; headers: Headers; method: string }> = [];
+    vi.stubGlobal('fetch', vi.fn(async (input: RequestInfo | URL, init?: RequestInit) => {
+      deleteRequests.push({
+        url: String(input),
+        headers: new Headers(init?.headers),
+        method: init?.method ?? 'GET'
+      });
+      return new Response('', { status: 200 });
+    }));
+
+    const { POST } = await import('../src/pages/api/admin/images/cloud/delete');
+    const response = await POST({
+      request: createJsonWriteRequest(
+        'http://127.0.0.1:4321/api/admin/images/cloud/delete',
+        { key: 'uploads/essay/guide/cloud-shot.webp' }
+      ),
+      url: new URL('http://127.0.0.1:4321/api/admin/images/cloud/delete')
+    } as never);
+
+    expect(response.status).toBe(200);
+    const payload = JSON.parse(await response.text());
+    expect(payload.ok).toBe(true);
+    expect(payload.result.key).toBe('uploads/essay/guide/cloud-shot.webp');
+    expect(deleteRequests).toHaveLength(1);
+    expect(deleteRequests[0]?.method).toBe('DELETE');
+    expect(deleteRequests[0]?.url).toBe('https://s3.example.test/site-images/uploads/essay/guide/cloud-shot.webp');
+    expect(deleteRequests[0]?.headers.get('authorization')).toContain('AWS4-HMAC-SHA256');
   });
 
   it('uploads memo body images next to the fixed memo source file', async () => {

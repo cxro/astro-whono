@@ -239,6 +239,20 @@ Theme Console 主要面向**站点级**和**页面级**配置，支持内容：
 - `/bits/` 默认头像：放 `public/author/**`，并填写实际文件路径，例如 `author/your-avatar.png`
 - 首页 Hero：支持 `src/assets/**`、`public/**` 和 `https://` 图片地址
 - 需要公共直链，或不希望经过 Astro 处理的图片：放 `public/**`
+- Admin Console 图片上传默认写入本地文件；如需上传到 S3 兼容云存储，可在本地开发环境设置：
+
+```bash
+ASTRO_WHONO_IMAGE_STORAGE=s3
+ASTRO_WHONO_S3_ENDPOINT=https://你的-s3-endpoint
+ASTRO_WHONO_S3_REGION=auto
+ASTRO_WHONO_S3_BUCKET=你的 bucket
+ASTRO_WHONO_S3_ACCESS_KEY_ID=你的 access key
+ASTRO_WHONO_S3_SECRET_ACCESS_KEY=你的 secret key
+ASTRO_WHONO_S3_PUBLIC_BASE_URL=https://你的-cdn-域名
+# 可选：ASTRO_WHONO_S3_PREFIX=blog
+```
+
+启用后，随笔 / 小记正文图片与 `/bits/` 配图上传会返回 `https://` 图片地址并写入内容；已有本地图片不会自动迁移。
 
 ### 核心字段（Frontmatter）
 

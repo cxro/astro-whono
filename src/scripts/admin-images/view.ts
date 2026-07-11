@@ -12,8 +12,15 @@ const escapeHtml = (value: string): string =>
 const getOriginBadgeLabel = (origin: AdminImageBrowseItem['origin']): string => {
   if (origin === 'public') return '公开资源';
   if (origin === 'src/assets') return '站点素材';
+  if (origin === 'cloud') return '云端资源';
   return '内容附件';
 };
+
+const getSourceSectionLabel = (origin: AdminImageBrowseItem['origin']): string =>
+  origin === 'cloud' ? '云端图片' : '本地图片';
+
+const getSourceSectionKey = (origin: AdminImageBrowseItem['origin']): 'cloud' | 'local' =>
+  origin === 'cloud' ? 'cloud' : 'local';
 
 // 正文图片引用：仅 public 图可作为根绝对路径写入 Markdown 正文（与现有 /images/... 约定一致）。
 // src/assets 需在代码中 import 后交由打包器处理；src/content 附件应在所属内容里用相对路径引用，
@@ -29,6 +36,9 @@ const encodeMarkdownImageDestination = (value: string): string =>
 const getMarkdownReference = (
   item: AdminImageBrowseItem
 ): { value: string } | { disabledReason: string } => {
+  if (item.origin === 'cloud' && item.path.startsWith('https://')) {
+    return { value: `![](${encodeMarkdownImageDestination(item.path)})` };
+  }
   if (item.origin === 'public' && item.path.startsWith('public/')) {
     const webPath = `/${item.path.slice('public/'.length)}`;
     return { value: `![](${encodeMarkdownImageDestination(webPath)})` };
@@ -208,9 +218,23 @@ export const renderItems = ({
 
   const isGridView = resultListEl.dataset.view === 'grid';
   const includeOwnerInItemMeta = isGridView;
+  const displayItems = [
+    ...items.filter((item) => item.origin !== 'cloud'),
+    ...items.filter((item) => item.origin === 'cloud')
+  ];
   emptyEl.hidden = true;
-  resultListEl.innerHTML = items
+  let previousSourceKey = '';
+  resultListEl.innerHTML = displayItems
     .map((item, index) => {
+      const sourceKey = getSourceSectionKey(item.origin);
+      const sectionHead = sourceKey !== previousSourceKey
+        ? `
+          <li class="admin-images-browser__source-heading" aria-label="${escapeHtml(getSourceSectionLabel(item.origin))}">
+            <span>${escapeHtml(getSourceSectionLabel(item.origin))}</span>
+          </li>
+        `
+        : '';
+      previousSourceKey = sourceKey;
       const overlayMeta = isGridView ? getCardOverlayMetaText(item, detailMetaCache) : '';
       const itemMeta = getItemMetaText(item, detailMetaCache, {
         includeOwner: includeOwnerInItemMeta
@@ -221,6 +245,7 @@ export const renderItems = ({
       const descriptionText = getCardDescriptionText(item, detailMetaCache);
 
       return `
+        ${sectionHead}
         <li class="admin-images-browser__item-shell">
           <button
             class="admin-images-browser__card${selectedPath === item.path ? ' admin-images-browser__card--active' : ''}"
@@ -360,6 +385,7 @@ export const renderDetail = ({
   copyIcon,
   linkIcon,
   eyeIcon,
+  trashIcon,
   largeFileThreshold
 }: {
   detailEl: HTMLElement;
@@ -370,6 +396,7 @@ export const renderDetail = ({
   copyIcon: string;
   linkIcon: string;
   eyeIcon: string;
+  trashIcon: string;
   largeFileThreshold: number;
 }) => {
   if (!item) {
@@ -409,6 +436,7 @@ export const renderDetail = ({
   const fieldCopyLabel = hasPreferredValue ? '可用值' : '文件路径';
   const markdownRef = getMarkdownReference(item);
   const previewSrc = detailMeta?.previewSrc ?? item.previewSrc;
+  const canDeleteCloudImage = item.origin === 'cloud' && Boolean(item.cloudKey);
 
   detailEl.hidden = false;
   detailEl.innerHTML = `
@@ -483,6 +511,17 @@ export const renderDetail = ({
               ${eyeIcon}
               浏览器新标签中打开
             </a>`
+        : ''}
+          ${canDeleteCloudImage
+        ? `<button
+              class="admin-btn admin-btn--danger"
+              type="button"
+              data-cloud-delete-key="${escapeHtml(item.cloudKey ?? '')}"
+              data-cloud-delete-label="${escapeHtml(item.fileName)}"
+            >
+              ${trashIcon}
+              删除云端图片
+            </button>`
         : ''}
         </div>
       </div>

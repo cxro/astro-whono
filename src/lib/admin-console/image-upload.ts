@@ -10,6 +10,11 @@ import {
   readAdminLocalImageInspectionMeta
 } from './image-shared';
 import { getAdminImageFieldValue } from './image-params';
+import {
+  isAdminImageCloudStorageEnabled,
+  uploadAdminImageToCloudStorage
+} from './image-cloud-storage';
+import { AdminImageUploadError } from './image-upload-error';
 
 export type AdminImageUploadResult = {
   src: string;
@@ -21,15 +26,7 @@ export type AdminImageUploadResult = {
   mimeType: string | null;
 };
 
-export class AdminImageUploadError extends Error {
-  status: number;
-
-  constructor(message: string, status = 400) {
-    super(message);
-    this.name = 'AdminImageUploadError';
-    this.status = status;
-  }
-}
+export { AdminImageUploadError } from './image-upload-error';
 
 const SUPPORTED_IMAGE_EXTENSIONS = new Set(['.avif', '.gif', '.jpg', '.jpeg', '.png', '.svg', '.webp']);
 const ADMIN_IMAGE_UPLOAD_MAX_BYTES = 12 * 1024 * 1024;
@@ -123,6 +120,62 @@ const writeUniqueImageFile = async (
 const isRecord = (value: unknown): value is Record<string, unknown> =>
   typeof value === 'object' && value !== null;
 
+const assertContentEntryCanReceiveImage = (collection: 'essay' | 'bits' | 'memo', entryId: string): string => {
+  try {
+    return resolveAdminContentEntrySourcePath(collection, entryId);
+  } catch (error) {
+    if (error instanceof AdminContentEntryResolutionError) {
+      throw new AdminImageUploadError(error.message, error.code === 'source-not-found' ? 404 : 400);
+    }
+    throw error;
+  }
+};
+
+const uploadAdminCloudImage = async ({
+  collection,
+  entryId,
+  file,
+  safeFileName,
+  buffer
+}: {
+  collection: 'essay' | 'bits' | 'memo';
+  entryId: string;
+  file: File;
+  safeFileName: string;
+  buffer: Buffer;
+}): Promise<AdminImageUploadResult> => {
+  const cloudResult = await uploadAdminImageToCloudStorage({
+    collection,
+    entryId,
+    fileName: safeFileName,
+    buffer,
+    mimeType: file.type.trim() || getMimeTypeFromFileName(safeFileName)
+  });
+
+  invalidateAdminImageCaches();
+
+  return {
+    src: cloudResult.url,
+    path: cloudResult.key,
+    fileName: path.basename(cloudResult.key),
+    width: null,
+    height: null,
+    size: file.size,
+    mimeType: file.type.trim() || getMimeTypeFromFileName(safeFileName)
+  };
+};
+
+const getMimeTypeFromFileName = (fileName: string): string | null => {
+  const extension = path.extname(fileName).toLowerCase();
+  if (extension === '.avif') return 'image/avif';
+  if (extension === '.gif') return 'image/gif';
+  if (extension === '.jpeg' || extension === '.jpg') return 'image/jpeg';
+  if (extension === '.png') return 'image/png';
+  if (extension === '.svg') return 'image/svg+xml';
+  if (extension === '.webp') return 'image/webp';
+  return null;
+};
+
 export const uploadAdminMarkdownBodyImage = async ({
   collection,
   entryId,
@@ -134,18 +187,14 @@ export const uploadAdminMarkdownBodyImage = async ({
 }): Promise<AdminImageUploadResult> => {
   assertUploadFile(file);
 
-  let sourcePath: string;
-  try {
-    sourcePath = resolveAdminContentEntrySourcePath(collection, entryId);
-  } catch (error) {
-    if (error instanceof AdminContentEntryResolutionError) {
-      throw new AdminImageUploadError(error.message, error.code === 'source-not-found' ? 404 : 400);
-    }
-    throw error;
-  }
-
+  const sourcePath = assertContentEntryCanReceiveImage(collection, entryId);
   const safeFileName = getSafeImageFileName(file.name);
   const buffer = Buffer.from(await file.arrayBuffer());
+
+  if (isAdminImageCloudStorageEnabled()) {
+    return uploadAdminCloudImage({ collection, entryId, file, safeFileName, buffer });
+  }
+
   const assetPath = await writeUniqueImageFile(resolveMarkdownBodyUploadDirectory(sourcePath), safeFileName, buffer);
   const relativePath = toRelativeProjectPath(assetPath);
 
@@ -191,17 +240,15 @@ export const uploadAdminBitsImage = async ({
 }): Promise<AdminImageUploadResult> => {
   assertUploadFile(file);
 
-  try {
-    resolveAdminContentEntrySourcePath('bits', entryId);
-  } catch (error) {
-    if (error instanceof AdminContentEntryResolutionError) {
-      throw new AdminImageUploadError(error.message, error.code === 'source-not-found' ? 404 : 400);
-    }
-    throw error;
-  }
+  assertContentEntryCanReceiveImage('bits', entryId);
 
   const safeFileName = getSafeImageFileName(file.name);
   const buffer = Buffer.from(await file.arrayBuffer());
+
+  if (isAdminImageCloudStorageEnabled()) {
+    return uploadAdminCloudImage({ collection: 'bits', entryId, file, safeFileName, buffer });
+  }
+
   const assetPath = await writeUniqueImageFile(resolveBitsUploadDirectory(), safeFileName, buffer);
   const relativePath = toRelativeProjectPath(assetPath);
   const src = getAdminImageFieldValue('bits.images', relativePath, 'public');
