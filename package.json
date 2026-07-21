@@ -38,7 +38,7 @@
     "new:bit": "node ./scripts/new-bit.mjs"
   },
   "dependencies": {
-    "@astrojs/rss": "^4.0.18",
+    "@astrojs/rss": "^4.0.19",
     "@astrojs/sitemap": "^3.7.2",
     "@lucide/astro": "^1.8.0",
     "astro": "^6.3.2",
