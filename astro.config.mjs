@@ -122,6 +122,9 @@ export default defineConfig({
   integrations,
   ...(fonts.length ? { fonts } : {}),
   trailingSlash: 'always',
+  // Astro 7 起 compressHTML 默认值改为 'jsx'(按 JSX 规则吞行内空格);
+  // 显式固定为 v6 的 HTML-aware 压缩,避免中英混排的行内空格被移除。
+  compressHTML: true,
   build: {
     inlineStylesheets: 'auto'
   },

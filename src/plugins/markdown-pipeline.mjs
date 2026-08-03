@@ -1,3 +1,4 @@
+import { unified } from '@astrojs/markdown-remark';
 import remarkDirective from 'remark-directive';
 import remarkMath from 'remark-math';
 import rehypeKatex from 'rehype-katex';
@@ -277,8 +278,12 @@ export const createProjectMarkdownRehypePlugins = ({ aboutBase = '/', aboutEnabl
   rehypeKatex
 ];
 
+// 顶层 markdown.remarkPlugins/rehypePlugins 自 Astro 6.4 起弃用(Astro 7 默认处理器
+// 切换为 Sätteri),插件改为传给显式 unified() 处理器;gfm/smartypants 不传,保持内建默认。
 export const createPublicMarkdownConfig = ({ base = '/' } = {}) => ({
-  remarkPlugins: createProjectMarkdownRemarkPlugins(),
-  rehypePlugins: createProjectMarkdownRehypePlugins({ aboutBase: base }),
+  processor: unified({
+    remarkPlugins: createProjectMarkdownRemarkPlugins(),
+    rehypePlugins: createProjectMarkdownRehypePlugins({ aboutBase: base })
+  }),
   shikiConfig: createMarkdownShikiConfig()
 });

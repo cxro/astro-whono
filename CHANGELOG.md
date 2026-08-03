@@ -11,6 +11,11 @@ The format is based on Keep a Changelog, and this project aims to follow Semanti
 - 主题切换新增「跟随系统」模式：站点外观可随系统浅色/深色设置自动切换（[PR #35](https://github.com/cxro/astro-whono/pull/35)，by [@ZephyrCICD](https://github.com/ZephyrCICD)）。
 - Theme Console 新增「排版字体」配置：正文、文案、等宽、品牌四类字体可独立选择，支持系统字体栈与自托管字体（含构建期下载的中文子集），页面不请求任何第三方字体服务
 
+### Changed
+- 站点框架升级到 Astro 7，构建链同步升级到 Vite 8，并更新相关依赖修复多个上游安全公告；文章与页面的渲染效果保持不变。
+- 构建产物的响应式样式改用新的媒体查询语法，需要 Chrome 104+ / Safari 16.4+ / Firefox 102+（2022 年后的主流浏览器）才能完整生效。
+- 界面图标库 Lucide 随依赖升级更新，部分图标形状有细微视觉调整。
+
 ### Fixed
 - 修复本地后台编辑 figure 图片块时，含转义文本或富文本说明的图片可能被错误回显，以及本地图片缺失检查可能漏检的问题。
 - 修复子路径部署时，`/robots.txt` 中的 `Sitemap` 链接遗漏部署路径、指向错误地址的问题。

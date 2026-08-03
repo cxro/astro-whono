@@ -63,7 +63,8 @@ describe('markdown pipeline contract', () => {
 
   it('keeps Astro public GFM and smartypants as built-ins instead of public remark plugins', () => {
     const publicConfig = createPublicMarkdownConfig({ base: '/blog/' });
-    const publicRemarkPlugins = publicConfig.remarkPlugins.map(pluginOf);
+    const { options: processorOptions } = publicConfig.processor;
+    const publicRemarkPlugins = processorOptions.remarkPlugins.map(pluginOf);
 
     expect(publicMarkdownRemarkSegments).toEqual([
       {
@@ -76,11 +77,16 @@ describe('markdown pipeline contract', () => {
         plugins: ['remark-math', 'remark-directive', 'remark-about-directives', 'remark-callout']
       }
     ]);
+    expect(publicConfig.processor.name).toBe('unified');
+    expect(publicConfig).not.toHaveProperty('remarkPlugins');
+    expect(publicConfig).not.toHaveProperty('rehypePlugins');
+    expect(processorOptions.gfm).toBeUndefined();
+    expect(processorOptions.smartypants).toBeUndefined();
     expect(publicRemarkPlugins).not.toContain(remarkGfm);
     expect(publicRemarkPlugins).not.toContain(remarkSmartypants);
-    expect(pluginOf(publicConfig.remarkPlugins[0])).toBe(remarkMath);
-    expect(optionsOf(publicConfig.remarkPlugins[0])).toBe(markdownMathOptions);
-    expect(optionsOf(publicConfig.rehypePlugins[3])).toEqual({ base: '/blog/' });
+    expect(pluginOf(processorOptions.remarkPlugins[0])).toBe(remarkMath);
+    expect(optionsOf(processorOptions.remarkPlugins[0])).toBe(markdownMathOptions);
+    expect(optionsOf(processorOptions.rehypePlugins[3])).toEqual({ base: '/blog/' });
   });
 
   it('documents Astro public rehype order without pretending Shiki is a project rehype plugin', () => {

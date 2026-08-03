@@ -892,11 +892,15 @@ export const runDevAdminSettingsSmokeCheck = async () => {
   const baseUrl = `http://${previewHost}:${availablePort}`;
   let stdout = '';
   let stderr = '';
-  const child = spawn(process.execPath, [astroCliPath, 'dev', '--host', previewHost, '--port', String(availablePort)], {
+  // Astro 7 在探测到 AI agent 环境时会把 dev server 自动转为后台守护进程(带 lock 注册表),
+  // teardown 只能杀掉 CLI 子进程、守护进程会泄漏并卡死下一次运行的端口探活。
+  // ASTRO_DEV_BACKGROUND=0 关闭该探测强制前台;--ignore-lock 使测试实例完全不读写注册表。
+  const child = spawn(process.execPath, [astroCliPath, 'dev', '--host', previewHost, '--port', String(availablePort), '--ignore-lock'], {
     cwd: projectRoot,
     env: {
       ...process.env,
       NODE_ENV: 'development',
+      ASTRO_DEV_BACKGROUND: '0',
       ASTRO_WHONO_INTERNAL_TEST_PROJECT_ROOT: fixture.tempRoot,
       ASTRO_WHONO_INTERNAL_TEST_SETTINGS: '1',
       ASTRO_WHONO_INTERNAL_TEST_SETTINGS_DIR: fixture.settingsDir
