@@ -4,11 +4,11 @@ import { join } from 'node:path';
 import type { APIRoute } from 'astro';
 import {
   ADMIN_JSON_HEADERS,
-  createAdminWriteQueue,
   isAdminDryRunRequest,
   persistAdminFileTransaction,
   readAdminJsonRequestBody,
   validateAdminJsonWriteRequest,
+  withAdminSettingsWriteLock,
   type AdminFileTransactionEntry
 } from '../../../lib/admin-console/admin-api';
 import {
@@ -121,9 +121,6 @@ const createPersistEntries = (
     filePath: getThemeSettingsFilePath(group),
     content: createJsonBody(groups[group])
   }));
-
-// DEV 后台保存是低频操作，串行化写入可保证 revision 校验与实际提交处于同一临界区。
-const withAdminSettingsWriteLock = createAdminWriteQueue();
 
 const validateIncomingSettingsSnapshot = (
   settingsInput: unknown

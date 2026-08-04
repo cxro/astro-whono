@@ -566,6 +566,8 @@ const getPreferredFieldValue = (record: AdminImageAssetRecord): string | null =>
 };
 
 const isSystemAssetPath = (assetPath: string): boolean => {
+  // Theme Console 站点图标托管目录整体按系统资产处理，不进入浏览与字段选择列表。
+  if (assetPath.startsWith('public/images/site/')) return true;
   if (path.posix.dirname(assetPath) !== 'public') return false;
   const fileName = path.posix.basename(assetPath);
   return SYSTEM_ASSET_FILE_PATTERNS.some((pattern) => pattern.test(fileName));

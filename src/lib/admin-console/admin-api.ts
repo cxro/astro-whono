@@ -208,6 +208,10 @@ export const createAdminWriteQueue = (): (<T>(task: () => Promise<T>) => Promise
   };
 };
 
+// settings 保存与 site-assets 上传共享同一写队列：上传阶段的旧文件回收依赖最新 site.json 引用快照，
+// 分离队列会产生「保存引用 A 后，被并发上传按旧快照删除 A」的竞态。
+export const withAdminSettingsWriteLock = createAdminWriteQueue();
+
 export const persistAdminFileTransaction = async <TId extends string>(
   entries: readonly AdminFileTransactionEntry<TId>[],
   options: {

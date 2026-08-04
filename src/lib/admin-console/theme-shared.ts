@@ -20,15 +20,29 @@ import {
 import {
   getBitsAvatarLocalFilePath as getAdminBitsAvatarLocalFilePath,
   getHeroImageLocalFilePath as getAdminHeroImageLocalFilePath,
+  getSiteFaviconLocalFilePath as getAdminSiteFaviconLocalFilePath,
+  getSiteFaviconSizesFromPath as getAdminSiteFaviconSizesFromPath,
   normalizeBitsAvatarPath as normalizeAdminBitsAvatarPath,
-  normalizeHeroImageSrc as normalizeAdminHeroImageSrc
+  normalizeHeroImageSrc as normalizeAdminHeroImageSrc,
+  normalizeSiteFaviconPath as normalizeAdminSiteFaviconPath,
+  type SiteFaviconSlot
 } from '../../utils/format';
 
 export {
   getAdminBitsAvatarLocalFilePath,
   getAdminHeroImageLocalFilePath,
+  getAdminSiteFaviconLocalFilePath,
+  getAdminSiteFaviconSizesFromPath,
   normalizeAdminBitsAvatarPath,
-  normalizeAdminHeroImageSrc
+  normalizeAdminHeroImageSrc,
+  normalizeAdminSiteFaviconPath
+};
+
+export const ADMIN_SITE_FAVICON_SLOTS = ['svg', 'png', 'appleTouchIcon'] as const satisfies readonly SiteFaviconSlot[];
+export const ADMIN_SITE_FAVICON_SLOT_LABELS: Record<SiteFaviconSlot, string> = {
+  svg: '站点图标（SVG）',
+  png: '标签页图标（PNG）',
+  appleTouchIcon: '触摸图标（PNG）'
 };
 
 export const ADMIN_NAV_IDS = ['essay', 'bits', 'memo', 'archive', 'about'] as const satisfies readonly SidebarNavId[];
@@ -468,6 +482,19 @@ export const canonicalizeAdminThemeSettings = (
     return normalized || ADMIN_HERO_IMAGE_ALT_DEFAULT;
   })();
 
+  const rawFavicon = isRecord(site.favicon) ? site.favicon : {};
+  const canonicalFaviconSlot = (slot: SiteFaviconSlot): string | null => {
+    const rawValue = rawFavicon[slot];
+    if (rawValue === null || rawValue === undefined) return null;
+
+    const normalized = normalizeAdminSiteFaviconPath(slot, rawValue);
+    if (normalized === undefined) {
+      const rawText = normalizeTrimmed(rawValue);
+      return rawText ? rawText : null;
+    }
+    return normalized;
+  };
+
   return {
     site: {
       title: normalizeTrimmed(site.title),
@@ -484,6 +511,11 @@ export const canonicalizeAdminThemeSettings = (
           adminOverview.hiddenMessage,
           ADMIN_OVERVIEW_HIDDEN_MESSAGE_DEFAULT
         )
+      },
+      favicon: {
+        svg: canonicalFaviconSlot('svg'),
+        png: canonicalFaviconSlot('png'),
+        appleTouchIcon: canonicalFaviconSlot('appleTouchIcon')
       },
       socialLinks: {
         github: normalizeTrimmed(socialLinks.github) || null,
@@ -598,6 +630,9 @@ export const createAdminWritableThemeSettingsGroups = (
     adminOverview: {
       ...settings.site.adminOverview
     },
+    favicon: {
+      ...settings.site.favicon
+    },
     socialLinks: {
       github: settings.site.socialLinks.github,
       x: settings.site.socialLinks.x,
@@ -704,6 +739,26 @@ export const validateAdminThemeSettings = (
       `Admin Overview 关闭态文案不能超过 ${ADMIN_OVERVIEW_HIDDEN_MESSAGE_MAX_LENGTH} 个字符`
     );
   }
+
+  ADMIN_SITE_FAVICON_SLOTS.forEach((slot) => {
+    const slotValue = settings.site.favicon?.[slot] ?? null;
+    if (slotValue === null) return;
+
+    const slotLabel = ADMIN_SITE_FAVICON_SLOT_LABELS[slot];
+    const extHint = slot === 'svg' ? '.svg' : '.png';
+    if (normalizeAdminSiteFaviconPath(slot, slotValue) === undefined) {
+      pushIssue(
+        `site.favicon.${slot}`,
+        `${slotLabel} 只允许 public/**（或 / 开头）的 ${extHint} 路径，不允许 URL、..、?、#`
+      );
+      return;
+    }
+
+    const localFilePath = getAdminSiteFaviconLocalFilePath(slotValue);
+    if (options.localFileExists && !options.localFileExists(localFilePath)) {
+      pushIssue(`site.favicon.${slot}`, `${slotLabel} 指向的本地文件不存在：${localFilePath}`);
+    }
+  });
 
   if (
     settings.site.socialLinks?.github &&
@@ -1174,27 +1229,39 @@ const fillAdminThemeSettingsSiteCompatibilityDefaults = (
   rawSite: LooseRecord,
   canonicalSite: LooseRecord
 ): LooseRecord => {
-  const canonicalAdminOverview = canonicalSite.adminOverview;
-  if (!isRecord(canonicalAdminOverview)) return rawSite;
+  let next = rawSite;
 
-  const rawAdminOverview = rawSite.adminOverview;
-  if (rawAdminOverview === undefined) {
-    return {
-      ...rawSite,
-      adminOverview: canonicalAdminOverview
-    };
+  const canonicalAdminOverview = canonicalSite.adminOverview;
+  if (isRecord(canonicalAdminOverview)) {
+    const rawAdminOverview = next.adminOverview;
+    if (rawAdminOverview === undefined) {
+      next = { ...next, adminOverview: canonicalAdminOverview };
+    } else if (isRecord(rawAdminOverview)) {
+      next = {
+        ...next,
+        adminOverview: {
+          publicVisible: canonicalAdminOverview.publicVisible,
+          hiddenMessage: canonicalAdminOverview.hiddenMessage,
+          ...rawAdminOverview
+        }
+      };
+    }
   }
 
-  if (!isRecord(rawAdminOverview)) return rawSite;
-
-  return {
-    ...rawSite,
-    adminOverview: {
-      publicVisible: canonicalAdminOverview.publicVisible,
-      hiddenMessage: canonicalAdminOverview.hiddenMessage,
-      ...rawAdminOverview
+  const canonicalFavicon = canonicalSite.favicon;
+  if (isRecord(canonicalFavicon)) {
+    const rawFavicon = next.favicon;
+    if (rawFavicon === undefined) {
+      next = { ...next, favicon: canonicalFavicon };
+    } else if (isRecord(rawFavicon)) {
+      const defaults = Object.fromEntries(
+        ADMIN_SITE_FAVICON_SLOTS.map((slot) => [slot, canonicalFavicon[slot]])
+      );
+      next = { ...next, favicon: { ...defaults, ...rawFavicon } };
     }
-  };
+  }
+
+  return next;
 };
 
 /* ui.* 分组兼容回填的字段表：新增分组只需在此登记，不再复制合并块。 */

@@ -17,6 +17,7 @@ import {
   queryAll
 } from './controls';
 import { createAdminThemeController } from './controller';
+import { createAdminFaviconUploads } from './favicon-uploads';
 import { createFormCodec } from './form-codec';
 import { createAdminThemeImageFields } from './image-fields';
 import { createSocialLinks } from './social-links';
@@ -73,6 +74,9 @@ if (!root) {
       inputSiteFooterCopyright: controls.inputSiteFooterCopyright,
       inputSiteAdminOverviewPublicVisible: controls.inputSiteAdminOverviewPublicVisible,
       inputSiteAdminOverviewHiddenMessage: controls.inputSiteAdminOverviewHiddenMessage,
+      inputSiteFaviconSvg: controls.inputSiteFaviconSvg,
+      inputSiteFaviconPng: controls.inputSiteFaviconPng,
+      inputSiteFaviconAppleTouchIcon: controls.inputSiteFaviconAppleTouchIcon,
       inputSiteSocialGithubOrder: controls.inputSiteSocialGithubOrder,
       inputSiteSocialGithub: controls.inputSiteSocialGithub,
       inputSiteSocialXOrder: controls.inputSiteSocialXOrder,
@@ -213,6 +217,14 @@ if (!root) {
     });
 
     const imagePicker = createAdminImagePicker();
+    const faviconUploads = createAdminFaviconUploads({
+      root,
+      inputs: {
+        png: controls.inputSiteFaviconPng,
+        appleTouchIcon: controls.inputSiteFaviconAppleTouchIcon
+      },
+      setStatus: uiState.setStatus
+    });
     const themeImageFields = createAdminThemeImageFields({
       root,
       picker: imagePicker,
@@ -233,6 +245,7 @@ if (!root) {
         socialLinks.syncPresetRow(row);
       });
       themeImageFields?.refreshAll();
+      faviconUploads.refreshAll();
     };
 
     const syncEditableDerivedControls = (): void => {

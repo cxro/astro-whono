@@ -10,6 +10,7 @@ The format is based on Keep a Changelog, and this project aims to follow Semanti
 ### Added
 - 主题切换新增「跟随系统」模式：站点外观可随系统浅色/深色设置自动切换（[PR #35](https://github.com/cxro/astro-whono/pull/35)，by [@ZephyrCICD](https://github.com/ZephyrCICD)）。
 - Theme Console 新增「排版字体」配置：正文、文案、等宽、品牌四类字体可独立选择，支持系统字体栈与自托管字体（含构建期下载的中文子集），页面不请求任何第三方字体服务
+- Theme Console 新增「站点图标」配置：可上传正方形 PNG 自定义浏览器标签页图标与移动端触摸图标；文件以内容哈希命名写入 `public/images/site/`，替换后不受浏览器图标缓存影响，SVG 图标仍可通过替换 `public/favicon.svg` 自定义
 
 ### Changed
 - 站点框架升级到 Astro 7，构建链同步升级到 Vite 8，并更新相关依赖修复多个上游安全公告；文章与页面的渲染效果保持不变。

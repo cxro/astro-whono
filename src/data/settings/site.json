@@ -11,6 +11,11 @@
     "publicVisible": true,
     "hiddenMessage": "作者暂未公开此页面。"
   },
+  "favicon": {
+    "svg": null,
+    "png": null,
+    "appleTouchIcon": null
+  },
   "socialLinks": {
     "github": "https://github.com/cxro/astro-whono",
     "x": "https://twitter.com/yourname",

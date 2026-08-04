@@ -433,6 +433,10 @@ describe('admin images api', () => {
     await touch('src/content/essay/guide-assets/hero.png', '2026-03-31T00:00:00.000Z');
     await touch('src/assets/hero.png', '2026-04-04T00:00:00.000Z');
     await touch('public/apple-touch-icon.png', '2026-04-05T00:00:00.000Z');
+    // Theme Console 站点图标托管目录整体隐藏，即便文件是最新的也不进入 recent。
+    await mkdir(path.join(tempRoot, 'public', 'images', 'site'), { recursive: true });
+    await writeFile(path.join(tempRoot, 'public', 'images', 'site', 'favicon-64x64-a1b2c3d4.png'), PNG_1X1);
+    await touch('public/images/site/favicon-64x64-a1b2c3d4.png', '2026-04-06T00:00:00.000Z');
 
     const scopeIndex = await listAdminImageScopeIndex();
 
@@ -445,6 +449,7 @@ describe('admin images api', () => {
     expect(scopeIndex.recent).toContain('src/content/essay/guide-assets/hero.png');
     expect(scopeIndex.recent).not.toContain('public/favicon.png');
     expect(scopeIndex.recent).not.toContain('public/apple-touch-icon.png');
+    expect(scopeIndex.recent).not.toContain('public/images/site/favicon-64x64-a1b2c3d4.png');
 
     const response = await GET({
       url: new URL('http://127.0.0.1:4321/api/admin/images/list?scope=recent&page=1&limit=3')

@@ -5,8 +5,12 @@ import { site as legacySite } from '../../site.config.mjs';
 import { asThemeFontIdForRole, type ThemeFontId } from './fonts/registry';
 import {
   getHeroImageLocalFilePath,
+  getSiteFaviconLocalFilePath,
+  getSiteFaviconSizesFromPath,
   normalizeBitsAvatarPath,
-  normalizeHeroImageSrc
+  normalizeHeroImageSrc,
+  normalizeSiteFaviconPath,
+  type SiteFaviconSlot
 } from '../utils/format';
 import {
   ADMIN_ARTICLE_META_DATE_LABEL_DEFAULT,
@@ -123,12 +127,28 @@ export interface SiteAdminOverviewSettings {
   hiddenMessage: string;
 }
 
+export type { SiteFaviconSlot } from '../utils/format';
+
+export interface SiteFaviconSettings {
+  svg: string | null;
+  png: string | null;
+  appleTouchIcon: string | null;
+}
+
+export interface SiteFaviconLink {
+  rel: 'icon' | 'apple-touch-icon';
+  href: string;
+  type?: string;
+  sizes?: string;
+}
+
 export interface SiteSettings {
   title: string;
   description: string;
   defaultLocale: string;
   footer: SiteFooterSettings;
   adminOverview: SiteAdminOverviewSettings;
+  favicon: SiteFaviconSettings;
   socialLinks: SiteSocialLinks;
 }
 
@@ -229,6 +249,9 @@ export interface ThemeSettingsSources {
     footerCopyright: SettingSource;
     adminOverviewPublicVisible: SettingSource;
     adminOverviewHiddenMessage: SettingSource;
+    faviconSvg: SettingSource;
+    faviconPng: SettingSource;
+    faviconAppleTouchIcon: SettingSource;
     socialLinksGithub: SettingSource;
     socialLinksX: SettingSource;
     socialLinksEmail: SettingSource;
@@ -452,6 +475,11 @@ const DEFAULT_SITE: SiteSettings = {
   adminOverview: {
     publicVisible: true,
     hiddenMessage: ADMIN_OVERVIEW_HIDDEN_MESSAGE_DEFAULT
+  },
+  favicon: {
+    svg: null,
+    png: null,
+    appleTouchIcon: null
   },
   socialLinks: {
     github: null,
@@ -692,6 +720,11 @@ const asHeroImageSrc = (value: unknown): string | null | undefined => {
 
   return existsSync(join(process.cwd(), ...localFilePath.split('/'))) ? normalized : undefined;
 };
+
+// 只做格式校验；文件是否存在交给保存期校验（阻断新的坏引用）与渲染期回退——
+// 手改 JSON / 切分支导致的文件缺失不应把后台锁进 invalid-settings。
+const asSiteFaviconPath = (slot: SiteFaviconSlot, value: unknown): string | null | undefined =>
+  normalizeSiteFaviconPath(slot, value);
 
 const asBitsAvatarPath = (value: unknown): string | undefined => {
   return normalizeBitsAvatarPath(value);
@@ -1125,6 +1158,7 @@ export const getThemeSettings = (): ThemeSettingsResolved => {
 
   const siteFooterJson = isRecord(siteJson?.footer) ? siteJson.footer : undefined;
   const siteAdminOverviewJson = isRecord(siteJson?.adminOverview) ? siteJson.adminOverview : undefined;
+  const siteFaviconJson = isRecord(siteJson?.favicon) ? siteJson.favicon : undefined;
   const siteSocialLinksJson = isRecord(siteJson?.socialLinks) ? siteJson.socialLinks : undefined;
   const siteSocialPresetOrderJson = isRecord(siteSocialLinksJson?.presetOrder) ? siteSocialLinksJson.presetOrder : undefined;
   const pageEssayJson = isRecord(pageJson?.essay) ? pageJson.essay : undefined;
@@ -1173,6 +1207,21 @@ export const getThemeSettings = (): ThemeSettingsResolved => {
     asSingleLineString(siteAdminOverviewJson?.hiddenMessage, ADMIN_OVERVIEW_HIDDEN_MESSAGE_MAX_LENGTH),
     undefined,
     DEFAULT_SITE.adminOverview.hiddenMessage
+  );
+  const faviconSvg = resolveValue<string | null>(
+    asSiteFaviconPath('svg', siteFaviconJson?.svg),
+    undefined,
+    DEFAULT_SITE.favicon.svg
+  );
+  const faviconPng = resolveValue<string | null>(
+    asSiteFaviconPath('png', siteFaviconJson?.png),
+    undefined,
+    DEFAULT_SITE.favicon.png
+  );
+  const faviconAppleTouchIcon = resolveValue<string | null>(
+    asSiteFaviconPath('appleTouchIcon', siteFaviconJson?.appleTouchIcon),
+    undefined,
+    DEFAULT_SITE.favicon.appleTouchIcon
   );
   const socialLinksGithub = resolveValue(
     asHttpsUrl(siteSocialLinksJson?.github, GITHUB_HOSTS),
@@ -1447,6 +1496,11 @@ export const getThemeSettings = (): ThemeSettingsResolved => {
           publicVisible: adminOverviewPublicVisible.value,
           hiddenMessage: adminOverviewHiddenMessage.value
         },
+        favicon: {
+          svg: faviconSvg.value,
+          png: faviconPng.value,
+          appleTouchIcon: faviconAppleTouchIcon.value
+        },
         socialLinks: {
           github: socialLinksGithub.value,
           x: socialLinksX.value,
@@ -1537,6 +1591,9 @@ export const getThemeSettings = (): ThemeSettingsResolved => {
         footerCopyright: footerCopyright.source,
         adminOverviewPublicVisible: adminOverviewPublicVisible.source,
         adminOverviewHiddenMessage: adminOverviewHiddenMessage.source,
+        faviconSvg: faviconSvg.source,
+        faviconPng: faviconPng.source,
+        faviconAppleTouchIcon: faviconAppleTouchIcon.source,
         socialLinksGithub: socialLinksGithub.source,
         socialLinksX: socialLinksX.source,
         socialLinksEmail: socialLinksEmail.source,
@@ -1634,6 +1691,9 @@ const buildEditableThemeSettingsSnapshot = (
       adminOverview: {
         ...resolved.settings.site.adminOverview
       },
+      favicon: {
+        ...resolved.settings.site.favicon
+      },
       socialLinks: {
         github: resolved.settings.site.socialLinks.github,
         x: resolved.settings.site.socialLinks.x,
@@ -1707,6 +1767,44 @@ export const getEditableThemeSettingsState = (
 
 export const resetThemeSettingsCache = (): void => {
   cachedSettings = null;
+};
+
+// 文件缺失的槽位按主题默认回退（渲染兜底，不阻断构建、不锁后台）。抑制只发生在标签页图标组
+// （svg/png）内部：自定义后继续输出默认 SVG 会让桌面浏览器优先选中默认图标；触摸图标与其不竞争，独立回退。
+const resolveRenderableFaviconPath = (value: string | null): string | null => {
+  if (!value) return null;
+  const projectRoot = process.env.ASTRO_WHONO_INTERNAL_TEST_PROJECT_ROOT?.trim() || process.cwd();
+  return existsSync(join(projectRoot, ...getSiteFaviconLocalFilePath(value).split('/'))) ? value : null;
+};
+
+export const getSiteFaviconLinks = (favicon: SiteFaviconSettings): SiteFaviconLink[] => {
+  const svg = resolveRenderableFaviconPath(favicon.svg);
+  const png = resolveRenderableFaviconPath(favicon.png);
+  const appleTouchIcon = resolveRenderableFaviconPath(favicon.appleTouchIcon);
+
+  const links: SiteFaviconLink[] = [];
+  if (!svg && !png) {
+    links.push(
+      { rel: 'icon', type: 'image/svg+xml', sizes: 'any', href: 'favicon.svg' },
+      { rel: 'icon', type: 'image/png', sizes: '32x32', href: 'favicon-32x32.png' }
+    );
+  } else {
+    if (svg) {
+      links.push({ rel: 'icon', type: 'image/svg+xml', sizes: 'any', href: svg });
+    }
+    if (png) {
+      const sizes = getSiteFaviconSizesFromPath(png);
+      links.push({ rel: 'icon', type: 'image/png', ...(sizes ? { sizes } : {}), href: png });
+    }
+  }
+
+  if (appleTouchIcon) {
+    const sizes = getSiteFaviconSizesFromPath(appleTouchIcon);
+    links.push({ rel: 'apple-touch-icon', ...(sizes ? { sizes } : {}), href: appleTouchIcon });
+  } else {
+    links.push({ rel: 'apple-touch-icon', sizes: '180x180', href: 'apple-touch-icon.png' });
+  }
+  return links;
 };
 
 export const getSidebarHref = (id: SidebarNavId): string => SIDEBAR_HREFS[id];

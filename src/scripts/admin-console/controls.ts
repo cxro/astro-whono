@@ -49,6 +49,10 @@ export type AdminThemeControls = RequiredElements<{
   inputSiteFooterCopyright: HTMLInputElement | null;
   inputSiteAdminOverviewPublicVisible: HTMLInputElement | null;
   inputSiteAdminOverviewHiddenMessage: HTMLInputElement | null;
+  /* svg 槽位暂无上传 UI，隐藏 input 只负责把手工配置的值随表单快照往返。 */
+  inputSiteFaviconSvg: HTMLInputElement | null;
+  inputSiteFaviconPng: HTMLInputElement | null;
+  inputSiteFaviconAppleTouchIcon: HTMLInputElement | null;
   inputSiteSocialGithubOrder: HTMLInputElement | null;
   inputSiteSocialGithub: HTMLInputElement | null;
   inputSiteSocialXOrder: HTMLInputElement | null;
@@ -136,6 +140,9 @@ export const queryAdminThemeControls = (): AdminThemeControls | null => {
     inputSiteFooterCopyright: byId<HTMLInputElement>('site-footer-copyright'),
     inputSiteAdminOverviewPublicVisible: byId<HTMLInputElement>('site-admin-overview-public-visible'),
     inputSiteAdminOverviewHiddenMessage: byId<HTMLInputElement>('site-admin-overview-hidden-message'),
+    inputSiteFaviconSvg: byId<HTMLInputElement>('site-favicon-svg'),
+    inputSiteFaviconPng: byId<HTMLInputElement>('site-favicon-png'),
+    inputSiteFaviconAppleTouchIcon: byId<HTMLInputElement>('site-favicon-apple-touch-icon'),
     inputSiteSocialGithubOrder: byId<HTMLInputElement>('site-social-github-order'),
     inputSiteSocialGithub: byId<HTMLInputElement>('site-social-github'),
     inputSiteSocialXOrder: byId<HTMLInputElement>('site-social-x-order'),

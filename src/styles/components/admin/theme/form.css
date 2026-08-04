@@ -1244,3 +1244,52 @@
     flex: 1 1 0;
   }
 }
+
+/* 站点图标：桌面单行双槽位（本地 admin 后台，无移动端诉求） */
+.admin-favicon-line {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.admin-favicon-slot {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.admin-favicon-slot__label {
+  font-size: 0.86em;
+  color: var(--muted);
+  white-space: nowrap;
+}
+
+.admin-favicon-slot__preview {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--code-content-bg);
+  overflow: hidden;
+  flex: none;
+}
+
+.admin-favicon-slot__preview img {
+  width: 20px;
+  height: 20px;
+  object-fit: contain;
+}
+
+.admin-favicon-slot__preview[data-state='default'] img {
+  opacity: 0.45;
+}
+
+.admin-favicon-line__divider {
+  width: 1px;
+  height: 20px;
+  background: var(--border);
+  flex: none;
+}

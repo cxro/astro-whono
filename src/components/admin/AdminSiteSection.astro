@@ -108,6 +108,39 @@ const { footerStartYearMin, footerStartYearMax, socialCustomLimit } = Astro.prop
         disabled
       />
     </div>
+    <div class="admin-field admin-field--full">
+      <span class="admin-label">
+        <span class="admin-label__main">站点图标</span>
+        <span class="admin-label__hint">（浏览器标签页 / 移动端触摸图标；构建后生效）</span>
+      </span>
+      <input id="site-favicon-svg" type="hidden" />
+      <input id="site-favicon-png" type="hidden" />
+      <input id="site-favicon-apple-touch-icon" type="hidden" />
+      <div class="admin-favicon-line">
+        <div class="admin-favicon-slot" data-favicon-slot="png">
+          <span class="admin-favicon-slot__preview" data-favicon-preview="png">
+            <img alt="" loading="lazy" decoding="async" data-favicon-preview-img="png" />
+          </span>
+          <span class="admin-favicon-slot__label">标签页图标</span>
+          <button class="admin-btn admin-btn--ghost admin-btn--compact" type="button" data-favicon-upload="png" aria-label="上传标签页图标">上传</button>
+          <button class="admin-btn admin-btn--ghost admin-btn--compact" type="button" data-favicon-clear="png" aria-label="恢复标签页图标为主题默认">恢复默认</button>
+        </div>
+        <span class="admin-favicon-line__divider" aria-hidden="true"></span>
+        <div class="admin-favicon-slot" data-favicon-slot="appleTouchIcon">
+          <span class="admin-favicon-slot__preview" data-favicon-preview="appleTouchIcon">
+            <img alt="" loading="lazy" decoding="async" data-favicon-preview-img="appleTouchIcon" />
+          </span>
+          <span class="admin-favicon-slot__label">触摸图标</span>
+          <button class="admin-btn admin-btn--ghost admin-btn--compact" type="button" data-favicon-upload="appleTouchIcon" aria-label="上传触摸图标">上传</button>
+          <button class="admin-btn admin-btn--ghost admin-btn--compact" type="button" data-favicon-clear="appleTouchIcon" aria-label="恢复触摸图标为主题默认">恢复默认</button>
+        </div>
+      </div>
+      <input type="file" accept="image/png" hidden data-favicon-file="png" />
+      <input type="file" accept="image/png" hidden data-favicon-file="appleTouchIcon" />
+      <p class="admin-help">
+        建议上传 256x256 的正方形 PNG（边长 16-512px，不超过 256KB）；SVG 图标请直接替换 <code>public/favicon.svg</code>。
+      </p>
+    </div>
   </div>
 
   <AdminSiteSocialSection socialCustomLimit={socialCustomLimit} />

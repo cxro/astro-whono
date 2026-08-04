@@ -199,6 +199,13 @@ export const createValidation = ({
         return () => inputSiteAdminOverviewPublicVisible;
       case 'site.adminOverview.hiddenMessage':
         return () => inputSiteAdminOverviewHiddenMessage;
+      /* favicon input 均为隐藏元素，错误改聚焦站点图标区域的可见按钮；svg 无独立控件，借用 png 上传按钮定位。 */
+      case 'site.favicon.svg':
+        return () => form.querySelector<HTMLElement>('[data-favicon-upload="png"]');
+      case 'site.favicon.png':
+        return () => form.querySelector<HTMLElement>('[data-favicon-clear="png"]');
+      case 'site.favicon.appleTouchIcon':
+        return () => form.querySelector<HTMLElement>('[data-favicon-clear="appleTouchIcon"]');
       case 'site.socialLinks.github':
         return () => inputSiteSocialGithub;
       case 'site.socialLinks.x':

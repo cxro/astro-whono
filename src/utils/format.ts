@@ -126,6 +126,47 @@ export function getBitsAvatarLocalFilePath(value: string): string | null {
   return `public/${value}`;
 }
 
+export type SiteFaviconSlot = 'svg' | 'png' | 'appleTouchIcon';
+
+const SITE_FAVICON_EXT_RE_BY_SLOT: Record<SiteFaviconSlot, RegExp> = {
+  svg: /\.svg$/i,
+  png: /\.png$/i,
+  appleTouchIcon: /\.png$/i
+};
+
+export function normalizeSiteFaviconPath(slot: SiteFaviconSlot, value: unknown): string | null | undefined {
+  if (value === null) return null;
+  if (typeof value !== 'string') return undefined;
+
+  const trimmed = value.trim();
+  if (!trimmed) return null;
+
+  const normalized = trimmed.replace(/\\/g, '/').replace(/^\.\/+/, '');
+  if (!normalized || normalized.startsWith('//') || /^[A-Za-z]+:/.test(normalized) || hasInvalidLocalImagePathSegment(normalized)) {
+    return undefined;
+  }
+
+  const publicPath = normalized.startsWith('public/')
+    ? `/${normalized.slice('public/'.length)}`
+    : normalized.startsWith('/')
+      ? normalized
+      : undefined;
+  if (!publicPath || publicPath === '/') return undefined;
+
+  return SITE_FAVICON_EXT_RE_BY_SLOT[slot].test(publicPath) ? publicPath : undefined;
+}
+
+export function getSiteFaviconLocalFilePath(value: string): string {
+  return `public${value}`;
+}
+
+/* 图标尺寸不进 settings：上传时把 WxH 编进文件名，渲染期从路径解析 sizes，保持 schema 只存路径。 */
+export function getSiteFaviconSizesFromPath(value: string): string | null {
+  const baseName = value.split('/').pop() ?? '';
+  const match = baseName.match(/(?:^|[^0-9])(\d{2,4})x(\d{2,4})(?:[^0-9]|$)/);
+  return match ? `${match[1]}x${match[2]}` : null;
+}
+
 export function tokenizeSearchQuery(query: string): string[] {
   return Array.from(
     new Set(

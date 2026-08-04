@@ -16,8 +16,11 @@ import {
   buildSearchHaystack,
   getBitsAvatarLocalFilePath,
   getHeroImageLocalFilePath,
+  getSiteFaviconLocalFilePath,
+  getSiteFaviconSizesFromPath,
   normalizeBitsAvatarPath,
   normalizeHeroImageSrc,
+  normalizeSiteFaviconPath,
   tokenizeSearchQuery
 } from '../src/utils/format';
 
@@ -69,6 +72,27 @@ describe('admin-console/shared', () => {
     expect(normalizeBitsAvatarPath('https://example.com/avatar.webp')).toBeUndefined();
     expect(normalizeBitsAvatarPath('author/avatar.webp?v=2')).toBeUndefined();
     expect(getBitsAvatarLocalFilePath('author/avatar.webp')).toBe('public/author/avatar.webp');
+  });
+
+  it('normalizes site favicon paths per slot and parses sizes from file names', () => {
+    expect(normalizeSiteFaviconPath('png', 'public/images/site/favicon-64x64-a1b2c3d4.png')).toBe(
+      '/images/site/favicon-64x64-a1b2c3d4.png'
+    );
+    expect(normalizeSiteFaviconPath('png', ' /favicon-32x32.png ')).toBe('/favicon-32x32.png');
+    expect(normalizeSiteFaviconPath('svg', '/favicon.svg')).toBe('/favicon.svg');
+    expect(normalizeSiteFaviconPath('png', null)).toBeNull();
+    expect(normalizeSiteFaviconPath('png', '')).toBeNull();
+    expect(normalizeSiteFaviconPath('png', '/favicon.svg')).toBeUndefined();
+    expect(normalizeSiteFaviconPath('svg', '/favicon.png')).toBeUndefined();
+    expect(normalizeSiteFaviconPath('png', 'https://example.com/favicon.png')).toBeUndefined();
+    expect(normalizeSiteFaviconPath('png', '/images/site/../secret.png')).toBeUndefined();
+    expect(normalizeSiteFaviconPath('png', '/favicon.png?v=2')).toBeUndefined();
+    expect(getSiteFaviconLocalFilePath('/images/site/favicon-64x64-a1b2c3d4.png')).toBe(
+      'public/images/site/favicon-64x64-a1b2c3d4.png'
+    );
+    expect(getSiteFaviconSizesFromPath('/images/site/favicon-64x64-a1b2c3d4.png')).toBe('64x64');
+    expect(getSiteFaviconSizesFromPath('/favicon-32x32.png')).toBe('32x32');
+    expect(getSiteFaviconSizesFromPath('/images/site/favicon-a1b2c3d4.svg')).toBeNull();
   });
 
   it('normalizes admin image field preview sources through field contracts', () => {
@@ -253,5 +277,65 @@ describe('admin-console/shared', () => {
     expect(validateAdminThemeSettings(settings).map((issue) => issue.path)).toContain(
       'site.adminOverview.hiddenMessage'
     );
+  });
+
+  it('canonicalizes favicon slot paths and keeps invalid inputs for validation', () => {
+    const raw = structuredClone(getEditableThemeSettingsPayload().settings) as Record<string, any>;
+    raw.site.favicon = {
+      svg: null,
+      png: ' public/images/site/favicon-64x64-a1b2c3d4.png ',
+      appleTouchIcon: 'https://example.com/apple-touch-icon.png'
+    };
+
+    const canonical = canonicalizeAdminThemeSettings(raw);
+
+    expect(canonical.site.favicon).toEqual({
+      svg: null,
+      png: '/images/site/favicon-64x64-a1b2c3d4.png',
+      appleTouchIcon: 'https://example.com/apple-touch-icon.png'
+    });
+
+    const paths = validateAdminThemeSettings(canonical).map((issue) => issue.path);
+    expect(paths).toContain('site.favicon.appleTouchIcon');
+    expect(paths).not.toContain('site.favicon.png');
+  });
+
+  it('validates favicon file existence through localFileExists', () => {
+    const settings = structuredClone(getEditableThemeSettingsPayload().settings);
+    settings.site.favicon = {
+      svg: null,
+      png: '/images/site/favicon-64x64-a1b2c3d4.png',
+      appleTouchIcon: null
+    };
+
+    const missing = validateAdminThemeSettings(settings, { localFileExists: () => false });
+    expect(missing.map((issue) => issue.path)).toContain('site.favicon.png');
+    expect(missing.find((issue) => issue.path === 'site.favicon.png')?.message).toContain(
+      'public/images/site/favicon-64x64-a1b2c3d4.png'
+    );
+
+    const present = validateAdminThemeSettings(settings, { localFileExists: () => true });
+    expect(present.map((issue) => issue.path)).not.toContain('site.favicon.png');
+  });
+
+  it('fills compatibility defaults for legacy snapshots missing the favicon block', () => {
+    const canonical = getEditableThemeSettingsPayload().settings;
+    const legacySnapshot = structuredClone(canonical) as Record<string, any>;
+    delete legacySnapshot.site.favicon;
+
+    const compatible = fillAdminThemeSettingsCompatibilityDefaults(legacySnapshot, canonical);
+    const mismatchPaths = createAdminThemeSettingsCanonicalMismatchIssues(compatible, canonical).map(
+      (issue) => issue.path
+    );
+    expect(mismatchPaths).not.toContain('site.favicon');
+
+    const partialSnapshot = structuredClone(canonical) as Record<string, any>;
+    partialSnapshot.site.favicon = { png: canonical.site.favicon.png };
+    const partialCompatible = fillAdminThemeSettingsCompatibilityDefaults(partialSnapshot, canonical);
+    const partialMismatchPaths = createAdminThemeSettingsCanonicalMismatchIssues(partialCompatible, canonical).map(
+      (issue) => issue.path
+    );
+    expect(partialMismatchPaths).not.toContain('site.favicon.svg');
+    expect(partialMismatchPaths).not.toContain('site.favicon.appleTouchIcon');
   });
 });

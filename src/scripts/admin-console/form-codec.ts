@@ -9,7 +9,7 @@ import type {
   TypographyRole,
   TypographySettings
 } from '@/lib/theme-settings';
-import { normalizeHeroImageSrc as normalizeHeroImageSrcValue } from '@/utils/format';
+import { normalizeHeroImageSrc as normalizeHeroImageSrcValue, normalizeSiteFaviconPath, type SiteFaviconSlot } from '@/utils/format';
 import {
   ADMIN_ARTICLE_META_DATE_LABEL_DEFAULT,
   ADMIN_HERO_IMAGE_ALT_DEFAULT,
@@ -59,6 +59,9 @@ type FormCodecContext = {
   inputSiteFooterCopyright: HTMLInputElement;
   inputSiteAdminOverviewPublicVisible: HTMLInputElement;
   inputSiteAdminOverviewHiddenMessage: HTMLInputElement;
+  inputSiteFaviconSvg: HTMLInputElement;
+  inputSiteFaviconPng: HTMLInputElement;
+  inputSiteFaviconAppleTouchIcon: HTMLInputElement;
   inputSiteSocialGithubOrder: HTMLInputElement;
   inputSiteSocialGithub: HTMLInputElement;
   inputSiteSocialXOrder: HTMLInputElement;
@@ -147,6 +150,12 @@ const normalizeHeroImageAlt = (value: unknown): string => {
   return rawValue || ADMIN_HERO_IMAGE_ALT_DEFAULT;
 };
 
+const normalizeSiteFaviconInput = (slot: SiteFaviconSlot, value: unknown): string | null => {
+  const rawValue = normalizeTrimmed(value);
+  if (!rawValue) return null;
+  return normalizeSiteFaviconPath(slot, rawValue) ?? rawValue;
+};
+
 export const createFormCodec = ({
   footerStartYearMax,
   query,
@@ -170,6 +179,9 @@ export const createFormCodec = ({
   inputSiteFooterCopyright,
   inputSiteAdminOverviewPublicVisible,
   inputSiteAdminOverviewHiddenMessage,
+  inputSiteFaviconSvg,
+  inputSiteFaviconPng,
+  inputSiteFaviconAppleTouchIcon,
   inputSiteSocialGithubOrder,
   inputSiteSocialGithub,
   inputSiteSocialXOrder,
@@ -478,6 +490,11 @@ export const createFormCodec = ({
             ADMIN_OVERVIEW_HIDDEN_MESSAGE_DEFAULT
           )
         },
+        favicon: {
+          svg: normalizeSiteFaviconInput('svg', inputSiteFaviconSvg.value),
+          png: normalizeSiteFaviconInput('png', inputSiteFaviconPng.value),
+          appleTouchIcon: normalizeSiteFaviconInput('appleTouchIcon', inputSiteFaviconAppleTouchIcon.value)
+        },
         socialLinks: {
           github: inputSiteSocialGithub.value.trim() || null,
           x: inputSiteSocialX.value.trim() || null,
@@ -570,6 +587,9 @@ export const createFormCodec = ({
     inputSiteAdminOverviewHiddenMessage.value =
       settings.site.adminOverview?.hiddenMessage || ADMIN_OVERVIEW_HIDDEN_MESSAGE_DEFAULT;
     syncAdminOverviewControls();
+    inputSiteFaviconSvg.value = settings.site.favicon?.svg || '';
+    inputSiteFaviconPng.value = settings.site.favicon?.png || '';
+    inputSiteFaviconAppleTouchIcon.value = settings.site.favicon?.appleTouchIcon || '';
     inputSiteSocialGithubOrder.value = String(
       settings.site.socialLinks?.presetOrder?.github ?? ADMIN_SOCIAL_PRESET_ORDER_DEFAULT.github
     );

@@ -1,10 +1,11 @@
-import { cp, mkdtemp, readFile, rm, writeFile } from 'node:fs/promises';
+import { cp, mkdir, mkdtemp, readFile, rm, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import {
   getEditableThemeSettingsPayload,
   getEditableThemeSettingsState,
+  getSiteFaviconLinks,
   getThemeSettings,
   getThemeSettingsReadDiagnostics,
   getThemeSettingsRevision,
@@ -159,5 +160,117 @@ describe('theme-settings revision semantics', () => {
     mutated.settings.ui.typography.readable = 'lxgw-wenkai-lite';
 
     expect(getThemeSettingsRevision(mutated)).not.toBe(getThemeSettingsRevision(resolved));
+  });
+
+  it('resolves favicon slots to null defaults and emits the default three-link set', () => {
+    const resolved = getThemeSettings();
+
+    expect(resolved.settings.site.favicon).toEqual({ svg: null, png: null, appleTouchIcon: null });
+    // demo site.json 显式写了三个 null 槽位，来源应标记为 new（显式配置的默认态）。
+    expect(resolved.sources.site.faviconPng).toBe('new');
+    expect(getSiteFaviconLinks(resolved.settings.site.favicon)).toEqual([
+      { rel: 'icon', type: 'image/svg+xml', sizes: 'any', href: 'favicon.svg' },
+      { rel: 'icon', type: 'image/png', sizes: '32x32', href: 'favicon-32x32.png' },
+      { rel: 'apple-touch-icon', sizes: '180x180', href: 'apple-touch-icon.png' }
+    ]);
+  });
+
+  it('keeps the console unlocked when site.json lacks the favicon block', async () => {
+    const settingsDir = await createTempSettingsFixture();
+    const sitePath = path.join(settingsDir, 'site.json');
+    const siteJson = JSON.parse(await readFile(sitePath, 'utf8')) as Record<string, unknown>;
+    delete siteJson.favicon;
+    await writeFile(sitePath, `${JSON.stringify(siteJson, null, 2)}\n`, 'utf8');
+
+    const resolved = getThemeSettings();
+
+    expect(resolved.settings.site.favicon).toEqual({ svg: null, png: null, appleTouchIcon: null });
+    expect(resolved.sources.site.faviconPng).toBe('default');
+    expect(getThemeSettingsReadDiagnostics(resolved)).toEqual([]);
+    expect(getEditableThemeSettingsState(resolved).ok).toBe(true);
+  });
+
+  it('accepts an existing favicon slot path and suppresses default links for unset slots', async () => {
+    const settingsDir = await createTempSettingsFixture();
+    const sitePath = path.join(settingsDir, 'site.json');
+    const siteJson = JSON.parse(await readFile(sitePath, 'utf8')) as Record<string, any>;
+    siteJson.favicon = { svg: null, png: '/favicon-32x32.png', appleTouchIcon: null };
+    await writeFile(sitePath, `${JSON.stringify(siteJson, null, 2)}\n`, 'utf8');
+
+    const resolved = getThemeSettings();
+
+    expect(resolved.settings.site.favicon.png).toBe('/favicon-32x32.png');
+    expect(resolved.sources.site.faviconPng).toBe('new');
+    expect(getThemeSettingsReadDiagnostics(resolved)).toEqual([]);
+    // 分组抑制：png 自定义后标签页图标组不再回退默认 SVG；触摸图标独立回退，保持主题默认。
+    expect(getSiteFaviconLinks(resolved.settings.site.favicon)).toEqual([
+      { rel: 'icon', type: 'image/png', sizes: '32x32', href: '/favicon-32x32.png' },
+      { rel: 'apple-touch-icon', sizes: '180x180', href: 'apple-touch-icon.png' }
+    ]);
+  });
+
+  it('keeps default tab icons when only the touch icon is customized', async () => {
+    const settingsDir = await createTempSettingsFixture();
+    const sitePath = path.join(settingsDir, 'site.json');
+    const siteJson = JSON.parse(await readFile(sitePath, 'utf8')) as Record<string, any>;
+    siteJson.favicon = { svg: null, png: null, appleTouchIcon: '/apple-touch-icon.png' };
+    await writeFile(sitePath, `${JSON.stringify(siteJson, null, 2)}\n`, 'utf8');
+
+    const resolved = getThemeSettings();
+
+    expect(getSiteFaviconLinks(resolved.settings.site.favicon)).toEqual([
+      { rel: 'icon', type: 'image/svg+xml', sizes: 'any', href: 'favicon.svg' },
+      { rel: 'icon', type: 'image/png', sizes: '32x32', href: 'favicon-32x32.png' },
+      { rel: 'apple-touch-icon', href: '/apple-touch-icon.png' }
+    ]);
+  });
+
+  it('falls back to theme defaults without locking the console when a favicon file is missing', async () => {
+    const settingsDir = await createTempSettingsFixture();
+    const sitePath = path.join(settingsDir, 'site.json');
+    const siteJson = JSON.parse(await readFile(sitePath, 'utf8')) as Record<string, any>;
+    siteJson.favicon = { svg: null, png: '/images/site/favicon-64x64-deadbeef.png', appleTouchIcon: null };
+    await writeFile(sitePath, `${JSON.stringify(siteJson, null, 2)}\n`, 'utf8');
+
+    const resolved = getThemeSettings();
+
+    // 格式合法的路径原样保留（不触发 schema-mismatch），文件缺失只在渲染期回退主题默认。
+    expect(resolved.settings.site.favicon.png).toBe('/images/site/favicon-64x64-deadbeef.png');
+    expect(getThemeSettingsReadDiagnostics(resolved)).toEqual([]);
+    expect(getEditableThemeSettingsState(resolved).ok).toBe(true);
+    expect(getSiteFaviconLinks(resolved.settings.site.favicon)).toEqual([
+      { rel: 'icon', type: 'image/svg+xml', sizes: 'any', href: 'favicon.svg' },
+      { rel: 'icon', type: 'image/png', sizes: '32x32', href: 'favicon-32x32.png' },
+      { rel: 'apple-touch-icon', sizes: '180x180', href: 'apple-touch-icon.png' }
+    ]);
+  });
+
+  it('omits the sizes attribute when a favicon file name carries no dimensions', async () => {
+    const tempRoot = await mkdtemp(path.join(tmpdir(), 'astro-whono-favicon-links-'));
+    tempDirs.push(tempRoot);
+    const assetDir = path.join(tempRoot, 'public', 'images', 'site');
+    await mkdir(assetDir, { recursive: true });
+    await Promise.all([
+      writeFile(path.join(assetDir, 'favicon-a1b2c3d4.svg'), '<svg xmlns="http://www.w3.org/2000/svg"/>'),
+      writeFile(path.join(assetDir, 'favicon-notdims.png'), 'png'),
+      writeFile(path.join(assetDir, 'apple-touch-icon-180x180-a1b2c3d4.png'), 'png')
+    ]);
+
+    process.env.ASTRO_WHONO_INTERNAL_TEST_PROJECT_ROOT = tempRoot;
+    try {
+      const links = getSiteFaviconLinks({
+        svg: '/images/site/favicon-a1b2c3d4.svg',
+        png: '/images/site/favicon-notdims.png',
+        appleTouchIcon: '/images/site/apple-touch-icon-180x180-a1b2c3d4.png'
+      });
+
+      expect(links).toEqual([
+        { rel: 'icon', type: 'image/svg+xml', sizes: 'any', href: '/images/site/favicon-a1b2c3d4.svg' },
+        { rel: 'icon', type: 'image/png', href: '/images/site/favicon-notdims.png' },
+        { rel: 'apple-touch-icon', sizes: '180x180', href: '/images/site/apple-touch-icon-180x180-a1b2c3d4.png' }
+      ]);
+    } finally {
+      delete process.env.ASTRO_WHONO_INTERNAL_TEST_PROJECT_ROOT;
+    }
   });
 });
