@@ -1,12 +1,12 @@
 import type { AdminIconName } from './admin-icon-names';
 
-export type AdminRouteId = 'overview' | 'theme' | 'content' | 'images' | 'checks' | 'data';
+export type AdminRouteId = 'overview' | 'theme' | 'content' | 'images' | 'data';
 
 export type AdminRouteActiveMatch = 'exact' | 'prefix';
 
 export type AdminRouteIconName = Extract<
   AdminIconName,
-  'astro-logo-color' | 'palette' | 'admin-page' | 'images' | 'shield-check' | 'database'
+  'astro-logo-color' | 'palette' | 'admin-page' | 'images' | 'database'
 >;
 
 export type AdminRouteDefinition = {
@@ -16,7 +16,6 @@ export type AdminRouteDefinition = {
     | '/admin/theme/'
     | '/admin/content/'
     | '/admin/images/'
-    | '/admin/checks/'
     | '/admin/data/';
   label: string;
   sidebarLabel: string;
@@ -58,14 +57,6 @@ export const ADMIN_ROUTES: readonly AdminRouteDefinition[] = [
     sidebarLabel: '图片',
     sidebarIcon: 'images',
     description: '图片管理'
-  },
-  {
-    id: 'checks',
-    href: '/admin/checks/',
-    label: 'Checks',
-    sidebarLabel: '校验',
-    sidebarIcon: 'shield-check',
-    description: '站点诊断'
   },
   {
     id: 'data',

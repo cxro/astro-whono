@@ -273,16 +273,6 @@ const assertReadonlyAdminDataShell = (label, response) => {
   expect(!response.body.includes('id="admin-data-bootstrap"'), `${label} should not emit data bootstrap payload outside dev`);
 };
 
-const assertReadonlyAdminChecksShell = (label, response) => {
-  expect(response.status === 200, `${label} returned ${response.status}`);
-  expect(
-    response.contentType.toLowerCase().includes('text/html'),
-    `${label} did not return HTML`
-  );
-  expect(response.body.includes('Checks Console'), `${label} is missing the Checks Console route heading`);
-  assertNoAdminRouteNav(label, response.body);
-};
-
 const assertReadonlyAdminImageShell = (label, response) => {
   expect(response.status === 200, `${label} returned ${response.status}`);
   expect(
@@ -721,7 +711,6 @@ export const runPreviewAdminBoundaryCheck = async () => {
     const adminEssayContentEditResponse = await request(baseUrl, '/admin/content/essay/_edit/admin-console-guide/');
     const adminAboutContentEditResponse = await request(baseUrl, '/admin/content/about/_edit/index/');
     const adminImageResponse = await request(baseUrl, '/admin/images/');
-    const adminChecksResponse = await request(baseUrl, '/admin/checks/');
     const adminDataResponse = await request(baseUrl, '/admin/data/');
     const getResponse = await request(baseUrl, '/api/admin/settings/');
     const exportResponse = await request(baseUrl, '/api/admin/data/settings/');
@@ -875,7 +864,6 @@ export const runPreviewAdminBoundaryCheck = async () => {
     assertAdminContentEditStaticMissing('Preview GET /admin/content/essay/_edit/admin-console-guide/', adminEssayContentEditResponse);
     assertAdminContentEditStaticMissing('Preview GET /admin/content/about/_edit/index/', adminAboutContentEditResponse);
     assertReadonlyAdminImageShell('Preview GET /admin/images/', adminImageResponse);
-    assertReadonlyAdminChecksShell('Preview GET /admin/checks/', adminChecksResponse);
     assertReadonlyAdminDataShell('Preview GET /admin/data/', adminDataResponse);
     assertAdminSettingsStaticResponse('GET /api/admin/settings/', getResponse);
     assertAdminSettingsStaticResponse('GET /api/admin/data/settings/', exportResponse, '/api/admin/data/settings/');

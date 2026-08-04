@@ -152,7 +152,6 @@ Run `npm run dev`, then open `http://localhost:4321/admin/` (replace `4321` with
 | `/admin/` | Stable Admin entry and Site Overview |
 | `/admin/theme/` | Theme Console for editing site information, sidebar, home page, inner-page copy, and more |
 | `/admin/images/` | Image resource browser and path helper |
-| `/admin/checks/` | Structured diagnostics and pre-release checks |
 | `/admin/data/` | Settings snapshot export / dry-run import / confirmed write |
 | `/admin/content/` | Local editing, draft creation, and source export for essay / bits / memo / about |
 

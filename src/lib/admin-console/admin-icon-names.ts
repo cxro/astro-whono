@@ -31,7 +31,6 @@ export type AdminIconName =
   | 'scan'
   | 'search'
   | 'settings'
-  | 'shield-check'
   | 'tags'
   | 'terminal'
   | 'triangle-alert'

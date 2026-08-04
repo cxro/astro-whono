@@ -33,7 +33,6 @@ npm run dev
 | `/admin/theme/` | Theme Console | 编辑站点信息、侧栏、首页、内页文案 |
 | `/admin/content/` | Content Console | 文章管理与可视化写作 |
 | `/admin/images/` | Images Console | 浏览图片资源，复制可用路径 |
-| `/admin/checks/` | Checks Console | 查看结构化诊断，做发布前检查 |
 | `/admin/data/` | Data Console | 导入与导出主题设置，便于迁移和备份 |
 
 ## 主要页面
@@ -62,12 +61,6 @@ Images Console 可浏览图片资源、核对图片信息，并复制可用于�
 
 目前定位接近资源浏览器，暂不支持压缩、删除或替换文件。
 需要换图时，先把图片放到项目约定目录，再回到对应页面选择或填写路径。
-
-### ✅ Checks Console
-
-Checks Console 做发布前检查，会把内容、配置、图片引用和约定风险整理成诊断结果。
-
-这个页面不直接修改文件。发现问题后，再回到 Theme、Content 或源码里处理。
 
 ### 📤 Data Console
 

@@ -153,7 +153,6 @@ npm run audit:prod
 | `/admin/` | 后台稳定入口与 Site Overview |
 | `/admin/theme/` | Theme Console，编辑站点信息、侧栏、首页与内页文案等 |
 | `/admin/images/` | 图片资源浏览与路径辅助 |
-| `/admin/checks/` | 结构化诊断与发布前自检 |
 | `/admin/data/` | settings 快照导出 / dry-run 导入 / 确认写入 |
 | `/admin/content/` | 随笔 / 絮语 / 小记 / 关于页的本地编辑、新建与源文件导出 |
 

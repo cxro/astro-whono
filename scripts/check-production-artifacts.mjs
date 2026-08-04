@@ -120,7 +120,6 @@ export const runProductionArtifactCheck = async (options = {}) => {
     'dist/admin/index.html',
     'dist/admin/content/index.html',
     'dist/admin/images/index.html',
-    'dist/admin/checks/index.html',
     'dist/bits/index.html',
     'dist/admin/data/index.html',
     'dist/admin/theme/index.html',
@@ -158,7 +157,6 @@ export const runProductionArtifactCheck = async (options = {}) => {
   expect(!sitemapXml.includes('/admin/theme/'), 'Admin theme route leaked into sitemap');
   expect(!sitemapXml.includes('/admin/content/'), 'Admin content route leaked into sitemap');
   expect(!sitemapXml.includes('/admin/images/'), 'Admin images route leaked into sitemap');
-  expect(!sitemapXml.includes('/admin/checks/'), 'Admin checks route leaked into sitemap');
   expect(!sitemapXml.includes('/admin/data/'), 'Admin data route leaked into sitemap');
   expect(
     !sitemapXml.includes(`${siteUrl}${basePrefix}/bits/draft-dialog/`),
@@ -198,13 +196,11 @@ export const runProductionArtifactCheck = async (options = {}) => {
   const adminHtml = readText('dist/admin/index.html');
   const adminContentHtml = readText('dist/admin/content/index.html');
   const adminImageHtml = readText('dist/admin/images/index.html');
-  const adminChecksHtml = readText('dist/admin/checks/index.html');
   const adminThemeHtml = readText('dist/admin/theme/index.html');
   const adminDataHtml = readText('dist/admin/data/index.html');
   const readonlyAdminHtmlChecks = [
     ['dist/admin/content/index.html', adminContentHtml, 'Content Console'],
     ['dist/admin/images/index.html', adminImageHtml, 'Images Console'],
-    ['dist/admin/checks/index.html', adminChecksHtml, 'Checks Console'],
     ['dist/admin/theme/index.html', adminThemeHtml, 'Theme Console'],
     ['dist/admin/data/index.html', adminDataHtml, 'Data Console']
   ];
