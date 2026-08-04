@@ -4,7 +4,7 @@
 
 [![CI](https://img.shields.io/github/actions/workflow/status/cxro/astro-whono/ci.yml?style=flat&label=CI&labelColor=2E3440&color=A3BE8C&logo=githubactions&logoColor=ECEFF4)](https://github.com/cxro/astro-whono/actions/workflows/ci.yml)  [![Node](https://img.shields.io/badge/Node-%3E%3D22.12.0-81A1C1?style=flat&labelColor=2E3440&logo=nodedotjs&logoColor=ECEFF4)](README.en.md#requirements)  [![Astro](https://img.shields.io/github/package-json/dependency-version/cxro/astro-whono/astro?branch=main&style=flat&label=Astro&labelColor=2E3440&color=BC52EE&logo=astro&logoColor=ECEFF4)](https://docs.astro.build/)  [![License](https://img.shields.io/badge/License-MIT-4C566A?style=flat&labelColor=2E3440&logo=opensourceinitiative&logoColor=ECEFF4)](LICENSE)
 
-**✨ astro-whono now supports visual writing and live preview in the local admin console**
+**✨ astro-whono supports visual writing and live preview in the local admin console**
 
 A minimal two-column Astro theme for personal writing and lightweight publishing.
 
@@ -27,7 +27,7 @@ A minimal two-column Astro theme for personal writing and lightweight publishing
 - Two-column layout (sidebar navigation + content area)
 - Responsive design for mobile devices
 - Content collections: essay / bits / memo / about (archive is generated from essay)
-- Built-in local Admin Console (`/admin`): use Theme / Content / Images / Checks / Data Console in development to manage site settings, content, and assets, and take over the theme after forking or cloning
+- Built-in local Admin Console (`/admin`): manage site settings, content, and image assets in development
 - Bits draft generator on `/bits/`: one-click Markdown output (copy/download), with multi-image support and automatic image dimension detection
 - RSS: default archive feed + section feeds
 - Light / dark theme + reading mode
@@ -44,10 +44,7 @@ A minimal two-column Astro theme for personal writing and lightweight publishing
 
 ```bash
 npm install
-# Repeatable install (recommended for CI/troubleshooting)
-# npm ci
 npm run dev
-npm run build
 ```
 
 <details>
@@ -146,69 +143,27 @@ npm run audit:prod
 
 ### Admin Console (`/admin`)
 
-astro-whono includes a local Admin Console as the development entry point for viewing the site overview, adjusting theme settings, and importing/exporting settings snapshots.
+The built-in local Admin Console targets development only, for viewing the site overview, adjusting theme settings, editing content, and importing/exporting settings snapshots.
 
-#### Admin Entry Points
+Run `npm run dev`, then open `http://localhost:4321/admin/` (replace `4321` with your actual port if changed).
 
-Admin Console is intended for **local development** by default.
-
-Start the dev server:
-
-```bash
-npm install
-npm run dev
-```
-
-Then open `http://localhost:4321/admin/` in your browser.
-(If you changed the dev server port, replace `4321` with your actual port.)
-
-| Entry | Status | Purpose |
-| :---: | :---: | :--- |
-| `/admin/` | Available | Stable Admin entry and Site Overview |
-| `/admin/theme/` | Available | Theme Console for editing site information, sidebar, home page, inner-page copy, and more |
-| `/admin/images/` | Available | Image resource browser and path helper |
-| `/admin/checks/` | Available | Structured diagnostics and pre-release checks |
-| `/admin/data/` | Available | Settings snapshot export / dry-run import / confirmed write |
-| `/admin/content/` | Available | Content management, essay / bits draft creation, local editing for essay / bits / memo / about page, and source export |
+| Entry | Purpose |
+| :---: | :--- |
+| `/admin/` | Stable Admin entry and Site Overview |
+| `/admin/theme/` | Theme Console for editing site information, sidebar, home page, inner-page copy, and more |
+| `/admin/images/` | Image resource browser and path helper |
+| `/admin/checks/` | Structured diagnostics and pre-release checks |
+| `/admin/data/` | Settings snapshot export / dry-run import / confirmed write |
+| `/admin/content/` | Local editing, draft creation, and source export for essay / bits / memo / about |
 
 > Guides: [Admin Console](https://astro.whono.me/archive/admin-console-guide/) · [Theme Console](https://astro.whono.me/archive/theme-console-guide/) · [Content Console](https://astro.whono.me/archive/content-console-guide/)
 
-
-<details>
-<summary><strong>🖼️ Theme Console Overview </strong></summary>
-
-astro-whono provides a local Theme Console for centralized theme-level configuration in development.<br>
-
-#### Current Theme Console Support
-
-Theme Console mainly covers **site-level** and **page-level** settings, including:
-
-- Site title, description, brand name, and other basic metadata
-- `/admin/` Overview public visibility and hidden-state copy
-- Home intro copy and Hero image settings
-- Sidebar navigation labels, visibility, and ordering
-- Social links and custom social items
-- Footer copyright line / basic footer copy
-- Main title and subtitle for fixed inner pages
-- Article metadata display rules
-- Default author for the `/bits/` page
-
-For more details, see the [Theme Console configuration guide](https://astro.whono.me/archive/theme-console-guide/).
-
-<br>
-</details>
-
-#### Production behavior
-
-- Admin Console write capabilities are available only in local development, including theme settings, content editing, settings import/export, and supported content image uploads.
-- `/admin/content/` provides the content list, filters, search, essay / bits draft creation, and row-level actions. In development, edit pages support local editing and preview for essay, bits, memo, and about content.
-- Production builds remain static output. `/admin/` can show a read-only public Overview or a hidden-state message based on Theme settings; production does not show Admin tabs, and other Admin subroutes only keep a local-development notice.
-- `/api/admin/**` is for local development only and should not be treated as a production API
+Production builds remain static output: `/admin/` can show a read-only public Overview or a hidden-state message based on Theme settings; other Admin subroutes and `/api/admin/**` are available in local development only.
 
 #### Compatibility for existing forks
 
 - If `src/data/settings/*.json` does not exist yet, the frontend still reads config via `settings > legacy > default`
-- The JSON files are generated only after the first save in `/admin/theme/`, so no manual migration script is required
+- The JSON files are generated only after the first save in `/admin/theme/`; no manual migration is required
 
 
 ## Content and Writing
@@ -248,27 +203,7 @@ badge: optional     # List badge; if omitted, list shows "Essay"
 updatedAt: 2026-01-02 # Optional update date; replaces the visible article date when set
 ```
 
-`essay.date` should use the `YYYY-MM-DD` format for archive grouping, ordering, and page date display.
-
-Legacy ISO 8601 datetime values are still accepted. When written as a string, for example `date: "2026-01-01T12:00:00+08:00"`, the leading date is normalized to `2026-01-01`.
-
-If you need to keep a precise publish time, you can add:
-
-```yaml
-publishedAt: 2026-01-01T12:00:00+08:00
-```
-
-`publishedAt` does not need to be added to existing content in bulk. It only keeps a more precise publish time; archive ordering and RSS publish time continue to read `date` / `publishedAt` as before.
-
-If the article has a revision date, add:
-
-```yaml
-updatedAt: 2026-01-02
-```
-
-`updatedAt` is an optional update date. Prefer `YYYY-MM-DD`. When set, the home index, essay list, and article detail page replace the original visible date with an update label such as `更新于：YYYY-MM-DD`; when omitted, pages keep the existing date display.
-
-Unquoted YAML datetimes are also accepted. In rare UTC-boundary cases, the parser may have already lost the original timezone text; in that case the parsed UTC date is used.
+`date` should use the `YYYY-MM-DD` format for archive grouping, ordering, and date display; legacy ISO 8601 datetime values are still accepted and normalized to their date part. To keep a precise publish time, add `publishedAt: 2026-01-01T12:00:00+08:00`.
 
 Bits:
 ```yaml
@@ -283,23 +218,19 @@ images:                         # Optional: multi-image list (dimensions reduce 
 # draft: true   # Optional draft; visible in `dev`, hidden by default in `build/preview` and production
 ```
 
-`/bits/` does not currently generate detail routes from `slug`, nor does it render it as visible UI text; unless you are extending the theme, you usually do not need to set it.
+`/bits/` does not currently generate detail routes; `slug` usually does not need to be set.
 
 Author info (on `/bits/` only):
 
 - Default author and avatar are read from Theme Console via `page.bits.defaultAuthor`; if `src/data/settings/page.json` does not exist yet, they fall back to `site.author` / `site.authorAvatar` in `site.config.mjs`
-- `authorAvatar` should be a relative image path only (no `public/`, no leading `/`), for example: `author/avatar.webp`; it should point to an existing file under `public/**`
-- Per-bit overrides are supported via `author` in frontmatter:
+- Avatars use relative image paths only (no `public/`, no leading `/`), for example `author/avatar.webp`, pointing to an existing file under `public/**`; a missing or failed avatar falls back to an initial-based one
+- Per-bit overrides are supported via `author` in frontmatter, with the same avatar rule:
 
 ```yaml
 author:
   name: Alice
   avatar: author/alice.webp
 ```
-- Per-bit `author.avatar` follows the same rule as the default avatar: use a relative image path and preferably point it to an existing file under `public/**`
-
-- If the avatar is missing or fails to load, it automatically falls back to an initial-based avatar.
-- `bits.images[*].width / height` can be omitted and will not block builds; keeping them helps reduce image layout shift.
 
 
 ### Excerpt and Description (`description`)
@@ -311,7 +242,7 @@ author:
 
 ### Writing Conventions (Content Blocks)
 
-- Callout: recommended directive syntax `:::note[title] ... :::` (`note` / `tip` / `info` / `warning`); in HTML form use `.callout-title`, and use `data-icon="none"` to hide icon
+- Callout: `:::note[title] ... :::` (`note` / `tip` / `info` / `warning`)
 - Figure: `figure.figure > (img|picture) + figcaption.figure-caption?`; optional `figure--sm/md/lg/full` and `figure--left/center/right`
 - Gallery: `ul.gallery > li > figure > (img|picture) + figcaption?`; optional `cols-2` / `cols-3`
 - Math: double-dollar syntax is supported, with inline `$$x$$` and block `$$ ... $$`; single-dollar `$x$` is not parsed as math
@@ -327,15 +258,6 @@ Body text goes here...
 :::
 ```
 
-HTML example:
-
-```html
-<div class="callout note">
-  <p class="callout-title" data-icon="none">Note</p>
-  <p>Body text goes here...</p>
-</div>
-```
-
 
 ## Fonts and Licensing
 
@@ -346,16 +268,15 @@ This theme uses two typeface families (self-hosted + subsetted):
 The repository includes subsetted WOFF2 files (`latin` / `cjk-common` / `cjk-ext`, loaded on demand via `unicode-range`), so you can use the project immediately after cloning.
 Subset charset is generated from repository text plus `tools/charset-base.txt` (3,500 common characters) to reduce missing-glyph cases.
 
-To regenerate font subsets:
-1. Install Python 3, then run `python -m pip install fonttools brotli zopfli`
-2. Make sure `pyftsubset --help` works; if it does not, add the Python Scripts directory to `PATH`
-3. Put the source fonts in `tools/fonts-src/`
-4. Run `npm run font:build`
-5. If glyphs are missing, add the characters to `tools/charset-base.txt` and rerun `npm run font:build`
-6. `tools/charset-common.txt` is regenerated by `npm run font:charset`; do not edit it unless you only want to rerun `npm run font:subset`
+To regenerate subsets after glyph gaps or source font changes, run `npm run font:build`; steps and file list below.
 
 <details>
-  <summary>Font file list (subsets + source files)</summary>
+  <summary>Subset regeneration and file list</summary>
+
+1. Install Python 3, run `python -m pip install fonttools brotli zopfli`, and make sure `pyftsubset --help` works (add the Python Scripts directory to `PATH` if not)
+2. Put the source fonts in `tools/fonts-src/`
+3. Run `npm run font:build`; if glyphs are missing, add the characters to `tools/charset-base.txt` and rerun
+4. `tools/charset-common.txt` is regenerated by `npm run font:charset`; do not edit it by hand
 
 Subset files (tracked in repository):
 - `public/fonts/lxgw-wenkai-lite-latin.woff2`
@@ -378,13 +299,15 @@ Font license: SIL Open Font License 1.1 (see `public/fonts/OFL-LXGW-WenKai-Lite.
 
 ### Typography settings
 
-In development, open the Theme Console (`/admin/theme/` → "Typography") to configure the body text, copy, monospace, and brand fonts independently. Changes apply on the next build; the brand font is used for the sidebar site title and quote.
-
-Font cards show previews and source information. Options include system fonts, self-hosted fonts, and online fonts downloaded and self-hosted at build time. Browsers do not contact third-party font services when loading pages. To add a font beyond the built-in options, register it in `src/lib/fonts/registry.ts`.
-
-For source details, size trade-offs, and custom font setup, see the [Theme Console guide → "Typography"](https://astro.whono.me/archive/theme-console-guide/).
+In development, open the Theme Console (`/admin/theme/` → "Typography") to configure the body text, copy, monospace, and brand fonts independently; changes apply on the next build. Options include system fonts, self-hosted fonts, and online fonts downloaded and self-hosted at build time — browsers never contact third-party font services. Fonts beyond the built-in options are registered in `src/lib/fonts/registry.ts`. See the [Theme Console guide → "Typography"](https://astro.whono.me/archive/theme-console-guide/) for details.
 
 Run `npm run check:font-charset` to verify that the charset and font subsets match the site content. If it fails, follow the prompt to run `npm run font:build`.
+
+### Site icon settings
+
+In development, open the Theme Console (`/admin/theme/` → "Site" → site icons) to upload square PNG files for the browser tab favicon and the mobile touch icon. Uploads are written to `public/images/site/` with content-hash file names, so replaced icons are not affected by browser favicon caching; changes apply after saving and rebuilding.
+
+Once either tab icon slot (SVG or PNG) is customized, the other empty slot no longer emits the theme default icon, so browsers do not keep showing the default logo; the touch icon falls back independently and keeps the theme default until customized. SVG upload is not supported in the console yet; replace `public/favicon.svg` directly, or point `favicon.svg` in `src/data/settings/site.json` at an SVG under `public/**`.
 
 
 ## RSS
