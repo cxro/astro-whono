@@ -831,6 +831,35 @@ describe('admin content essay write contract', () => {
     );
   });
 
+  it('rejects essay tags that normalize to non-routable archive tag keys', async () => {
+    const { readAdminContentEntryEditorPayload } = await import('../src/lib/admin-console/content-shared');
+    const { POST } = await import('../src/pages/api/admin/content/entry');
+    const current = await readAdminContentEntryEditorPayload('essay', 'demo');
+
+    const response = await POST({
+      request: createJsonRequest('http://127.0.0.1:4321/api/admin/content/entry?dryRun=1', {
+        collection: 'essay',
+        entryId: 'demo',
+        revision: current.revision,
+        frontmatter: {
+          ...current.values,
+          tagsText: '..\n合法标签'
+        }
+      }),
+      url: new URL('http://127.0.0.1:4321/api/admin/content/entry?dryRun=1')
+    } as never);
+
+    expect(response.status).toBe(400);
+    const payload = JSON.parse(await response.text());
+    expect(payload.ok).toBe(false);
+    expect(payload.issues).toEqual([
+      expect.objectContaining({
+        path: 'tagsText',
+        message: expect.stringContaining('".."')
+      })
+    ]);
+  });
+
   it('rejects stale revisions after the source file changes externally', async () => {
     const { readAdminContentEntryEditorPayload } = await import('../src/lib/admin-console/content-shared');
     const { POST } = await import('../src/pages/api/admin/content/entry');

@@ -16,6 +16,7 @@ import {
   parseAdminEssayEditorInput,
   parseTagsText,
   validateEssayPublicSlug,
+  validateRoutableTags,
   type AdminEssayOptionalInputMode
 } from './content-essay-frontmatter';
 import type { AdminContentValidationIssue } from './content-entry-contract';
@@ -241,6 +242,9 @@ export const buildBitsFrontmatterFromValues = (
   const imageResult = parseBitsImages(values.imagesText);
   issues.push(...imageResult.issues);
 
+  const tags = parseTagsText(values.tagsText);
+  issues.push(...validateRoutableTags(tags));
+
   if (issues.length > 0) {
     return { issues };
   }
@@ -251,7 +255,7 @@ export const buildBitsFrontmatterFromValues = (
       ...(values.title.trim() ? { title: values.title.trim() } : {}),
       ...(values.description.trim() ? { description: values.description.trim() } : {}),
       date,
-      tags: parseTagsText(values.tagsText),
+      tags,
       draft: values.draft === true,
       ...((authorName || authorAvatar)
         ? {

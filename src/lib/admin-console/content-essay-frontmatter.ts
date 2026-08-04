@@ -8,6 +8,7 @@ import {
   contentSourceEntryIdToPublicEntryId,
   flattenEntryIdToSlug
 } from '../../utils/slug-rules';
+import { isRoutableTagKey, toTagKey } from '../tags';
 import type { AdminEssayEditorValues } from './content-editor-payload';
 import type { AdminContentValidationIssue } from './content-entry-contract';
 import {
@@ -118,6 +119,11 @@ export const parseTagsText = (value: string): string[] =>
     .split(/\r?\n/)
     .map((item) => item.trim())
     .filter(Boolean);
+
+export const validateRoutableTags = (tags: readonly string[]): AdminContentValidationIssue[] =>
+  tags
+    .filter((tag) => !isRoutableTagKey(toTagKey(tag)))
+    .map((tag) => createIssue('tagsText', `tag "${tag}" 规范化后无法生成可路由的归档路由键，请调整该标签`));
 
 const resolveDefaultPublicEntryId = (sourceEntryId: string): string => {
   const publicEntryId = contentSourceEntryIdToPublicEntryId(sourceEntryId);
@@ -261,6 +267,9 @@ export const buildEssayFrontmatterFromValues = (
     issues.push(createIssue('updatedAt', 'essay.updatedAt 必须是 YYYY-MM-DD 或带时区的 ISO 8601 日期时间'));
   }
 
+  const tags = parseTagsText(values.tagsText);
+  issues.push(...validateRoutableTags(tags));
+
   if (!dateResult || issues.length > 0) {
     return { issues };
   }
@@ -296,7 +305,7 @@ export const buildEssayFrontmatterFromValues = (
       date,
       ...(publishedAtText ? { publishedAt: publishedAtText } : {}),
       ...(updatedAtText ? { updatedAt: updatedAtText } : {}),
-      tags: parseTagsText(values.tagsText),
+      tags,
       draft: values.draft === true,
       archive: values.archive !== false,
       ...(slug ? { slug } : {}),
