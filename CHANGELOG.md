@@ -21,6 +21,9 @@ The format is based on Keep a Changelog, and this project aims to follow Semanti
 - 移除 `/admin/checks/` Checks Console：slug 与 settings 问题构建时会报错，无法生成归档路由的标签改为在本地后台保存时拦截，图片引用检查不再提供。
 
 ### Fixed
+- 更新依赖锁文件，并提高 Astro、Vitest 与 KaTeX 的最低版本，修复当前依赖审计中的安全告警；将 fast-uri 固定到 3.1.8，并让间接依赖使用与项目一致的 KaTeX 版本。
+- 修复云端图片上传超时测试提前推进模拟时钟的竞态：等待上传请求启动后再验证超时和请求取消，避免 Node.js 24 下上传队列阻塞后续测试。
+- 预览接口测试在收集阶段加载渲染依赖，避免首次模块加载占用单个测试的超时预算。
 - 修复本地后台编辑 figure 图片块时，含转义文本或富文本说明的图片可能被错误回显，以及本地图片缺失检查可能漏检的问题。
 - 修复子路径部署时，`/robots.txt` 中的 `Sitemap` 链接遗漏部署路径、指向错误地址的问题。
 - 修复依赖更新后 `package-lock.json` 重新写入第三方镜像地址的问题，默认安装不再依赖该镜像。
