@@ -1,8 +1,9 @@
 import { visit } from 'unist-util-visit';
 
-// Astro leaves root-relative image paths (`/images/a.webp`) untouched in Markdown and raw HTML,
-// so they miss the deployment base on subpath deploys. Paths already under the base are kept.
-export const rehypeImageBasePath = (options = {}) => {
+// Astro leaves root-relative body paths (`/images/a.webp`, `/archive/post/`) untouched in Markdown
+// and raw HTML, so they miss the deployment base on subpath deploys. Paths already under the base
+// are kept.
+export const rehypeBasePath = (options = {}) => {
   const base = typeof options.base === 'string' && options.base.trim() ? options.base.trim() : '/';
   const baseNormalized = base.endsWith('/') ? base : `${base}/`;
   if (baseNormalized === '/') return () => {};
@@ -27,8 +28,13 @@ export const rehypeImageBasePath = (options = {}) => {
 
   return (tree) => {
     visit(tree, 'element', (node) => {
-      if (node.tagName !== 'img' && node.tagName !== 'source') return;
       const properties = node.properties ?? {};
+
+      if (node.tagName === 'a' && typeof properties.href === 'string') {
+        properties.href = withBase(properties.href);
+        return;
+      }
+      if (node.tagName !== 'img' && node.tagName !== 'source') return;
 
       if (node.tagName === 'img' && typeof properties.src === 'string') {
         properties.src = withBase(properties.src);

@@ -10,8 +10,38 @@ const render = async (source: string, base: string) => {
 };
 
 const srcs = (html: string) => Array.from(html.matchAll(/<img[^>]*?\ssrc="([^"]*)"/g), (match) => match[1]);
+const hrefs = (html: string) => Array.from(html.matchAll(/<a[^>]*?\shref="([^"]*)"/g), (match) => match[1]);
 
-describe('rehype image base path', () => {
+describe('rehype base path', () => {
+  it('prefixes root-relative markdown and raw html links with the deployment base', async () => {
+    const html = await render(
+      [
+        '[home](/) [guide](/archive/guide/#setup) [file](/files/a.pdf)',
+        '',
+        '<a href="/essay/">essay</a>'
+      ].join('\n'),
+      '/blog/'
+    );
+
+    expect(hrefs(html)).toEqual(['/blog/', '/blog/archive/guide/#setup', '/blog/files/a.pdf', '/blog/essay/']);
+  });
+
+  it('keeps links already under the base, anchors, protocol-relative and absolute urls', async () => {
+    const html = await render(
+      '[a](/blog/archive/) [b](#top) [c](//example.com/x) [d](https://example.com/x) [e](mailto:a@example.com) [f](./x/)',
+      '/blog/'
+    );
+
+    expect(hrefs(html)).toEqual([
+      '/blog/archive/',
+      '#top',
+      '//example.com/x',
+      'https://example.com/x',
+      'mailto:a@example.com',
+      './x/'
+    ]);
+  });
+
   it('prefixes root-relative raw html and markdown images with the deployment base', async () => {
     const html = await render(['<img src="/images/a.webp" alt="a" />', '', '![b](/images/b.webp)'].join('\n'), '/blog/');
 
@@ -55,8 +85,9 @@ describe('rehype image base path', () => {
   });
 
   it('leaves root deployments unchanged', async () => {
-    const html = await render('<img src="/images/a.webp" alt="a" />', '/');
+    const html = await render('<img src="/images/a.webp" alt="a" /> [x](/archive/)', '/');
 
     expect(srcs(html)).toEqual(['/images/a.webp']);
+    expect(hrefs(html)).toEqual(['/archive/']);
   });
 });
