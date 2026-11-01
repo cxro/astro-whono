@@ -26,6 +26,7 @@ import {
   rehypeProtectMarkdownMath,
   rehypeRestoreMarkdownMathBoundary
 } from '../src/plugins/rehype-markdown-math-boundary.mjs';
+import { rehypeImageBasePath } from '../src/plugins/rehype-image-base-path.mjs';
 import { rehypeRawHtmlLocalImages } from '../src/plugins/rehype-raw-html-local-images.mjs';
 import { sanitizeSchema } from '../src/plugins/sanitize-schema.mjs';
 
@@ -107,10 +108,14 @@ describe('markdown pipeline contract', () => {
       ]
     });
     expect(publicSegmentIndex('project-rehype')).toBeLessThan(publicSegmentIndex('raw-html-local-images'));
-    expect(publicSegmentIndex('raw-html-local-images')).toBeLessThan(publicSegmentIndex('astro-images'));
+    expect(publicSegmentIndex('raw-html-local-images')).toBeLessThan(publicSegmentIndex('image-base-path'));
+    expect(publicSegmentIndex('image-base-path')).toBeLessThan(publicSegmentIndex('astro-images'));
 
-    const { options: processorOptions } = createPublicMarkdownConfig().processor;
-    expect(pluginOf(processorOptions.rehypePlugins.at(-1))).toBe(rehypeRawHtmlLocalImages);
+    const { options: processorOptions } = createPublicMarkdownConfig({ base: '/blog/' }).processor;
+    const publicImagePlugins = processorOptions.rehypePlugins.slice(-2);
+    expect(pluginOf(publicImagePlugins[0])).toBe(rehypeRawHtmlLocalImages);
+    expect(pluginOf(publicImagePlugins[1])).toBe(rehypeImageBasePath);
+    expect(optionsOf(publicImagePlugins[1])).toEqual({ base: '/blog/' });
   });
 
   it('declares preview GFM and smartypants before project remark plugins', () => {
