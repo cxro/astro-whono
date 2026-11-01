@@ -18,6 +18,7 @@ The format is based on Keep a Changelog, and this project aims to follow Semanti
 - 站点框架升级到 Astro 7，构建链同步升级到 Vite 8，并更新相关依赖修复多个上游安全公告；文章与页面的渲染效果保持不变。
 - 构建产物的响应式样式改用新的媒体查询语法，需要 Chrome 104+ / Safari 16.4+ / Firefox 102+（2022 年后的主流浏览器）才能完整生效。
 - 界面图标库 Lucide 随依赖升级更新，部分图标形状有细微视觉调整。
+- Node.js 最低版本提高到 22.23.4（Astro 7.4 起的要求）；Cloudflare Pages 等需手动指定版本的平台请同步更新 `NODE_VERSION`。
 - 移除 `/admin/checks/` Checks Console：slug 与 settings 问题构建时会报错，无法生成归档路由的标签改为在本地后台保存时拦截，图片引用检查不再提供。
 
 ### Fixed
