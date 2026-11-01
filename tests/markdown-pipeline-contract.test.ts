@@ -26,6 +26,7 @@ import {
   rehypeProtectMarkdownMath,
   rehypeRestoreMarkdownMathBoundary
 } from '../src/plugins/rehype-markdown-math-boundary.mjs';
+import { rehypeRawHtmlLocalImages } from '../src/plugins/rehype-raw-html-local-images.mjs';
 import { sanitizeSchema } from '../src/plugins/sanitize-schema.mjs';
 
 const pluginOf = (entry: unknown) => (Array.isArray(entry) ? entry[0] : entry);
@@ -105,6 +106,11 @@ describe('markdown pipeline contract', () => {
         'rehype-katex'
       ]
     });
+    expect(publicSegmentIndex('project-rehype')).toBeLessThan(publicSegmentIndex('raw-html-local-images'));
+    expect(publicSegmentIndex('raw-html-local-images')).toBeLessThan(publicSegmentIndex('astro-images'));
+
+    const { options: processorOptions } = createPublicMarkdownConfig().processor;
+    expect(pluginOf(processorOptions.rehypePlugins.at(-1))).toBe(rehypeRawHtmlLocalImages);
   });
 
   it('declares preview GFM and smartypants before project remark plugins', () => {
