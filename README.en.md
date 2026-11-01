@@ -2,7 +2,7 @@
 
 [中文](README.md) | [English](README.en.md)
 
-[![CI](https://img.shields.io/github/actions/workflow/status/cxro/astro-whono/ci.yml?style=flat&label=CI&labelColor=2E3440&color=A3BE8C&logo=githubactions&logoColor=ECEFF4)](https://github.com/cxro/astro-whono/actions/workflows/ci.yml)  [![Node](https://img.shields.io/badge/Node-%3E%3D22.12.0-81A1C1?style=flat&labelColor=2E3440&logo=nodedotjs&logoColor=ECEFF4)](README.en.md#requirements)  [![Astro](https://img.shields.io/github/package-json/dependency-version/cxro/astro-whono/astro?branch=main&style=flat&label=Astro&labelColor=2E3440&color=BC52EE&logo=astro&logoColor=ECEFF4)](https://docs.astro.build/)  [![License](https://img.shields.io/badge/License-MIT-4C566A?style=flat&labelColor=2E3440&logo=opensourceinitiative&logoColor=ECEFF4)](LICENSE)
+[![CI](https://img.shields.io/github/actions/workflow/status/cxro/astro-whono/ci.yml?style=flat&label=CI&labelColor=2E3440&color=A3BE8C&logo=githubactions&logoColor=ECEFF4)](https://github.com/cxro/astro-whono/actions/workflows/ci.yml)  [![Node](https://img.shields.io/badge/Node-%3E%3D22.23.4-81A1C1?style=flat&labelColor=2E3440&logo=nodedotjs&logoColor=ECEFF4)](README.en.md#requirements)  [![Astro](https://img.shields.io/github/package-json/dependency-version/cxro/astro-whono/astro?branch=main&style=flat&label=Astro&labelColor=2E3440&color=BC52EE&logo=astro&logoColor=ECEFF4)](https://docs.astro.build/)  [![License](https://img.shields.io/badge/License-MIT-4C566A?style=flat&labelColor=2E3440&logo=opensourceinitiative&logoColor=ECEFF4)](LICENSE)
 
 **✨ astro-whono supports visual writing and live preview in the local admin console**
 
@@ -37,7 +37,7 @@ A minimal two-column Astro theme for personal writing and lightweight publishing
 
 ### Requirements
 
-- Node.js 22.12+ (`.nvmrc` recommended)
+- Node.js 22.23.4+ (`.nvmrc` recommended)
 
 
 ### Quick Start
@@ -109,7 +109,7 @@ npm run audit:prod
 
 **Node.js version (usually not required)**
 - This project includes `.nvmrc`, and Cloudflare Pages reads it automatically.
-- If you need to set it manually, add `NODE_VERSION=22.22.0` in environment variables.
+- If you need to set it manually, add `NODE_VERSION=22.23.4` in environment variables.
 
 **Environment variables (set for production)**
 - In Pages project -> Settings -> Environment variables, add: `SITE_URL=https://your-domain` (for example `https://astro.whono.me`, without a trailing `/`).

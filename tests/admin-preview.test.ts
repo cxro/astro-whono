@@ -1,5 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { readFile } from 'node:fs/promises';
+// Load the rendering dependencies during collection, outside the first test's timeout.
+import { POST } from '../src/pages/api/admin/preview';
 
 const createJsonRequest = (url: string, payload: unknown) =>
   new Request(url, {
@@ -13,8 +15,6 @@ const createJsonRequest = (url: string, payload: unknown) =>
 
 describe('admin preview api', () => {
   it('renders markdown with project callout and sanitize rules', async () => {
-    const { POST } = await import('../src/pages/api/admin/preview');
-
     const response = await POST({
       request: createJsonRequest('http://127.0.0.1:4321/api/admin/preview', {
         collection: 'essay',
@@ -231,8 +231,6 @@ describe('admin preview api', () => {
   });
 
   it('returns structured json errors for invalid inputs', async () => {
-    const { POST } = await import('../src/pages/api/admin/preview');
-
     const response = await POST({
       request: createJsonRequest('http://127.0.0.1:4321/api/admin/preview', {
         collection: 'page',
@@ -253,7 +251,6 @@ describe('admin preview api', () => {
   });
 
   it('renders about markdown-first preview with friend and FAQ directives', async () => {
-    const { POST } = await import('../src/pages/api/admin/preview');
     const { getThemeSettings } = await import('../src/lib/theme-settings');
 
     const response = await POST({
@@ -341,8 +338,6 @@ describe('admin preview api', () => {
   });
 
   it('requires fixed about entryId for markdown-first preview', async () => {
-    const { POST } = await import('../src/pages/api/admin/preview');
-
     const basePayload = {
       collection: 'about',
       source: 'about body'

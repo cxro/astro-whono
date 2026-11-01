@@ -18,6 +18,10 @@
 .admin-images-browser__detail-media {
   display: grid;
   place-items: center;
+  /* Keep the square preview within its column when the metadata is taller. */
+  align-self: start;
+  min-width: 0;
+  width: 100%;
   aspect-ratio: 1 / 1;
   max-height: 440px;
   border: 1px solid color-mix(in srgb, var(--border) 70%, transparent 30%);

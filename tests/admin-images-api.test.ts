@@ -802,10 +802,17 @@ describe('admin images api', () => {
       url: new URL('http://127.0.0.1:4321/api/admin/images/upload')
     } as never);
 
+    // Multipart parsing and filesystem reads must finish before the cloud deadline
+    // is registered. Advancing the clock earlier can leave the upload queue locked.
+    await vi.waitFor(() => expect(s3SdkMock.send).toHaveBeenCalledTimes(1));
+    const uploadOptions = s3SdkMock.send.mock.calls[0]![1] as { abortSignal: AbortSignal };
+    expect(uploadOptions.abortSignal.aborted).toBe(false);
+
     await vi.advanceTimersByTimeAsync(60_000);
     const response = await responsePromise;
     const payload = JSON.parse(await response.text());
 
+    expect(uploadOptions.abortSignal.aborted).toBe(true);
     expect(response.status).toBe(504);
     expect(payload.error).toEqual(expect.objectContaining({
       code: 'cloud_timeout',
