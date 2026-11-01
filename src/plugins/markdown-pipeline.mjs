@@ -11,6 +11,8 @@ import {
 } from './rehype-markdown-math-boundary.mjs';
 import { rehypeAboutDirectives, remarkAboutDirectives } from './about-directives.mjs';
 import remarkCallout from './remark-callout.mjs';
+import { rehypeImageBasePath } from './rehype-image-base-path.mjs';
+import { rehypeRawHtmlLocalImages } from './rehype-raw-html-local-images.mjs';
 import { sanitizeSchema } from './sanitize-schema.mjs';
 import shikiToolbar from './shiki-toolbar.mjs';
 
@@ -142,6 +144,20 @@ export const publicMarkdownRehypeSegments = Object.freeze([
       'rehype-sanitize',
       'rehype-katex'
     ]
+  },
+  {
+    id: 'raw-html-local-images',
+    publicOnly: true,
+    plugins: ['rehypeRawHtmlLocalImages'],
+    after: 'project-rehype',
+    before: 'astro-images'
+  },
+  {
+    id: 'image-base-path',
+    publicOnly: true,
+    plugins: ['rehypeImageBasePath'],
+    after: 'raw-html-local-images',
+    before: 'astro-images'
   },
   {
     id: 'astro-images',
@@ -283,7 +299,11 @@ export const createProjectMarkdownRehypePlugins = ({ aboutBase = '/', aboutEnabl
 export const createPublicMarkdownConfig = ({ base = '/' } = {}) => ({
   processor: unified({
     remarkPlugins: createProjectMarkdownRemarkPlugins(),
-    rehypePlugins: createProjectMarkdownRehypePlugins({ aboutBase: base })
+    rehypePlugins: [
+      ...createProjectMarkdownRehypePlugins({ aboutBase: base }),
+      rehypeRawHtmlLocalImages,
+      [rehypeImageBasePath, { base }]
+    ]
   }),
   shikiConfig: createMarkdownShikiConfig()
 });

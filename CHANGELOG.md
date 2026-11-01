@@ -23,6 +23,8 @@ The format is based on Keep a Changelog, and this project aims to follow Semanti
 - 移除 `/admin/checks/` Checks Console：slug 与 settings 问题构建时会报错，无法生成归档路由的标签改为在本地后台保存时拦截，图片引用检查不再提供。
 
 ### Fixed
+- 修复文章中通过后台「画廊」插入的本地图片在构建后的页面上无法显示的问题：画廊等原始 HTML `<img>` 中的相对路径图片现在与 Markdown 图片一样参与构建处理；引用的本地图片不存在时构建会报错（[#54](https://github.com/cxro/astro-whono/issues/54)）。
+- 修复子路径部署时，正文中以 `/` 开头的图片路径（如 `/images/...`，含手写 HTML 与 Markdown 图片）遗漏部署路径、图片无法显示的问题。
 - 修复在 UTC 以西时区（如美洲）运行本地后台时，批量下载内容文件因 zip 时间戳超出范围而失败的问题。
 - 修复图库详情中信息列较高时，图片预览超出所在列并遮挡右侧尺寸、文件路径等信息的问题（[PR #65](https://github.com/cxro/astro-whono/pull/65)，by [@Puureastar](https://github.com/Puureastar)）。
 - 修复本地后台编辑 figure 图片块时，含转义文本或富文本说明的图片可能被错误回显，以及本地图片缺失检查可能漏检的问题。
