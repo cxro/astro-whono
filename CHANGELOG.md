@@ -19,9 +19,11 @@ The format is based on Keep a Changelog, and this project aims to follow Semanti
 - 构建产物的响应式样式改用新的媒体查询语法，需要 Chrome 104+ / Safari 16.4+ / Firefox 102+（2022 年后的主流浏览器）才能完整生效。
 - 界面图标库 Lucide 随依赖升级更新，部分图标形状有细微视觉调整。
 - Node.js 最低版本提高到 22.23.4（Astro 7.4 起的要求）；Cloudflare Pages 等需手动指定版本的平台请同步更新 `NODE_VERSION`。
+- 依赖升级到 Astro 7.4、Vite 8.3、Vitest 4.1.12 与 KaTeX 0.18，修复依赖审计中的安全告警（含 Astro AVIF 图片处理远程代码执行）；fast-uri 固定到 3.1.9，并让间接依赖使用与项目一致的 KaTeX 版本。KaTeX 0.18 为部分内部 class 增加了 `katex-` 前缀，自定义样式若直接选择这些 class 需同步调整（[PR #65](https://github.com/cxro/astro-whono/pull/65)，by [@Puureastar](https://github.com/Puureastar)）。
 - 移除 `/admin/checks/` Checks Console：slug 与 settings 问题构建时会报错，无法生成归档路由的标签改为在本地后台保存时拦截，图片引用检查不再提供。
 
 ### Fixed
+- 修复图库详情中信息列较高时，图片预览超出所在列并遮挡右侧尺寸、文件路径等信息的问题（[PR #65](https://github.com/cxro/astro-whono/pull/65)，by [@Puureastar](https://github.com/Puureastar)）。
 - 修复本地后台编辑 figure 图片块时，含转义文本或富文本说明的图片可能被错误回显，以及本地图片缺失检查可能漏检的问题。
 - 修复子路径部署时，`/robots.txt` 中的 `Sitemap` 链接遗漏部署路径、指向错误地址的问题。
 - 修复依赖更新后 `package-lock.json` 重新写入第三方镜像地址的问题，默认安装不再依赖该镜像。
