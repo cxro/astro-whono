@@ -279,7 +279,8 @@ export const POST: APIRoute = async ({ request, url }) => {
 
   const zipBytes = zipSync(zipEntries, {
     level: 6,
-    mtime: new Date('1980-01-01T00:00:00Z')
+    // ZIP DOS timestamps are local wall-clock fields; a UTC instant becomes 1979 west of UTC.
+    mtime: new Date(1980, 0, 1)
   });
   const fileName = createExportFileName();
 
