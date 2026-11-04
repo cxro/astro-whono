@@ -92,6 +92,7 @@ type FormCodecContext = {
   inputArticleMetaShowTags: HTMLInputElement;
   inputArticleMetaShowWordCount: HTMLInputElement;
   inputArticleMetaShowReadingTime: HTMLInputElement;
+  inputArticleTocShowEntry: HTMLInputElement;
   inputPageBitsAuthorName: HTMLInputElement;
   inputPageBitsAuthorAvatar: HTMLInputElement;
   inputHomeShowHero: HTMLInputElement;
@@ -212,6 +213,7 @@ export const createFormCodec = ({
   inputArticleMetaShowTags,
   inputArticleMetaShowWordCount,
   inputArticleMetaShowReadingTime,
+  inputArticleTocShowEntry,
   inputPageBitsAuthorName,
   inputPageBitsAuthorAvatar,
   inputHomeShowHero,
@@ -563,6 +565,9 @@ export const createFormCodec = ({
           showWordCount: Boolean(inputArticleMetaShowWordCount.checked),
           showReadingTime: Boolean(inputArticleMetaShowReadingTime.checked)
         },
+        articleToc: {
+          showEntry: Boolean(inputArticleTocShowEntry.checked)
+        },
         layout: {
           sidebarDivider: getSelectedSidebarDividerVariant()
         },
@@ -646,6 +651,7 @@ export const createFormCodec = ({
     inputArticleMetaShowTags.checked = settings.ui?.articleMeta?.showTags !== false;
     inputArticleMetaShowWordCount.checked = settings.ui?.articleMeta?.showWordCount !== false;
     inputArticleMetaShowReadingTime.checked = settings.ui?.articleMeta?.showReadingTime !== false;
+    inputArticleTocShowEntry.checked = settings.ui?.articleToc?.showEntry !== false;
     applySidebarDividerVariant(settings.ui?.layout?.sidebarDivider || ADMIN_SIDEBAR_DIVIDER_DEFAULT);
     applyTypographySettings(settings.ui?.typography);
     refreshFooterPreview();

@@ -53,6 +53,7 @@ type ValidationContext = {
   inputArticleMetaShowTags: HTMLInputElement;
   inputArticleMetaShowWordCount: HTMLInputElement;
   inputArticleMetaShowReadingTime: HTMLInputElement;
+  inputArticleTocShowEntry: HTMLInputElement;
   inputSidebarActionsShowRssLink: HTMLInputElement;
   inputSidebarActionsShowThemeToggle: HTMLInputElement;
   inputSidebarActionsShowAdminEntry: HTMLInputElement;
@@ -121,6 +122,7 @@ export const createValidation = ({
   inputArticleMetaShowTags,
   inputArticleMetaShowWordCount,
   inputArticleMetaShowReadingTime,
+  inputArticleTocShowEntry,
   inputSidebarActionsShowRssLink,
   inputSidebarActionsShowThemeToggle,
   inputSidebarActionsShowAdminEntry,
@@ -256,6 +258,8 @@ export const createValidation = ({
         return () => inputArticleMetaShowWordCount;
       case 'ui.articleMeta.showReadingTime':
         return () => inputArticleMetaShowReadingTime;
+      case 'ui.articleToc.showEntry':
+        return () => inputArticleTocShowEntry;
       case 'ui.layout.sidebarDivider':
         return () => inputSidebarDividerDefault;
       case 'ui.typography.readable':

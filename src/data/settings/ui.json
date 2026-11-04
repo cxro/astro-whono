@@ -17,6 +17,9 @@
     "showWordCount": true,
     "showReadingTime": true
   },
+  "articleToc": {
+    "showEntry": true
+  },
   "layout": {
     "sidebarDivider": "default"
   },

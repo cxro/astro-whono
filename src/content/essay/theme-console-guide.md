@@ -57,6 +57,7 @@ Theme Console 当前适合处理以下几类配置：
 - 首页 Hero、首页导语及首页内部入口
 - `/essay/`、`/archive/`、`/bits/`、`/memo/`、`/about/` 的主副标题
 - 文章元信息显示选项
+- 文章页右侧目录开关
 - 代码块行号
 - 正文 / 文案 / 等宽 / 品牌四个角色的排版字体
 
@@ -138,6 +139,7 @@ Theme Console 管理的是仓库内的主题配置，相关改动仍可通过 Gi
 - `/memo/` 页面主副标题
 - `/about/` 页面主副标题
 - 文章元信息是否显示日期、标签、字数、阅读时长
+- 文章页（`/archive/` 详情页）是否显示右侧目录：目录只在 1440px 及以上的宽屏显示，少于 2 个章节标题的文章不显示
 - `/bits/` 默认作者名与头像
 
 > ![Inner Pages 分组截图](./theme-console/theme-console-inner-pages.webp)

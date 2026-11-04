@@ -85,6 +85,7 @@ export type AdminThemeControls = RequiredElements<{
   inputArticleMetaShowTags: HTMLInputElement | null;
   inputArticleMetaShowWordCount: HTMLInputElement | null;
   inputArticleMetaShowReadingTime: HTMLInputElement | null;
+  inputArticleTocShowEntry: HTMLInputElement | null;
   inputPageBitsAuthorName: HTMLInputElement | null;
   inputPageBitsAuthorAvatar: HTMLInputElement | null;
   inputHomeShowHero: HTMLInputElement | null;
@@ -175,6 +176,7 @@ export const queryAdminThemeControls = (): AdminThemeControls | null => {
     inputArticleMetaShowTags: byId<HTMLInputElement>('ui-article-meta-show-tags'),
     inputArticleMetaShowWordCount: byId<HTMLInputElement>('ui-article-meta-show-word-count'),
     inputArticleMetaShowReadingTime: byId<HTMLInputElement>('ui-article-meta-show-reading-time'),
+    inputArticleTocShowEntry: byId<HTMLInputElement>('ui-article-toc-show-entry'),
     inputPageBitsAuthorName: byId<HTMLInputElement>('page-bits-author-name'),
     inputPageBitsAuthorAvatar: byId<HTMLInputElement>('page-bits-author-avatar'),
     inputHomeShowHero: byId<HTMLInputElement>('home-show-hero'),

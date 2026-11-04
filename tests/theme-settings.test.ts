@@ -162,6 +162,71 @@ describe('theme-settings revision semantics', () => {
     expect(getThemeSettingsRevision(mutated)).not.toBe(getThemeSettingsRevision(resolved));
   });
 
+  it('defaults the article TOC on and keeps the console unlocked when ui.json lacks articleToc', async () => {
+    const settingsDir = await createTempSettingsFixture();
+    const uiPath = path.join(settingsDir, 'ui.json');
+    const uiJson = JSON.parse(await readFile(uiPath, 'utf8')) as Record<string, unknown>;
+    delete uiJson.articleToc;
+    await writeFile(uiPath, `${JSON.stringify(uiJson, null, 2)}
+`, 'utf8');
+
+    const resolved = getThemeSettings();
+    const state = getEditableThemeSettingsState(resolved);
+
+    expect(resolved.settings.ui.articleToc).toEqual({ showEntry: true });
+    expect(resolved.sources.ui.articleTocShowEntry).toBe('default');
+    expect(getThemeSettingsReadDiagnostics(resolved)).toEqual([]);
+    expect(state.ok).toBe(true);
+  });
+
+  it('reads an explicit articleToc.showEntry = false from ui.json', async () => {
+    const settingsDir = await createTempSettingsFixture();
+    const uiPath = path.join(settingsDir, 'ui.json');
+    const uiJson = JSON.parse(await readFile(uiPath, 'utf8')) as Record<string, any>;
+    uiJson.articleToc.showEntry = false;
+    await writeFile(uiPath, `${JSON.stringify(uiJson, null, 2)}
+`, 'utf8');
+
+    const resolved = getThemeSettings();
+    const state = getEditableThemeSettingsState(resolved);
+
+    expect(resolved.settings.ui.articleToc.showEntry).toBe(false);
+    expect(resolved.sources.ui.articleTocShowEntry).toBe('new');
+    expect(getThemeSettingsReadDiagnostics(resolved)).toEqual([]);
+    expect(state.ok).toBe(true);
+  });
+
+  it('locks the console when articleToc.showEntry is not a boolean', async () => {
+    const settingsDir = await createTempSettingsFixture();
+    const uiPath = path.join(settingsDir, 'ui.json');
+    const uiJson = JSON.parse(await readFile(uiPath, 'utf8')) as Record<string, any>;
+    uiJson.articleToc.showEntry = 'false';
+    await writeFile(uiPath, `${JSON.stringify(uiJson, null, 2)}
+`, 'utf8');
+
+    const resolved = getThemeSettings();
+    const state = getEditableThemeSettingsState(resolved);
+
+    expect(resolved.settings.ui.articleToc.showEntry).toBe(true);
+    expect(getThemeSettingsReadDiagnostics(resolved)).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          group: 'ui',
+          code: 'schema-mismatch'
+        })
+      ])
+    );
+    expect(state.ok).toBe(false);
+  });
+
+  it('changes revision when the article TOC switch changes', () => {
+    const resolved = getThemeSettings();
+    const mutated = structuredClone(resolved);
+    mutated.settings.ui.articleToc.showEntry = !resolved.settings.ui.articleToc.showEntry;
+
+    expect(getThemeSettingsRevision(mutated)).not.toBe(getThemeSettingsRevision(resolved));
+  });
+
   it('resolves favicon slots to null defaults and emits the default three-link set', () => {
     const resolved = getThemeSettings();
 

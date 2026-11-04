@@ -410,6 +410,7 @@ export const canonicalizeAdminThemeSettings = (
   const bitsDefaultAuthor = isRecord(bitsPage.defaultAuthor) ? bitsPage.defaultAuthor : {};
   const rawPresetOrder = isRecord(socialLinks.presetOrder) ? socialLinks.presetOrder : {};
   const rawUiArticleMeta: LooseRecord = isRecord(ui.articleMeta) ? ui.articleMeta : {};
+  const rawUiArticleToc: LooseRecord = isRecord(ui.articleToc) ? ui.articleToc : {};
   const rawUiSidebarActions: LooseRecord = isRecord(ui.sidebarActions) ? ui.sidebarActions : {};
   const rawUiLayout: LooseRecord = isRecord(ui.layout) ? ui.layout : {};
   const rawUiTypography: LooseRecord = isRecord(ui.typography) ? ui.typography : {};
@@ -601,6 +602,9 @@ export const canonicalizeAdminThemeSettings = (
           ? rawUiArticleMeta.showReadingTime
           : true
       },
+      articleToc: {
+        showEntry: typeof rawUiArticleToc.showEntry === 'boolean' ? rawUiArticleToc.showEntry : true
+      },
       layout: {
         sidebarDivider: isAdminSidebarDividerVariant(rawSidebarDivider)
           ? rawSidebarDivider
@@ -670,6 +674,7 @@ export const createAdminWritableThemeSettingsGroups = (
     readingMode: { ...settings.ui.readingMode },
     sidebarActions: { ...settings.ui.sidebarActions },
     articleMeta: { ...settings.ui.articleMeta },
+    articleToc: { ...settings.ui.articleToc },
     layout: { ...settings.ui.layout },
     typography: { ...settings.ui.typography }
   }
@@ -1026,6 +1031,10 @@ export const validateAdminThemeSettings = (
     pushIssue('ui.articleMeta.showReadingTime', '文章元信息里的“显示阅读时长”必须是布尔值');
   }
 
+  if (typeof settings.ui?.articleToc?.showEntry !== 'boolean') {
+    pushIssue('ui.articleToc.showEntry', '文章目录里的“显示右侧目录”必须是布尔值');
+  }
+
   if (typeof settings.ui?.sidebarActions?.showRssLink !== 'boolean') {
     pushIssue('ui.sidebarActions.showRssLink', '侧栏图标里的“显示 RSS 入口”必须是布尔值');
   }
@@ -1267,6 +1276,7 @@ const fillAdminThemeSettingsSiteCompatibilityDefaults = (
 /* ui.* 分组兼容回填的字段表：新增分组只需在此登记，不再复制合并块。 */
 const UI_COMPATIBILITY_GROUP_FIELDS: ReadonlyArray<readonly [string, readonly string[]]> = [
   ['sidebarActions', ['showRssLink', 'showThemeToggle', 'showAdminEntry']],
+  ['articleToc', ['showEntry']],
   ['typography', ['readable', 'copy', 'mono', 'brand']]
 ];
 

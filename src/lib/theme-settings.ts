@@ -203,6 +203,10 @@ export interface ArticleMetaSettings {
 
 export type ArticleMetaDisplayContext = 'home' | 'list' | 'detail';
 
+export interface ArticleTocSettings {
+  showEntry: boolean;
+}
+
 export interface SidebarActionsSettings {
   showRssLink: boolean;
   showThemeToggle: boolean;
@@ -225,6 +229,7 @@ export interface UiSettings {
   };
   sidebarActions: SidebarActionsSettings;
   articleMeta: ArticleMetaSettings;
+  articleToc: ArticleTocSettings;
   layout: {
     sidebarDivider: SidebarDividerVariant;
   };
@@ -300,6 +305,7 @@ export interface ThemeSettingsSources {
     articleMetaShowTags: SettingSource;
     articleMetaShowWordCount: SettingSource;
     articleMetaShowReadingTime: SettingSource;
+    articleTocShowEntry: SettingSource;
     layoutSidebarDivider: SettingSource;
     typographyReadable: SettingSource;
     typographyCopy: SettingSource;
@@ -553,6 +559,9 @@ const DEFAULT_UI: UiSettings = {
     showTags: true,
     showWordCount: true,
     showReadingTime: true
+  },
+  articleToc: {
+    showEntry: true
   },
   layout: {
     sidebarDivider: ADMIN_SIDEBAR_DIVIDER_DEFAULT
@@ -1381,6 +1390,7 @@ export const getThemeSettings = (): ThemeSettingsResolved => {
   const uiReadingMode = isRecord(uiJson?.readingMode) ? uiJson.readingMode : undefined;
   const uiSidebarActions = isRecord(uiJson?.sidebarActions) ? uiJson.sidebarActions : undefined;
   const uiArticleMeta = isRecord(uiJson?.articleMeta) ? uiJson.articleMeta : undefined;
+  const uiArticleToc = isRecord(uiJson?.articleToc) ? uiJson.articleToc : undefined;
   const uiLayout = isRecord(uiJson?.layout) ? uiJson.layout : undefined;
   const uiTypography = isRecord(uiJson?.typography) ? uiJson.typography : undefined;
 
@@ -1433,6 +1443,11 @@ export const getThemeSettings = (): ThemeSettingsResolved => {
     asBoolean(uiArticleMeta?.showReadingTime),
     undefined,
     DEFAULT_UI.articleMeta.showReadingTime
+  );
+  const showArticleToc = resolveValue(
+    asBoolean(uiArticleToc?.showEntry),
+    undefined,
+    DEFAULT_UI.articleToc.showEntry
   );
   const sidebarDivider = resolveValue(
     asSidebarDividerVariant(uiLayout?.sidebarDivider),
@@ -1570,6 +1585,9 @@ export const getThemeSettings = (): ThemeSettingsResolved => {
           showWordCount: showArticleWordCount.value,
           showReadingTime: showArticleReadingTime.value
         },
+        articleToc: {
+          showEntry: showArticleToc.value
+        },
         layout: {
           sidebarDivider: sidebarDivider.value
         },
@@ -1642,6 +1660,7 @@ export const getThemeSettings = (): ThemeSettingsResolved => {
         articleMetaShowTags: showArticleTags.source,
         articleMetaShowWordCount: showArticleWordCount.source,
         articleMetaShowReadingTime: showArticleReadingTime.source,
+        articleTocShowEntry: showArticleToc.source,
         layoutSidebarDivider: sidebarDivider.source,
         typographyReadable: typographyReadable.source,
         typographyCopy: typographyCopy.source,
@@ -1729,6 +1748,7 @@ const buildEditableThemeSettingsSnapshot = (
       readingMode: { ...resolved.settings.ui.readingMode },
       sidebarActions: { ...resolved.settings.ui.sidebarActions },
       articleMeta: { ...resolved.settings.ui.articleMeta },
+      articleToc: { ...resolved.settings.ui.articleToc },
       layout: { ...resolved.settings.ui.layout },
       typography: { ...resolved.settings.ui.typography }
     }

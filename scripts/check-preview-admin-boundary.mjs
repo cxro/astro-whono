@@ -1036,8 +1036,9 @@ export const runDevAdminSettingsSmokeCheck = async () => {
 
     const afterSave = await readFile(uiSettingsPath, 'utf8');
     expect(afterSave !== beforeDryRun, 'Dev POST /api/admin/settings/ did not update ui.json');
+    // ui.json 中有多个 showEntry（readingMode / articleToc），按路径比对，避免字符串匹配误判。
     expect(
-      afterSave.includes(`"showEntry": ${dryRunSettings.ui.readingMode.showEntry}`),
+      JSON.parse(afterSave)?.readingMode?.showEntry === dryRunSettings.ui.readingMode.showEntry,
       'Dev POST /api/admin/settings/ wrote unexpected ui.json content'
     );
 

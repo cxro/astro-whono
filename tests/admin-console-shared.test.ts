@@ -1,7 +1,10 @@
+import { readFileSync } from 'node:fs';
+import path from 'node:path';
 import { describe, expect, it } from 'vitest';
 import {
   canonicalizeAdminThemeSettings,
   createAdminThemeSettingsCanonicalMismatchIssues,
+  createAdminWritableThemeSettingsGroups,
   fillAdminThemeSettingsCompatibilityDefaults,
   getAdminNavOrderIssues,
   getAdminSocialOrderIssues,
@@ -263,6 +266,55 @@ describe('admin-console/shared', () => {
     expect(paths).toContain('ui.typography.copy');
     expect(paths).toContain('ui.typography.mono');
     expect(paths).not.toContain('ui.typography.readable');
+  });
+
+  it('keeps the article TOC on when a legacy snapshot lacks articleToc', () => {
+    const current = getEditableThemeSettingsPayload().settings;
+    const legacySnapshot = structuredClone(current) as Record<string, any>;
+    delete legacySnapshot.ui.articleToc;
+
+    // 与设置 API 相同：先由输入本身规范化，再回填兼容默认值。
+    const canonical = canonicalizeAdminThemeSettings(legacySnapshot);
+    expect(canonical.ui.articleToc).toEqual({ showEntry: true });
+
+    const compatible = fillAdminThemeSettingsCompatibilityDefaults(legacySnapshot, canonical) as Record<string, any>;
+    expect(compatible.ui.articleToc).toEqual({ showEntry: true });
+    const mismatchPaths = createAdminThemeSettingsCanonicalMismatchIssues(compatible, canonical).map((issue) => issue.path);
+    expect(mismatchPaths.filter((issuePath) => issuePath.startsWith('ui.articleToc'))).toEqual([]);
+
+    const emptyGroupSnapshot = structuredClone(current) as Record<string, any>;
+    emptyGroupSnapshot.ui.articleToc = {};
+    const emptyGroupCanonical = canonicalizeAdminThemeSettings(emptyGroupSnapshot);
+    const emptyGroupCompatible = fillAdminThemeSettingsCompatibilityDefaults(
+      emptyGroupSnapshot,
+      emptyGroupCanonical
+    ) as Record<string, any>;
+    expect(emptyGroupCompatible.ui.articleToc).toEqual({ showEntry: true });
+  });
+
+  it('canonicalizes articleToc.showEntry strictly and validates it as a boolean', () => {
+    const raw = structuredClone(getEditableThemeSettingsPayload().settings) as Record<string, any>;
+    raw.ui.articleToc.showEntry = 'false';
+
+    const canonical = canonicalizeAdminThemeSettings(raw);
+    expect(canonical.ui.articleToc.showEntry).toBe(true);
+    expect(createAdminThemeSettingsCanonicalMismatchIssues(raw, canonical).map((issue) => issue.path)).toContain(
+      'ui.articleToc.showEntry'
+    );
+    expect(validateAdminThemeSettings(raw as EditableThemeSettings).map((issue) => issue.path)).toContain(
+      'ui.articleToc.showEntry'
+    );
+
+    raw.ui.articleToc.showEntry = false;
+    expect(canonicalizeAdminThemeSettings(raw).ui.articleToc.showEntry).toBe(false);
+    expect(validateAdminThemeSettings(raw as EditableThemeSettings)).toEqual([]);
+  });
+
+  it('writes ui groups in the same key order as the shipped ui.json', () => {
+    const settings = getEditableThemeSettingsPayload().settings;
+    const shippedUi = JSON.parse(readFileSync(path.resolve('src/data/settings/ui.json'), 'utf8')) as Record<string, unknown>;
+
+    expect(Object.keys(createAdminWritableThemeSettingsGroups(settings).ui)).toEqual(Object.keys(shippedUi));
   });
 
   it('validates admin overview public display settings', () => {

@@ -27,7 +27,8 @@ const {
   next,
   articleMetaSettings,
   visibleTags = [],
-  headings = []
+  headings = [],
+  showToc = true
 } = Astro.props as {
   entry: EssayEntry;
   prev: ArticleNeighborLink | null;
@@ -35,6 +36,7 @@ const {
   articleMetaSettings: ArticleMetaSettings;
   visibleTags?: string[];
   headings?: MarkdownHeading[];
+  showToc?: boolean;
 };
 
 const entryTags: string[] = entry?.data?.tags ?? [];
@@ -64,7 +66,8 @@ const shouldShowMetaLine = articleMetaSettings.showDate
   || (articleMetaSettings.showTags && visibleTags.length > 0)
   || articleMetaSettings.showWordCount
   || articleMetaSettings.showReadingTime;
-const tocHeadings = getArticleTocHeadings(headings);
+// 目录开关（ui.articleToc.showEntry）关闭时不生成目录数据，下游 DOM、网格与脚本随之不生效。
+const tocHeadings = showToc ? getArticleTocHeadings(headings) : [];
 const hasToc = tocHeadings.length > 0;
 // 一级编号达到两位数（"10."）时加宽编号列。
 const hasWideTocNumbers = tocHeadings.some((heading) => heading.level === 1 && (heading.number?.length ?? 0) > 2);
