@@ -37,7 +37,7 @@ const { entry, prev, next } = Astro.props as {
   prev: ArticleNeighborLink | null;
   next: ArticleNeighborLink | null;
 };
-const { Content } = await render(entry);
+const { Content, headings } = await render(entry);
 const articleMetaSettings = getThemeSettings().settings.ui.articleMeta;
 const visibleTags = getVisibleArticleMetaTags(entry.data.tags, 'detail');
 ---
@@ -48,6 +48,7 @@ const visibleTags = getVisibleArticleMetaTags(entry.data.tags, 'detail');
   next={next}
   articleMetaSettings={articleMetaSettings}
   visibleTags={visibleTags}
+  headings={headings}
 >
   <Content />
 </ArticleLayout>

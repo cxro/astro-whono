@@ -8,6 +8,7 @@ The format is based on Keep a Changelog, and this project aims to follow Semanti
 ## [Unreleased]
 
 ### Added
+- 文章页在宽屏（1440px 及以上）的正文右侧显示目录：H2/H3 自动编号，滚动时高亮当前章节；标题已自带编号的文章不重复编号。
 - Admin Console 支持将随笔、小记正文图片和絮语配图上传到 S3 兼容对象存储；Images Console 可浏览云端图片并复制 URL。未配置云存储时仍使用本地文件（[PR #38](https://github.com/cxro/astro-whono/pull/38)，by [@Nilbug](https://github.com/Nilbug)）。
 - 主题切换新增「跟随系统」模式：站点外观可随系统浅色/深色设置自动切换（[PR #35](https://github.com/cxro/astro-whono/pull/35)，by [@ZephyrCICD](https://github.com/ZephyrCICD)）。
 - Theme Console 新增「排版字体」配置：正文、文案、等宽、品牌四类字体可独立选择，支持系统字体栈与自托管字体（含构建期下载的中文子集），页面不请求任何第三方字体服务

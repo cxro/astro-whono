@@ -1,8 +1,10 @@
 ---
+import type { MarkdownHeading } from 'astro';
 import BaseLayout from './BaseLayout.astro';
 import UiIcon from '../components/UiIcon.astro';
 import Lightbox from '../components/Lightbox.astro';
 import '../styles/article.css';
+import { getArticleTocHeadings } from '../lib/article-toc';
 import { getEssayDerivedText, type EssayEntry } from '../lib/content';
 import { containsMarkdownMath } from '../lib/markdown-math';
 import {
@@ -24,13 +26,15 @@ const {
   prev,
   next,
   articleMetaSettings,
-  visibleTags = []
+  visibleTags = [],
+  headings = []
 } = Astro.props as {
   entry: EssayEntry;
   prev: ArticleNeighborLink | null;
   next: ArticleNeighborLink | null;
   articleMetaSettings: ArticleMetaSettings;
   visibleTags?: string[];
+  headings?: MarkdownHeading[];
 };
 
 const entryTags: string[] = entry?.data?.tags ?? [];
@@ -60,6 +64,10 @@ const shouldShowMetaLine = articleMetaSettings.showDate
   || (articleMetaSettings.showTags && visibleTags.length > 0)
   || articleMetaSettings.showWordCount
   || articleMetaSettings.showReadingTime;
+const tocHeadings = getArticleTocHeadings(headings);
+const hasToc = tocHeadings.length > 0;
+// 一级编号达到两位数（"10."）时加宽编号列。
+const hasWideTocNumbers = tocHeadings.some((heading) => heading.level === 1 && (heading.number?.length ?? 0) > 2);
 
 ---
 
@@ -86,49 +94,74 @@ const shouldShowMetaLine = articleMetaSettings.showDate
       />
     ) : null}
   </Fragment>
-  <div class="article-header reader-exit-anchor">
-    <h1 class="page-title">{entry.data.title}</h1>
-    <button
-      id="reader-exit"
-      class="icon-button reader-exit"
-      type="button"
-      aria-label="退出阅读"
-      title="退出阅读"
-      aria-hidden="true"
-      tabindex="-1"
-    >
-      <UiIcon name="reader-exit" class="icon" />
-    </button>
-    {shouldShowMetaLine ? (
-      <div class="meta-line meta-line--items">
-        {articleMetaSettings.showDate ? (
-          <span class="meta-line__item">
-            <time datetime={displayDate.toISOString()}>{`${displayDateLabel}${formatISODateUtc(displayDate)}`}</time>
-          </span>
-        ) : null}
-        {articleMetaSettings.showTags && visibleTags.length ? (
-          <span class="meta-line__item meta-line__item--tags">
-            {visibleTags.map((tag) => (
-              <span class="tag">#{tag}</span>
-            ))}
-          </span>
-        ) : null}
-        {articleMetaSettings.showWordCount ? (
-          <span class="meta-line__item meta-line__item--desktop-meta">
-            共 {numberFormatter.format(articleReadingStats.wordCount)} 字
-          </span>
-        ) : null}
-        {articleMetaSettings.showReadingTime ? (
-          <span class="meta-line__item meta-line__item--desktop-meta">
-            约 {numberFormatter.format(articleReadingStats.readingMinutes)} 分钟
-          </span>
-        ) : null}
-      </div>
-    ) : null}
-  </div>
+  <div class:list={['article-body', { 'article-body--toc': hasToc }]}>
+    <div class="article-header reader-exit-anchor">
+      <h1 class="page-title">{entry.data.title}</h1>
+      <button
+        id="reader-exit"
+        class="icon-button reader-exit"
+        type="button"
+        aria-label="退出阅读"
+        title="退出阅读"
+        aria-hidden="true"
+        tabindex="-1"
+      >
+        <UiIcon name="reader-exit" class="icon" />
+      </button>
+      {shouldShowMetaLine ? (
+        <div class="meta-line meta-line--items">
+          {articleMetaSettings.showDate ? (
+            <span class="meta-line__item">
+              <time datetime={displayDate.toISOString()}>{`${displayDateLabel}${formatISODateUtc(displayDate)}`}</time>
+            </span>
+          ) : null}
+          {articleMetaSettings.showTags && visibleTags.length ? (
+            <span class="meta-line__item meta-line__item--tags">
+              {visibleTags.map((tag) => (
+                <span class="tag">#{tag}</span>
+              ))}
+            </span>
+          ) : null}
+          {articleMetaSettings.showWordCount ? (
+            <span class="meta-line__item meta-line__item--desktop-meta">
+              共 {numberFormatter.format(articleReadingStats.wordCount)} 字
+            </span>
+          ) : null}
+          {articleMetaSettings.showReadingTime ? (
+            <span class="meta-line__item meta-line__item--desktop-meta">
+              约 {numberFormatter.format(articleReadingStats.readingMinutes)} 分钟
+            </span>
+          ) : null}
+        </div>
+      ) : null}
+    </div>
 
-  <div class="prose">
-    <slot />
+    {hasToc ? (
+      <nav class:list={['article-toc', { 'article-toc--wide-num': hasWideTocNumbers }]} aria-label="文章目录">
+        <p class="article-toc__title">
+          <span class="article-toc__label"><UiIcon name="toc" class="article-toc__icon" size={14} />On this page</span>
+        </p>
+        <ul class="article-toc__list">
+          {tocHeadings.map((heading) => (
+            <li>
+              <a
+                class="article-toc__link"
+                href={`#${heading.slug}`}
+                data-depth={heading.depth}
+                data-level={heading.level}
+              >
+                {heading.number ? <span class="article-toc__num" aria-hidden="true">{heading.number}</span> : null}
+                <span class="article-toc__text">{heading.text}</span>
+              </a>
+            </li>
+          ))}
+        </ul>
+      </nav>
+    ) : null}
+
+    <div class="prose">
+      <slot />
+    </div>
   </div>
   {(prev || next) ? (
     <nav class="prev-next" aria-label="上一篇/下一篇">
@@ -165,6 +198,7 @@ const shouldShowMetaLine = articleMetaSettings.showDate
 
   <script>
     import { initArticleLightbox, initCodeCopyButtons } from '../scripts/lightbox';
+    import { initArticleToc } from '../scripts/article-toc';
 
     initCodeCopyButtons();
     initArticleLightbox({
@@ -174,5 +208,6 @@ const shouldShowMetaLine = articleMetaSettings.showDate
       enablePan: false,
       enableSwipeDownClose: false
     });
+    initArticleToc();
   </script>
 </BaseLayout>

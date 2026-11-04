@@ -24,6 +24,7 @@ import SquareArrowRightExit from '@lucide/astro/icons/square-arrow-right-exit';
 import Sun from '@lucide/astro/icons/sun';
 import SunMoon from '@lucide/astro/icons/sun-moon';
 import Tag from '@lucide/astro/icons/tag';
+import TextAlignStart from '@lucide/astro/icons/text-align-start';
 
 type UiIconName =
   | 'bold'
@@ -48,6 +49,7 @@ type UiIconName =
   | 'sun'
   | 'sun-moon'
   | 'tag'
+  | 'toc'
   | 'user-circle';
 
 interface Props {
@@ -89,6 +91,7 @@ const uiIconComponents = {
   sun: Sun,
   'sun-moon': SunMoon,
   tag: Tag,
+  toc: TextAlignStart,
   'user-circle': CircleUserRound
 } as const satisfies Record<UiIconName, AstroComponent>;
 

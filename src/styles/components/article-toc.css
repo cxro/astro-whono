@@ -1,0 +1,154 @@
+/* 文章右侧目录：仅宽屏显示，占用 shell 右侧空白，正文宽度与位置保持不变。
+   .article-body 平时与 .content__inner 一样是纵向 flex 容器（子项外边距不折叠），保证引入包裹层前后间距一致。 */
+.article-body {
+  display: flex;
+  flex-direction: column;
+}
+
+.article-toc {
+  display: none;
+}
+
+/* 断点推导：目录最小距正文 32px（起点落在 shell 右内边距内 16px），宽 160px，此时目录右缘 = shell 右缘 + 144px。
+   1440px 窗口下即便有 17px 经典滚动条，目录距滚动条仍约 17px；再低则须移动或收窄正文。
+   间距随窗口加宽（目录单独右移，正文不动）：50vw - 694px 使目录距窗口右缘恒约 24px（含 17px 滚动条）/ 32px（无滚动条），
+   约 1452px 起超过 32px，约 1580px 起封顶 96px，避免超宽屏上目录脱离正文。 */
+@media (min-width: 1440px) {
+  .article-body--toc {
+    --article-toc-inline-size: 160px;
+    --article-toc-gap: clamp(32px, 50vw - 694px, 96px);
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) var(--article-toc-inline-size);
+    /* 目录跨标题与正文两行；1fr 吸收目录高出的部分，避免撑开标题行。 */
+    grid-template-rows: auto 1fr;
+    column-gap: var(--article-toc-gap);
+    align-items: start;
+    margin-inline-end: calc(-1 * (var(--article-toc-gap) + var(--article-toc-inline-size)));
+  }
+
+  .article-body--toc > .article-header {
+    grid-column: 1;
+    grid-row: 1;
+  }
+
+  .article-body--toc > .prose {
+    grid-column: 1;
+    grid-row: 2;
+  }
+
+  .article-body--toc .prose :is(h2, h3) {
+    scroll-margin-block-start: 56px;
+  }
+
+  .article-toc {
+    grid-column: 2;
+    grid-row: 1 / span 2;
+    position: sticky;
+    top: 56px;
+    display: flex;
+    flex-direction: column;
+    max-block-size: calc(100vh - 112px);
+    font-size: 13px;
+    line-height: 1.6;
+  }
+}
+
+/* 标题行沿用文章大标题的字号与行高（.page-title 26px、行高为 body 的 1.75）作为行内支柱，
+   13px 文字因此与大标题落在同一条基线上（底部对齐）；正文字体改变时两者同步变化。
+   下外边距 2.5px：补齐行框 45.5px 的半像素，并扣除一级项多出的 2px 上内边距，使标题与首个目录项基线相距 34px。 */
+.article-toc__title {
+  margin: 0 0 2.5px;
+  font-size: 26px;
+  line-height: 1.75;
+  color: var(--muted);
+}
+
+.article-toc__label {
+  font-size: 13px;
+  line-height: 1.6;
+}
+
+/* lucide 图标线条从 viewBox 的 x=3 起笔，左移使其与下方目录项左缘对齐。 */
+.article-toc__icon {
+  margin-inline: -1.75px 6px;
+  vertical-align: middle;
+}
+
+.article-toc__list {
+  position: relative;
+  min-block-size: 0;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  overflow-y: auto;
+  scrollbar-width: thin;
+}
+
+/* 非当前项在 --muted 与 --faint 之间取色（浅色 4.67:1、深色 5.45:1），拉开与当前项 --text 的差距。 */
+.article-toc__link {
+  display: flex;
+  gap: 6px;
+  padding-block: 3px;
+  color: var(--muted);
+  transition: color 0.2s ease;
+}
+
+@supports (color: color-mix(in srgb, black, white)) {
+  .article-toc__link {
+    color: color-mix(in srgb, var(--muted) 60%, var(--faint));
+  }
+}
+
+/* 一级编号列宽：13px 下 "1."–"9." 约 10.4–11.6px，两位数 "10." 约 17.6px，按全篇最大编号位数取值。
+   二级项缩进 = 一级编号列宽 + 间距，使 "1.1" 与上方一级标题文字左缘对齐。 */
+.article-toc {
+  --article-toc-num-inline-size: 12px;
+}
+
+.article-toc--wide-num {
+  --article-toc-num-inline-size: 18px;
+}
+
+/* 一级项上下各多 2px，相邻一级项基线间距由 26.8px 增至 30.8px；折行时同一项内的行距不变。 */
+.article-toc__link[data-level="1"] {
+  padding-block: 5px;
+}
+
+.article-toc__link[data-level="2"] {
+  padding-inline-start: calc(var(--article-toc-num-inline-size) + 6px);
+}
+
+.article-toc__link[data-depth="3"] {
+  font-family: var(--font-copy);
+}
+
+.article-toc__num {
+  flex: none;
+  min-inline-size: var(--article-toc-num-inline-size);
+  font-variant-numeric: tabular-nums;
+}
+
+/* 二级编号 "1.1"–"9.9" 约 20.2px。 */
+.article-toc__link[data-level="2"] .article-toc__num {
+  min-inline-size: 21px;
+}
+
+.article-toc__text {
+  min-inline-size: 0;
+  overflow-wrap: anywhere;
+}
+
+.article-toc__link:hover,
+.article-toc__link[aria-current="location"] {
+  color: var(--text);
+}
+
+.article-toc__link:focus-visible {
+  outline-offset: -2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .article-toc__link {
+    transition: none;
+  }
+}
