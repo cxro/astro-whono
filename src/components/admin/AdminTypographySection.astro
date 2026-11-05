@@ -1,0 +1,63 @@
+---
+import AdminHelpTip from './AdminHelpTip.astro';
+import {
+  ADMIN_TYPOGRAPHY_DEFAULT,
+  getAdminTypographyFontOptions
+} from '../../lib/admin-console/theme-shared';
+
+const typographyFields = [
+  { role: 'readable', label: '正文字体', tip: '用于文章正文与标题。' },
+  { role: 'copy', label: '文案字体', tip: '用于导语、关于页等楷体场景。' },
+  { role: 'mono', label: '等宽字体', tip: '用于代码块与行内代码。' },
+  { role: 'brand', label: '品牌字体', tip: '用于侧栏站点名与引言。' }
+] as const;
+---
+
+<fieldset class="admin-section">
+  <legend class="admin-sr-only"><h2>字体设置</h2></legend>
+  <div class="admin-subsection admin-subsection--loose">
+    {
+      typographyFields.map((field) => {
+        const options = getAdminTypographyFontOptions(field.role);
+        const defaultId = ADMIN_TYPOGRAPHY_DEFAULT[field.role];
+        const labelId = `ui-typography-${field.role}-label`;
+        const tipId = `ui-typography-${field.role}-tip`;
+        return (
+          <div class="admin-field">
+            <div class="admin-field__head">
+              <AdminHelpTip id={tipId} text={field.tip}>
+                <span class="admin-field__label" id={labelId}>{field.label}</span>
+              </AdminHelpTip>
+            </div>
+            <div
+              class="admin-font-grid"
+              id={`ui-typography-${field.role}`}
+              role="radiogroup"
+              aria-labelledby={labelId}
+              aria-describedby={tipId}
+            >
+              {options.map((option) => (
+                <label class="admin-font-card" for={`ui-typography-${field.role}-${option.id}`}>
+                  <input
+                    id={`ui-typography-${field.role}-${option.id}`}
+                    name={`ui-typography-${field.role}`}
+                    type="radio"
+                    value={option.id}
+                    checked={option.id === defaultId}
+                  />
+                  <span class="admin-font-card__body">
+                    <span class="admin-font-card__preview" aria-hidden="true" style={`font-family: ${option.previewStack};`}>
+                      永 Aa
+                    </span>
+                    <span class="admin-font-card__name">{option.cardLabel}</span>
+                    <span class="admin-font-card__badge">{option.badge}</span>
+                  </span>
+                </label>
+              ))}
+            </div>
+          </div>
+        );
+      })
+    }
+  </div>
+</fieldset>

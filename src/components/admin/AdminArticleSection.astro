@@ -1,0 +1,58 @@
+---
+import AdminHelpTip from './AdminHelpTip.astro';
+import AdminSettingSwitch from './AdminSettingSwitch.astro';
+import { ADMIN_ARTICLE_META_DATE_LABEL_MAX_LENGTH } from '../../lib/admin-console/theme-shared';
+---
+
+<fieldset class="admin-section">
+  <legend class="admin-sr-only"><h2>文章设置</h2></legend>
+
+  <div class="admin-subsection" role="group" aria-labelledby="ui-article-meta-title" aria-describedby="ui-article-meta-tip">
+    <div class="admin-subsection__head">
+      <h3 id="ui-article-meta-title" class="admin-subsection__title">
+        <AdminHelpTip id="ui-article-meta-tip" text="文章标题下方的一行信息。字数与阅读时长只在详情页显示，移动端隐藏。">文章元信息</AdminHelpTip>
+      </h3>
+    </div>
+    <div class="admin-subsection__block" data-reveal-scope>
+      <AdminSettingSwitch id="ui-article-meta-show-date" inputAttrs={{ 'data-reveal-source': true }}>
+        显示发布日期
+        <label slot="aside" class="admin-setting__aside admin-field--compact" data-reveal-when-on>
+          <span>前缀</span>
+          <input
+            id="ui-article-meta-date-label"
+            class="admin-field__control"
+            type="text"
+            maxlength={ADMIN_ARTICLE_META_DATE_LABEL_MAX_LENGTH}
+            autocomplete="off"
+            placeholder="发布于："
+            aria-label="发布日期前缀"
+          />
+        </label>
+      </AdminSettingSwitch>
+    </div>
+    <AdminSettingSwitch id="ui-article-meta-show-tags">显示标签</AdminSettingSwitch>
+    <AdminSettingSwitch id="ui-article-meta-show-word-count">显示字数</AdminSettingSwitch>
+    <AdminSettingSwitch id="ui-article-meta-show-reading-time">显示阅读时长</AdminSettingSwitch>
+    <p class="admin-help admin-preview">
+      <span class="admin-preview__label">预览</span>
+      <span id="article-meta-preview-value" class="admin-preview__value">{'发布于：2026-03-18 · #Astro\u00A0\u00A0#写作 · 共 2,416 字 · 约 6 分钟'}</span>
+    </p>
+  </div>
+
+  <div class="admin-subsection" role="group" aria-labelledby="ui-article-toc-title">
+    <div class="admin-subsection__head">
+      <h3 id="ui-article-toc-title" class="admin-subsection__title">文章目录</h3>
+    </div>
+    <AdminSettingSwitch id="ui-article-toc-show-entry">
+      显示右侧目录
+      <Fragment slot="description">仅 /archive/ 文章详情页，窗口宽度 1440px 及以上时显示。</Fragment>
+    </AdminSettingSwitch>
+  </div>
+
+  <div class="admin-subsection" role="group" aria-labelledby="ui-code-title">
+    <div class="admin-subsection__head">
+      <h3 id="ui-code-title" class="admin-subsection__title">代码块</h3>
+    </div>
+    <AdminSettingSwitch id="ui-code-line-numbers">显示行号</AdminSettingSwitch>
+  </div>
+</fieldset>

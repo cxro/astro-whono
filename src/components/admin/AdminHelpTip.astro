@@ -1,18 +1,20 @@
 ---
-import AdminIcon from './AdminIcon.astro';
-
+/*
+ * 悬停说明：包住字段名或小节标题文字，悬停文字时在右侧显示说明（窄容器显示在下方）。
+ * 文字可用 Tab 聚焦，键盘用户同样能打开说明。
+ * 说明节点静止时 visibility: hidden，不会混进所在 label / 标题的可访问名称；
+ * 屏幕阅读器经相关控件或分组上的 aria-describedby={id} 读到说明。
+ * 放在 <label> / <h3> 之内或之外均可（外层是 span）；包住 label 时说明不在 label 内，最干净。
+ */
 interface Props {
   id: string;
-  label: string;
   text: string;
 }
 
-const { id, label, text } = Astro.props;
+const { id, text } = Astro.props;
 ---
 
 <span class="admin-help-tip">
-  <button class="admin-help-tip__trigger" type="button" aria-label={label} aria-describedby={id}>
-    <AdminIcon name="info" size={13} strokeWidth={2} />
-  </button>
+  <span class="admin-help-tip__text" tabindex="0" aria-describedby={id}><slot /></span>
   <span id={id} class="admin-help-tip__bubble" role="tooltip">{text}</span>
 </span>

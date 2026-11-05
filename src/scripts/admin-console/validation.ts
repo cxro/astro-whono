@@ -2,7 +2,10 @@ import type {
   SidebarNavId,
   SiteSocialPresetId
 } from '@/lib/theme-settings';
-import { validateAdminThemeSettings } from '@/lib/admin-console/theme-shared';
+import {
+  validateAdminThemeSettings,
+  type AdminThemeSettingsValidationIssue
+} from '@/lib/admin-console/theme-shared';
 import { type EditableSettings } from './form-codec';
 
 export type ValidationIssue = {
@@ -320,13 +323,15 @@ export const createValidation = ({
     return undefined;
   };
 
+  const createPathIssues = (issues: readonly AdminThemeSettingsValidationIssue[]): ValidationIssue[] =>
+    issues.map((issue) => createIssue(issue.message, resolveSharedIssueTarget(issue.path)));
+
   const validateSettings = (settings: EditableSettings): ValidationIssue[] =>
-    validateAdminThemeSettings(settings, { footerStartYearMax }).map((issue) =>
-      createIssue(issue.message, resolveSharedIssueTarget(issue.path))
-    );
+    createPathIssues(validateAdminThemeSettings(settings, { footerStartYearMax }));
 
   return {
     validateSettings,
+    createPathIssues,
     clearInvalidFields,
     markInvalidFields,
     resolveIssueField

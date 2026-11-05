@@ -53,7 +53,9 @@ export const bindAdminThemeFieldEvents = ({
     inputHomeIntroMoreLinkPrimary,
     inputHomeIntroMoreLinkSecondaryEnabled,
     inputHomeIntroMoreLinkSecondary,
-    inputHomeShowHero
+    inputHomeShowHero,
+    inputHeroImageSrc,
+    inputHeroImageAlt
   } = controls;
   const {
     refreshArticleMetaPreview,
@@ -62,8 +64,7 @@ export const bindAdminThemeFieldEvents = ({
     syncSidebarActionControls,
     syncHomeIntroLinkControls,
     syncHeroControls,
-    refreshFooterPreview,
-    syncFooterYearControls
+    refreshFooterPreview
   } = formCodec;
 
   form.addEventListener('input', (event) => {
@@ -77,10 +78,7 @@ export const bindAdminThemeFieldEvents = ({
   });
 
   inputSiteFooterStartYear.addEventListener('input', refreshFooterPreview);
-  inputSiteFooterShowCurrentYear.addEventListener('change', () => {
-    syncFooterYearControls();
-    refreshFooterPreview();
-  });
+  inputSiteFooterShowCurrentYear.addEventListener('change', refreshFooterPreview);
   inputSiteFooterCopyright.addEventListener('input', refreshFooterPreview);
   inputSiteAdminOverviewPublicVisible.addEventListener('change', () => {
     syncAdminOverviewControls();
@@ -106,6 +104,11 @@ export const bindAdminThemeFieldEvents = ({
     refreshDirty();
   });
   inputHomeShowHero.addEventListener('change', () => {
+    // 关闭后这两项不再参与校验；不清除的话，含出错字段时不隐藏的规则会把它们留在页面上。
+    if (!inputHomeShowHero.checked) {
+      clearTargetInvalidState(inputHeroImageSrc);
+      clearTargetInvalidState(inputHeroImageAlt);
+    }
     syncHeroControls();
     themeImageFields?.refresh('home.heroImageSrc');
     refreshDirty();

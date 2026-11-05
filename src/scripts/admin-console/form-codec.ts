@@ -417,17 +417,11 @@ export const createFormCodec = ({
       ? `${startYear}-${footerStartYearMax}`
       : String(startYear || footerStartYearMax);
     const copyright = inputSiteFooterCopyright.value.trim() || 'Whono · Theme Demo · by cxro';
-    return `页脚预览：© ${yearRange} ${copyright}`;
+    return `© ${yearRange} ${copyright}`;
   };
 
   const refreshFooterPreview = (): void => {
-    footerPreviewValueEl.textContent = getFooterPreviewText().replace(/^页脚预览：/, '').trim();
-  };
-
-  const syncFooterYearControls = (): void => {
-    const footerYearRangeEl = inputSiteFooterShowCurrentYear.closest<HTMLElement>('.admin-year-range');
-    if (!footerYearRangeEl) return;
-    footerYearRangeEl.dataset.currentYearEnabled = String(Boolean(inputSiteFooterShowCurrentYear.checked));
+    footerPreviewValueEl.textContent = getFooterPreviewText();
   };
 
   const canonicalize = (settings: unknown): EditableSettings =>
@@ -639,7 +633,6 @@ export const createFormCodec = ({
     inputHeroImageSrc.value = settings.home.heroImageSrc || '';
     inputHeroImageAlt.value = settings.home.heroImageAlt || ADMIN_HERO_IMAGE_ALT_DEFAULT;
     syncHeroControls();
-    syncFooterYearControls();
     inputCodeLineNumbers.checked = Boolean(settings.ui?.codeBlock?.showLineNumbers);
     inputReadingEntry.checked = Boolean(settings.ui?.readingMode?.showEntry);
     inputSidebarActionsShowRssLink.checked = settings.ui?.sidebarActions?.showRssLink !== false;
@@ -684,7 +677,6 @@ export const createFormCodec = ({
     syncSidebarActionControls,
     syncHomeIntroLinkControls,
     syncHeroControls,
-    refreshFooterPreview,
-    syncFooterYearControls
+    refreshFooterPreview
   };
 };

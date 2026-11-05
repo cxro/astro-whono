@@ -2,6 +2,7 @@ import type {
   ThemeSettingsEditableErrorState,
   ThemeSettingsEditablePayload
 } from '@/lib/theme-settings';
+import type { AdminThemeSettingsValidationIssue } from '@/lib/admin-console/theme-shared';
 import type { EditableSettings } from './form-codec';
 
 export type LooseRecord = Record<string, unknown>;
@@ -39,6 +40,15 @@ export const getPayloadMessage = (payload: unknown): string | null =>
 export const getPayloadErrors = (payload: unknown): string[] => {
   if (!isRecord(payload) || !Array.isArray(payload.errors)) return [];
   return payload.errors.filter((error): error is string => typeof error === 'string' && error.length > 0);
+};
+
+/** 服务器校验出的问题（含字段路径），用于定位到字段；提示条文字仍用去重后的 errors。 */
+export const getPayloadIssues = (payload: unknown): AdminThemeSettingsValidationIssue[] => {
+  if (!isRecord(payload) || !Array.isArray(payload.issues)) return [];
+  return payload.issues.filter(
+    (issue): issue is AdminThemeSettingsValidationIssue =>
+      isRecord(issue) && typeof issue.path === 'string' && typeof issue.message === 'string'
+  );
 };
 
 export const buildSettingsRequestUrl = (

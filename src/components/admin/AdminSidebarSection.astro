@@ -1,6 +1,6 @@
 ---
 import AdminHelpTip from './AdminHelpTip.astro';
-import AdminIcon from './AdminIcon.astro';
+import AdminSettingSwitch from './AdminSettingSwitch.astro';
 import UiIcon from '../UiIcon.astro';
 import type { SidebarNavId } from '../../lib/theme-settings';
 import {
@@ -16,36 +16,18 @@ interface Props {
 const { navIdOrder } = Astro.props;
 ---
 
-<fieldset class="admin-group">
-  <legend class="admin-group__legend">
-    <AdminIcon name="admin-sidebar" class="admin-group__legend-icon" size={14} />
-    <span class="admin-group__legend-copy">
-      <span class="admin-group__legend-zh">侧栏设置</span>
-      <span class="admin-group__legend-en">Sidebar</span>
-    </span>
-  </legend>
-  <div class="admin-sidebar-layout">
-    <div class="admin-sidebar-layout__main">
+<fieldset class="admin-section">
+  <legend class="admin-sr-only"><h2>侧栏设置</h2></legend>
+
+  <div class="admin-subsection">
+    <div class="admin-fields admin-fields--2">
       <label class="admin-field">
-        <span class="admin-label">
-          <span class="admin-label__main">侧栏站点名</span>
-          <span class="admin-label__hint">（显示在左侧站点标题）</span>
-        </span>
+        <span class="admin-field__label">侧栏站点名</span>
         <input class="admin-field__control" id="shell-brand-title" type="text" autocomplete="off" />
       </label>
-      <label class="admin-field">
-        <span class="admin-label">
-          <span class="admin-label__main">侧栏引用文案</span>
-          <span class="admin-label__hint">（支持换行显示）</span>
-        </span>
-        <textarea class="admin-field__control" id="shell-quote" rows="4"></textarea>
-      </label>
-      <div class="admin-field admin-field--sidebar-divider">
-        <span class="admin-label">
-          <span class="admin-label__main">侧栏分隔线</span>
-          <span class="admin-label__hint">（控制与正文间的分隔强度）</span>
-        </span>
-        <div class="admin-segmented" role="radiogroup" aria-label="侧栏分隔线样式">
+      <div class="admin-field">
+        <span class="admin-field__label" id="ui-layout-sidebar-divider-label">侧栏分隔线</span>
+        <div class="admin-segmented" role="radiogroup" aria-labelledby="ui-layout-sidebar-divider-label">
           {
             ADMIN_SIDEBAR_DIVIDER_OPTIONS.map((option) => (
               <label class="admin-segmented__option" for={`ui-layout-sidebar-divider-${option.id}`}>
@@ -62,154 +44,111 @@ const { navIdOrder } = Astro.props;
           }
         </div>
       </div>
-
-      <div class="admin-subgroup admin-subgroup--sidebar-icons">
-        <p class="admin-subtitle">
-          <span class="admin-subtitle__main">侧栏图标</span>
-          <span class="admin-subtitle__hint">（选择底部显示的图标）</span>
-        </p>
-        <div class="admin-sidebar-icon-grid" role="group" aria-label="侧栏图标显隐">
-          <label class="admin-sidebar-icon-toggle" for="ui-reading-entry" title="显示阅读模式入口">
-            <input id="ui-reading-entry" type="checkbox" aria-label="显示阅读模式入口" title="显示阅读模式入口" />
-            <span
-              class="admin-btn admin-btn--tool admin-btn--compact admin-btn--icon admin-sidebar-icon-toggle__button"
-              aria-hidden="true"
-            >
-              <UiIcon name="book-open" size={18} strokeWidth={2} />
-            </span>
-          </label>
-          <label class="admin-sidebar-icon-toggle" for="ui-sidebar-actions-show-rss-link" title="显示 RSS 入口">
-            <input
-              id="ui-sidebar-actions-show-rss-link"
-              type="checkbox"
-              aria-label="显示 RSS 入口"
-              title="显示 RSS 入口"
-            />
-            <span
-              class="admin-btn admin-btn--tool admin-btn--compact admin-btn--icon admin-sidebar-icon-toggle__button"
-              aria-hidden="true"
-            >
-              <UiIcon name="rss" size={18} strokeWidth={2} />
-            </span>
-          </label>
-          <label class="admin-sidebar-icon-toggle" for="ui-sidebar-actions-show-theme-toggle" title="显示主题切换入口">
-            <input
-              id="ui-sidebar-actions-show-theme-toggle"
-              type="checkbox"
-              aria-label="显示主题切换入口"
-              title="显示主题切换入口"
-            />
-            <span
-              class="admin-btn admin-btn--tool admin-btn--compact admin-btn--icon admin-sidebar-icon-toggle__button"
-              aria-hidden="true"
-            >
-              <UiIcon name="moon" size={17} strokeWidth={2} />
-            </span>
-          </label>
-          <label
-            id="ui-sidebar-actions-show-admin-entry-row"
-            class="admin-sidebar-icon-toggle"
-            for="ui-sidebar-actions-show-admin-entry"
-            title="显示站点概览入口（/admin/）"
-          >
-            <input
-              id="ui-sidebar-actions-show-admin-entry"
-              type="checkbox"
-              aria-label="显示 /admin/ 入口"
-              title="显示站点概览入口（/admin/）"
-            />
-            <span
-              class="admin-btn admin-btn--tool admin-btn--compact admin-btn--icon admin-sidebar-icon-toggle__button"
-              aria-hidden="true"
-            >
-              <UiIcon name="monitor-dot" size={18} strokeWidth={2} />
-            </span>
-          </label>
-        </div>
-      </div>
+      <label class="admin-field admin-field--full">
+        <span class="admin-field__label">侧栏引用文案</span>
+        <textarea class="admin-field__control" id="shell-quote" rows="4"></textarea>
+      </label>
     </div>
+  </div>
 
-    <div class="admin-subgroup admin-subgroup--sidebar-nav">
-      <p class="admin-subtitle">
-        <span class="admin-subtitle__main">侧栏导航</span>
+  <div class="admin-subsection" role="group" aria-labelledby="sidebar-icons-title" aria-describedby="sidebar-icons-tip">
+    <div class="admin-subsection__head">
+      <h3 id="sidebar-icons-title" class="admin-subsection__title">
+        <AdminHelpTip id="sidebar-icons-tip" text="选择侧栏底部显示的图标。">侧栏图标</AdminHelpTip>
+      </h3>
+    </div>
+    <AdminSettingSwitch id="ui-reading-entry">
+      <UiIcon name="book-open" class="admin-setting__icon" size={15} strokeWidth={2} />
+      阅读模式
+    </AdminSettingSwitch>
+    <AdminSettingSwitch id="ui-sidebar-actions-show-rss-link">
+      <UiIcon name="rss" class="admin-setting__icon" size={15} strokeWidth={2} />
+      RSS 订阅
+    </AdminSettingSwitch>
+    <AdminSettingSwitch id="ui-sidebar-actions-show-theme-toggle">
+      <UiIcon name="moon" class="admin-setting__icon" size={15} strokeWidth={2} />
+      主题切换
+    </AdminSettingSwitch>
+    <AdminSettingSwitch id="ui-sidebar-actions-show-admin-entry" rowId="ui-sidebar-actions-show-admin-entry-row">
+      <UiIcon name="monitor-dot" class="admin-setting__icon" size={15} strokeWidth={2} />
+      站点概览 <code>/admin/</code>
+      <Fragment slot="description">需先在站点设置中公开概览页。</Fragment>
+    </AdminSettingSwitch>
+  </div>
+
+  <div class="admin-subsection" role="group" aria-labelledby="sidebar-nav-title">
+    <div class="admin-subsection__head">
+      <h3 id="sidebar-nav-title" class="admin-subsection__title">
         <AdminHelpTip
           id="admin-nav-ornament-hint"
-          label="侧栏导航后缀说明"
           text={`后缀支持短文本/符号；留空隐藏，输入 ${ADMIN_NAV_ORNAMENT_DEFAULT} 还原默认。`}
-        />
-      </p>
-      <div class="admin-nav-grid admin-nav-grid--compact">
-        <div class="admin-nav-header" aria-hidden="true">
-          <span>排序</span>
-          <span>页面 ID</span>
-          <span>导航名称</span>
-          <span>导航后缀</span>
-          <span>是否展示</span>
-        </div>
-        {
-          navIdOrder.map((id, index) => (
-            <div class="admin-row admin-row--interactive admin-row--table admin-nav-row" data-nav-id={id}>
-              <label class="admin-field admin-nav-field admin-nav-field--order">
-                <span class="admin-nav-cell-label">排序</span>
-                <span class="sr-only">{id} 排序</span>
-                <span class="admin-social-order-frame admin-nav-order-frame">
-                  <span class="admin-social-order-frame__mark" aria-hidden="true">[</span>
-                  <input
-                    class="admin-field__control"
-                    data-nav-field="order"
-                    name={`shell-nav-${id}-order`}
-                    type="number"
-                    min="1"
-                    step="1"
-                    inputmode="numeric"
-                    value={index + 1}
-                  />
-                  <span class="admin-social-order-frame__mark" aria-hidden="true">]</span>
-                </span>
-              </label>
-              <p class="admin-nav-id">
-                <span class="admin-nav-cell-label">页面 ID</span>
-                <span class="admin-nav-id__text">{id}</span>
-              </p>
-              <label class="admin-field admin-nav-field admin-nav-field--name">
-                <span class="admin-nav-cell-label">导航名称</span>
-                <span class="sr-only">{id} 导航名称</span>
-                <input
-                  class="admin-field__control admin-field__control--soft"
-                  data-nav-field="label"
-                  name={`shell-nav-${id}-label`}
-                  type="text"
-                  autocomplete="off"
-                />
-              </label>
-              <label class="admin-field admin-nav-field admin-nav-field--ornament">
-                <span class="admin-nav-cell-label">导航后缀</span>
-                <span class="sr-only">{id} 导航后缀，留空表示不显示</span>
-                <input
-                  class="admin-field__control admin-field__control--soft"
-                  data-nav-field="ornament"
-                  name={`shell-nav-${id}-ornament`}
-                  type="text"
-                  autocomplete="off"
-                  maxlength={ADMIN_NAV_ORNAMENT_MAX_LENGTH}
-                  aria-describedby="admin-nav-ornament-hint"
-                />
-              </label>
-              <label class="admin-toggle">
-                <span class="admin-nav-cell-label">是否展示</span>
-                <span class="admin-toggle__control">
-                  <input
-                    data-nav-field="visible"
-                    name={`shell-nav-${id}-visible`}
-                    type="checkbox"
-                    aria-label={`${id} 是否显示`}
-                  />
-                </span>
-              </label>
-            </div>
-          ))
-        }
+        >侧栏导航</AdminHelpTip>
+      </h3>
+    </div>
+    <div class="admin-table admin-nav-table">
+      <div class="admin-table__head admin-nav-header" aria-hidden="true">
+        <span class="admin-nav-header__center">位置</span>
+        <span>页面</span>
+        <span class="admin-nav-header__center">导航名称</span>
+        <span class="admin-nav-header__center">后缀</span>
+        <span class="admin-nav-header__center">显示</span>
       </div>
+      {
+        navIdOrder.map((id, index) => (
+          <div class="admin-row admin-row--interactive admin-row--table admin-table__row admin-nav-row" data-nav-id={id}>
+            <label class="admin-nav-cell admin-nav-cell--order admin-field--compact">
+              <span class="sr-only">{id} 排序</span>
+              <input
+                class="admin-field__control admin-field__control--quiet admin-nav-order"
+                data-nav-field="order"
+                name={`shell-nav-${id}-order`}
+                type="number"
+                min="1"
+                step="1"
+                inputmode="numeric"
+                value={index + 1}
+              />
+            </label>
+            <span class="admin-nav-cell admin-nav-cell--page">{id}</span>
+            <label class="admin-nav-cell admin-nav-cell--label admin-field--compact">
+              <span class="sr-only">{id} 导航名称</span>
+              <input
+                class="admin-field__control admin-field__control--quiet admin-nav-label"
+                data-nav-field="label"
+                name={`shell-nav-${id}-label`}
+                type="text"
+                autocomplete="off"
+              />
+            </label>
+            <label class="admin-nav-cell admin-nav-cell--ornament admin-field--compact">
+              <span class="sr-only">{id} 导航后缀，留空表示不显示</span>
+              <input
+                class="admin-field__control admin-field__control--quiet admin-nav-ornament"
+                data-nav-field="ornament"
+                name={`shell-nav-${id}-ornament`}
+                type="text"
+                autocomplete="off"
+                maxlength={ADMIN_NAV_ORNAMENT_MAX_LENGTH}
+                placeholder="无"
+                aria-describedby="admin-nav-ornament-hint"
+              />
+            </label>
+            <span class="admin-nav-cell admin-nav-cell--visible">
+              <span class="admin-switch">
+                <input
+                  class="admin-switch__input"
+                  data-nav-field="visible"
+                  name={`shell-nav-${id}-visible`}
+                  type="checkbox"
+                  role="switch"
+                  aria-label={`${id} 是否显示`}
+                />
+                <span class="admin-switch__track" aria-hidden="true"></span>
+              </span>
+            </span>
+          </div>
+        ))
+      }
     </div>
   </div>
 </fieldset>

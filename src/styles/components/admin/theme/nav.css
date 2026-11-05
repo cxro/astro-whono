@@ -1,172 +1,74 @@
 /* Admin Nav
-   负责 Theme Console 侧栏导航排序编辑表格。
+   侧栏导航表格：位置 / 页面 / 导航名称 / 后缀 / 显示。
+   外框、表头、分隔线、悬停见 form.css 的 .admin-table；这里只定义列与单元格。
 */
 
-.admin-nav-grid {
-  --admin-nav-column-gap: 16px;
-  --admin-nav-columns: 52px 92px minmax(0, 0.95fr) 88px 96px;
-  --admin-nav-table-min-width: 0;
-  --admin-nav-header-padding-inline: var(--admin-row-table-padding-inline);
-  --admin-nav-header-font-size: var(--admin-text-xs);
-  --admin-nav-header-line-height: normal;
-  --admin-nav-row-padding-block: var(--admin-row-table-padding-block);
-  --admin-nav-row-padding-inline: var(--admin-row-table-padding-inline);
-  --admin-nav-id-font-size: var(--admin-text-sm);
-  --admin-nav-name-control-max-width: none;
-  --admin-nav-name-text-align: start;
-  --admin-nav-name-justify-items: stretch;
-  --admin-nav-ornament-control-max-width: none;
-  --admin-nav-ornament-padding-inline: var(--admin-field-padding-inline);
-  --admin-nav-ornament-text-align: start;
-  --admin-nav-ornament-justify-items: stretch;
-  --admin-nav-toggle-min-height: 36px;
-  --admin-nav-toggle-justify-self: center;
-  display: grid;
-  gap: 0;
-  border: 1px solid var(--admin-row-border);
-  border-radius: var(--admin-row-radius);
-  overflow-x: auto;
-  overflow-y: hidden;
-  background: var(--bg);
+.admin-nav-table {
+  --admin-nav-col-order: 56px;
+  --admin-nav-col-page: 104px;
+  --admin-nav-col-ornament: 64px;
+  --admin-nav-col-visible: 48px;
 }
 
 .admin-nav-header,
 .admin-nav-row {
-  display: grid;
-  gap: var(--admin-nav-column-gap);
-  grid-template-columns: var(--admin-nav-columns);
-  align-items: center;
-  min-width: var(--admin-nav-table-min-width);
+  grid-template-columns:
+    var(--admin-nav-col-order)
+    var(--admin-nav-col-page)
+    minmax(0, 1fr)
+    var(--admin-nav-col-ornament)
+    var(--admin-nav-col-visible);
+  grid-template-areas: 'order page label ornament visible';
 }
 
-.admin-nav-header {
-  padding: 8px var(--admin-nav-header-padding-inline);
-  background: var(--admin-row-bg-muted);
-  color: var(--muted);
-  font-size: var(--admin-nav-header-font-size);
-  border-bottom: 1px solid var(--admin-row-border);
-}
-
-.admin-nav-header > span {
+/* 表头与列内容对齐方式一致：页面列左对齐，其余各列居中。 */
+.admin-nav-header__center {
   text-align: center;
-  line-height: var(--admin-nav-header-line-height);
-  white-space: nowrap;
 }
 
-.admin-nav-grid--compact {
-  --admin-nav-column-gap: 6px;
-  --admin-nav-columns: 40px 50px minmax(78px, 1fr) 58px 46px;
-  --admin-nav-table-min-width: 320px;
-  --admin-nav-header-padding-inline: 8px;
-  --admin-nav-header-font-size: var(--admin-text-2xs);
-  --admin-nav-header-line-height: 1.35;
-  --admin-nav-row-padding-block: 8px;
-  --admin-nav-row-padding-inline: 8px;
-  --admin-nav-id-font-size: var(--admin-text-xs);
-  --admin-nav-name-control-max-width: 9ch;
-  --admin-nav-name-text-align: center;
-  --admin-nav-name-justify-items: center;
-  --admin-nav-ornament-control-max-width: 5ch;
-  --admin-nav-ornament-padding-inline: 6px;
-  --admin-nav-ornament-text-align: center;
-  --admin-nav-ornament-justify-items: center;
-  --admin-nav-toggle-min-height: 34px;
-  --admin-nav-toggle-justify-self: stretch;
+.admin-nav-cell {
+  display: block;
+  min-width: 0;
 }
 
-.admin-nav-row {
-  border: 0;
-  border-top: 1px solid var(--admin-row-divider);
-  border-radius: 0;
-  padding-block: var(--admin-nav-row-padding-block);
-  padding-inline: var(--admin-nav-row-padding-inline);
+.admin-nav-cell--order {
+  grid-area: order;
 }
 
-.admin-nav-row:first-of-type {
-  border-top: 0;
+.admin-nav-cell--page {
+  grid-area: page;
+  color: var(--muted);
+  font-size: var(--admin-text-sm);
+  overflow-wrap: anywhere;
 }
 
-.admin-nav-id {
-  margin: 0;
-  align-self: stretch;
-  justify-self: stretch;
+.admin-nav-cell--label {
+  grid-area: label;
+}
+
+.admin-nav-cell--ornament {
+  grid-area: ornament;
+}
+
+.admin-nav-cell--visible {
+  grid-area: visible;
   display: flex;
-  align-items: center;
   justify-content: center;
 }
 
-.admin-nav-id__text {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 100%;
-  min-width: 0;
-  min-height: var(--admin-control-height);
-  color: var(--muted);
-  font-size: var(--admin-nav-id-font-size);
-  line-height: 1.3;
+.admin-nav-order,
+.admin-nav-label,
+.admin-nav-ornament {
   text-align: center;
 }
 
-.admin-nav-field {
-  gap: 4px;
-}
-
-.admin-nav-field--order {
-  justify-items: center;
-}
-
-.admin-nav-field--name {
-  justify-items: var(--admin-nav-name-justify-items);
-}
-
-.admin-nav-field--ornament {
-  justify-items: var(--admin-nav-ornament-justify-items);
-}
-
-.admin-nav-field--name .admin-field__control {
-  width: 100%;
-  max-width: var(--admin-nav-name-control-max-width);
-  min-width: 0;
-  margin-inline: 0;
-  text-align: var(--admin-nav-name-text-align);
-}
-
-.admin-nav-field--ornament .admin-field__control {
-  width: 100%;
-  max-width: var(--admin-nav-ornament-control-max-width);
-  min-width: 0;
-  margin-inline: 0;
-  padding-inline: var(--admin-nav-ornament-padding-inline);
-  text-align: var(--admin-nav-ornament-text-align);
-}
-
-.admin-nav-field--order .admin-field__control {
-  width: 2.8ch;
-  min-width: 0;
-  margin-inline: 0;
-  border: 0;
-  border-radius: 0;
-  background: transparent;
-  padding: 0;
-  text-align: center;
-  box-shadow: none;
-}
-
-.admin-nav-order-frame {
-  min-width: 0;
-}
-
-.admin-nav-field--order .admin-field__control:focus-visible {
-  outline: none;
-  box-shadow: none;
-}
-
-.admin-nav-row .admin-toggle {
-  min-height: var(--admin-nav-toggle-min-height);
-  justify-self: var(--admin-nav-toggle-justify-self);
-}
-
-.admin-nav-cell-label {
-  display: none;
+/* 窄容器：位置 / 页面 / 显示一行，导航名称与后缀第二行。 */
+@container admin-theme-form (max-width: 520px) {
+  .admin-nav-row {
+    grid-template-columns: var(--admin-nav-col-order) minmax(0, 1fr) var(--admin-nav-col-ornament);
+    grid-template-areas:
+      'order page visible'
+      'label label ornament';
+    row-gap: 8px;
+  }
 }

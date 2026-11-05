@@ -594,7 +594,8 @@
   grid-column: 1 / -1;
 }
 
-.admin-field__label {
+.admin-field__label,
+.admin-setting__title {
   color: color-mix(in srgb, var(--muted) 78%, var(--text) 22%);
   font-size: var(--admin-text-sm);
 }
@@ -660,11 +661,6 @@
   padding-block: 8px;
 }
 
-.admin-field textarea.admin-field__control--singleline-textarea {
-  min-height: var(--admin-control-height);
-  padding-block: 6px;
-}
-
 .admin-field textarea.admin-field__control--compact-textarea {
   min-height: 58px;
   padding-block: 6px;
@@ -678,32 +674,216 @@
   box-shadow: none;
 }
 
-.admin-field:not(.is-invalid) .admin-field__control--soft:not([aria-invalid='true']) {
-  border-color: var(--admin-field-soft-border);
-  background: var(--admin-field-soft-bg);
-}
-
-.admin-field:not(.is-invalid) .admin-field__control--soft:not([aria-invalid='true']):hover {
-  border-color: var(--admin-field-soft-hover-border);
-  background: var(--admin-field-soft-hover-bg);
-}
-
 .admin-field__control:focus-visible {
   outline: none;
   border-color: var(--admin-focus-border);
   box-shadow: var(--admin-focus-shadow);
 }
 
-.admin-field:not(.is-invalid) .admin-field__control--soft:not([aria-invalid='true']):focus-visible {
+/* 安静输入框：用于表格内的编辑单元格，静止时无边框无底色，悬停显示细边框，聚焦时恢复底色、边框与焦点环；
+   出错、禁用沿用通用状态。 */
+.admin-field__control--quiet:not([aria-invalid='true']):not(:disabled) {
+  border-color: transparent;
+  background-color: transparent;
+}
+
+.admin-field__control--quiet:not([aria-invalid='true']):not(:disabled):hover {
+  border-color: var(--admin-control-border);
+}
+
+.admin-field__control--quiet:not([aria-invalid='true']):not(:disabled):focus-visible {
   border-color: var(--admin-focus-border);
-  background: var(--bg);
-  box-shadow: var(--admin-focus-shadow);
+  background-color: var(--bg);
 }
 
 .admin-field__control[aria-invalid='true']:focus-visible,
 .admin-field.is-invalid .admin-field__control:focus-visible {
   border-color: var(--admin-field-invalid-border);
   box-shadow: var(--admin-field-invalid-focus-shadow);
+}
+
+/* 开关设置行：标题 + 说明在左，开关在右。不放进 .admin-field，避免被文本字段规则命中。 */
+.admin-setting {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  min-width: 0;
+}
+
+.admin-setting__text {
+  display: grid;
+  flex: 1 1 auto;
+  gap: 2px;
+  min-width: 0;
+}
+
+/* 开关左侧的附属小控件（短标签 + 输入框）：与标题、开关垂直居中。 */
+.admin-setting:has(> .admin-setting__aside) {
+  align-items: center;
+}
+
+.admin-setting__aside {
+  display: flex;
+  flex: none;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+  color: var(--faint);
+  font-size: var(--admin-text-xs);
+}
+
+.admin-setting__aside .admin-field__control {
+  width: 7.5rem;
+}
+
+.admin-setting__title {
+  line-height: 1.5;
+  cursor: pointer;
+}
+
+/* 标题前的小图标（如侧栏图标开关对应的图标），随标题颜色。 */
+.admin-setting__icon {
+  display: inline-block;
+  margin-inline-end: 6px;
+  vertical-align: -2px;
+}
+
+/* 开关不可用（依赖未满足，或保存、校验期间）时标题一并变灰。 */
+.admin-setting:has(.admin-switch__input:disabled) .admin-setting__title {
+  color: var(--admin-control-text-disabled);
+  cursor: not-allowed;
+}
+
+.admin-setting__desc {
+  margin: 0;
+  color: var(--faint);
+  font-size: var(--admin-text-xs);
+  line-height: 1.6;
+}
+
+/* 开关：原生 checkbox 覆盖在轨道上接收点击与焦点，轨道只负责视觉。Theme Console 与侧栏偏好卡片共用。 */
+.admin-switch {
+  --admin-switch-track: color-mix(in srgb, var(--muted) 14%, var(--bg) 86%);
+  --admin-switch-border: color-mix(in srgb, var(--muted) 22%, transparent);
+  --admin-switch-track-on: var(--text);
+  --admin-switch-thumb: color-mix(in srgb, #fff 94%, var(--panel) 6%);
+  --admin-switch-inset: inset 0 1px 1px color-mix(in srgb, #000 8%, transparent);
+
+  position: relative;
+  display: inline-flex;
+  flex: none;
+  width: 34px;
+  height: 18px;
+  margin-top: 1px;
+}
+
+:root[data-theme='dark'] .admin-switch {
+  --admin-switch-track: color-mix(in srgb, var(--muted) 16%, var(--bg) 84%);
+  --admin-switch-border: color-mix(in srgb, var(--text) 12%, var(--border) 88%);
+  --admin-switch-track-on: color-mix(in srgb, var(--text) 44%, var(--panel) 56%);
+  --admin-switch-thumb: color-mix(in srgb, #fff 88%, var(--panel) 12%);
+  --admin-switch-inset: inset 0 1px 1px color-mix(in srgb, #000 14%, transparent);
+}
+
+.admin-switch__input {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  opacity: 0;
+  cursor: pointer;
+}
+
+.admin-switch__input:disabled {
+  cursor: not-allowed;
+}
+
+.admin-switch__track {
+  position: relative;
+  box-sizing: border-box;
+  width: 100%;
+  height: 100%;
+  border: 1px solid var(--admin-switch-border);
+  border-radius: 999px;
+  background-color: var(--admin-switch-track);
+  box-shadow: var(--admin-switch-inset);
+  transition:
+    border-color 160ms ease,
+    background-color 160ms ease,
+    box-shadow 160ms ease;
+}
+
+.admin-switch__track::after {
+  content: '';
+  position: absolute;
+  inset-block-start: 50%;
+  inset-inline-start: 2px;
+  width: 12px;
+  height: 12px;
+  border-radius: 999px;
+  background-color: var(--admin-switch-thumb);
+  box-shadow:
+    0 1px 2px color-mix(in srgb, #000 18%, transparent),
+    0 0 0 1px color-mix(in srgb, #000 6%, transparent);
+  transform: translate3d(0, -50%, 0);
+  transition: transform 180ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.admin-switch__input:checked + .admin-switch__track {
+  border-color: color-mix(in srgb, var(--admin-switch-track-on) 76%, var(--border) 24%);
+  background-color: var(--admin-switch-track-on);
+}
+
+.admin-switch__input:checked + .admin-switch__track::after {
+  transform: translate3d(16px, -50%, 0);
+}
+
+.admin-switch__input:focus-visible + .admin-switch__track {
+  border-color: var(--admin-focus-border);
+  box-shadow: var(--admin-focus-shadow);
+}
+
+.admin-switch__input:disabled + .admin-switch__track {
+  opacity: 0.5;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .admin-switch__track,
+  .admin-switch__track::after {
+    transition: none;
+  }
+}
+
+/* 强制颜色模式（Windows 高对比度）下背景会被系统接管，改用系统色绘制轨道与圆点。 */
+@media (forced-colors: active) {
+  .admin-switch__track {
+    forced-color-adjust: none;
+    border-color: ButtonText;
+    background-color: ButtonFace;
+    box-shadow: none;
+  }
+
+  .admin-switch__track::after {
+    background-color: ButtonText;
+    box-shadow: none;
+  }
+
+  .admin-switch__input:checked + .admin-switch__track {
+    border-color: Highlight;
+    background-color: Highlight;
+  }
+
+  .admin-switch__input:checked + .admin-switch__track::after {
+    background-color: HighlightText;
+  }
+
+  .admin-switch__input:focus-visible + .admin-switch__track {
+    outline: 2px solid Highlight;
+    outline-offset: 2px;
+  }
 }
 
 .admin-toggle-row {
@@ -716,19 +896,6 @@
 
 .admin-toggle-row[aria-disabled='true'] {
   opacity: 0.62;
-}
-
-.admin-toggle-row--compact {
-  min-height: 0;
-}
-
-.admin-toggle-row--with-inline-field {
-  flex-wrap: nowrap;
-  gap: 10px;
-}
-
-.admin-toggle-row__sep {
-  color: var(--faint);
 }
 
 .admin-route-nav {
@@ -1197,6 +1364,13 @@
 .admin-btn--compact {
   min-height: var(--admin-control-height-compact);
   padding-inline: var(--admin-control-padding-compact);
+}
+
+/* 迷你按钮：小节标题条、列表行内的次级操作（新建、上传、恢复默认等），与内容页「新建文章」同尺寸。 */
+.admin-btn--mini {
+  min-height: 24px;
+  padding-inline: 7px;
+  border-radius: 4px;
 }
 
 .admin-btn--icon {

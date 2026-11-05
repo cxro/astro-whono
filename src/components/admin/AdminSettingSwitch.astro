@@ -1,0 +1,55 @@
+---
+/*
+ * 开关设置行：左侧标题（唯一的 <label>）与说明，右侧开关。
+ * 底层仍是原生 checkbox（role="switch"），脚本照常读写 .checked、监听 change。
+ * 说明通过 aria-describedby 关联，不并入可访问名称。
+ * 常驻说明用 description 插槽（解释开关后果）；纯补充说明用 tip，做成悬停标题显示。
+ * aside 插槽放在开关左侧的附属小控件（如日期前缀输入框），元素需带 .admin-setting__aside，窄容器下换到标题下方。
+ */
+import AdminHelpTip from './AdminHelpTip.astro';
+
+interface Props {
+  id: string;
+  checked?: boolean;
+  /** 整行的 id：脚本需要定位整行时用（例如依赖禁用时在行上标记 aria-disabled）。 */
+  rowId?: string;
+  /** 悬停标题时显示的说明；提示组件包在 label 外，点说明不会切换开关。 */
+  tip?: string;
+  /** 透传到 input 的 data-* / aria-controls（禁用状态由控制台脚本统一推导，不在这里传）。 */
+  inputAttrs?: Partial<Record<`data-${string}`, string | boolean>> & { 'aria-controls'?: string };
+}
+
+const { id, checked = false, rowId, tip, inputAttrs = {} } = Astro.props;
+const descriptionId = `${id}-desc`;
+const tipId = `${id}-tip`;
+const hasDescription = Astro.slots.has('description');
+const describedBy = [hasDescription ? descriptionId : '', tip ? tipId : ''].filter(Boolean).join(' ') || undefined;
+---
+
+<div class="admin-setting" id={rowId}>
+  <div class="admin-setting__text">
+    {tip ? (
+      <AdminHelpTip id={tipId} text={tip}>
+        <label class="admin-setting__title" for={id}><slot /></label>
+      </AdminHelpTip>
+    ) : (
+      <label class="admin-setting__title" for={id}><slot /></label>
+    )}
+    {hasDescription ? (
+      <p class="admin-setting__desc" id={descriptionId}><slot name="description" /></p>
+    ) : null}
+  </div>
+  <slot name="aside" />
+  <span class="admin-switch">
+    <input
+      id={id}
+      class="admin-switch__input"
+      type="checkbox"
+      role="switch"
+      checked={checked}
+      aria-describedby={describedBy}
+      {...inputAttrs}
+    />
+    <span class="admin-switch__track" aria-hidden="true"></span>
+  </span>
+</div>

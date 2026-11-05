@@ -1,5 +1,6 @@
 ---
 import type { SiteSocialIconKey, SiteSocialPresetId } from '../../lib/theme-settings';
+import AdminIcon from './AdminIcon.astro';
 import AdminSocialCustomRowTemplate from './AdminSocialCustomRowTemplate.astro';
 import AdminSocialPresetRow from './AdminSocialPresetRow.astro';
 
@@ -78,32 +79,27 @@ const socialPresetRows: readonly SocialPresetRow[] = [
 ];
 ---
 
-<div class="admin-subgroup">
-  <div class="admin-social-panel">
-    <div class="admin-social-panel__head">
-      <p class="admin-subtitle admin-subtitle--compact">
-        <span class="admin-subtitle__main">社交链接</span>
-        <span id="site-social-custom-count" class="admin-subtitle__hint admin-social-count">
-          (新增 0 / {socialCustomLimit})
-        </span>
-      </p>
-      <div class="admin-social-actions">
-        <button id="site-social-custom-add" class="admin-btn admin-btn--ghost admin-btn--compact" type="button">
-          新增链接
-        </button>
-      </div>
+<div class="admin-subsection" role="group" aria-labelledby="site-social-title">
+  <div class="admin-subsection__head">
+    <div class="admin-subsection__label">
+      <h3 id="site-social-title" class="admin-subsection__title">社交链接</h3>
+      <span id="site-social-custom-count" class="admin-subsection__meta">(新增 0 / {socialCustomLimit})</span>
     </div>
-    <div class="admin-social-table">
-      <div id="site-social-custom-head" class="admin-social-header" aria-hidden="true">
-        <span class="admin-social-header__order">位置</span>
-        <span class="admin-social-header__platform">平台</span>
-        <span class="admin-social-header__icon">图标</span>
-        <span class="admin-social-header__href">链接地址</span>
-        <span class="admin-social-header__actions">操作</span>
-      </div>
-      <div id="site-social-custom-list" class="admin-social-list">
-        {socialPresetRows.map((row) => <AdminSocialPresetRow row={row} />)}
-      </div>
+    <button id="site-social-custom-add" class="admin-btn admin-btn--ghost admin-btn--mini" type="button">
+      <AdminIcon name="plus" size={13} strokeWidth={2.2} />
+      <span>新增链接</span>
+    </button>
+  </div>
+  <p class="admin-subsection__desc">显示在关于页的页头与联系列表中，按位置从小到大排列。</p>
+  <div class="admin-table admin-social-table">
+    <div id="site-social-custom-head" class="admin-table__head admin-social-header" aria-hidden="true">
+      <span class="admin-social-header__order">位置</span>
+      <span>平台</span>
+      <span class="admin-social-header__href">链接地址</span>
+      <span class="admin-social-header__actions">操作</span>
+    </div>
+    <div id="site-social-custom-list" class="admin-social-list">
+      {socialPresetRows.map((row) => <AdminSocialPresetRow row={row} />)}
     </div>
   </div>
 

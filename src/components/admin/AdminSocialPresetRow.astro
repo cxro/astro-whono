@@ -19,64 +19,47 @@ interface Props {
 const { row } = Astro.props;
 const visibilityLabel = `隐藏 ${row.label}`;
 const removeLabel = `${row.label} 为固定项，不可删除`;
+const hrefLabel = row.id === 'email' ? '邮箱地址' : '链接地址';
 ---
 
-<article class="admin-row admin-row--interactive admin-row--table admin-social-row admin-social-row--preset" data-social-preset-row data-social-preset-id={row.id}>
-  <label class="admin-field admin-social-field admin-social-field--order">
-    <span class="admin-social-cell-label">位置</span>
-    <span class="admin-social-order-frame">
-      <span class="admin-social-order-frame__mark" aria-hidden="true">[</span>
-      <input
-        class="admin-field__control"
-        id={row.orderInputId}
-        data-social-preset-field="order"
-        type="number"
-        min="1"
-        max={String(ADMIN_SOCIAL_ORDER_MAX)}
-        step="1"
-        inputmode="numeric"
-        aria-label={`${row.label} 位置排序`}
-      />
-      <span class="admin-social-order-frame__mark" aria-hidden="true">]</span>
-    </span>
-  </label>
-
-  <div class="admin-field admin-social-field admin-social-field--platform admin-social-field--static">
-    <span class="admin-social-cell-label">平台</span>
+<article class="admin-row admin-row--interactive admin-row--table admin-table__row admin-social-row admin-social-row--preset" data-social-preset-row data-social-preset-id={row.id}>
+  <div class="admin-social-field admin-social-field--order admin-field--compact">
     <input
-      class="admin-field__control admin-social-static-input"
-      name={`site-social-${row.id}-platform-display`}
-      type="text"
-      value={row.label}
-      readonly
-      tabindex="-1"
+      class="admin-field__control admin-field__control--quiet admin-social-order"
+      id={row.orderInputId}
+      data-social-preset-field="order"
+      type="number"
+      min="1"
+      max={String(ADMIN_SOCIAL_ORDER_MAX)}
+      step="1"
+      inputmode="numeric"
+      aria-label={`${row.label} 位置排序`}
     />
   </div>
 
-  <div class="admin-social-field admin-social-field--icon admin-social-field--static">
-    <span class="admin-social-cell-label">图标</span>
-    <div class="admin-social-icon-preview">
+  <div class="admin-social-field admin-social-field--platform">
+    <span class="admin-social-icon-preview">
       <span class="admin-social-icon-only">
         <BrandIcon name={row.id} class="admin-social-icon-only__icon" size={16} />
       </span>
-    </div>
+    </span>
+    <span class="admin-social-platform-name">{row.label}</span>
   </div>
 
-  <label class="admin-field admin-social-field admin-social-field--href">
-    <span class="admin-social-cell-label">{row.id === 'email' ? '邮箱地址' : '链接地址'}</span>
+  <div class="admin-social-field admin-social-field--href admin-field--compact">
     <input
-      class="admin-field__control admin-field__control--soft"
+      class="admin-field__control admin-field__control--quiet"
       id={row.inputId}
       data-social-preset-field="href"
       type={row.inputType}
       inputmode={row.inputMode}
       autocomplete={row.autoComplete}
       placeholder={row.placeholder}
+      aria-label={`${row.label} ${hrefLabel}`}
     />
-  </label>
+  </div>
 
-  <div class="admin-field admin-social-field admin-social-field--actions admin-social-field--static">
-    <span class="admin-social-cell-label">操作</span>
+  <div class="admin-social-field admin-social-field--actions">
     <div class="admin-social-row-actions">
       <button
         class="admin-btn admin-btn--tool admin-btn--compact admin-btn--icon admin-social-action"
@@ -90,12 +73,13 @@ const removeLabel = `${row.label} 为固定项，不可删除`;
         <span class="sr-only">{visibilityLabel}</span>
       </button>
       <button
-        class="admin-btn admin-btn--tool admin-btn--compact admin-btn--icon admin-social-action admin-social-action--disabled"
+        class="admin-btn admin-btn--tool admin-btn--compact admin-btn--icon admin-social-action"
         type="button"
         data-social-preset-action="remove"
         aria-label={removeLabel}
         title={removeLabel}
         disabled
+        data-always-disabled
       >
         <AdminIcon name="trash" class="admin-social-action__icon" size={15} />
         <span class="sr-only">{removeLabel}</span>

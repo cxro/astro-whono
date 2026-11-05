@@ -1,5 +1,7 @@
 ---
+import AdminHelpTip from './AdminHelpTip.astro';
 import AdminIcon from './AdminIcon.astro';
+import AdminSettingSwitch from './AdminSettingSwitch.astro';
 import AdminSiteSocialSection from './AdminSiteSocialSection.astro';
 import { ADMIN_OVERVIEW_HIDDEN_MESSAGE_MAX_LENGTH } from '../../lib/admin-console/theme-shared';
 
@@ -12,42 +14,42 @@ interface Props {
 const { footerStartYearMin, footerStartYearMax, socialCustomLimit } = Astro.props;
 ---
 
-<fieldset class="admin-group">
-  <legend class="admin-group__legend">
-    <AdminIcon name="admin-site" class="admin-group__legend-icon" size={14} />
-    <span class="admin-group__legend-copy">
-      <span class="admin-group__legend-zh">站点设置</span>
-      <span class="admin-group__legend-en">Site</span>
-    </span>
-  </legend>
-  <div class="admin-grid">
-    <label class="admin-field">
-      <span class="admin-label">
-        <span class="admin-label__main">站点标题</span>
-        <span class="admin-label__hint">（用于浏览器标题 / RSS / 分享）</span>
-      </span>
-      <input class="admin-field__control" id="site-title" type="text" autocomplete="off" />
-    </label>
-    <label class="admin-field">
-      <span class="admin-label">
-        <span class="admin-label__main">站点语言</span>
-        <span class="admin-label__hint">（默认值为 zh-CN）</span>
-      </span>
-      <input class="admin-field__control" id="site-default-locale" type="text" autocomplete="off" />
-    </label>
-    <label class="admin-field admin-field--full">
-      <span class="admin-label">
-        <span class="admin-label__main">默认 SEO 描述</span>
-        <span class="admin-label__hint">（用于搜索结果和分享摘要）</span>
-      </span>
-      <textarea class="admin-field__control admin-field__control--singleline-textarea" id="site-description" rows="1"></textarea>
-    </label>
-    <label class="admin-field">
-      <span class="admin-label">
-        <span class="admin-label__main">页脚年份</span>
-        <span class="admin-label__hint">（结束年份自动拾取当前年）</span>
-      </span>
-      <span class="admin-year-range">
+<fieldset class="admin-section">
+  <legend class="admin-sr-only"><h2>站点设置</h2></legend>
+
+  <div class="admin-subsection">
+    <div class="admin-fields admin-fields--2">
+      <label class="admin-field">
+        <span class="admin-field__label">站点标题</span>
+        <input class="admin-field__control" id="site-title" type="text" autocomplete="off" />
+      </label>
+      <label class="admin-field">
+        <span class="admin-field__label">站点语言</span>
+        <input class="admin-field__control" id="site-default-locale" type="text" autocomplete="off" />
+      </label>
+    </div>
+    <div class="admin-field">
+      <div class="admin-field__head">
+        <AdminHelpTip id="site-description-tip" text="用于搜索结果与分享摘要。">
+          <label class="admin-field__label" for="site-description">默认 SEO 描述</label>
+        </AdminHelpTip>
+      </div>
+      <textarea
+        class="admin-field__control admin-field__control--compact-textarea"
+        id="site-description"
+        rows="2"
+        aria-describedby="site-description-tip"
+      ></textarea>
+    </div>
+  </div>
+
+  <div class="admin-subsection" role="group" aria-labelledby="site-footer-title">
+    <div class="admin-subsection__head">
+      <h3 id="site-footer-title" class="admin-subsection__title">页脚</h3>
+    </div>
+    <div class="admin-fields admin-fields--lead">
+      <label class="admin-field">
+        <span class="admin-field__label">起始年份</span>
         <input
           class="admin-field__control"
           id="site-footer-start-year"
@@ -59,46 +61,32 @@ const { footerStartYearMin, footerStartYearMax, socialCustomLimit } = Astro.prop
           placeholder={String(footerStartYearMax)}
           aria-describedby="site-footer-preview"
         />
-        <span class="admin-year-range__sep" aria-hidden="true">-</span>
-        <input
-          class="admin-field__control admin-year-range__readonly"
-          name="site-footer-current-year-display"
-          type="text"
-          value={String(footerStartYearMax)}
-          readonly
-          tabindex="-1"
-          aria-label="当前年份（自动）"
-        />
-        <label class="admin-year-range__toggle">
-          <input id="site-footer-show-current-year" type="checkbox" checked />
-          <span class="sr-only">显示当前年</span>
-        </label>
-      </span>
-    </label>
-    <label class="admin-field">
-      <span class="admin-label">
-        <span class="admin-label__main">页脚版权文案</span>
-      </span>
-      <input class="admin-field__control" id="site-footer-copyright" type="text" autocomplete="off" aria-describedby="site-footer-preview" />
-    </label>
-    <div class="admin-field admin-field--full">
-      <p id="site-footer-preview" class="admin-help">
-        页脚预览：<code id="site-footer-preview-value">© {footerStartYearMax} Whono · Theme Demo · by cxro</code>
-      </p>
+      </label>
+      <label class="admin-field">
+        <span class="admin-field__label">版权文案</span>
+        <input class="admin-field__control" id="site-footer-copyright" type="text" autocomplete="off" aria-describedby="site-footer-preview" />
+      </label>
     </div>
-    <div class="admin-field admin-field--full">
-      <div class="admin-label admin-label--split">
-        <span class="admin-label__copy">
-          <label class="admin-label__main" for="site-admin-overview-hidden-message">
-            <code>/admin/</code> Overview 公开访问（不收录）
-          </label>
-          <span class="admin-label__hint">（构建后生效；关闭公开时，该页仅显示下方文字）</span>
-        </span>
-        <label class="admin-label__toggle" for="site-admin-overview-public-visible">
-          <input id="site-admin-overview-public-visible" type="checkbox" checked />
-          <span>公开</span>
-        </label>
-      </div>
+    <AdminSettingSwitch id="site-footer-show-current-year" checked>
+      在起始年份后追加当前年份
+      <Fragment slot="description">开启后显示为“起始年份-{footerStartYearMax}”，每年自动更新。</Fragment>
+    </AdminSettingSwitch>
+    <p id="site-footer-preview" class="admin-help admin-preview">
+      <span class="admin-preview__label">预览</span>
+      <span id="site-footer-preview-value" class="admin-preview__value">© {footerStartYearMax} Whono · Theme Demo · by cxro</span>
+    </p>
+  </div>
+
+  <div class="admin-subsection" role="group" aria-labelledby="site-overview-title" data-reveal-scope>
+    <div class="admin-subsection__head">
+      <h3 id="site-overview-title" class="admin-subsection__title">后台概览页</h3>
+    </div>
+    <AdminSettingSwitch id="site-admin-overview-public-visible" checked inputAttrs={{ 'data-reveal-source': true }}>
+      公开 <code>/admin/</code> 概览页
+      <Fragment slot="description">访客可查看站点概览，不会被搜索引擎收录；关闭后该页只显示一段说明文字。构建后生效。</Fragment>
+    </AdminSettingSwitch>
+    <label class="admin-field" data-reveal-when-off>
+      <span class="admin-field__label">关闭时显示的文字</span>
       <input
         class="admin-field__control"
         id="site-admin-overview-hidden-message"
@@ -107,40 +95,62 @@ const { footerStartYearMin, footerStartYearMax, socialCustomLimit } = Astro.prop
         autocomplete="off"
         disabled
       />
+    </label>
+  </div>
+
+  <div class="admin-subsection" role="group" aria-labelledby="site-favicon-title">
+    <div class="admin-subsection__head">
+      <h3 id="site-favicon-title" class="admin-subsection__title">站点图标</h3>
     </div>
-    <div class="admin-field admin-field--full">
-      <span class="admin-label">
-        <span class="admin-label__main">站点图标</span>
-        <span class="admin-label__hint">（浏览器标签页 / 移动端触摸图标；构建后生效）</span>
-      </span>
-      <input id="site-favicon-svg" type="hidden" />
-      <input id="site-favicon-png" type="hidden" />
-      <input id="site-favicon-apple-touch-icon" type="hidden" />
-      <div class="admin-favicon-line">
-        <div class="admin-favicon-slot" data-favicon-slot="png">
-          <span class="admin-favicon-slot__preview" data-favicon-preview="png">
-            <img alt="" loading="lazy" decoding="async" data-favicon-preview-img="png" />
-          </span>
-          <span class="admin-favicon-slot__label">标签页图标</span>
-          <button class="admin-btn admin-btn--ghost admin-btn--compact" type="button" data-favicon-upload="png" aria-label="上传标签页图标">上传</button>
-          <button class="admin-btn admin-btn--ghost admin-btn--compact" type="button" data-favicon-clear="png" aria-label="恢复标签页图标为主题默认">恢复默认</button>
-        </div>
-        <span class="admin-favicon-line__divider" aria-hidden="true"></span>
-        <div class="admin-favicon-slot" data-favicon-slot="appleTouchIcon">
-          <span class="admin-favicon-slot__preview" data-favicon-preview="appleTouchIcon">
-            <img alt="" loading="lazy" decoding="async" data-favicon-preview-img="appleTouchIcon" />
-          </span>
-          <span class="admin-favicon-slot__label">触摸图标</span>
-          <button class="admin-btn admin-btn--ghost admin-btn--compact" type="button" data-favicon-upload="appleTouchIcon" aria-label="上传触摸图标">上传</button>
-          <button class="admin-btn admin-btn--ghost admin-btn--compact" type="button" data-favicon-clear="appleTouchIcon" aria-label="恢复触摸图标为主题默认">恢复默认</button>
-        </div>
-      </div>
-      <input type="file" accept="image/png" hidden data-favicon-file="png" />
-      <input type="file" accept="image/png" hidden data-favicon-file="appleTouchIcon" />
-      <p class="admin-help">
-        建议上传 256x256 的正方形 PNG（边长 16-512px，不超过 256KB）；SVG 图标请直接替换 <code>public/favicon.svg</code>。
-      </p>
-    </div>
+    <p class="admin-subsection__desc">浏览器标签页与移动端主屏图标，构建后生效。</p>
+    <input id="site-favicon-svg" type="hidden" />
+    <input id="site-favicon-png" type="hidden" />
+    <input id="site-favicon-apple-touch-icon" type="hidden" />
+    <ul class="admin-asset-list">
+      <li class="admin-asset" data-favicon-slot="png">
+        <span class="admin-asset__preview" data-favicon-preview="png">
+          <img alt="" loading="lazy" decoding="async" data-favicon-preview-img="png" />
+        </span>
+        <span class="admin-asset__text">
+          <span class="admin-asset__name">标签页图标</span>
+          <span class="admin-asset__meta">PNG，浏览器标签页与书签</span>
+        </span>
+        <span class="admin-asset__actions">
+          <button class="admin-btn admin-btn--ghost admin-btn--mini" type="button" data-favicon-upload="png" aria-label="上传标签页图标">
+            <AdminIcon name="upload" size={13} strokeWidth={2.2} />
+            <span>上传</span>
+          </button>
+          <button class="admin-btn admin-btn--ghost admin-btn--mini" type="button" data-favicon-clear="png" aria-label="恢复默认标签页图标">
+            <AdminIcon name="refresh" size={13} strokeWidth={2.2} />
+            <span>恢复默认</span>
+          </button>
+        </span>
+      </li>
+      <li class="admin-asset" data-favicon-slot="appleTouchIcon">
+        <span class="admin-asset__preview" data-favicon-preview="appleTouchIcon">
+          <img alt="" loading="lazy" decoding="async" data-favicon-preview-img="appleTouchIcon" />
+        </span>
+        <span class="admin-asset__text">
+          <span class="admin-asset__name">触摸图标</span>
+          <span class="admin-asset__meta">PNG，添加到移动端主屏时使用</span>
+        </span>
+        <span class="admin-asset__actions">
+          <button class="admin-btn admin-btn--ghost admin-btn--mini" type="button" data-favicon-upload="appleTouchIcon" aria-label="上传触摸图标">
+            <AdminIcon name="upload" size={13} strokeWidth={2.2} />
+            <span>上传</span>
+          </button>
+          <button class="admin-btn admin-btn--ghost admin-btn--mini" type="button" data-favicon-clear="appleTouchIcon" aria-label="恢复默认触摸图标">
+            <AdminIcon name="refresh" size={13} strokeWidth={2.2} />
+            <span>恢复默认</span>
+          </button>
+        </span>
+      </li>
+    </ul>
+    <input type="file" accept="image/png" hidden data-favicon-file="png" />
+    <input type="file" accept="image/png" hidden data-favicon-file="appleTouchIcon" />
+    <p class="admin-help">
+      建议上传 256×256 的正方形 PNG（边长 16-512px，不超过 256KB）；SVG 图标请直接替换 <code>public/favicon.svg</code>。
+    </p>
   </div>
 
   <AdminSiteSocialSection socialCustomLimit={socialCustomLimit} />

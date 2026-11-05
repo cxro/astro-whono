@@ -29,7 +29,8 @@ import {
   getAdminFooterStartYearMax,
   getAdminThemeSettingsMismatchPaths,
   validateAdminThemeSettings,
-  type AdminThemeSettingsChangePreview
+  type AdminThemeSettingsChangePreview,
+  type AdminThemeSettingsValidationIssue
 } from '../../../lib/admin-console/theme-shared';
 
 const WRITABLE_GROUPS = ['site', 'shell', 'home', 'page', 'ui'] as const satisfies readonly ThemeSettingsFileGroup[];
@@ -124,10 +125,15 @@ const createPersistEntries = (
 
 const validateIncomingSettingsSnapshot = (
   settingsInput: unknown
-): { canonicalSettings?: EditableThemeSettings; errors: string[] } => {
+): {
+  canonicalSettings?: EditableThemeSettings;
+  errors: string[];
+  issues: AdminThemeSettingsValidationIssue[];
+} => {
   if (!isRecord(settingsInput)) {
     return {
-      errors: ['settings 必须是 JSON 对象']
+      errors: ['settings 必须是 JSON 对象'],
+      issues: []
     };
   }
 
@@ -148,7 +154,8 @@ const validateIncomingSettingsSnapshot = (
 
   return {
     canonicalSettings,
-    errors: Array.from(new Set(issues.map((issue) => issue.message)))
+    errors: Array.from(new Set(issues.map((issue) => issue.message))),
+    issues
   };
 };
 
@@ -287,13 +294,14 @@ export const POST: APIRoute = async ({ request, url }) => {
       );
     }
 
-    const { canonicalSettings, errors } = validateIncomingSettingsSnapshot(settingsInput);
+    const { canonicalSettings, errors, issues } = validateIncomingSettingsSnapshot(settingsInput);
     if (!canonicalSettings || errors.length > 0) {
       return new Response(
         JSON.stringify(
           {
             ok: false,
             errors,
+            issues,
             results: createResults()
           },
           null,

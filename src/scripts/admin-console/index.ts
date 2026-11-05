@@ -20,6 +20,7 @@ import { createAdminThemeController } from './controller';
 import { createAdminFaviconUploads } from './favicon-uploads';
 import { createFormCodec } from './form-codec';
 import { createAdminThemeImageFields } from './image-fields';
+import { createAdminSectionTabs } from './section-tabs';
 import { createSocialLinks } from './social-links';
 import { createAdminConsoleUiState } from './ui-state';
 import { createValidation } from './validation';
@@ -256,9 +257,12 @@ if (!root) {
       formCodec.syncSidebarActionControls();
       formCodec.syncHomeIntroLinkControls();
       formCodec.syncHeroControls();
-      formCodec.syncFooterYearControls();
       themeImageFields?.refresh('home.heroImageSrc');
+      faviconUploads.refreshAll();
+      socialLinks.updateCustomRowsUi();
     };
+
+    const sectionTabs = createAdminSectionTabs({ root, form: controls.form });
 
     const controller = createAdminThemeController({
       controls,
@@ -267,7 +271,8 @@ if (!root) {
       uiState,
       validation,
       finalizeAppliedSettings,
-      syncEditableDerivedControls
+      syncEditableDerivedControls,
+      revealField: sectionTabs.revealField
     });
 
     bindAdminThemeFieldEvents({

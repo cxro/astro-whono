@@ -1,13 +1,451 @@
 /* Admin Form
-   负责 Theme Console 表单控件、toggle、分组与底部操作区。
+   负责 Theme Console 分组标签、表单控件、toggle、分组与底部操作区。
 */
 
 .admin-form {
+  /* 表单内的统一间距：字段之间 / 小节之间。只在本页使用，不提升为全局 token。 */
+  --form-gap-field: 16px;
+  --form-gap-subsection: 32px;
+  --form-fill-muted: color-mix(in srgb, var(--text) 4%, var(--bg));
+  --form-fill-heading: color-mix(in srgb, var(--text) 7%, var(--bg));
+
   container: admin-theme-form / inline-size;
   margin-top: 0;
   display: grid;
   gap: 0;
   min-width: 0;
+}
+
+/* —— 分组标签 ——
+   一次只显示一个分组。标签沿用分组标题样式：衬线 16px / 600 + 16px 图标；未选中弱化为次级色。
+   标签行底部一条细线；当前标签正文色 + 2px 正文色下划线（单色，与开关同一语言），字重不变，切换时宽度不跳动。
+   红点表示该分组有校验未通过的字段。 */
+.admin-tabs-bar {
+  container: admin-tabs / inline-size;
+  margin: 0 0 28px;
+}
+
+/* 标签两端对齐、均匀铺满整行，首尾与表单左右边缘对齐；6px 是窄屏下的最小间距。 */
+.admin-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  column-gap: 6px;
+  border-bottom: 1px solid var(--border);
+}
+
+.admin-tabs__tab {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 42px;
+  margin: 0 0 -1px;
+  padding: 8px 2px 9px;
+  border: 0;
+  border-bottom: 2px solid transparent;
+  background: none;
+  color: var(--muted);
+  font: inherit;
+  font-family: var(--admin-font-page);
+  font-size: 1rem;
+  font-weight: 600;
+  line-height: 1.4;
+  white-space: nowrap;
+  cursor: pointer;
+  transition:
+    color 160ms ease,
+    border-color 160ms ease;
+}
+
+.admin-tabs__icon {
+  flex: none;
+  color: var(--faint);
+  transition: color 160ms ease;
+}
+
+.admin-tabs__tab:hover {
+  color: var(--text);
+}
+
+.admin-tabs__tab:hover .admin-tabs__icon,
+.admin-tabs__tab[aria-selected='true'] .admin-tabs__icon {
+  color: var(--muted);
+}
+
+.admin-tabs__tab[aria-selected='true'] {
+  color: var(--text);
+  border-bottom-color: var(--text);
+}
+
+.admin-tabs__tab:focus-visible {
+  outline: 2px solid var(--admin-focus-border);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+/* 红点悬在文字右上角、不占宽度：出现时标签不移位，窄屏也不换行。 */
+.admin-tabs__dot {
+  position: absolute;
+  top: 9px;
+  right: -6px;
+  width: 6px;
+  height: 6px;
+  border-radius: 999px;
+  background: var(--admin-status-danger-accent);
+}
+
+/* 窄屏放不下图标：只留文字，字号降一档，6 个标签保持一行。 */
+@container admin-tabs (max-width: 460px) {
+  .admin-tabs__icon {
+    display: none;
+  }
+
+  .admin-tabs__tab {
+    font-size: 0.9375rem;
+  }
+}
+
+/* 强制色模式（如 Windows 高对比度）：透明下边框会被画出来、背景色被替换，选中下划线和红点改用系统色。 */
+@media (forced-colors: active) {
+  .admin-tabs__tab {
+    margin-bottom: 0;
+    border-bottom-color: Canvas;
+  }
+
+  .admin-tabs__tab[aria-selected='true'] {
+    border-bottom-color: Highlight;
+  }
+
+  .admin-tabs__dot {
+    background-color: Highlight;
+  }
+}
+
+/* —— 分组与小节 ——
+   分组名由上方标签显示，legend 仅供读屏（admin-sr-only）。 */
+.admin-section {
+  min-width: 0;
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+.admin-subsection {
+  display: grid;
+  gap: var(--form-gap-field);
+  min-width: 0;
+}
+
+.admin-subsection + .admin-subsection {
+  margin-top: var(--form-gap-subsection);
+}
+
+/* 小节标题条：浅灰底色块承载标题（与右侧操作），用色块而不是线条分隔小节。 */
+.admin-subsection__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  min-width: 0;
+  min-height: 36px;
+  padding: 4px 6px 4px 12px;
+  border-radius: 6px;
+  /* 比表头灰底（--form-fill-muted）深一档，标题条与表头一眼可分。 */
+  background: var(--form-fill-heading);
+}
+
+.admin-subsection__label {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  min-width: 0;
+}
+
+.admin-subsection__title {
+  margin: 0;
+  color: var(--text);
+  font-family: var(--admin-font-page);
+  font-size: var(--admin-text-base);
+  font-weight: 600;
+  line-height: 1.5;
+}
+
+.admin-subsection__meta {
+  color: var(--faint);
+  font-size: var(--admin-text-xs);
+  white-space: nowrap;
+}
+
+.admin-subsection__desc {
+  margin: 0;
+  color: var(--faint);
+  font-size: var(--admin-text-xs);
+  line-height: 1.6;
+}
+
+/* 字段本身较高（如字体卡片组）的小节：字段之间拉开到 24px。 */
+.admin-subsection--loose {
+  gap: 24px;
+}
+
+/* 说明紧跟标题条，间距小于字段间距。 */
+.admin-subsection__head + .admin-subsection__desc {
+  margin-top: -8px;
+}
+
+.admin-fields {
+  display: grid;
+  gap: var(--form-gap-field) 16px;
+  align-items: start;
+  min-width: 0;
+}
+
+/* 带悬停说明的字段名：用 div 包裹、label 用 for 关联。字号写在外层，否则行盒按 16px 计算，字段名比普通字段低约 5px。 */
+.admin-field__head {
+  display: flex;
+  align-items: center;
+  min-width: 0;
+  font-size: var(--admin-text-sm);
+}
+
+.admin-fields--2 {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+/* 首列为短字段（年份、数字等）。 */
+.admin-fields--lead {
+  grid-template-columns: minmax(0, 10rem) minmax(0, 1fr);
+}
+
+.admin-setting__title code,
+.admin-subsection code {
+  font-family: var(--admin-font-mono);
+  font-size: 0.92em;
+}
+
+/* 依赖开关的字段：在 [data-reveal-scope] 内按开关（[data-reveal-source]）显隐。
+   when-on：开关打开才显示（如 Hero 图字段）；when-off：开关关闭才显示（如概览页关闭时的文字）。
+   依据开关本身的勾选状态，而不是字段的 disabled（保存、校验期间所有控件都会被临时禁用）；
+   含出错字段时不隐藏，校验定位总能看到出错的输入框。每个 scope 只放一个开关，不要嵌套。 */
+[data-reveal-scope]:has([data-reveal-source]:checked) [data-reveal-when-off]:not(:has([aria-invalid='true'])),
+[data-reveal-scope]:has([data-reveal-source]:not(:checked)) [data-reveal-when-on]:not(:has([aria-invalid='true'])) {
+  display: none;
+}
+
+/* 小节内的一组「开关 + 依赖字段」。 */
+.admin-subsection__block {
+  display: grid;
+  gap: var(--form-gap-field);
+  min-width: 0;
+}
+
+/* 相邻两组之间稍拉开，组内（开关与其字段）更紧凑。 */
+.admin-subsection__block + .admin-subsection__block {
+  margin-top: 8px;
+}
+
+.admin-preview {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 8px;
+}
+
+.admin-preview__label {
+  flex: none;
+  color: var(--faint);
+}
+
+.admin-preview__value {
+  min-width: 0;
+  color: var(--muted);
+  overflow-wrap: anywhere;
+}
+
+/* 文件类资源（站点图标等）：预览 + 名称说明 + 操作，一行一项。 */
+.admin-asset-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  border: 1px solid var(--admin-row-border);
+  border-radius: var(--admin-row-radius);
+}
+
+.admin-asset {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+  padding: 10px var(--admin-row-table-padding-inline);
+}
+
+.admin-asset + .admin-asset {
+  border-top: 1px solid var(--admin-row-divider);
+}
+
+.admin-asset__preview {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: none;
+  width: 32px;
+  height: 32px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--code-content-bg);
+  overflow: hidden;
+}
+
+.admin-asset__preview img {
+  width: 20px;
+  height: 20px;
+  object-fit: contain;
+}
+
+.admin-asset__preview[data-state='default'] img {
+  opacity: 0.45;
+}
+
+.admin-asset__text {
+  display: grid;
+  gap: 2px;
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.admin-asset__name {
+  color: var(--text);
+  font-size: var(--admin-text-sm);
+  line-height: 1.5;
+}
+
+.admin-asset__meta {
+  color: var(--faint);
+  font-size: var(--admin-text-xs);
+  line-height: 1.5;
+}
+
+.admin-asset__actions {
+  display: flex;
+  flex: none;
+  gap: 8px;
+}
+
+/* 编辑表格（社交链接、侧栏导航、页面标题）：外框、表头灰底、常态横线分隔；行同时用共享 .admin-row--interactive 做悬停整行浅底。
+   各表只定义自己的列（grid-template-columns / grid-template-areas）。 */
+.admin-table {
+  min-width: 0;
+  border: 1px solid var(--admin-row-border);
+  border-radius: var(--admin-row-radius);
+  background: var(--bg);
+  overflow: hidden;
+}
+
+.admin-table__head,
+.admin-table__row {
+  display: grid;
+  column-gap: 16px;
+  align-items: center;
+}
+
+.admin-table__head {
+  padding: 8px var(--admin-row-table-padding-inline);
+  border-bottom: 1px solid var(--admin-row-divider);
+  background: var(--form-fill-muted);
+  color: var(--muted);
+  font-size: var(--admin-text-xs);
+  line-height: 1.4;
+}
+
+.admin-table__row {
+  border: 0;
+  border-radius: 0;
+}
+
+.admin-table__row + .admin-table__row {
+  border-top: 1px solid var(--admin-row-divider);
+}
+
+/* 页面标题表：页面 / 主标题（居中）/ 副标题；输入框静止无框，占位文字即默认标题。 */
+.admin-page-header,
+.admin-page-row {
+  grid-template-columns: 112px minmax(0, 1fr) minmax(0, 1.25fr);
+  grid-template-areas: 'path title subtitle';
+}
+
+.admin-page-header__center {
+  text-align: center;
+}
+
+.admin-page-header__input {
+  padding-inline-start: var(--admin-field-padding-inline-compact);
+}
+
+.admin-page-title-input {
+  text-align: center;
+}
+
+.admin-page-cell {
+  display: block;
+  min-width: 0;
+}
+
+.admin-page-cell--path {
+  grid-area: path;
+  color: var(--muted);
+  font-size: var(--admin-text-sm);
+}
+
+.admin-page-cell--title {
+  grid-area: title;
+}
+
+.admin-page-cell--subtitle {
+  grid-area: subtitle;
+}
+
+@container admin-theme-form (max-width: 520px) {
+  .admin-page-row {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-template-areas:
+      'path path'
+      'title subtitle';
+    row-gap: 4px;
+  }
+
+  /* 窄容器各表改为两行布局，表头不再与单元格对齐，隐藏。 */
+  .admin-table__head {
+    display: none;
+  }
+
+  .admin-fields--2,
+  .admin-fields--lead {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .admin-subsection__head {
+    flex-wrap: wrap;
+  }
+
+  .admin-asset {
+    flex-wrap: wrap;
+  }
+
+  /* 开关行的附属小控件换到标题下方（shell.css 先加载，这里同优先级即可覆盖）。 */
+  .admin-setting:has(> .admin-setting__aside) {
+    flex-wrap: wrap;
+  }
+
+  .admin-setting__aside {
+    order: 3;
+    flex-basis: 100%;
+  }
+
+  .admin-asset__actions {
+    width: 100%;
+    padding-inline-start: 44px;
+  }
 }
 
 .admin-banner--error:not([hidden]) + .admin-form {
@@ -23,129 +461,6 @@
   filter: saturate(0.72);
 }
 
-.admin-group {
-  margin: 0 0 32px;
-  min-width: 0;
-  padding: 0 0 32px;
-  border: 0;
-  border-bottom: 1px dashed var(--border);
-  border-radius: 0;
-  background: transparent;
-  box-shadow: none;
-}
-
-.admin-group > legend {
-  width: 100%;
-  margin: 0 0 20px;
-  padding: 0;
-}
-
-.admin-group__legend {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  min-width: 0;
-  width: 100%;
-  color: var(--muted);
-  letter-spacing: 0;
-}
-
-.admin-group__legend-icon {
-  flex: 0 0 auto;
-  color: var(--faint);
-}
-
-.admin-group__legend-copy {
-  display: inline-flex;
-  flex-wrap: wrap;
-  align-items: baseline;
-  gap: 6px;
-  min-width: 0;
-}
-
-.admin-group__legend-en {
-  color: var(--faint);
-  font-weight: 500;
-  font-size: 12px;
-  letter-spacing: 0;
-  line-height: 1.4;
-}
-
-.admin-group__legend-zh {
-  color: var(--muted);
-  font-size: var(--admin-text-sm);
-  font-weight: 600;
-  line-height: 1.4;
-  text-transform: uppercase;
-}
-
-.admin-group:last-of-type {
-  margin-bottom: 0;
-  padding-bottom: 0;
-  border-bottom: 0;
-}
-
-.admin-grid {
-  --admin-grid-column-gap: 18px;
-  display: grid;
-  row-gap: 10px;
-  column-gap: var(--admin-grid-column-gap);
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-}
-
-.admin-field--memo > .admin-field__control,
-.admin-field--memo > .admin-title-pair {
-  max-width: calc((100% - var(--admin-grid-column-gap)) / 2);
-}
-
-.admin-field--sidebar-divider {
-  align-content: start;
-}
-
-.admin-sidebar-layout {
-  display: grid;
-  grid-template-columns: minmax(220px, 0.72fr) minmax(0, 1.18fr);
-  gap: 18px clamp(20px, 3vw, 32px);
-  align-items: start;
-}
-
-.admin-sidebar-layout__main {
-  display: grid;
-  gap: 10px;
-  min-width: 0;
-}
-
-.admin-subgroup.admin-subgroup--sidebar-nav {
-  margin-top: 0;
-  min-width: 0;
-}
-
-.admin-subgroup.admin-subgroup--sidebar-icons {
-  display: grid;
-  gap: 6px;
-  margin-top: 0;
-}
-
-.admin-subgroup.admin-subgroup--sidebar-icons > .admin-subtitle {
-  margin-bottom: 0;
-}
-
-.admin-subgroup.admin-subgroup--sidebar-nav > .admin-subtitle {
-  margin-bottom: 6px;
-  gap: 4px;
-  font-size: 12px;
-  line-height: 1.5;
-}
-
-.admin-subgroup.admin-subgroup--sidebar-nav .admin-subtitle__main {
-  font-size: 12px;
-  line-height: 1.5;
-}
-
-.admin-subgroup.admin-subgroup--sidebar-nav .admin-subtitle__hint {
-  line-height: 1.5;
-}
-
 .admin-images-field-input {
   display: grid;
   grid-template-columns: minmax(0, 1fr) auto;
@@ -155,7 +470,7 @@
 .admin-images-field-preview {
   width: min(180px, 100%);
   margin-top: 10px;
-  border-radius: 14px;
+  border-radius: 8px;
   overflow: hidden;
   border: 1px solid var(--border);
   background: var(--admin-surface);
@@ -167,6 +482,7 @@
 }
 
 .admin-images-field-preview--hero {
+  width: 220px;
   aspect-ratio: 16 / 9;
 }
 
@@ -205,125 +521,43 @@
   text-align: center;
 }
 
-.admin-images-field-preview-label {
-  margin: 0;
-  color: var(--muted);
-  font-size: 12px;
-  font-weight: 600;
-  line-height: 1.5;
-}
-
-.admin-hero-image {
+/* 图片字段（Hero 图、默认头像）：左侧地址等字段，右侧预览；预览宽度由预览块自身决定。 */
+.admin-media {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(180px, 240px);
-  gap: 12px 24px;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: var(--form-gap-field) 24px;
   align-items: start;
 }
 
-.admin-hero-image:has(.admin-images-field-preview[hidden]) {
-  grid-template-columns: minmax(0, 1fr);
-}
-
-.admin-hero-image__preview {
+.admin-media__fields {
   display: grid;
-  gap: 8px;
-  align-items: start;
+  gap: var(--form-gap-field);
   min-width: 0;
 }
 
-.admin-hero-image__preview:has(.admin-images-field-preview[hidden]) {
-  display: none;
-}
-
-.admin-hero-image__preview .admin-images-field-preview {
-  width: 100%;
-  margin-top: 0;
-}
-
-.admin-author-image {
+.admin-media__preview {
   display: grid;
-  grid-template-columns: minmax(0, 260px) max-content;
-  gap: 12px 20px;
-  align-items: start;
-}
-
-.admin-author-image__fields {
-  display: grid;
-  gap: 10px;
-  min-width: 0;
-}
-
-.admin-author-image__preview {
-  display: grid;
-  gap: 8px;
-  align-items: start;
+  gap: 6px;
   justify-items: start;
   min-width: 0;
 }
 
-.admin-author-image__preview .admin-images-field-preview {
+.admin-media__preview:has(.admin-images-field-preview[hidden]) {
+  display: none;
+}
+
+.admin-media:not(.admin-media--compact):has(.admin-images-field-preview[hidden]) {
+  grid-template-columns: minmax(0, 1fr);
+}
+
+.admin-media__preview .admin-images-field-preview {
   margin-top: 0;
 }
 
-.admin-label {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: baseline;
-  gap: 4px;
-  font-size: 12px;
-  line-height: 1.5;
-}
-
-.admin-label--split {
-  align-items: flex-start;
-  justify-content: space-between;
-  gap: 8px 12px;
-}
-
-.admin-label__copy {
-  display: inline-flex;
-  flex-wrap: wrap;
-  align-items: baseline;
-  gap: 4px;
-  min-width: 0;
-}
-
-.admin-label__main {
-  color: var(--muted);
-  font-family: var(--admin-font-ui);
-  font-weight: 600;
-  letter-spacing: 0;
-  line-height: 1.5;
-}
-
-.admin-label__pipe {
-  color: var(--faint);
-  font-weight: 400;
-}
-
-.admin-label__hint {
-  color: var(--faint);
-  font-weight: 400;
-  font-family: "LXGW WenKai Lite", "Kaiti SC", "STKaiti", serif;
-}
-
-.admin-label__toggle {
-  margin-left: auto;
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  min-height: 20px;
-  color: var(--muted);
-  font-weight: 400;
-  font-family: "LXGW WenKai Lite", "Kaiti SC", "STKaiti", serif;
-  white-space: nowrap;
-  cursor: pointer;
-}
-
-.admin-label__toggle input {
-  width: 16px;
-  height: 16px;
-  margin: 0;
+/* 短字段（作者名、头像）：字段列限宽，预览紧跟其右。 */
+.admin-media--compact {
+  grid-template-columns: minmax(0, 20rem) auto;
+  justify-content: start;
 }
 
 .admin-help {
@@ -333,72 +567,48 @@
   line-height: 1.6;
 }
 
-.admin-help--article-meta-preview {
-  margin-top: 8px;
-}
-
 .admin-help code {
   color: var(--muted);
   font-size: 13px;
   line-height: 1.7;
 }
 
-.admin-help__preview-value {
-  font-family: "LXGW WenKai Lite", "Kaiti SC", "STKaiti", serif;
-}
-
+/* 悬停说明：悬停字段名 / 小节标题文字时气泡在右侧展开、垂直居中，不遮挡下方输入框；文字本身不加装饰，只换问号光标。
+   键盘用 Tab 聚焦文字时同样展开；只认 :focus-visible，鼠标点击不会触发。 */
 .admin-help-tip {
   position: relative;
-  display: inline-flex;
-  align-items: center;
-  align-self: center;
-  flex: 0 0 auto;
-  vertical-align: middle;
+  display: inline-block;
+  justify-self: start;
+  max-width: 100%;
 }
 
-.admin-help-tip__trigger {
-  display: inline-grid;
-  place-items: center;
-  width: 18px;
-  min-width: 18px;
-  height: 18px;
-  padding: 0;
-  border: 0;
-  border-radius: 999px;
-  appearance: none;
-  background: transparent;
-  color: var(--faint);
-  font: inherit;
-  line-height: 1;
+.admin-help-tip__text {
   cursor: help;
-  transition:
-    color 160ms ease,
-    background-color 160ms ease,
-    box-shadow 160ms ease;
 }
 
-.admin-help-tip__trigger:hover,
-.admin-help-tip__trigger:focus-visible {
-  background: color-mix(in srgb, var(--admin-control-bg-hover) 88%, transparent);
-  color: var(--muted);
+.admin-help-tip__text :where(label) {
+  cursor: help;
 }
 
-.admin-help-tip__trigger:focus-visible {
-  outline: none;
-  box-shadow: var(--admin-focus-shadow);
+.admin-help-tip__text:focus-visible {
+  outline: 2px solid var(--admin-focus-border);
+  outline-offset: 2px;
+  border-radius: 2px;
 }
 
-.admin-help-tip__trigger :where(svg) {
-  display: block;
+/* 开关标题外的提示组件：行高与开关标题一致，不把这一行撑高。 */
+.admin-setting__text > .admin-help-tip {
+  font-size: var(--admin-text-sm);
+  line-height: 1.5;
 }
 
 .admin-help-tip__bubble {
   position: absolute;
-  inset-block-start: calc(100% + 6px);
-  inset-inline-start: 50%;
+  inset-block-start: 50%;
+  inset-inline-start: calc(100% + 8px);
   z-index: 20;
   width: max-content;
-  max-width: min(320px, 70vw);
+  max-width: min(280px, 50vw);
   padding: 6px 8px;
   border: 1px solid var(--admin-row-border);
   border-radius: 4px;
@@ -409,117 +619,101 @@
   font-size: 12px;
   font-weight: 400;
   line-height: 1.55;
+  text-align: start;
   white-space: normal;
   overflow-wrap: anywhere;
+  visibility: hidden;
   opacity: 0;
-  pointer-events: none;
-  transform: translate(-50%, -2px);
+  transform: translate(-2px, -50%);
   transition:
     opacity 90ms ease,
-    transform 90ms ease;
+    transform 90ms ease,
+    visibility 0s linear 90ms;
+}
+
+/* 文字与气泡之间的空隙也算悬停区，指针可以移到气泡上而不消失。 */
+.admin-help-tip__bubble::before {
+  content: '';
+  position: absolute;
+  inset-block: 0;
+  inset-inline-start: -9px;
+  width: 9px;
 }
 
 .admin-help-tip:hover .admin-help-tip__bubble,
-.admin-help-tip:focus-within .admin-help-tip__bubble {
+.admin-help-tip__text:focus-visible + .admin-help-tip__bubble {
+  visibility: visible;
   opacity: 1;
-  pointer-events: auto;
-  transform: translate(-50%, 0);
+  transform: translate(0, -50%);
+  transition-delay: 0s;
 }
 
-.admin-year-range {
-  display: inline-grid;
-  grid-template-columns: 104px auto 104px auto;
-  gap: 8px;
-  align-items: center;
-  width: max-content;
-  max-width: 100%;
+/* 窄容器右侧空间不够：气泡改在文字下方、从文字左缘展开，宽度不超过表单。
+   须写在上面的基础规则之后（同等优先级，靠顺序覆盖）。 */
+@container admin-theme-form (max-width: 520px) {
+  .admin-help-tip__bubble {
+    inset-block-start: calc(100% + 4px);
+    inset-inline-start: 0;
+    max-width: min(280px, calc(100cqi - 24px));
+    transform: translateY(-2px);
+  }
+
+  .admin-help-tip__bubble::before {
+    inset-block: -5px auto;
+    inset-inline: 0;
+    width: auto;
+    height: 5px;
+  }
+
+  .admin-help-tip:hover .admin-help-tip__bubble,
+  .admin-help-tip__text:focus-visible + .admin-help-tip__bubble {
+    transform: translateY(0);
+  }
 }
 
-.admin-year-range > .admin-field__control {
-  width: 104px;
-  text-align: center;
-}
-
-.admin-year-range__sep {
-  color: var(--faint);
-  font-size: 14px;
-  line-height: 1;
-}
-
-.admin-year-range__readonly {
-  background: var(--panel) !important;
-  color: var(--faint) !important;
-  cursor: default;
-}
-
-.admin-year-range[data-current-year-enabled='true'] .admin-year-range__readonly {
-  color: var(--text) !important;
-}
-
-.admin-year-range[data-current-year-enabled='true'] .admin-year-range__sep {
-  color: var(--muted);
-}
-
-.admin-year-range__toggle {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 20px;
-  height: 20px;
-}
-
-.admin-year-range__toggle input {
-  width: 16px;
-  height: 16px;
-  margin: 0;
-}
-
+/* 分段选择（侧栏分隔线）：与输入框同高、同边框圆角；灰底轨道，选中项浮起为白底。 */
 .admin-segmented {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 2px;
-  width: 100%;
-  min-height: 38px;
+  min-height: var(--admin-control-height);
   padding: 2px;
+  border: 1px solid var(--admin-control-border);
   border-radius: var(--admin-control-radius);
-  background: linear-gradient(180deg, var(--bg) 0%, var(--code-content-bg) 100%);
-  box-shadow:
-    inset 0 0 0 1px var(--border),
-    inset 0 1px 0 rgba(255, 255, 255, 0.35);
+  background: var(--form-fill-muted);
 }
 
 .admin-segmented__option {
   position: relative;
-  min-width: 0;
   display: flex;
+  min-width: 0;
 }
 
 .admin-segmented__option input {
   position: absolute;
   inset: 0;
-  opacity: 0;
   margin: 0;
+  opacity: 0;
+  cursor: pointer;
+}
+
+.admin-segmented__option input:disabled {
+  cursor: not-allowed;
 }
 
 .admin-segmented__option span {
   display: inline-flex;
+  flex: 1 1 auto;
   align-items: center;
   justify-content: center;
-  flex: 1 1 auto;
-  width: 100%;
-  min-height: 100%;
   padding: 0 10px;
-  border: 1px solid transparent;
-  border-radius: calc(var(--admin-control-radius) - 2px);
-  background: transparent;
+  border-radius: 6px;
   color: var(--muted);
-  font-family: "LXGW WenKai Lite", "Kaiti SC", "STKaiti", serif;
-  font-size: 13px;
+  font-size: var(--admin-text-sm);
   line-height: 1.3;
   text-align: center;
-  cursor: pointer;
+  pointer-events: none;
   transition:
-    border-color 160ms ease,
     background-color 160ms ease,
     color 160ms ease,
     box-shadow 160ms ease;
@@ -527,25 +721,31 @@
 
 .admin-segmented__option:hover span {
   color: var(--text);
-  background: linear-gradient(180deg, var(--bg) 0%, var(--code-content-bg) 100%);
 }
 
 .admin-segmented__option input:checked + span {
-  border-color: var(--border);
-  background: linear-gradient(180deg, var(--code-content-bg) 0%, var(--panel) 100%);
+  background: var(--bg);
   color: var(--text);
   box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.45),
+    0 0 0 1px var(--admin-control-border),
     0 1px 2px -1px var(--overlay-20);
 }
 
+/* 深色下选中项比轨道亮一档，仍读作“浮起”。 */
+:root[data-theme='dark'] .admin-segmented__option input:checked + span {
+  background: color-mix(in srgb, var(--text) 12%, var(--bg));
+}
+
 .admin-segmented__option input:focus-visible + span {
-  outline: none;
-  border-color: var(--admin-focus-border);
   box-shadow: var(--admin-focus-shadow);
 }
 
-/* 排版字体：radio 卡片组（固定 4 列保证各 role 组卡片纵向对齐，超出自动换行） */
+.admin-segmented__option input:disabled + span {
+  color: var(--admin-control-text-disabled);
+}
+
+/* 字体卡片：单选卡片组，固定 4 列让各字体角色的卡片纵向对齐，窄容器 2 列。
+   常态浅边框浅底；选中为渐变底 + 投影（保留原有卡片质感）。 */
 .admin-font-grid {
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
@@ -561,16 +761,16 @@
 .admin-font-card input {
   position: absolute;
   inset: 0;
-  opacity: 0;
   margin: 0;
+  opacity: 0;
 }
 
 .admin-font-card__body {
-  flex: 1 1 auto;
-  min-width: 0;
   display: grid;
+  flex: 1 1 auto;
   align-content: start;
   gap: 4px;
+  min-width: 0;
   padding: 10px 12px;
   border: 1px solid var(--admin-field-soft-border);
   border-radius: var(--admin-control-radius);
@@ -600,7 +800,7 @@
   box-shadow: var(--admin-focus-shadow);
 }
 
-/* 卡片内容默认浅灰、选中恢复正文色：详情行已移除，选中态由卡片自身（边框/底色/文字色）表达。 */
+/* 卡片文字常态弱化，选中恢复正文色。 */
 .admin-font-card__preview {
   color: var(--muted);
   font-size: 19px;
@@ -618,7 +818,7 @@
   text-overflow: ellipsis;
 }
 
-/* 来源说明：纯文字弱化展示，与上方字体名左对齐。 */
+/* 来源说明（自托管子集 / 零下载 / 构建期下载）。 */
 .admin-font-card__badge {
   max-width: 100%;
   color: var(--faint);
@@ -634,411 +834,71 @@
   color: var(--text);
 }
 
-@media (max-width: 900px) {
+@container admin-theme-form (max-width: 560px) {
   .admin-font-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
 
-.admin-label__main code {
-  font-size: 12px;
-}
-
-.admin-title-pair {
-  display: flex;
-  align-items: stretch;
-  width: 100%;
-  min-width: 0;
-  min-height: var(--admin-control-height);
-  border: 1px solid var(--admin-control-border);
-  border-radius: var(--admin-control-radius);
-  background: var(--bg);
-  overflow: hidden;
-  transition:
-    border-color 160ms ease,
-    background-color 160ms ease,
-    box-shadow 160ms ease;
-}
-
-.admin-title-pair:hover {
-  border-color: var(--admin-control-border-hover);
-}
-
-.admin-title-pair:focus-within {
-  outline: none;
-  border-color: var(--admin-focus-border);
-  box-shadow: var(--admin-focus-shadow);
-}
-
-.admin-title-pair:has(.admin-title-pair__input[aria-invalid='true']) {
-  border-color: var(--admin-field-invalid-border);
-  background: var(--admin-field-invalid-bg);
-}
-
-.admin-title-pair:has(.admin-title-pair__input[aria-invalid='true']):focus-within {
-  border-color: var(--admin-field-invalid-border);
-  box-shadow: var(--admin-field-invalid-focus-shadow);
-}
-
-.admin-title-pair__input {
-  min-width: 0;
-  min-height: 100%;
-  padding: 6px var(--admin-field-padding-inline);
-  border: 0;
-  border-radius: 0;
-  box-shadow: none;
-  background: transparent;
-  color: var(--text);
-  font: inherit;
-  font-family: var(--admin-font-ui);
-  font-size: var(--admin-text-base);
-  line-height: 1.35;
-}
-
-.admin-title-pair__input:focus-visible {
-  outline: 0;
-}
-
-.admin-title-pair__input::placeholder {
-  color: var(--admin-field-placeholder);
-}
-
-.admin-title-pair__input--title {
-  flex: 3 1 0;
-  text-align: center;
-}
-
-.admin-title-pair__input--subtitle {
-  flex: 7 1 0;
-  text-align: left;
-}
-
-.admin-title-pair__sep {
-  flex: 0 0 auto;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  padding: 0 10px;
-  color: var(--faint);
-  font-size: var(--admin-text-sm);
-  line-height: 1;
-  font-family: var(--admin-font-ui);
-}
-
-.admin-subgroup {
-  margin-top: 20px;
-  border-top: 0;
-  padding-top: 0;
-}
-
-.admin-help--inline {
-  margin-top: 8px;
-}
-
-.admin-subtitle {
-  margin: 0 0 12px;
-  display: flex;
-  flex-wrap: wrap;
-  align-items: baseline;
-  gap: 6px;
-}
-
-.admin-subtitle__main,
-.admin-subtitle__hint {
-  font-family: "LXGW WenKai Lite", "Kaiti SC", "STKaiti", serif;
-}
-
-.admin-subtitle__main {
-  color: var(--muted);
-  font-family: inherit;
-  font-size: 13px;
-  font-weight: 600;
-}
-
-.admin-subtitle__hint {
-  font-size: 12px;
-  color: var(--faint);
-}
-
-.admin-subtitle--compact {
-  margin-bottom: 0;
-}
-
-.admin-inline-builder {
-  display: flex;
-  flex-wrap: nowrap;
-  gap: 8px;
-  align-items: center;
-  min-width: 0;
-}
-
-.admin-inline-builder--intro-more {
-  gap: 14px;
-}
-
-.admin-hero-fields {
+/* 首页导语补充句：按输出顺序排成一行（补充文案 + 链接 + 或 + 链接），关闭第二链接时整段隐藏。 */
+.admin-intro-more {
   display: grid;
-  gap: 10px;
+  gap: var(--form-gap-field);
+  min-width: 0;
 }
 
-.admin-inline-builder__text {
+.admin-intro-more__sentence {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+}
+
+.admin-intro-more__text {
   flex: 1 1 auto;
   min-width: 0;
-  min-height: calc(1.4em + 18px) !important;
-  resize: none !important;
+  min-height: var(--admin-control-height);
+  resize: none;
 }
 
-.admin-inline-builder--intro-more .admin-inline-builder__text {
-  flex: 0 1 248px;
-  max-width: 300px;
+.admin-intro-more__select {
+  flex: none;
+  width: 8.5rem;
 }
 
-.admin-inline-builder__select-group,
-.admin-inline-builder__secondary {
+.admin-intro-more__secondary {
   display: inline-flex;
+  flex: none;
   align-items: center;
-  gap: 6px;
-  min-width: 0;
-  box-sizing: border-box;
-}
-
-.admin-inline-builder__secondary-sep,
-.admin-inline-builder__divider {
-  flex: 0 0 auto;
-  white-space: nowrap;
-  font-size: 13px;
-}
-
-.admin-inline-builder__secondary-sep {
-  color: var(--muted);
-}
-
-.admin-inline-builder__select-group {
-  margin-right: 6px;
-}
-
-.admin-inline-builder__divider {
-  color: var(--border);
-  margin-left: 2px;
-  margin-right: 4px;
-}
-
-.admin-inline-builder__select {
-  flex: 0 0 92px;
-  width: 92px !important;
-  min-width: 92px;
-  padding-left: 0;
-  padding-right: 0;
-  text-align: center;
-  text-align-last: center;
-}
-
-.admin-inline-builder__select option {
-  text-align: center;
-}
-
-.admin-inline-builder__toggle {
-  flex: 0 0 auto;
-  display: inline-flex;
-  align-items: center;
-  gap: 5px;
-  min-height: 20px;
-  padding: 0;
-  color: var(--muted);
-  font-size: 13px;
-  white-space: nowrap;
-  cursor: pointer;
-}
-
-.admin-inline-builder__toggle input {
-  width: 16px;
-  height: 16px;
-  margin: 0;
-}
-
-.admin-inline-builder__secondary {
-  color: var(--text);
-  padding-right: 12px;
-  transition:
-    color 160ms ease,
-    opacity 160ms ease;
-}
-
-.admin-inline-builder__secondary[aria-disabled='true'] {
-  color: var(--faint);
-  opacity: 0.74;
-}
-
-.admin-toggle {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  min-height: 36px;
-  font-size: 13px;
-  color: var(--muted);
-}
-
-.admin-toggle__control {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 0;
-  width: 100%;
-}
-
-.admin-toggle__control input {
-  margin: 0;
-}
-
-.admin-stack {
-  display: grid;
   gap: 8px;
 }
 
-.admin-sidebar-icon-grid {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 14px;
+.admin-intro-more__secondary[aria-disabled='true'] {
+  display: none;
 }
 
-.admin-sidebar-icon-toggle {
-  --admin-control-height-compact: 30px;
-  --admin-control-icon-size-compact: 30px;
-  --admin-control-glyph-size-compact: 16px;
-  --admin-sidebar-icon-color: var(--muted);
-  --admin-sidebar-icon-border: color-mix(in srgb, var(--muted) 34%, transparent);
-  --admin-sidebar-icon-color-active: color-mix(in srgb, var(--muted) 92%, var(--text) 8%);
-  --admin-sidebar-icon-border-active: color-mix(in srgb, var(--muted) 54%, transparent);
-  --admin-sidebar-icon-bg-active: color-mix(in srgb, var(--admin-control-bg-hover) 92%, var(--muted) 8%);
-
-  position: relative;
-  display: inline-grid;
-  cursor: pointer;
-  touch-action: manipulation;
-  -webkit-tap-highlight-color: transparent;
-}
-
-.admin-sidebar-icon-toggle[aria-disabled='true'] {
-  cursor: not-allowed;
-}
-
-.admin-sidebar-icon-toggle input {
-  position: absolute;
-  inset: 0;
-  z-index: 1;
-  margin: 0;
-  opacity: 0;
-  cursor: inherit;
-}
-
-.admin-sidebar-icon-toggle .admin-sidebar-icon-toggle__button {
-  position: relative;
-  border-color: var(--admin-sidebar-icon-border);
-  background: transparent;
-  color: var(--admin-sidebar-icon-color);
-  pointer-events: none;
-}
-
-.admin-sidebar-icon-toggle__button svg {
-  flex: 0 0 auto;
-}
-
-.admin-sidebar-icon-toggle:hover .admin-sidebar-icon-toggle__button {
-  border-color: var(--admin-control-border-hover);
-  background: var(--admin-control-bg-hover);
-  color: var(--text);
-}
-
-.admin-sidebar-icon-toggle input:checked + .admin-sidebar-icon-toggle__button {
-  border-color: var(--admin-sidebar-icon-border-active);
-  background: var(--admin-sidebar-icon-bg-active);
-  color: var(--admin-sidebar-icon-color-active);
-  box-shadow: 0 0 0 1px color-mix(in srgb, var(--admin-sidebar-icon-color-active) 16%, transparent);
-}
-
-.admin-sidebar-icon-toggle input:focus-visible + .admin-sidebar-icon-toggle__button {
-  outline: none;
-  border-color: var(--admin-focus-border);
-  box-shadow: var(--admin-focus-shadow);
-}
-
-.admin-sidebar-icon-toggle input:disabled + .admin-sidebar-icon-toggle__button,
-.admin-sidebar-icon-toggle[aria-disabled='true'] .admin-sidebar-icon-toggle__button {
-  border-color: color-mix(in srgb, var(--admin-control-border) 72%, transparent);
-  background: var(--admin-control-bg-disabled);
-  color: var(--admin-control-text-disabled);
-  opacity: 0.68;
-}
-
-.admin-toggle-row-group {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 8px 18px;
-}
-
-.admin-toggle-row-group--article-meta {
-  flex-wrap: nowrap;
-  gap: 8px clamp(12px, 1.6vw, 20px);
-  overflow-x: auto;
-  scrollbar-width: thin;
-}
-
-.admin-toggle-row-group--article-meta :where(.admin-toggle-row, .admin-inline-field) {
-  flex: 0 0 auto;
-  white-space: nowrap;
-}
-
-.admin-inline-field {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  font-size: 13px;
+.admin-intro-more__or {
   color: var(--muted);
-  white-space: nowrap;
-}
-
-.admin-inline-field__input {
-  width: 92px;
-  min-width: 92px;
-  height: var(--admin-control-height-compact);
-  border: 1px solid var(--admin-control-border);
-  border-radius: var(--admin-control-radius);
-  background: var(--bg);
-  color: var(--text);
-  padding: 0 var(--admin-field-padding-inline-compact);
-  font: inherit;
-  font-family: var(--admin-font-ui);
   font-size: var(--admin-text-sm);
-  line-height: 1.2;
-  transition:
-    border-color 160ms ease,
-    background-color 160ms ease,
-    box-shadow 160ms ease;
 }
 
-.admin-inline-field__input::placeholder {
-  color: var(--admin-field-placeholder);
-}
+/* 窄容器：图片预览移到字段下方；补充句换行，补充文案独占一行。须写在上面的基础规则之后。 */
+@container admin-theme-form (max-width: 520px) {
+  .admin-media {
+    grid-template-columns: minmax(0, 1fr);
+  }
 
-.admin-inline-field__input:hover {
-  border-color: var(--admin-control-border-hover);
-}
+  .admin-images-field-preview--hero {
+    width: 100%;
+  }
 
-.admin-inline-field__input[aria-invalid='true'] {
-  border-color: var(--admin-field-invalid-border);
-  background: var(--admin-field-invalid-bg);
-}
+  .admin-intro-more__sentence {
+    flex-wrap: wrap;
+  }
 
-.admin-inline-field__input:focus-visible {
-  outline: none;
-  border-color: var(--admin-focus-border);
-  box-shadow: var(--admin-focus-shadow);
-}
-
-.admin-inline-field__input[aria-invalid='true']:focus-visible {
-  border-color: var(--admin-field-invalid-border);
-  box-shadow: var(--admin-field-invalid-focus-shadow);
+  .admin-intro-more__text {
+    flex-basis: 100%;
+  }
 }
 
 .admin-actions {
@@ -1107,6 +967,11 @@
   white-space: nowrap;
 }
 
+/* 底部状态只报告操作进度和结果：长分组里点保存时页头不在屏幕内。已载入、等待保存等常态只在页头显示。 */
+.admin-actions__controls .admin-status--inline:is([data-state='idle'], [data-state='ready']) {
+  display: none;
+}
+
 .admin-actions[data-sticky='true'] .admin-actions__meta {
   flex: 1 1 auto;
 }
@@ -1130,67 +995,6 @@
     width: 100%;
     margin-left: 0;
     justify-content: flex-end;
-  }
-}
-
-@container admin-theme-form (max-width: 480px) {
-  .admin-sidebar-layout {
-    grid-template-columns: 1fr;
-    gap: 18px;
-  }
-
-  .admin-grid {
-    grid-template-columns: 1fr;
-  }
-
-  .admin-hero-image,
-  .admin-author-image {
-    grid-template-columns: 1fr;
-  }
-
-  .admin-field--memo > .admin-field__control,
-  .admin-field--memo > .admin-title-pair {
-    max-width: none;
-  }
-
-  .admin-inline-builder {
-    flex-wrap: wrap;
-    gap: 8px;
-  }
-
-  .admin-inline-builder__text,
-  .admin-inline-builder__select {
-    flex: 1 1 100%;
-    width: 100% !important;
-  }
-
-  .admin-inline-builder__select-group,
-  .admin-inline-builder__secondary {
-    flex: 1 1 100%;
-    width: 100%;
-  }
-
-  .admin-inline-builder__divider {
-    display: none;
-  }
-
-  .admin-inline-builder__toggle {
-    justify-content: flex-start;
-    width: max-content;
-    max-width: 100%;
-  }
-
-  .admin-title-pair__sep {
-    padding: 0 8px;
-  }
-
-  .admin-toggle {
-    align-items: center;
-    justify-content: space-between;
-  }
-
-  .admin-toggle__control {
-    min-height: 32px;
   }
 }
 
@@ -1243,53 +1047,4 @@
   .admin-actions[data-sticky='true'] .admin-actions__buttons .admin-btn {
     flex: 1 1 0;
   }
-}
-
-/* 站点图标：桌面单行双槽位（本地 admin 后台，无移动端诉求） */
-.admin-favicon-line {
-  display: flex;
-  align-items: center;
-  gap: 14px;
-}
-
-.admin-favicon-slot {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.admin-favicon-slot__label {
-  font-size: 0.86em;
-  color: var(--muted);
-  white-space: nowrap;
-}
-
-.admin-favicon-slot__preview {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 28px;
-  height: 28px;
-  border: 1px solid var(--border);
-  border-radius: 6px;
-  background: var(--code-content-bg);
-  overflow: hidden;
-  flex: none;
-}
-
-.admin-favicon-slot__preview img {
-  width: 20px;
-  height: 20px;
-  object-fit: contain;
-}
-
-.admin-favicon-slot__preview[data-state='default'] img {
-  opacity: 0.45;
-}
-
-.admin-favicon-line__divider {
-  width: 1px;
-  height: 20px;
-  background: var(--border);
-  flex: none;
 }

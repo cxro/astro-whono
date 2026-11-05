@@ -2,10 +2,12 @@
 import type { SidebarNavId } from '../../lib/theme-settings';
 import AdminDiagnosticPanel from './AdminDiagnosticPanel.astro';
 import AdminHomeSection from './AdminHomeSection.astro';
+import AdminIcon from './AdminIcon.astro';
 import AdminPageSection from './AdminPageSection.astro';
+import AdminArticleSection from './AdminArticleSection.astro';
 import AdminSidebarSection from './AdminSidebarSection.astro';
 import AdminSiteSection from './AdminSiteSection.astro';
-import AdminUiSection from './AdminUiSection.astro';
+import AdminTypographySection from './AdminTypographySection.astro';
 
 interface Props {
   bootstrapText: string;
@@ -34,9 +36,53 @@ const {
   settingsEndpoint,
   socialCustomLimit
 } = Astro.props;
+
+// 分组标签：一次只显示一个分组，其余分组用 hidden 隐藏（不卸载，脚本仍能取到全部控件），统一保存。
+// id 同时用作地址栏 hash（#sidebar 等），刷新后停留在当前分组。
+const sectionTabs = [
+  { id: 'site', label: '站点', icon: 'admin-site' },
+  { id: 'sidebar', label: '侧栏', icon: 'admin-sidebar' },
+  { id: 'home', label: '首页', icon: 'admin-homepage' },
+  { id: 'page', label: '页面', icon: 'admin-page' },
+  { id: 'article', label: '文章', icon: 'admin-article' },
+  { id: 'typography', label: '字体', icon: 'admin-typography' }
+] as const;
+type SectionTabId = (typeof sectionTabs)[number]['id'];
+const defaultTabId: SectionTabId = sectionTabs[0].id;
+const panelAttrs = (id: SectionTabId) => ({
+  id: `admin-panel-${id}`,
+  role: 'tabpanel' as const,
+  'aria-labelledby': `admin-tab-${id}`,
+  hidden: id !== defaultTabId
+});
 ---
 
 <section class="admin-theme-console" data-admin-root data-settings-endpoint={settingsEndpoint}>
+  <div class="admin-tabs-bar">
+    <div class="admin-tabs" role="tablist" aria-label="主题设置分组">
+      {
+        sectionTabs.map((tab) => (
+          <button
+            id={`admin-tab-${tab.id}`}
+            class="admin-tabs__tab"
+            type="button"
+            role="tab"
+            aria-selected={tab.id === defaultTabId ? 'true' : 'false'}
+            aria-controls={`admin-panel-${tab.id}`}
+            tabindex={tab.id === defaultTabId ? 0 : -1}
+            data-admin-tab={tab.id}
+          >
+            <AdminIcon name={tab.icon} class="admin-tabs__icon" size={16} />
+            {tab.label}
+            <span class="admin-tabs__dot" data-admin-tab-invalid hidden>
+              <span class="admin-sr-only">（有待处理的问题）</span>
+            </span>
+          </button>
+        ))
+      }
+    </div>
+  </div>
+
   <AdminDiagnosticPanel
     bannerId="admin-error-banner"
     titleId="admin-error-title"
@@ -52,24 +98,38 @@ const {
   />
 
   <form id="admin-form" class="admin-form" novalidate>
-    <AdminSiteSection
-      footerStartYearMin={footerStartYearMin}
-      footerStartYearMax={footerStartYearMax}
-      socialCustomLimit={socialCustomLimit}
-    />
+    <div {...panelAttrs('site')}>
+      <AdminSiteSection
+        footerStartYearMin={footerStartYearMin}
+        footerStartYearMax={footerStartYearMax}
+        socialCustomLimit={socialCustomLimit}
+      />
+    </div>
 
-    <AdminSidebarSection navIdOrder={navIdOrder} />
+    <div {...panelAttrs('sidebar')}>
+      <AdminSidebarSection navIdOrder={navIdOrder} />
+    </div>
 
-    <AdminHomeSection homeIntroMaxLength={homeIntroMaxLength} />
+    <div {...panelAttrs('home')}>
+      <AdminHomeSection homeIntroMaxLength={homeIntroMaxLength} />
+    </div>
 
-    <AdminPageSection
-      pageTitleMaxLength={pageTitleMaxLength}
-      pageSubtitleMaxLength={pageSubtitleMaxLength}
-      memoTitlePlaceholder={memoTitlePlaceholder}
-      memoSubtitlePlaceholder={memoSubtitlePlaceholder}
-    />
+    <div {...panelAttrs('page')}>
+      <AdminPageSection
+        pageTitleMaxLength={pageTitleMaxLength}
+        pageSubtitleMaxLength={pageSubtitleMaxLength}
+        memoTitlePlaceholder={memoTitlePlaceholder}
+        memoSubtitlePlaceholder={memoSubtitlePlaceholder}
+      />
+    </div>
 
-    <AdminUiSection />
+    <div {...panelAttrs('article')}>
+      <AdminArticleSection />
+    </div>
+
+    <div {...panelAttrs('typography')}>
+      <AdminTypographySection />
+    </div>
   </form>
 
   <div id="admin-actions-sentinel" class="admin-actions__sentinel" aria-hidden="true"></div>

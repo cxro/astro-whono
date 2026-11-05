@@ -12,6 +12,7 @@ import {
   extractInvalidSettingsState,
   extractSettingsPayload,
   getPayloadErrors,
+  getPayloadIssues,
   getPayloadMessage,
   isRecord,
   requestSettingsWrite
@@ -30,6 +31,8 @@ type AdminThemeControllerContext = {
   validation: AdminThemeValidation;
   finalizeAppliedSettings: () => void;
   syncEditableDerivedControls: () => void;
+  /** 让字段所在的分组标签显示出来（字段可能在未选中的分组里）。 */
+  revealField: (field: HTMLElement) => void;
 };
 
 const STATUS_INVALID_SETTINGS = '配置损坏';
@@ -43,7 +46,8 @@ export const createAdminThemeController = ({
   uiState,
   validation,
   finalizeAppliedSettings,
-  syncEditableDerivedControls
+  syncEditableDerivedControls,
+  revealField
 }: AdminThemeControllerContext) => {
   const {
     bootstrapEl,
@@ -56,6 +60,7 @@ export const createAdminThemeController = ({
   } = formCodec;
   const {
     validateSettings,
+    createPathIssues,
     clearInvalidFields,
     markInvalidFields,
     resolveIssueField
@@ -75,6 +80,7 @@ export const createAdminThemeController = ({
       .map((issue) => resolveIssueField(issue))
       .find((field): field is HTMLElement => field !== null);
 
+    if (firstField) revealField(firstField);
     scrollIntoViewWithOffset(errorBanner);
     window.requestAnimationFrame(() => {
       if (!firstField) {
@@ -92,6 +98,13 @@ export const createAdminThemeController = ({
   const setValidationIssues = (issues: readonly ValidationIssue[]): void => {
     markInvalidFields(issues);
     uiState.setErrors(issues.map((issue) => issue.message));
+  };
+
+  /* 服务器才能发现的问题（如本地文件不存在）：标出字段，交给 revealErrorState 切到所在分组。 */
+  const markServerIssues = (payload: unknown): ValidationIssue[] => {
+    const issues = createPathIssues(getPayloadIssues(payload));
+    markInvalidFields(issues);
+    return issues;
   };
 
   const clearExternalUpdate = (): void => {
@@ -324,7 +337,7 @@ export const createAdminThemeController = ({
           title: '检查配置失败'
         });
         uiState.setStatus('error', '检查配置失败', { announce: false });
-        revealErrorState();
+        revealErrorState(markServerIssues(payload));
         return;
       }
 
@@ -418,7 +431,7 @@ export const createAdminThemeController = ({
         } else {
           uiState.setStatus('error', '保存失败', { announce: false });
         }
-        revealErrorState();
+        revealErrorState(markServerIssues(payload));
         return;
       }
 

@@ -1,6 +1,6 @@
 ---
-import AdminIcon from './AdminIcon.astro';
 import AdminHelpTip from './AdminHelpTip.astro';
+import AdminSettingSwitch from './AdminSettingSwitch.astro';
 import {
   ADMIN_HERO_IMAGE_ALT_DEFAULT,
   ADMIN_HERO_IMAGE_ALT_MAX_LENGTH,
@@ -16,121 +16,122 @@ interface Props {
 const { homeIntroMaxLength } = Astro.props;
 ---
 
-<fieldset class="admin-group">
-  <legend class="admin-group__legend">
-    <AdminIcon name="admin-home" class="admin-group__legend-icon" size={14} />
-    <span class="admin-group__legend-copy">
-      <span class="admin-group__legend-zh">首页设置</span>
-      <span class="admin-group__legend-en">Home</span>
-    </span>
-  </legend>
-  <div class="admin-grid">
-    <div class="admin-field admin-field--full">
-      <div class="admin-hero-image">
-        <div class="admin-hero-fields">
-          <div class="admin-field">
-            <div class="admin-label admin-label--split">
-              <span class="admin-label__copy">
-                <label class="admin-label__main" for="home-hero-image-src">Hero 图片地址</label>
-                <AdminHelpTip
-                  id="home-hero-image-src-tip"
-                  label="Hero 图片地址说明"
-                  text="支持 src/assets/**、public/** 或 https:// 图床链接；地址留空时回退内置默认图。"
-                />
-              </span>
-              <label class="admin-label__toggle" for="home-show-hero">
-                <input id="home-show-hero" type="checkbox" checked />
-                <span>展示</span>
-              </label>
-            </div>
-            <div class="admin-images-field-input">
-              <input
-                class="admin-field__control"
-                id="home-hero-image-src"
-                type="text"
-                inputmode="url"
-                spellcheck="false"
-                placeholder="当前使用：src/assets/hero.png"
-                aria-label="Hero 图片地址"
-                aria-describedby="home-hero-image-src-tip"
-              />
-              <button
-                class="admin-btn admin-btn--ghost"
-                type="button"
-                data-admin-images-open="home.heroImageSrc"
-                aria-label="选择本地 Hero 图片"
-              >
-                选择
-              </button>
-            </div>
-            <p class="admin-help admin-help--inline" data-admin-images-meta="home.heroImageSrc" hidden></p>
+<fieldset class="admin-section">
+  <legend class="admin-sr-only"><h2>首页设置</h2></legend>
+
+  <div class="admin-subsection" role="group" aria-labelledby="home-hero-title" data-reveal-scope>
+    <div class="admin-subsection__head">
+      <h3 id="home-hero-title" class="admin-subsection__title">Hero 图</h3>
+    </div>
+    <AdminSettingSwitch id="home-show-hero" checked inputAttrs={{ 'data-reveal-source': true }}>
+      显示 Hero 图
+    </AdminSettingSwitch>
+    <div class="admin-media" data-reveal-when-on>
+      <div class="admin-media__fields">
+        <div class="admin-field">
+          <div class="admin-field__head">
+            <AdminHelpTip
+              id="home-hero-image-src-tip"
+              text="支持 src/assets/**、public/** 或 https:// 图床链接；留空时使用内置默认图。"
+            >
+              <label class="admin-field__label" for="home-hero-image-src">图片地址</label>
+            </AdminHelpTip>
           </div>
-          <div class="admin-field">
-            <span class="admin-label">
-              <label class="admin-label__main" for="home-hero-image-alt">Hero 图片说明</label>
-              <span class="admin-label__hint">（用于图片替代文本，不在页面显示）</span>
-            </span>
+          <div class="admin-images-field-input">
             <input
               class="admin-field__control"
-              id="home-hero-image-alt"
+              id="home-hero-image-src"
               type="text"
-              maxlength={ADMIN_HERO_IMAGE_ALT_MAX_LENGTH}
-              placeholder={ADMIN_HERO_IMAGE_ALT_DEFAULT}
-              aria-label="Hero 图片说明"
+              inputmode="url"
+              spellcheck="false"
+              placeholder="当前使用：src/assets/hero.png"
+              aria-describedby="home-hero-image-src-tip"
             />
+            <button
+              class="admin-btn admin-btn--ghost"
+              type="button"
+              data-admin-images-open="home.heroImageSrc"
+              aria-label="选择本地 Hero 图片"
+            >
+              选择
+            </button>
           </div>
+          <p class="admin-help" data-admin-images-meta="home.heroImageSrc" hidden></p>
         </div>
-        <div class="admin-hero-image__preview" aria-label="Hero 图片预览">
-          <p class="admin-images-field-preview-label">预览图片</p>
-          <div
-            class="admin-images-field-preview admin-images-field-preview--hero"
-            data-admin-images-preview="home.heroImageSrc"
-            data-admin-images-default-preview-src={defaultHero.src}
-            hidden
-          >
-            <img alt="" loading="lazy" decoding="async" data-admin-images-preview-img="home.heroImageSrc" />
-            <span class="admin-images-field-placeholder" data-admin-images-preview-placeholder="home.heroImageSrc" hidden>
-              首页 Hero 图未启用
-            </span>
+        <div class="admin-field">
+          <div class="admin-field__head">
+            <AdminHelpTip id="home-hero-image-alt-tip" text="图片的替代文本，供读屏和图片加载失败时使用，不在页面上显示。">
+              <label class="admin-field__label" for="home-hero-image-alt">图片说明</label>
+            </AdminHelpTip>
           </div>
+          <input
+            class="admin-field__control"
+            id="home-hero-image-alt"
+            type="text"
+            maxlength={ADMIN_HERO_IMAGE_ALT_MAX_LENGTH}
+            placeholder={ADMIN_HERO_IMAGE_ALT_DEFAULT}
+            aria-describedby="home-hero-image-alt-tip"
+          />
+        </div>
+      </div>
+      <div class="admin-media__preview">
+        <span class="admin-field__label">预览</span>
+        <div
+          class="admin-images-field-preview admin-images-field-preview--hero"
+          data-admin-images-preview="home.heroImageSrc"
+          data-admin-images-default-preview-src={defaultHero.src}
+          hidden
+        >
+          <img alt="" loading="lazy" decoding="async" data-admin-images-preview-img="home.heroImageSrc" />
+          <span class="admin-images-field-placeholder" data-admin-images-preview-placeholder="home.heroImageSrc" hidden>
+            首页 Hero 图未启用
+          </span>
         </div>
       </div>
     </div>
-    <div class="admin-field admin-field--full">
-      <div class="admin-label admin-label--split">
-        <span class="admin-label__copy">
-          <label class="admin-label__main" for="home-intro-lead">首页导语主文案</label>
-        </span>
-        <label class="admin-label__toggle" for="home-show-intro-lead">
-          <input id="home-show-intro-lead" type="checkbox" checked />
-          <span>展示</span>
-        </label>
-      </div>
-      <textarea class="admin-field__control admin-field__control--compact-textarea" id="home-intro-lead" rows="2" maxlength={homeIntroMaxLength}></textarea>
+  </div>
+
+  <div class="admin-subsection" role="group" aria-labelledby="home-intro-title" aria-describedby="home-intro-tip">
+    <div class="admin-subsection__head">
+      <h3 id="home-intro-title" class="admin-subsection__title">
+        <AdminHelpTip
+          id="home-intro-tip"
+          text="Hero 图下方的导语：主文案一段；补充文案按「补充文案 + 链接 + 可选“或” + 链接」拼成一句。"
+        >首页导语</AdminHelpTip>
+      </h3>
     </div>
-    <div class="admin-field admin-field--full">
-      <div class="admin-label admin-label--split">
-        <span class="admin-label__copy">
-          <label class="admin-label__main" for="home-intro-more">首页导语补充文案</label>
-          <span class="admin-label__hint">（固定句式：补充文案 + 链接 + 可选“或” + 链接）</span>
-        </span>
-        <label class="admin-label__toggle" for="home-show-intro-more">
-          <input id="home-show-intro-more" type="checkbox" checked />
-          <span>展示</span>
-        </label>
-      </div>
-      <div class="admin-inline-builder admin-inline-builder--intro-more" role="group" aria-label="首页导语补充句式编辑器">
+
+    <div class="admin-subsection__block" data-reveal-scope>
+      <AdminSettingSwitch id="home-show-intro-lead" checked inputAttrs={{ 'data-reveal-source': true }}>
+        显示主文案
+      </AdminSettingSwitch>
+      <div class="admin-field" data-reveal-when-on>
         <textarea
-          id="home-intro-more"
-          class="admin-field__control admin-inline-builder__text"
-          rows="1"
+          class="admin-field__control admin-field__control--compact-textarea"
+          id="home-intro-lead"
+          rows="2"
           maxlength={homeIntroMaxLength}
-          aria-label="首页导语补充文案"
+          aria-label="首页导语主文案"
         ></textarea>
-        <span class="admin-inline-builder__select-group">
+      </div>
+    </div>
+
+    <div class="admin-subsection__block" data-reveal-scope>
+      <AdminSettingSwitch id="home-show-intro-more" checked inputAttrs={{ 'data-reveal-source': true }}>
+        显示补充文案
+      </AdminSettingSwitch>
+      <div class="admin-intro-more" data-reveal-when-on>
+        <div class="admin-intro-more__sentence" role="group" aria-label="首页导语补充句式">
+          <textarea
+            id="home-intro-more"
+            class="admin-field__control admin-intro-more__text"
+            rows="1"
+            maxlength={homeIntroMaxLength}
+            aria-label="首页导语补充文案"
+          ></textarea>
           <select
             id="home-intro-more-link-primary"
-            class="admin-field__control admin-inline-builder__select"
+            class="admin-field__control admin-intro-more__select"
             aria-label="首页导语补充主链接"
           >
             {ADMIN_HOME_INTRO_LINK_OPTIONS.map((option) => (
@@ -139,39 +140,34 @@ const { homeIntroMaxLength } = Astro.props;
               </option>
             ))}
           </select>
-        </span>
-        <span class="admin-inline-builder__divider" aria-hidden="true">|</span>
-        <label class="admin-inline-builder__toggle" for="home-intro-more-link-secondary-enabled">
-          <input
-            id="home-intro-more-link-secondary-enabled"
-            type="checkbox"
-            aria-controls="home-intro-more-link-secondary"
-          />
-          <span>启用双链接</span>
-        </label>
-        <span
-          id="home-intro-more-link-secondary-group"
-          class="admin-inline-builder__secondary"
-          aria-disabled="true"
+          <span id="home-intro-more-link-secondary-group" class="admin-intro-more__secondary" aria-disabled="true">
+            <span class="admin-intro-more__or" aria-hidden="true">或</span>
+            <select
+              id="home-intro-more-link-secondary"
+              class="admin-field__control admin-intro-more__select"
+              aria-label="首页导语补充第二链接"
+              disabled
+            >
+              {ADMIN_HOME_INTRO_LINK_OPTIONS.map((option) => (
+                <option value={option.id} selected={option.id === ADMIN_HOME_INTRO_LINK_DEFAULT[1]}>
+                  {option.label}
+                </option>
+              ))}
+            </select>
+          </span>
+        </div>
+        <AdminSettingSwitch
+          id="home-intro-more-link-secondary-enabled"
+          tip="开启后句式为「补充文案 + 链接 或 链接」。"
+          inputAttrs={{ 'aria-controls': 'home-intro-more-link-secondary' }}
         >
-          <span class="admin-inline-builder__secondary-sep">或</span>
-          <select
-            id="home-intro-more-link-secondary"
-            class="admin-field__control admin-inline-builder__select"
-            aria-label="首页导语补充第二链接"
-            disabled
-          >
-            {ADMIN_HOME_INTRO_LINK_OPTIONS.map((option) => (
-              <option value={option.id} selected={option.id === ADMIN_HOME_INTRO_LINK_DEFAULT[1]}>
-                {option.label}
-              </option>
-            ))}
-          </select>
-        </span>
+          使用第二个链接
+        </AdminSettingSwitch>
+        <p class="admin-help admin-preview">
+          <span class="admin-preview__label">预览</span>
+          <span id="home-intro-more-preview" class="admin-preview__value">更多文章请访问 归档。</span>
+        </p>
       </div>
-      <p class="admin-help">
-        补充导语预览：<code id="home-intro-more-preview" class="admin-help__preview-value">更多文章请访问 归档。</code>
-      </p>
     </div>
   </div>
 </fieldset>

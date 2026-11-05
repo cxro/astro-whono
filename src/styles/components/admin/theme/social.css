@@ -1,121 +1,38 @@
 /* Admin Social
-   负责社交链接表格、预设/自定义行、图标预览与行内操作。
+   社交链接表格：预设 / 自定义行、平台图标、行内操作。
+   列用 grid-template-areas 命名，窄容器下改为两行布局，不出现横向滚动。
 */
 
-.admin-social-panel {
-  --admin-social-column-gap: 10px;
-  --admin-social-column-order-width: 44px;
-  --admin-social-column-platform-width: 104px;
-  --admin-social-column-icon-width: 64px;
-  --admin-social-column-actions-width: 84px;
-  --admin-social-row-padding-inline: var(--admin-row-table-padding-inline);
-  --admin-social-header-font-size: var(--admin-text-xs);
-  --admin-social-field-font-size: var(--admin-text-base);
-  --admin-social-platform-padding-inline: 16px;
-  --admin-social-href-padding-inline: var(--admin-field-padding-inline);
-  --admin-social-order-gap: 4px;
-  --admin-social-order-font-size: 15px;
-  --admin-social-order-width: 2.8ch;
-  --admin-social-actions-gap: 6px;
-  --admin-social-action-glyph-size: 15px;
-  --admin-social-icon-size: 18px;
-
-  margin-top: 0;
-  padding: 0;
-  border: 0;
-  border-radius: 0;
-  background: transparent;
-}
-
-.admin-social-panel__head {
-  display: flex;
-  align-items: baseline;
-  justify-content: space-between;
-  gap: 12px;
-  margin-bottom: 8px;
-}
-
-.admin-social-count {
-  white-space: nowrap;
-}
-
-.admin-social-list {
-  display: grid;
-  gap: 0;
-  border: 1px solid var(--admin-row-border);
-  border-top: 0;
-  border-radius: 0 0 var(--admin-row-radius) var(--admin-row-radius);
-  background: var(--bg);
-  overflow: hidden;
-}
-
-.admin-social-list:empty {
-  display: none;
-}
-
+/* 外框、表头、分隔线、悬停见 form.css 的 .admin-table；这里只定义列。 */
 .admin-social-table {
-  margin-top: 12px;
-  width: 100%;
-  min-width: 0;
-  overflow-x: auto;
+  --admin-social-col-order: 56px;
+  --admin-social-col-platform: 136px;
+  --admin-social-col-actions: 66px;
 }
 
 .admin-social-header,
 .admin-social-row {
-  display: grid;
-  gap: var(--admin-social-column-gap);
   grid-template-columns:
-    var(--admin-social-column-order-width)
-    var(--admin-social-column-platform-width)
-    var(--admin-social-column-icon-width)
+    var(--admin-social-col-order)
+    var(--admin-social-col-platform)
     minmax(0, 1fr)
-    var(--admin-social-column-actions-width);
-  align-items: center;
+    var(--admin-social-col-actions);
+  grid-template-areas: 'order platform href actions';
 }
 
-.admin-social-header {
-  padding: 10px var(--admin-social-row-padding-inline);
-  border: 1px solid var(--admin-row-border);
-  border-radius: var(--admin-row-radius) var(--admin-row-radius) 0 0;
-  background: var(--admin-row-bg-muted);
-  color: var(--muted);
-  font-size: var(--admin-social-header-font-size);
-}
-
-.admin-social-header > span {
+/* 表头与列内容对齐方式一致：位置、操作两列居中，其余左对齐。 */
+.admin-social-header__order,
+.admin-social-header__actions {
   text-align: center;
 }
 
-.admin-social-header__order {
-  grid-column: 1;
-}
-
-.admin-social-header__platform {
-  grid-column: 2;
-}
-
-.admin-social-header__icon {
-  grid-column: 3;
-}
-
+/* 单元格输入框静止时无边框，表头文字按输入框内边距缩进，与单元格文字对齐。 */
 .admin-social-header__href {
-  grid-column: 4;
+  padding-inline-start: var(--admin-field-padding-inline-compact);
 }
 
-.admin-social-header__actions {
-  grid-column: 5;
-}
-
-.admin-social-row {
-  --admin-row-table-padding-inline: var(--admin-social-row-padding-inline);
-
-  border: 0;
-  border-top: 1px solid var(--admin-row-divider);
-  border-radius: 0;
-}
-
-.admin-social-row:first-child {
-  border-top: 0;
+.admin-social-list {
+  display: grid;
 }
 
 .admin-social-field {
@@ -123,178 +40,37 @@
 }
 
 .admin-social-field--order {
-  grid-column: 1;
-  justify-items: center;
+  grid-area: order;
 }
 
+/* 固定行是图标 + 文字，自定义行是图标 + 下拉框；文字统一按输入框内边距缩进，两种行的图标与名称间距一致。 */
 .admin-social-field--platform {
-  grid-column: 2;
-  justify-items: center;
-}
-
-.admin-social-field--icon {
-  grid-column: 3;
-  justify-items: center;
+  grid-area: platform;
+  display: flex;
+  align-items: center;
+  gap: 4px;
 }
 
 .admin-social-field--href {
-  grid-column: 4;
+  grid-area: href;
 }
 
 .admin-social-field--actions {
-  grid-column: 5;
-  display: grid;
-  gap: 6px;
-  justify-items: center;
+  grid-area: actions;
 }
 
-.admin-social-link-inline {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr);
-  align-items: center;
-  gap: 8px;
-  width: 100%;
-}
-
-.admin-social-row[data-custom-label-visible='true'] .admin-social-link-inline {
-  grid-template-columns: minmax(84px, 92px) minmax(0, 1fr);
-}
-
-.admin-social-link-label {
-  min-width: 0;
-}
-
-.admin-social-link-label[hidden] {
-  display: none;
-}
-
-.admin-social-link-label__input,
-.admin-social-link-inline__href {
-  width: 100%;
-  min-width: 0;
-}
-
-.admin-social-link-label__input {
+.admin-social-order {
   text-align: center;
-}
-
-.admin-social-order-frame {
-  display: inline-grid;
-  grid-template-columns: auto minmax(2ch, auto) auto;
-  align-items: center;
-  justify-items: center;
-  gap: var(--admin-social-order-gap);
-  min-height: 36px;
-  color: var(--muted);
-  font-family: var(--admin-font-copy);
-  font-size: var(--admin-social-order-font-size);
-  line-height: 1;
-}
-
-.admin-social-order-frame:focus-within {
-  color: var(--text);
-}
-
-.admin-social-order-frame__mark {
-  color: var(--faint);
-}
-
-.admin-social-field--order .admin-field__control {
-  width: var(--admin-social-order-width);
-  min-width: 0;
-  margin-inline: 0;
-  border: 0;
-  border-radius: 0;
-  background: transparent;
-  padding: 0;
-  text-align: center;
-  box-shadow: none;
-}
-
-.admin-social-field--order .admin-field__control:focus-visible {
-  outline: none;
-  box-shadow: none;
-}
-
-.admin-social-field--platform select.admin-field__control {
-  width: var(--admin-social-column-platform-width);
-  min-width: 0;
-  margin-inline: 0;
-  appearance: none;
-  -webkit-appearance: none;
-  -moz-appearance: none;
-  border-color: transparent;
-  background-color: transparent;
-  background-image:
-    linear-gradient(45deg, transparent 50%, var(--muted) 50%),
-    linear-gradient(135deg, var(--muted) 50%, transparent 50%);
-  background-repeat: no-repeat;
-  background-size: 4px 4px;
-  background-position:
-    calc(100% - 13px) calc(50% + 1px),
-    calc(100% - 9px) calc(50% + 1px);
-  box-shadow: none;
-  padding-inline: var(--admin-social-platform-padding-inline);
-  font-size: var(--admin-social-field-font-size);
-  text-align: center;
-  text-align-last: center;
-}
-
-.admin-social-field--platform select.admin-field__control option {
-  text-align: center;
-}
-
-.admin-social-static-input {
-  cursor: default;
-}
-
-.admin-social-field--platform .admin-social-static-input {
-  width: var(--admin-social-column-platform-width);
-  min-width: 0;
-  margin-inline: 0;
-  border-color: transparent;
-  background: transparent;
-  box-shadow: none;
-  padding-inline: 0;
-  font-size: var(--admin-social-field-font-size);
-  text-align: center;
-  color: var(--muted);
-}
-
-.admin-social-field--platform select.admin-field__control:hover {
-  border-color: transparent;
-  background-color: color-mix(in srgb, var(--admin-row-bg-muted) 72%, transparent);
-}
-
-.admin-social-field--platform select.admin-field__control:focus-visible {
-  border-color: var(--admin-focus-border);
-  background-color: var(--bg);
-  box-shadow: var(--admin-focus-shadow);
-}
-
-.admin-social-field--href .admin-field__control {
-  padding-inline: var(--admin-social-href-padding-inline);
-  font-size: var(--admin-social-field-font-size);
-}
-
-.admin-social-field--icon {
-  justify-self: center;
-  width: 100%;
-  padding-inline: 0;
 }
 
 .admin-social-icon-preview {
-  min-height: 36px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  display: inline-flex;
+  flex: none;
+  color: var(--muted);
 }
 
 .admin-social-icon-only {
   display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  color: var(--muted);
 }
 
 .admin-social-icon-only[hidden] {
@@ -302,100 +78,81 @@
 }
 
 .admin-social-icon-only__icon {
-  width: var(--admin-social-icon-size);
-  height: var(--admin-social-icon-size);
   display: block;
+  width: 16px;
+  height: 16px;
+}
+
+.admin-social-platform-name {
+  min-width: 0;
+  /* 对齐下拉框内文字：内边距 + 边框 1px + 原生下拉框自带的约 4px 文字缩进。 */
+  padding-inline-start: calc(var(--admin-field-padding-inline-compact) + 5px);
+  color: var(--text);
+  font-size: var(--admin-text-sm);
+}
+
+.admin-social-platform-select {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.admin-social-link-inline {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 8px;
+}
+
+.admin-social-row[data-custom-label-visible='true'] .admin-social-link-inline {
+  grid-template-columns: minmax(88px, 7rem) minmax(0, 1fr);
+}
+
+.admin-social-link-label,
+.admin-social-link-href {
+  display: block;
+  min-width: 0;
+}
+
+.admin-social-link-label[hidden] {
+  display: none;
 }
 
 .admin-social-row-actions {
   display: flex;
-  flex-wrap: nowrap;
-  gap: var(--admin-social-actions-gap);
   justify-content: center;
+  gap: 6px;
 }
 
+/* 行内图标按钮不加边框（减少框中框），状态只用颜色与悬停底色表达。 */
 .admin-social-action {
-  --admin-btn-icon-glyph-size: var(--admin-social-action-glyph-size);
+  --admin-btn-icon-glyph-size: 15px;
+  --admin-btn-tool-border: transparent;
+  --admin-btn-tool-hover-border: transparent;
+  --admin-btn-tool-active-border: transparent;
+  --admin-btn-tool-active-bg: transparent;
+  --admin-btn-tool-disabled-border: transparent;
 }
 
 .admin-social-action[data-state='hidden'] {
   color: var(--faint);
 }
 
-.admin-social-action--disabled {
-  color: var(--faint);
-  opacity: 0.55;
-  cursor: not-allowed;
-}
-
 .admin-social-action--danger {
   --admin-btn-tool-color: var(--admin-status-danger-text);
   --admin-btn-tool-hover-color: var(--admin-status-danger-text);
   --admin-btn-tool-hover-bg: var(--admin-status-danger-bg);
-  --admin-btn-tool-hover-border: var(--admin-status-danger-border);
-  --admin-btn-tool-active-color: var(--admin-status-danger-text);
-  --admin-btn-tool-active-bg: var(--admin-status-danger-bg);
-  --admin-btn-tool-active-border: var(--admin-status-danger-border);
-
-  color: var(--admin-status-danger-text);
 }
 
-.admin-social-cell-label {
-  display: none;
-  margin: 0;
-  color: var(--faint);
-  font-size: var(--admin-text-2xs);
-  line-height: 1.4;
-  font-family: var(--admin-font-copy);
-}
-
-.admin-social-actions {
-  margin-top: 0;
-  display: flex;
-  justify-content: flex-end;
-  gap: 8px;
-}
-
-@container admin-theme-form (max-width: 560px) {
-  .admin-social-panel {
-    --admin-social-column-gap: 8px;
-    --admin-social-column-order-width: 40px;
-    --admin-social-column-platform-width: 92px;
-    --admin-social-column-icon-width: 36px;
-    --admin-social-column-actions-width: 72px;
-    --admin-social-row-padding-inline: 10px;
-    --admin-social-header-font-size: var(--admin-text-2xs);
-    --admin-social-field-font-size: var(--admin-text-xs);
-    --admin-social-platform-padding-inline: 14px;
-    --admin-social-href-padding-inline: 8px;
+/* 窄容器：位置 / 平台 / 操作一行，链接地址独占第二行。 */
+@container admin-theme-form (max-width: 520px) {
+  .admin-social-row {
+    grid-template-columns: var(--admin-social-col-order) minmax(0, 1fr) auto;
+    grid-template-areas:
+      'order platform actions'
+      'href href href';
+    row-gap: 8px;
   }
 
-  .admin-social-panel__head {
-    flex-wrap: wrap;
-    align-items: center;
-  }
-}
-
-@container admin-theme-form (max-width: 480px) {
-  .admin-social-panel {
-    --admin-social-column-gap: 6px;
-    --admin-social-column-platform-width: 84px;
-    --admin-social-column-icon-width: 32px;
-    --admin-social-column-actions-width: 68px;
-    --admin-social-row-padding-inline: 8px;
-    --admin-social-field-font-size: var(--admin-text-2xs);
-    --admin-social-platform-padding-inline: 12px;
-    --admin-social-href-padding-inline: 7px;
-    --admin-social-order-gap: 2px;
-    --admin-social-order-font-size: 13px;
-    --admin-social-order-width: 2.4ch;
-    --admin-social-actions-gap: 4px;
-    --admin-social-action-glyph-size: 14px;
-    --admin-social-icon-size: 16px;
-  }
-
-  .admin-social-link-inline,
   .admin-social-row[data-custom-label-visible='true'] .admin-social-link-inline {
-    grid-template-columns: 1fr;
+    grid-template-columns: minmax(0, 1fr);
   }
 }

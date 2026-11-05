@@ -167,12 +167,15 @@ export const createAdminConsoleUiState = ({
   const syncInteractiveAvailability = (): void => {
     const isInteractionLocked = isConsoleLocked || isSaving || isValidating;
     queryAll<AdminControl>(root, 'input, textarea, select, button').forEach((element) => {
+      // 分组标签只切换显示，锁定 / 保存中也要能切换查看。
+      if (element.getAttribute('role') === 'tab') return;
       if (element === errorRetryBtn) {
         element.disabled = isSaving || isValidating;
         return;
       }
 
-      element.disabled = isInteractionLocked;
+      // data-always-disabled：常驻不可用的控件（例如固定社交行的删除按钮），解锁后也保持禁用。
+      element.disabled = isInteractionLocked || element.hasAttribute('data-always-disabled');
     });
   };
 
