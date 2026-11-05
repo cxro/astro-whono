@@ -267,14 +267,9 @@ body[data-dev-ui='true'] .sidebar-nav-panels [data-admin-nav-panel='admin'] {
 }
 
 body.admin-page[data-admin-dev='true'] .admin-ui-prefs {
-  --admin-ui-prefs-muted-control-bg: color-mix(in srgb, var(--muted) 14%, var(--bg) 86%);
   --admin-ui-prefs-muted-control-border: color-mix(in srgb, var(--muted) 22%, transparent);
-  --admin-ui-prefs-active-bg: var(--text);
   --admin-ui-prefs-active-bg-soft: color-mix(in srgb, #fff 96%, var(--bg) 4%);
   --admin-ui-prefs-active-text: var(--text);
-  --admin-ui-prefs-control-thumb: color-mix(in srgb, #fff 94%, var(--panel) 6%);
-  --admin-ui-prefs-control-thumb-active: color-mix(in srgb, #fff 96%, var(--panel) 4%);
-  --admin-ui-prefs-control-shadow: inset 0 1px 1px color-mix(in srgb, #000 8%, transparent);
   --admin-ui-prefs-segment-bg: color-mix(in srgb, var(--text) 7%, var(--bg) 93%);
   --admin-ui-prefs-segment-text: var(--faint);
   --admin-ui-prefs-segment-hover-bg: color-mix(in srgb, var(--text) 8%, transparent);
@@ -289,14 +284,9 @@ body.admin-page[data-admin-dev='true'] .admin-ui-prefs {
 }
 
 :root[data-theme='dark'] body.admin-page[data-admin-dev='true'] .admin-ui-prefs {
-  --admin-ui-prefs-muted-control-bg: color-mix(in srgb, var(--muted) 16%, var(--bg) 84%);
   --admin-ui-prefs-muted-control-border: color-mix(in srgb, var(--text) 12%, var(--border) 88%);
-  --admin-ui-prefs-active-bg: color-mix(in srgb, var(--text) 44%, var(--panel) 56%);
   --admin-ui-prefs-active-bg-soft: color-mix(in srgb, var(--text) 84%, var(--panel) 16%);
   --admin-ui-prefs-active-text: color-mix(in srgb, var(--bg) 88%, var(--panel) 12%);
-  --admin-ui-prefs-control-thumb: color-mix(in srgb, #fff 88%, var(--panel) 12%);
-  --admin-ui-prefs-control-thumb-active: color-mix(in srgb, #fff 92%, var(--panel) 8%);
-  --admin-ui-prefs-control-shadow: inset 0 1px 1px color-mix(in srgb, #000 14%, transparent);
   --admin-ui-prefs-segment-bg: color-mix(in srgb, var(--panel) 76%, var(--bg) 24%);
   --admin-ui-prefs-segment-text: color-mix(in srgb, var(--muted) 84%, var(--text) 16%);
   --admin-ui-prefs-segment-hover-bg: color-mix(in srgb, var(--text) 6%, transparent);
@@ -417,72 +407,9 @@ body.admin-page[data-admin-dev='true'] .admin-ui-prefs__setting-label {
   transition: color 160ms ease;
 }
 
-body.admin-page[data-admin-dev='true'] label.admin-ui-prefs__setting > input[type='checkbox'] {
-  position: absolute;
-  inset: 0;
-  z-index: 1;
-  margin: 0;
-  opacity: 0;
-  cursor: inherit;
-}
-
-body.admin-page[data-admin-dev='true'] .admin-ui-prefs__switch {
-  position: relative;
-  justify-self: end;
-  box-sizing: border-box;
-  display: inline-block;
-  width: 34px;
-  height: 18px;
-  border: 1px solid var(--admin-ui-prefs-muted-control-border);
-  border-radius: 999px;
-  background-color: var(--admin-ui-prefs-muted-control-bg);
-  box-shadow: var(--admin-ui-prefs-control-shadow);
-  transition:
-    border-color 160ms ease,
-    background-color 160ms ease,
-    box-shadow 160ms ease;
-}
-
-body.admin-page[data-admin-dev='true'] .admin-ui-prefs__switch::after {
-  content: '';
-  position: absolute;
-  inset-block-start: 50%;
-  inset-inline-start: 2px;
-  width: 12px;
-  height: 12px;
-  border-radius: 999px;
-  background-color: var(--admin-ui-prefs-control-thumb);
-  box-shadow:
-    0 1px 2px color-mix(in srgb, #000 18%, transparent),
-    0 0 0 1px color-mix(in srgb, #000 6%, transparent);
-  transform: translate3d(0, -50%, 0);
-  transition:
-    background-color 160ms ease,
-    transform 180ms cubic-bezier(0.16, 1, 0.3, 1);
-}
-
-body.admin-page[data-admin-dev='true']
-  label.admin-ui-prefs__setting
-  > input[type='checkbox']:checked
-  + .admin-ui-prefs__switch {
-  border-color: color-mix(in srgb, var(--admin-ui-prefs-active-bg) 76%, var(--border) 24%);
-  background-color: var(--admin-ui-prefs-active-bg);
-}
-
-body.admin-page[data-admin-dev='true']
-  label.admin-ui-prefs__setting
-  > input[type='checkbox']:checked
-  + .admin-ui-prefs__switch::after {
-  background-color: var(--admin-ui-prefs-control-thumb-active);
-  transform: translate3d(16px, -50%, 0);
-}
-
-body.admin-page[data-admin-dev='true']
-  label.admin-ui-prefs__setting
-  > input[type='checkbox']:focus-visible
-  + .admin-ui-prefs__switch {
-  border-color: var(--admin-focus-border, var(--text));
-  box-shadow: var(--admin-focus-shadow, 0 0 0 2px color-mix(in srgb, var(--text) 16%, transparent));
+/* 开关用共享 .admin-switch（shell.css）；其 1px 上边距用于对齐表单开关行标题，偏好卡片行已垂直居中，不需要。 */
+body.admin-page[data-admin-dev='true'] .admin-ui-prefs__setting > .admin-switch {
+  margin-top: 0;
 }
 
 body.admin-page[data-admin-dev='true'] .admin-ui-prefs__segmented {

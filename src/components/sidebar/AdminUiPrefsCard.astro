@@ -30,12 +30,16 @@ const editorLayoutLabelId = 'admin-ui-prefs-editor-layout-label';
 
       <label class="admin-ui-prefs__setting" for={showTopNavId}>
         <span class="admin-ui-prefs__setting-label">顶部导航</span>
-        <input
-          id={showTopNavId}
-          type="checkbox"
-          data-admin-ui-pref="show-top-nav"
-        />
-        <span class="admin-ui-prefs__switch" aria-hidden="true"></span>
+        <span class="admin-switch">
+          <input
+            id={showTopNavId}
+            class="admin-switch__input"
+            type="checkbox"
+            role="switch"
+            data-admin-ui-pref="show-top-nav"
+          />
+          <span class="admin-switch__track" aria-hidden="true"></span>
+        </span>
       </label>
 
       <div class="admin-ui-prefs__setting" role="group" aria-labelledby={defaultSidebarNavLabelId}>
@@ -111,22 +115,30 @@ const editorLayoutLabelId = 'admin-ui-prefs-editor-layout-label';
 
       <label class="admin-ui-prefs__setting" for={editorOutlineId}>
         <span class="admin-ui-prefs__setting-label">自动展开文章目录</span>
-        <input
-          id={editorOutlineId}
-          type="checkbox"
-          data-admin-ui-pref="editor-default-outline"
-        />
-        <span class="admin-ui-prefs__switch" aria-hidden="true"></span>
+        <span class="admin-switch">
+          <input
+            id={editorOutlineId}
+            class="admin-switch__input"
+            type="checkbox"
+            role="switch"
+            data-admin-ui-pref="editor-default-outline"
+          />
+          <span class="admin-switch__track" aria-hidden="true"></span>
+        </span>
       </label>
 
       <label class="admin-ui-prefs__setting" for={editorSyntaxId}>
         <span class="admin-ui-prefs__setting-label">自动展开语法提示</span>
-        <input
-          id={editorSyntaxId}
-          type="checkbox"
-          data-admin-ui-pref="editor-default-syntax"
-        />
-        <span class="admin-ui-prefs__switch" aria-hidden="true"></span>
+        <span class="admin-switch">
+          <input
+            id={editorSyntaxId}
+            class="admin-switch__input"
+            type="checkbox"
+            role="switch"
+            data-admin-ui-pref="editor-default-syntax"
+          />
+          <span class="admin-switch__track" aria-hidden="true"></span>
+        </span>
       </label>
     </section>
   </div>
