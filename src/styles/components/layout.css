@@ -1171,6 +1171,29 @@ body.admin-page .sidebar-actions .icon-button[data-tooltip]::after {
   transform: translate(-50%, 0);
 }
 
+/* 窄屏按钮贴近页面右上角：居中向上的提示会撑出横向滚动，顶部也会超出视口，改为按钮下方右对齐。 */
+@media (max-width: 900px) {
+  :where(body:not(.admin-page)) .sidebar-actions .icon-button[data-tooltip]::after {
+    top: calc(100% + 8px);
+    right: 0;
+    bottom: auto;
+    left: auto;
+    transform: translateY(-4px);
+  }
+
+  :where(body:not(.admin-page)) .sidebar-actions .icon-button[data-tooltip]::before {
+    top: 100%;
+    bottom: auto;
+    border-top-color: transparent;
+    border-bottom-color: var(--panel);
+    transform: translate(-50%, -2px);
+  }
+
+  :where(body:not(.admin-page)) .sidebar-actions .icon-button[data-tooltip]:is(:hover, :focus-visible)::after {
+    transform: none;
+  }
+}
+
 .icon-button:hover {
   color: var(--text);
 }

@@ -38,6 +38,7 @@ The format is based on Keep a Changelog, and this project aims to follow Semanti
 - 修复本地后台编辑 figure 图片块时，含转义文本或富文本说明的图片可能被错误回显，以及本地图片缺失检查可能漏检的问题。
 - 修复子路径部署时，`/robots.txt` 中的 `Sitemap` 链接遗漏部署路径、指向错误地址的问题。
 - 修复依赖更新后 `package-lock.json` 重新写入第三方镜像地址的问题，默认安装不再依赖该镜像。
+- 修复窄窗口下主题切换按钮的提示撑出页面横向滚动的问题。
 
 
 ## [0.5.0] - 2026-06-16
