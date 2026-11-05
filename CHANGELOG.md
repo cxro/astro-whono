@@ -16,6 +16,7 @@ The format is based on Keep a Changelog, and this project aims to follow Semanti
 - Theme Console 新增「站点图标」配置：可上传正方形 PNG 自定义浏览器标签页图标与移动端触摸图标；文件以内容哈希命名写入 `public/images/site/`，替换后不受浏览器图标缓存影响，SVG 图标仍可通过替换 `public/favicon.svg` 自定义
 
 ### Changed
+- Theme Console 改版：设置按顶部标签分组显示，统一保存；表单样式统一。
 - 云端图片上传和列表遇到临时连接错误时会自动重试，等待过久时会结束请求；错误提示不再显示存储服务返回的原始内容。
 - 站点框架升级到 Astro 7，构建链同步升级到 Vite 8，并更新相关依赖修复多个上游安全公告；文章与页面的渲染效果保持不变。
 - 构建产物的响应式样式改用新的媒体查询语法，需要 Chrome 104+ / Safari 16.4+ / Firefox 102+（2022 年后的主流浏览器）才能完整生效。

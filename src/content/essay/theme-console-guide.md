@@ -3,7 +3,7 @@ title: Theme Console 配置指南
 description: 说明 astro-whono 本地 Theme Console 在开发环境下的适用范围、页面分组、配置落点与保存机制。
 badge: 指南
 date: 2026-04-26
-updatedAt: 2026-07-11
+updatedAt: 2026-11-04
 tags: [ "Theme Console", "指南"]
 draft: false
 ---
@@ -84,11 +84,13 @@ Theme Console 管理的是仓库内的主题配置，相关改动仍可通过 Gi
 
 ## 页面分组
 
-`/admin/theme/` 当前按编辑场景拆分为五组。
+`/admin/theme/` 顶部有 6 个分组标签：站点、侧栏、首页、页面、文章、字体，一次显示一组。切换分组不影响已填写的内容，保存、检查配置与重置更改对全部分组一起生效。
 
-### Site
+当前分组记录在地址栏（如 `/admin/theme/#sidebar`），刷新后保持不变。
 
-`Site` 负责站点层面的基础信息：
+### 站点
+
+「站点」负责站点层面的基础信息：
 
 - 站点标题
 - 默认语言
@@ -100,11 +102,11 @@ Theme Console 管理的是仓库内的主题配置，相关改动仍可通过 Gi
 
 站点图标支持上传正方形 PNG（16-512px，256KB 以内），分别对应浏览器标签页图标与移动端触摸图标；文件以内容哈希命名写入 `public/images/site/`，替换后不受浏览器图标缓存影响。自定义标签页图标后，主题默认的 SVG / PNG 图标不再输出；触摸图标独立回退，未自定义时保持主题默认。图标文件缺失时站点自动回退主题默认图标，不影响构建。SVG 图标暂不支持上传，可直接替换 `public/favicon.svg`（手工维护的固定路径不带缓存戳，替换内容后浏览器可能仍显示旧图标）。
 
-> ![Site 分组截图](./theme-console/theme-console-site.webp)
+> ![站点分组截图](./theme-console/theme-console-site.webp)
 
-### Sidebar
+### 侧栏
 
-`Sidebar` 负责壳层与导航相关配置：
+「侧栏」负责壳层与导航相关配置：
 
 - 侧栏站点名
 - 侧栏引用文案
@@ -112,11 +114,11 @@ Theme Console 管理的是仓库内的主题配置，相关改动仍可通过 Gi
 - 侧栏动作图标显隐（阅读模式 / RSS / 主题切换 / 站点概览）
 - 导航名称、排序、后缀字符与显隐状态
 
-> ![Sidebar 分组截图](./theme-console/theme-console-sidebar.webp)
+> ![侧栏分组截图](./theme-console/theme-console-sidebar.webp)
 
-### Home
+### 首页
 
-`Home` 负责首页展示相关配置：
+「首页」负责首页展示相关配置：
 
 - Hero 图片地址与说明文字
 - Hero 显隐
@@ -124,34 +126,37 @@ Theme Console 管理的是仓库内的主题配置，相关改动仍可通过 Gi
 - 首页导语补充文案
 - 补充导语中的主链接与第二链接
 
-> ![Home 分组截图](./theme-console/theme-console-home.webp)
+> ![首页分组截图](./theme-console/theme-console-home.webp)
 
 首页补充导语仍采用固定句式，后台只开放了文案和入口选择，尽量保持首页结构稳定。当前可选入口包括 `archive`、`essay`、`bits`、`memo`、`about` 和 `tag`。
 
 
-### Inner Pages
+### 页面
 
-`Inner Pages` 负责内页层面的统一文案与显示策略：
+「页面」负责各内页的标题与默认作者：
 
 - `/essay/` 页面主副标题
 - `/archive/` 页面主副标题
 - `/bits/` 页面主副标题
 - `/memo/` 页面主副标题
 - `/about/` 页面主副标题
-- 文章元信息是否显示日期、标签、字数、阅读时长
-- 文章页（`/archive/` 详情页）是否显示右侧目录：目录只在 1440px 及以上的宽屏显示，少于 2 个章节标题的文章不显示
 - `/bits/` 默认作者名与头像
 
-> ![Inner Pages 分组截图](./theme-console/theme-console-inner-pages.webp)
+> ![页面分组截图](./theme-console/theme-console-page.webp)
 
+### 文章
 
-### Code
+「文章」负责文章页的显示选项：
 
+- 文章元信息是否显示日期、标签、字数、阅读时长
+- 文章页（`/archive/` 详情页）是否显示右侧目录：目录只在 1440px 及以上的宽屏显示，少于 2 个章节标题的文章不显示
 - 是否在代码块中显示行号
 
-### Typography
+> ![文章分组截图](./theme-console/theme-console-article.webp)
 
-`Typography` 负责四个排版字体角色的选择：
+### 字体
+
+「字体」负责四个排版字体角色的选择：
 
 - 正文字体（文章正文与标题）
 - 文案字体（导语、关于页等场景）
@@ -160,10 +165,12 @@ Theme Console 管理的是仓库内的主题配置，相关改动仍可通过 Gi
 
 保存后写入 `src/data/settings/ui.json`，下次构建生效。字体的来源、体积与添加自定义字体的方式见下文「排版字体」。
 
+> ![字体分组截图](./theme-console/theme-console-typography.webp)
+
 
 ## 排版字体
 
-四个字体角色各自从一组字体卡片中选择：卡片以该字体实际渲染预览字样，并标注来源徽章，选中后卡片下方显示全称与体积详情，便于按需取舍。内置选项分三类来源：
+四个字体角色各自从一组字体卡片中选择：卡片以该字体实际渲染预览字样，并标注来源，便于按需取舍。内置选项分三类来源：
 
 - **系统字体**：使用访客设备上已有的字体，不产生下载。
 - **自托管字体**：字体文件随站点构建产物一并分发，访客不经过任何外部 CDN，页面不请求第三方。
@@ -191,7 +198,7 @@ Theme Console 管理的是仓库内的主题配置，相关改动仍可通过 Gi
 
 - 保存按 `site / shell / home / page / ui` 分组回写，不直接修改模板源码
 - 多数字段提供即时预览或明确的页面对应关系
-- 保存前会执行字段校验
+- 保存前会执行字段校验；未通过时自动切到第一个出错字段所在的分组，出错分组的标签上显示红点
 - 保存时会附带版本信息，用于避免并发修改造成的静默覆盖
 - 写入过程包含失败回滚，避免多文件半成功状态
 
