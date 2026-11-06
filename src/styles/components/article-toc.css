@@ -74,11 +74,12 @@
   vertical-align: middle;
 }
 
+/* 右侧预留悬停位移的 3px：盒子向外扩、内容宽度不变，折行不受影响，也不会出现横向滚动条。 */
 .article-toc__list {
   position: relative;
   min-block-size: 0;
-  margin: 0;
-  padding: 0;
+  margin: 0 -3px 0 0;
+  padding: 0 3px 0 0;
   list-style: none;
   overflow-y: auto;
   scrollbar-width: thin;
@@ -145,6 +146,18 @@
 
 .article-toc__link:focus-visible {
   outline-offset: -2px;
+}
+
+/* 只移动内容、不移动链接本身：热区固定，指针停在左缘时不会反复进出悬停。 */
+@media (hover: hover) and (pointer: fine) and (prefers-reduced-motion: no-preference) {
+  .article-toc__num,
+  .article-toc__text {
+    transition: transform 0.2s ease;
+  }
+
+  .article-toc__link:hover :is(.article-toc__num, .article-toc__text) {
+    transform: translateX(3px);
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {

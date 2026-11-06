@@ -296,9 +296,9 @@
 
 /* 文章上下篇导航 */
 .prev-next {
-  margin-top: 28px;
+  margin-top: 40px;
   display: flex;
-  gap: 10px;
+  gap: 24px;
   flex-wrap: nowrap;
 }
 
@@ -311,44 +311,60 @@
   display: flex;
   flex-direction: column;
   gap: 6px;
-  padding: 10px 12px;
-  border-radius: 10px;
-  border: 1px solid var(--border);
-  color: var(--text);
-  background: transparent;
-  transition: color 0.2s ease, border-color 0.2s ease, background 0.2s ease;
-}
-
-.prev-next__link:hover {
-  color: var(--text);
-  border-color: var(--border);
-  background: var(--panel);
-}
-
-@supports (color: color-mix(in srgb, black 50%, white)) {
-  .prev-next__link:hover {
-    border-color: color-mix(in srgb, var(--border) 85%, var(--muted) 15%);
-  }
+  width: fit-content;
+  padding-block: 10px;
+  color: var(--muted);
+  transition: color 0.2s ease;
 }
 
 .prev-next__link--next {
-  text-align: right;
+  margin-left: auto;
   align-items: flex-end;
+  text-align: right;
 }
 
 .prev-next__label {
+  display: flex;
+  align-items: center;
+  gap: 4px;
   font-size: 12px;
   color: var(--faint);
+  transition: color 0.2s ease;
+}
+
+.prev-next__icon {
+  color: var(--muted);
+  transition: color 0.2s ease, transform 0.2s ease;
+}
+
+/* 抵消图标内留白，让箭头尖与标题边缘对齐。 */
+.prev-next__link--prev .prev-next__icon {
+  margin-left: -3px;
+}
+
+.prev-next__link--next .prev-next__icon {
+  margin-right: -3px;
 }
 
 .prev-next__title {
-  display: block;
   font-size: 13px;
-  color: var(--muted);
-  width: 100%;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+  overflow-wrap: anywhere;
+  text-wrap: balance;
+}
+
+.prev-next__link:is(:hover, :focus-visible),
+.prev-next__link:is(:hover, :focus-visible) :is(.prev-next__label, .prev-next__icon) {
+  color: var(--text);
+}
+
+@media (hover: hover) and (pointer: fine) and (prefers-reduced-motion: no-preference) {
+  .prev-next__link--prev:hover .prev-next__icon {
+    transform: translateX(-4px);
+  }
+
+  .prev-next__link--next:hover .prev-next__icon {
+    transform: translateX(4px);
+  }
 }
 
 .prev-next__placeholder {

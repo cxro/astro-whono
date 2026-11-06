@@ -1,6 +1,8 @@
 ---
 // 公开站点非品牌 UI 图标入口；只收录当前真实使用的项目语义名。
 import type { AstroComponent } from '@lucide/astro';
+import ArrowLeft from '@lucide/astro/icons/arrow-left';
+import ArrowRight from '@lucide/astro/icons/arrow-right';
 import Bold from '@lucide/astro/icons/bold';
 import Book from '@lucide/astro/icons/book';
 import BookOpen from '@lucide/astro/icons/book-open';
@@ -27,6 +29,8 @@ import Tag from '@lucide/astro/icons/tag';
 import TextAlignStart from '@lucide/astro/icons/text-align-start';
 
 type UiIconName =
+  | 'arrow-left'
+  | 'arrow-right'
   | 'bold'
   | 'book-closed'
   | 'book-open'
@@ -69,6 +73,8 @@ const {
 } = Astro.props as Props;
 
 const uiIconComponents = {
+  'arrow-left': ArrowLeft,
+  'arrow-right': ArrowRight,
   bold: Bold,
   'book-closed': Book,
   'book-open': BookOpen,

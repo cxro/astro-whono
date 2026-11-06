@@ -171,7 +171,10 @@ const hasWideTocNumbers = tocHeadings.some((heading) => heading.level === 1 && (
       <div class="prev-next__item">
         {prev ? (
           <a class="prev-next__link prev-next__link--prev" href={prev.href} rel="prev">
-            <span class="prev-next__label">上一篇</span>
+            <span class="prev-next__label">
+              <UiIcon name="arrow-left" class="prev-next__icon" size={16} strokeWidth={1.5} />
+              上一篇
+            </span>
             <span class="prev-next__title">{prev.title}</span>
           </a>
         ) : (
@@ -181,7 +184,10 @@ const hasWideTocNumbers = tocHeadings.some((heading) => heading.level === 1 && (
       <div class="prev-next__item">
         {next ? (
           <a class="prev-next__link prev-next__link--next" href={next.href} rel="next">
-            <span class="prev-next__label">下一篇</span>
+            <span class="prev-next__label">
+              下一篇
+              <UiIcon name="arrow-right" class="prev-next__icon" size={16} strokeWidth={1.5} />
+            </span>
             <span class="prev-next__title">{next.title}</span>
           </a>
         ) : (
