@@ -7,6 +7,8 @@ The format is based on Keep a Changelog, and this project aims to follow Semanti
 
 ## [Unreleased]
 
+## [0.6.0] - 2026-11-05
+
 ### Added
 - Markdown 新增 `==文本==` 高亮、`:spoiler[文本]` / `:::spoiler` 模糊（点击后显示）与 `:::details[标题]` 折叠内容；絮语支持高亮和模糊；模糊内容不进入摘要和搜索索引；编辑器新增高亮、模糊按钮，「折叠内容」改为插入 `:::details`。
 - 文章页正文底部新增标签与分享按钮（X、Facebook、邮件、分享卡片、复制链接）；分享卡片可生成带二维码的小海报并保存为图片；文章标签默认从标题下方移到这里，点击可进入标签页；Theme Console 可分别开关列表、标题下方和正文底部的标签（可同时显示）和上一篇/下一篇导航，并选择要显示的分享按钮（另可选微博、Telegram、LinkedIn）。
@@ -299,7 +301,8 @@ node ".\export-astro-whono-settings.mjs" --include-legacy
 - 修复部分未使用样式与细节遗留问题。
 
 
-[Unreleased]: https://github.com/cxro/astro-whono/compare/v0.5.0...HEAD
+[Unreleased]: https://github.com/cxro/astro-whono/compare/v0.6.0...HEAD
+[0.6.0]: https://github.com/cxro/astro-whono/compare/v0.5.0...v0.6.0
 [0.5.0]: https://github.com/cxro/astro-whono/compare/v0.4.1...v0.5.0
 [0.4.1]: https://github.com/cxro/astro-whono/compare/v0.4.0...v0.4.1
 [0.4.0]: https://github.com/cxro/astro-whono/compare/v0.3.1...v0.4.0
