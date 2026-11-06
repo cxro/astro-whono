@@ -8,7 +8,7 @@ import Lightbox from '../components/Lightbox.astro';
 import '../styles/article.css';
 import { getArticleShareLinks } from '../lib/article-share';
 import { getArticleTocHeadings } from '../lib/article-toc';
-import { getEssayDerivedText, type EssayEntry } from '../lib/content';
+import { getEssayDerivedText, getEssaySlug, type EssayEntry } from '../lib/content';
 import { containsMarkdownMath } from '../lib/markdown-math';
 import {
   MARKDOWN_MATH_STYLESHEET_DATA_ATTR,
@@ -17,6 +17,7 @@ import {
 } from '../lib/markdown-math-styles';
 import type { ArticleFooterSettings, ArticleMetaSettings, SidebarNavId } from '../lib/theme-settings';
 import { createWithBase, formatISODateUtc } from '../utils/format';
+import ArticlePosterDialog from '../components/ArticlePosterDialog.astro';
 import { truncateText } from '../utils/excerpt';
 
 type ArticleNeighborLink = {
@@ -37,6 +38,7 @@ const {
   articleFooterSettings,
   visibleTags = [],
   tags = [],
+  poster,
   headings = [],
   showToc = true
 } = Astro.props as {
@@ -47,6 +49,7 @@ const {
   articleFooterSettings: ArticleFooterSettings;
   visibleTags?: string[];
   tags?: ArticleTagLink[];
+  poster: { siteName: string; authorName: string; authorAvatar: string };
   headings?: MarkdownHeading[];
   showToc?: boolean;
 };
@@ -85,15 +88,16 @@ const tocHeadings = showToc ? getArticleTocHeadings(headings) : [];
 const hasToc = tocHeadings.length > 0;
 // 一级编号达到两位数（"10."）时加宽编号列。
 const hasWideTocNumbers = tocHeadings.some((heading) => heading.level === 1 && (heading.number?.length ?? 0) > 2);
-// 分享平台需要完整地址；未设置 SITE_URL 的构建只保留复制链接，dev 用本地地址方便预览。
+// 分享平台需要完整地址；未设置 SITE_URL 的构建只保留分享卡片和复制链接，dev 用本地地址方便预览。
 const shareUrl = hasSiteUrl && Astro.site
   ? new URL(Astro.url.pathname, Astro.site).toString()
   : (import.meta.env.DEV ? Astro.url.href : null);
 const shareLinks = shareUrl
   ? getArticleShareLinks(shareUrl, entry.data.title, articleFooterSettings.sharePlatforms)
   : [];
+const showPoster = articleFooterSettings.sharePlatforms.includes('poster');
 const showCopyLink = articleFooterSettings.sharePlatforms.includes('copy');
-const hasShare = shareLinks.length > 0 || showCopyLink;
+const hasShare = shareLinks.length > 0 || showPoster || showCopyLink;
 
 ---
 
@@ -216,6 +220,19 @@ const hasShare = shareLinks.length > 0 || showCopyLink;
               <BrandIcon name={link.id} class="icon" size={16} />
             </a>
           ))}
+          {showPoster ? (
+            <button
+              class="icon-button"
+              type="button"
+              aria-label="生成分享卡片"
+              aria-haspopup="dialog"
+              title="分享卡片"
+              data-article-poster-open
+              disabled
+            >
+              <UiIcon name="share-2" class="icon" size={16} />
+            </button>
+          ) : null}
           {showCopyLink ? (
             <button
               class="icon-button article-footer__copy"
@@ -272,12 +289,27 @@ const hasShare = shareLinks.length > 0 || showCopyLink;
     enableSwipeDownClose={false}
   />
 
+  {showPoster ? (
+    <ArticlePosterDialog
+      siteName={poster.siteName}
+      title={entry.data.title}
+      date={articleMetaSettings.showDate ? formatISODateUtc(displayDate) : ''}
+      summary={description}
+      authorName={poster.authorName}
+      authorAvatar={poster.authorAvatar}
+      url={shareUrl}
+      fileName={`${getEssaySlug(entry)}.png`}
+    />
+  ) : null}
+
   <script>
     import { initArticleLightbox, initArticleLinkCopyButton, initCodeCopyButtons } from '../scripts/lightbox';
+    import { initArticlePoster } from '../scripts/article-poster';
     import { initArticleToc } from '../scripts/article-toc';
 
     initCodeCopyButtons();
     initArticleLinkCopyButton();
+    initArticlePoster();
     initArticleLightbox({
       dialogId: 'lightbox',
       containerSelector: '.prose',

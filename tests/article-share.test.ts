@@ -4,7 +4,7 @@ import { getArticleShareLinks } from '../src/lib/article-share';
 describe('article-share', () => {
   const url = 'https://example.com/blog/archive/a-b/?x=1&y=2';
   const title = 'C# & Astro 指南 #1';
-  const allPlatforms = ['x', 'facebook', 'weibo', 'telegram', 'linkedin', 'email', 'copy'] as const;
+  const allPlatforms = ['x', 'facebook', 'weibo', 'telegram', 'linkedin', 'email', 'poster', 'copy'] as const;
   const byId = Object.fromEntries(getArticleShareLinks(url, title, allPlatforms).map((link) => [link.id, link.href]));
 
   it('keeps the title and url intact through each platform query string', () => {
@@ -32,10 +32,10 @@ describe('article-share', () => {
     expect(linkedin.searchParams.get('url')).toBe(url);
   });
 
-  it('returns only the chosen platforms and leaves the copy button to the page', () => {
-    expect(getArticleShareLinks(url, title, ['telegram', 'email', 'copy']).map((link) => link.id))
+  it('returns only the chosen platforms and leaves the poster and copy buttons to the page', () => {
+    expect(getArticleShareLinks(url, title, ['telegram', 'email', 'poster', 'copy']).map((link) => link.id))
       .toEqual(['telegram', 'email']);
-    expect(getArticleShareLinks(url, title, ['copy'])).toEqual([]);
+    expect(getArticleShareLinks(url, title, ['poster', 'copy'])).toEqual([]);
     expect(getArticleShareLinks(url, title, [])).toEqual([]);
   });
 

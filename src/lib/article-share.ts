@@ -1,15 +1,15 @@
 import type { ArticleSharePlatformId } from './theme-settings';
 
-type ArticleShareLinkId = Exclude<ArticleSharePlatformId, 'copy'>;
+type ArticleShareLinkId = Exclude<ArticleSharePlatformId, 'poster' | 'copy'>;
 
-export type ArticleShareLink = {
+type ArticleShareLink = {
   id: ArticleShareLinkId;
   label: string;
   href: string;
 };
 
 // 用 encodeURIComponent 而非 URLSearchParams：后者把空格编码成 +，mailto 不会还原。
-// copy 不是链接，由页面渲染为按钮。
+// poster 和 copy 不是链接，由页面渲染为按钮。
 export const getArticleShareLinks = (
   url: string,
   title: string,
@@ -44,5 +44,5 @@ export const getArticleShareLinks = (
     }
   };
 
-  return platforms.flatMap((id) => (id === 'copy' ? [] : [{ id, ...links[id] }]));
+  return platforms.flatMap((id) => (id === 'poster' || id === 'copy' ? [] : [{ id, ...links[id] }]));
 };

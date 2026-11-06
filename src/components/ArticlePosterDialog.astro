@@ -1,0 +1,36 @@
+---
+interface Props {
+  siteName: string;
+  title: string;
+  date: string;
+  summary: string;
+  authorName: string;
+  authorAvatar: string;
+  url: string | null;
+  fileName: string;
+}
+
+const { siteName, title, date, summary, authorName, authorAvatar, url, fileName } = Astro.props;
+---
+
+<dialog
+  class="article-poster"
+  aria-label="分享卡片"
+  data-article-poster
+  data-site-name={siteName}
+  data-title={title}
+  data-date={date}
+  data-summary={summary}
+  data-author-name={authorName}
+  data-author-avatar={authorAvatar}
+  data-url={url ?? ''}
+>
+  <div class="article-poster__panel" tabindex="-1" autofocus>
+    <p class="article-poster__status" role="status" data-article-poster-status></p>
+    <img class="article-poster__image" alt={`${title} 的分享卡片`} data-article-poster-image hidden />
+    <a class="article-poster__save" download={fileName} data-article-poster-save hidden>保存图片</a>
+    <p class="article-poster__hint">也可以长按图片保存。</p>
+    {/* 平时点遮罩或按 Esc 关闭；触屏读屏软件点不到遮罩，留这个不可见按钮。 */}
+    <button class="sr-only" type="button" tabindex="-1" data-article-poster-close>关闭</button>
+  </div>
+</dialog>

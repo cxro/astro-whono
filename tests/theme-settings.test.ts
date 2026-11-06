@@ -183,6 +183,7 @@ describe('theme-settings revision semantics', () => {
     const settingsDir = await createTempSettingsFixture();
     const uiPath = path.join(settingsDir, 'ui.json');
     const uiJson = JSON.parse(await readFile(uiPath, 'utf8')) as Record<string, any>;
+    uiJson.articleMeta.showTags = true;
     delete uiJson.articleMeta.showHeaderTags;
     delete uiJson.articleFooter;
     await writeFile(uiPath, `${JSON.stringify(uiJson, null, 2)}
@@ -195,7 +196,7 @@ describe('theme-settings revision semantics', () => {
     expect(resolved.settings.ui.articleFooter).toEqual({
       showTags: true,
       showPrevNext: true,
-      sharePlatforms: ['x', 'facebook', 'email', 'copy']
+      sharePlatforms: ['x', 'facebook', 'email', 'poster', 'copy']
     });
     expect(resolved.sources.ui.articleFooterShowPrevNext).toBe('default');
     expect(resolved.sources.ui.articleFooterSharePlatforms).toBe('default');
@@ -217,9 +218,29 @@ describe('theme-settings revision semantics', () => {
     expect(resolved.settings.ui.articleFooter).toEqual({
       showTags: false,
       showPrevNext: true,
-      sharePlatforms: ['x', 'facebook', 'email', 'copy']
+      sharePlatforms: ['x', 'facebook', 'email', 'poster', 'copy']
     });
     expect(resolved.sources.ui.articleFooterShowTags).toBe('legacy');
+    expect(getEditableThemeSettingsState(resolved).ok).toBe(true);
+  });
+
+  it('reads the header tag, bottom tag and prev/next switches from ui.json independently', async () => {
+    const settingsDir = await createTempSettingsFixture();
+    const uiPath = path.join(settingsDir, 'ui.json');
+    const uiJson = JSON.parse(await readFile(uiPath, 'utf8')) as Record<string, any>;
+    uiJson.articleMeta = { ...uiJson.articleMeta, showTags: true, showHeaderTags: true };
+    uiJson.articleFooter = { showTags: false, showPrevNext: false, sharePlatforms: ['copy'] };
+    await writeFile(uiPath, `${JSON.stringify(uiJson, null, 2)}
+`, 'utf8');
+
+    const resolved = getThemeSettings();
+
+    expect(resolved.settings.ui.articleMeta.showTags).toBe(true);
+    expect(resolved.settings.ui.articleMeta.showHeaderTags).toBe(true);
+    expect(resolved.settings.ui.articleFooter).toEqual({ showTags: false, showPrevNext: false, sharePlatforms: ['copy'] });
+    expect(resolved.sources.ui.articleMetaShowHeaderTags).toBe('new');
+    expect(resolved.sources.ui.articleFooterShowTags).toBe('new');
+    expect(resolved.sources.ui.articleFooterShowPrevNext).toBe('new');
     expect(getEditableThemeSettingsState(resolved).ok).toBe(true);
   });
 
@@ -227,7 +248,7 @@ describe('theme-settings revision semantics', () => {
     const settingsDir = await createTempSettingsFixture();
     const uiPath = path.join(settingsDir, 'ui.json');
     const uiJson = JSON.parse(await readFile(uiPath, 'utf8')) as Record<string, any>;
-    uiJson.articleFooter.sharePlatforms = [];
+    uiJson.articleFooter = { ...uiJson.articleFooter, sharePlatforms: [] };
     await writeFile(uiPath, `${JSON.stringify(uiJson, null, 2)}
 `, 'utf8');
 
@@ -242,7 +263,7 @@ describe('theme-settings revision semantics', () => {
     const settingsDir = await createTempSettingsFixture();
     const uiPath = path.join(settingsDir, 'ui.json');
     const uiJson = JSON.parse(await readFile(uiPath, 'utf8')) as Record<string, any>;
-    uiJson.articleFooter.sharePlatforms = ['copy', 'wechat', 'x', 'x'];
+    uiJson.articleFooter = { ...uiJson.articleFooter, sharePlatforms: ['copy', 'wechat', 'x', 'x'] };
     await writeFile(uiPath, `${JSON.stringify(uiJson, null, 2)}
 `, 'utf8');
 
@@ -256,13 +277,13 @@ describe('theme-settings revision semantics', () => {
     const settingsDir = await createTempSettingsFixture();
     const uiPath = path.join(settingsDir, 'ui.json');
     const uiJson = JSON.parse(await readFile(uiPath, 'utf8')) as Record<string, any>;
-    uiJson.articleFooter.sharePlatforms = 'x';
+    uiJson.articleFooter = { ...uiJson.articleFooter, sharePlatforms: 'x' };
     await writeFile(uiPath, `${JSON.stringify(uiJson, null, 2)}
 `, 'utf8');
 
     const resolved = getThemeSettings();
 
-    expect(resolved.settings.ui.articleFooter.sharePlatforms).toEqual(['x', 'facebook', 'email', 'copy']);
+    expect(resolved.settings.ui.articleFooter.sharePlatforms).toEqual(['x', 'facebook', 'email', 'poster', 'copy']);
     expect(resolved.sources.ui.articleFooterSharePlatforms).toBe('default');
   });
 
@@ -270,6 +291,7 @@ describe('theme-settings revision semantics', () => {
     const settingsDir = await createTempSettingsFixture();
     const uiPath = path.join(settingsDir, 'ui.json');
     const uiJson = JSON.parse(await readFile(uiPath, 'utf8')) as Record<string, any>;
+    uiJson.articleFooter = { ...uiJson.articleFooter };
     delete uiJson.articleFooter.sharePlatforms;
     await writeFile(uiPath, `${JSON.stringify(uiJson, null, 2)}
 `, 'utf8');
@@ -277,7 +299,7 @@ describe('theme-settings revision semantics', () => {
     const first = getThemeSettings();
     first.settings.ui.articleFooter.sharePlatforms.length = 0;
 
-    expect(getThemeSettings().settings.ui.articleFooter.sharePlatforms).toEqual(['x', 'facebook', 'email', 'copy']);
+    expect(getThemeSettings().settings.ui.articleFooter.sharePlatforms).toEqual(['x', 'facebook', 'email', 'poster', 'copy']);
   });
 
   it('reads an explicit articleToc.showEntry = false from ui.json', async () => {

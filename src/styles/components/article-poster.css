@@ -1,0 +1,85 @@
+/* 文章分享卡片弹窗：弹窗跟随主题，海报图片固定浅色。 */
+/* 打开时锁定页面滚动；保留滚动条占位，页面不会横向跳动。 */
+html:has(.article-poster[open]) {
+  overflow: hidden;
+  scrollbar-gutter: stable;
+}
+
+.article-poster {
+  width: min(360px, calc(100vw - 32px));
+  max-height: calc(100dvh - 32px);
+  padding: 0;
+  border: 0;
+  border-radius: 12px;
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font-copy);
+}
+
+.article-poster::backdrop {
+  background: rgb(0 0 0 / 0.45);
+}
+
+.article-poster__panel {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding-bottom: 16px;
+  outline: none;
+}
+
+.article-poster__status:not(.sr-only) {
+  margin: 0;
+  padding-block: 96px;
+  color: var(--muted);
+  font-size: 14px;
+  text-align: center;
+}
+
+.article-poster__image[hidden],
+.article-poster__save[hidden] {
+  display: none;
+}
+
+.article-poster__image {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+.article-poster__save {
+  display: block;
+  /* 和海报内容左右对齐：海报 375 宽、左右留白 28。 */
+  margin-inline: calc(100% * 28 / 375);
+  padding: 9px 12px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  color: var(--text);
+  font-size: 14px;
+  text-align: center;
+  transition: border-color 0.2s ease;
+}
+
+.article-poster__save:hover {
+  border-color: var(--text);
+}
+
+.article-poster__save:focus-visible {
+  outline: 2px solid currentColor;
+  outline-offset: 2px;
+}
+
+/* 触屏设备上下载链接不一定可用（如部分 App 内置浏览器），提示长按保存。 */
+.article-poster__hint {
+  display: none;
+  margin: 0;
+  color: var(--muted);
+  font-size: 12px;
+  text-align: center;
+}
+
+@media (hover: none) {
+  .article-poster__image:not([hidden]) ~ .article-poster__hint {
+    display: block;
+  }
+}

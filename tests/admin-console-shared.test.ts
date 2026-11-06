@@ -294,16 +294,17 @@ describe('admin-console/shared', () => {
 
   it('shows article tags only at the bottom when a legacy snapshot lacks the position switches', () => {
     const legacySnapshot = structuredClone(getEditableThemeSettingsPayload().settings) as Record<string, any>;
+    legacySnapshot.ui.articleMeta.showTags = true;
     delete legacySnapshot.ui.articleMeta.showHeaderTags;
     delete legacySnapshot.ui.articleFooter;
 
     const canonical = canonicalizeAdminThemeSettings(legacySnapshot);
     expect(canonical.ui.articleMeta.showHeaderTags).toBe(false);
-    expect(canonical.ui.articleFooter).toEqual({ showTags: true, showPrevNext: true, sharePlatforms: ['x', 'facebook', 'email', 'copy'] });
+    expect(canonical.ui.articleFooter).toEqual({ showTags: true, showPrevNext: true, sharePlatforms: ['x', 'facebook', 'email', 'poster', 'copy'] });
 
     const compatible = fillAdminThemeSettingsCompatibilityDefaults(legacySnapshot, canonical) as Record<string, any>;
     expect(compatible.ui.articleMeta.showHeaderTags).toBe(false);
-    expect(compatible.ui.articleFooter).toEqual({ showTags: true, showPrevNext: true, sharePlatforms: ['x', 'facebook', 'email', 'copy'] });
+    expect(compatible.ui.articleFooter).toEqual({ showTags: true, showPrevNext: true, sharePlatforms: ['x', 'facebook', 'email', 'poster', 'copy'] });
     const mismatchPaths = createAdminThemeSettingsCanonicalMismatchIssues(compatible, canonical).map((issue) => issue.path);
     expect(mismatchPaths.filter((issuePath) => /^ui\.article(Meta|Footer)/.test(issuePath))).toEqual([]);
   });
@@ -314,7 +315,7 @@ describe('admin-console/shared', () => {
     delete legacySnapshot.ui.articleFooter;
 
     const canonical = canonicalizeAdminThemeSettings(legacySnapshot);
-    expect(canonical.ui.articleFooter).toEqual({ showTags: false, showPrevNext: true, sharePlatforms: ['x', 'facebook', 'email', 'copy'] });
+    expect(canonical.ui.articleFooter).toEqual({ showTags: false, showPrevNext: true, sharePlatforms: ['x', 'facebook', 'email', 'poster', 'copy'] });
 
     const emptyGroupSnapshot = structuredClone(legacySnapshot);
     emptyGroupSnapshot.ui.articleFooter = {};
@@ -322,7 +323,7 @@ describe('admin-console/shared', () => {
       emptyGroupSnapshot,
       canonicalizeAdminThemeSettings(emptyGroupSnapshot)
     ) as Record<string, any>;
-    expect(emptyGroupCompatible.ui.articleFooter).toEqual({ showTags: false, showPrevNext: true, sharePlatforms: ['x', 'facebook', 'email', 'copy'] });
+    expect(emptyGroupCompatible.ui.articleFooter).toEqual({ showTags: false, showPrevNext: true, sharePlatforms: ['x', 'facebook', 'email', 'poster', 'copy'] });
   });
 
   it('canonicalizes articleMeta.showHeaderTags strictly and validates it as a boolean', () => {
@@ -342,6 +343,7 @@ describe('admin-console/shared', () => {
 
   it('validates articleFooter switches and allows bottom and header tags together', () => {
     const raw = structuredClone(getEditableThemeSettingsPayload().settings) as Record<string, any>;
+    raw.ui.articleMeta.showTags = true;
     raw.ui.articleFooter.showTags = 'false';
     raw.ui.articleFooter.showPrevNext = 'false';
     raw.ui.articleFooter.sharePlatforms = ['copy'];
@@ -367,7 +369,7 @@ describe('admin-console/shared', () => {
     const issuePaths = () => validateAdminThemeSettings(raw as EditableThemeSettings).map((issue) => issue.path);
 
     raw.ui.articleFooter.sharePlatforms = 'x';
-    expect(canonicalizeAdminThemeSettings(raw).ui.articleFooter.sharePlatforms).toEqual(['x', 'facebook', 'email', 'copy']);
+    expect(canonicalizeAdminThemeSettings(raw).ui.articleFooter.sharePlatforms).toEqual(['x', 'facebook', 'email', 'poster', 'copy']);
     expect(issuePaths()).toContain('ui.articleFooter.sharePlatforms');
 
     raw.ui.articleFooter.sharePlatforms = ['x', 'wechat'];

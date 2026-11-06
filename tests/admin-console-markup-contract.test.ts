@@ -31,6 +31,14 @@ describe('admin theme console markup contract', () => {
     expect(ids.filter((id) => !isIdInMarkup(id))).toEqual([]);
   });
 
+  // Found through queryAll, not byId: a rename yields an empty list, which saves as "all share buttons off".
+  it('keeps the share platform checkboxes and the console script on one attribute', () => {
+    const attribute = 'data-article-share-platform';
+
+    expect(read('src/scripts/admin-console/index.ts')).toContain(`'[${attribute}]'`);
+    expect(markup).toContain(attribute);
+  });
+
   it('pairs every section tab with exactly one panel', () => {
     const consoleSource = read(`${ADMIN_COMPONENT_DIR}/AdminThemeDevConsole.astro`);
     const tabIds = [...consoleSource.matchAll(/\{ id: '([\w-]+)', label:/g)].map(([, id = '']) => id);

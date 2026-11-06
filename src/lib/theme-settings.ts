@@ -60,7 +60,7 @@ export type SidebarDividerVariant = 'default' | 'subtle' | 'none';
 export type { ThemeFontId } from './fonts/registry';
 export type TypographyRole = 'readable' | 'copy' | 'mono' | 'brand';
 export type HomeIntroLinkKey = 'archive' | 'essay' | 'bits' | 'memo' | 'about' | 'tag';
-export type ArticleSharePlatformId = 'x' | 'facebook' | 'weibo' | 'telegram' | 'linkedin' | 'email' | 'copy';
+export type ArticleSharePlatformId = 'x' | 'facebook' | 'weibo' | 'telegram' | 'linkedin' | 'email' | 'poster' | 'copy';
 export type SiteSocialPresetId = 'github' | 'x' | 'email';
 export type SiteSocialKind = 'preset' | 'custom';
 export type SiteSocialIconKey =

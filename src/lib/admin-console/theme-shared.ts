@@ -110,9 +110,10 @@ export const ADMIN_ARTICLE_SHARE_PLATFORM_OPTIONS = [
   { id: 'telegram', label: 'Telegram' },
   { id: 'linkedin', label: 'LinkedIn' },
   { id: 'email', label: '邮件' },
+  { id: 'poster', label: '分享卡片' },
   { id: 'copy', label: '复制链接' }
 ] as const satisfies readonly { id: ArticleSharePlatformId; label: string }[];
-export const ADMIN_ARTICLE_SHARE_PLATFORM_DEFAULT = ['x', 'facebook', 'email', 'copy'] as const satisfies readonly ArticleSharePlatformId[];
+export const ADMIN_ARTICLE_SHARE_PLATFORM_DEFAULT = ['x', 'facebook', 'email', 'poster', 'copy'] as const satisfies readonly ArticleSharePlatformId[];
 
 // 空数组表示全部关闭；非数组返回 undefined，由调用方回退默认值。未知值和重复项被丢弃，结果按固定顺序排列。
 export const normalizeArticleSharePlatforms = (value: unknown): ArticleSharePlatformId[] | undefined => {

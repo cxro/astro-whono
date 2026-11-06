@@ -8,7 +8,7 @@ The format is based on Keep a Changelog, and this project aims to follow Semanti
 ## [Unreleased]
 
 ### Added
-- 文章页正文底部新增标签与分享按钮（X、Facebook、邮件、复制链接）；文章标签默认从标题下方移到这里，点击可进入标签页；Theme Console 可分别开关列表、标题下方和正文底部的标签（可同时显示）和上一篇/下一篇导航，并选择要显示的分享按钮（另可选微博、Telegram、LinkedIn）。
+- 文章页正文底部新增标签与分享按钮（X、Facebook、邮件、分享卡片、复制链接）；分享卡片可生成带二维码的小海报并保存为图片；文章标签默认从标题下方移到这里，点击可进入标签页；Theme Console 可分别开关列表、标题下方和正文底部的标签（可同时显示）和上一篇/下一篇导航，并选择要显示的分享按钮（另可选微博、Telegram、LinkedIn）。
 - 文章页在宽屏（1440px 及以上）的正文右侧显示目录：H2/H3 自动编号，滚动时高亮当前章节；标题已自带编号的文章不重复编号。
 - Theme Console 新增「文章目录」开关：可关闭文章页右侧目录，默认开启。
 - Admin Console 支持将随笔、小记正文图片和絮语配图上传到 S3 兼容对象存储；Images Console 可浏览云端图片并复制 URL。未配置云存储时仍使用本地文件（[PR #38](https://github.com/cxro/astro-whono/pull/38)，by [@Nilbug](https://github.com/Nilbug)）。
@@ -18,6 +18,7 @@ The format is based on Keep a Changelog, and this project aims to follow Semanti
 
 ### Changed
 - 文章页底部的上一篇/下一篇改为无边框箭头样式，悬停时箭头轻微平移；右侧目录悬停时文字轻微平移。
+- 文章标签默认从标题下方移到正文底部，`articleMeta.showTags` 改为只控制首页和文章列表；已开启标签的站点升级后标签位置会变化，如需恢复，可在 Theme Console 打开「文章标题下方显示标签」，并关闭「文章底部」的「显示标签」。
 - Theme Console 改版：设置按顶部标签分组显示，统一保存；表单样式统一。
 - 云端图片上传和列表遇到临时连接错误时会自动重试，等待过久时会结束请求；错误提示不再显示存储服务返回的原始内容。
 - 站点框架升级到 Astro 7，构建链同步升级到 Vite 8，并更新相关依赖修复多个上游安全公告；文章与页面的渲染效果保持不变。
