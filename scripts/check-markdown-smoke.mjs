@@ -69,6 +69,31 @@ const checkGroups = [
     ]
   },
   {
+    label: 'Content syntax check',
+    checks: [
+      {
+        id: 'highlight.mark',
+        test: (html) => html.includes('<mark>高亮</mark>')
+      },
+      {
+        id: 'colon-text.kept',
+        test: (html) => html.includes('会议 10:30 开始')
+      },
+      {
+        id: 'spoiler.inline',
+        test: (html) => getTagsByClass(html, 'span', 'spoiler').some((tag) => /role="button"/.test(tag) && /aria-label=/.test(tag))
+      },
+      {
+        id: 'spoiler.block',
+        test: (html) => hasClass(html, 'spoiler--block')
+      },
+      {
+        id: 'details.summary',
+        test: (html) => html.includes('<details><summary>折叠标题</summary>')
+      }
+    ]
+  },
+  {
     label: 'Code block check',
     checks: [
       {

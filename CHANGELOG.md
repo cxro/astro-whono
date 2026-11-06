@@ -8,6 +8,7 @@ The format is based on Keep a Changelog, and this project aims to follow Semanti
 ## [Unreleased]
 
 ### Added
+- Markdown 新增 `==文本==` 高亮、`:spoiler[文本]` / `:::spoiler` 模糊（点击后显示）与 `:::details[标题]` 折叠内容；絮语支持高亮和模糊；模糊内容不进入摘要和搜索索引；编辑器新增高亮、模糊按钮，「折叠内容」改为插入 `:::details`。
 - 文章页正文底部新增标签与分享按钮（X、Facebook、邮件、分享卡片、复制链接）；分享卡片可生成带二维码的小海报并保存为图片；文章标签默认从标题下方移到这里，点击可进入标签页；Theme Console 可分别开关列表、标题下方和正文底部的标签（可同时显示）和上一篇/下一篇导航，并选择要显示的分享按钮（另可选微博、Telegram、LinkedIn）。
 - 文章页在宽屏（1440px 及以上）的正文右侧显示目录：H2/H3 自动编号，滚动时高亮当前章节；标题已自带编号的文章不重复编号。
 - Theme Console 新增「文章目录」开关：可关闭文章页右侧目录，默认开启。

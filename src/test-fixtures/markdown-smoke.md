@@ -10,6 +10,18 @@ title: Markdown Smoke Fixture
 这里是 smoke fixture 的 callout 内容。
 :::
 
+## Content Syntax
+
+这是 ==高亮== 文本，会议 10:30 开始，结局是 :spoiler[被模糊的内容]。
+
+:::spoiler
+整段模糊内容。
+:::
+
+:::details[折叠标题]
+折叠内容。
+:::
+
 ## Code Block
 
 ```js
