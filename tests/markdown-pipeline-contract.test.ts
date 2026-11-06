@@ -76,7 +76,7 @@ describe('markdown pipeline contract', () => {
       },
       {
         id: 'project-remark',
-        plugins: ['remark-math', 'remark-directive', 'remark-about-directives', 'remark-callout']
+        plugins: ['remark-math', 'remark-directive', 'remark-about-directives', 'remark-callout', 'remark-content-directives']
       }
     ]);
     expect(publicConfig.processor.name).toBe('unified');

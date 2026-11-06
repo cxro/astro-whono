@@ -11,6 +11,7 @@ import {
 } from './rehype-markdown-math-boundary.mjs';
 import { rehypeAboutDirectives, remarkAboutDirectives } from './about-directives.mjs';
 import remarkCallout from './remark-callout.mjs';
+import remarkContentDirectives from './remark-content-directives.mjs';
 import { rehypeBasePath } from './rehype-base-path.mjs';
 import { rehypeRawHtmlLocalImages } from './rehype-raw-html-local-images.mjs';
 import { sanitizeSchema } from './sanitize-schema.mjs';
@@ -101,7 +102,7 @@ export const publicMarkdownRemarkSegments = Object.freeze([
   },
   {
     id: 'project-remark',
-    plugins: ['remark-math', 'remark-directive', 'remark-about-directives', 'remark-callout']
+    plugins: ['remark-math', 'remark-directive', 'remark-about-directives', 'remark-callout', 'remark-content-directives']
   }
 ]);
 
@@ -117,7 +118,7 @@ export const previewMarkdownRemarkSegments = Object.freeze([
   },
   {
     id: 'project-remark',
-    plugins: ['remark-math', 'remark-directive', 'remark-about-directives', 'remark-callout']
+    plugins: ['remark-math', 'remark-directive', 'remark-about-directives', 'remark-callout', 'remark-content-directives']
   }
 ]);
 
@@ -278,7 +279,8 @@ export const createProjectMarkdownRemarkPlugins = ({ aboutEnabled } = {}) => [
   [remarkMath, markdownMathOptions],
   remarkDirective,
   withOptions(remarkAboutDirectives, aboutEnabled === undefined ? undefined : { enabled: aboutEnabled }),
-  remarkCallout
+  remarkCallout,
+  remarkContentDirectives
 ];
 
 /** @param {ProjectMarkdownRehypeOptions} [options] */
