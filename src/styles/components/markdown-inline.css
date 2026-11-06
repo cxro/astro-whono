@@ -1,0 +1,59 @@
+/* 正文 ==高亮== 与 :spoiler / :::spoiler 模糊。文章、小记、about 与絮语卡片共用；
+   点击显示由 src/scripts/spoiler.ts 处理。 */
+
+/* 半透明黄色，浅色、深色、提示块和表格背景下共用一条规则。 */
+.prose mark,
+.bit-body mark {
+  padding: 0 0.15em;
+  border-radius: 3px;
+  background: rgba(250, 204, 21, 0.32);
+  color: inherit;
+  -webkit-box-decoration-break: clone;
+  box-decoration-break: clone;
+}
+
+.spoiler {
+  border-radius: 4px;
+  transition: filter 0.2s ease;
+}
+
+.spoiler:not(.is-revealed) {
+  filter: blur(0.35em);
+  cursor: pointer;
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+.spoiler--block:not(.is-revealed) {
+  filter: blur(var(--blur-md));
+}
+
+/* 未显示时点击落在外层，内部链接和图片不会先响应。 */
+.spoiler:not(.is-revealed) * {
+  pointer-events: none;
+}
+
+.spoiler:not(.is-revealed):focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+/* 禁用脚本时无法点击，直接显示内容。 */
+@media (scripting: none) {
+  .spoiler:not(.is-revealed) {
+    filter: none;
+    cursor: auto;
+    -webkit-user-select: auto;
+    user-select: auto;
+  }
+
+  .spoiler:not(.is-revealed) * {
+    pointer-events: auto;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .spoiler {
+    transition: none;
+  }
+}

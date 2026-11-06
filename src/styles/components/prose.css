@@ -121,6 +121,70 @@
   text-align: right;
 }
 
+/* 折叠内容：:::details 与原生 <details> 共用。 */
+.prose details {
+  margin: 1rem 0;
+  padding: 0 16px;
+  border-radius: 8px;
+  background: var(--panel);
+}
+
+/* 块级 + 绝对定位箭头：标题里有粗体、代码等行内元素时不会被 flex 拆开。 */
+.prose details > summary {
+  position: relative;
+  display: block;
+  padding: 12px 28px 12px 0;
+  font-weight: 600;
+  list-style: none;
+  cursor: pointer;
+}
+
+.prose details > summary::-webkit-details-marker {
+  display: none;
+}
+
+.prose details > summary::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  right: 4px;
+  width: 7px;
+  height: 7px;
+  margin-top: -6px;
+  border-right: 1.5px solid var(--muted);
+  border-bottom: 1.5px solid var(--muted);
+  transform: rotate(45deg);
+}
+
+.prose details[open] > summary::after {
+  margin-top: -2px;
+  transform: rotate(-135deg);
+}
+
+.prose details > summary:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+/* 上、中、下留白都是 12px：标题上下各 12px，正文末段到卡片底部 12px。
+   用卡片内边距而不是末段外边距，避免外边距穿出卡片。 */
+.prose details[open] {
+  padding-bottom: 12px;
+}
+
+/* 正文用文楷 + 次要灰色，与 about 页 FAQ 回答一致（字体同提示块）。代码自带等宽字体，不受影响。 */
+.prose details > :not(summary) {
+  color: var(--muted);
+  font-family: var(--font-copy);
+}
+
+.prose details > summary + * {
+  margin-top: 0;
+}
+
+.prose details > :last-child:not(summary) {
+  margin-bottom: 0;
+}
 
 .prose code {
   font-size: 0.9em;

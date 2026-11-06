@@ -756,7 +756,8 @@ export const initArticleLightbox = (options: ArticleLightboxOptions = {}) => {
   const images = Array.from(container.querySelectorAll<HTMLImageElement>('img'));
   images.forEach((img) => {
     if (img.dataset.lightbox === 'false') return;
-    if (img.closest('[data-no-lightbox]')) return;
+    // 模糊内容里的图片不进灯箱，否则左右切换会直接看到原图。
+    if (img.closest('[data-no-lightbox], .spoiler')) return;
     if (isTinyImage(img, minImageSize)) return;
 
     const link = img.closest<HTMLAnchorElement>('a[href]');

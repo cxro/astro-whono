@@ -38,16 +38,18 @@ export type MarkdownAboutDirectiveInsertTool = {
 export const MARKDOWN_DETAILS_SUMMARY_PLACEHOLDER = '标题';
 export const MARKDOWN_DETAILS_BODY_PLACEHOLDER = '内容';
 
+// 正文已有 `:::` 行（嵌套提示块或代码块里的示例）时加长外层围栏，否则外层会在第一个 `:::` 处提前结束。
+export const getMarkdownDirectiveFence = (body: string): string => {
+  const longest = Math.max(0, ...Array.from(body.matchAll(/^[ \t]*(:{3,})/gm), (match) => match[1]?.length ?? 0));
+  return ':'.repeat(Math.max(3, longest + 1));
+};
+
 export const buildMarkdownDetailsText = (
   body: string = MARKDOWN_DETAILS_BODY_PLACEHOLDER
-): string =>
-  [
-    '<details>',
-    `<summary>${MARKDOWN_DETAILS_SUMMARY_PLACEHOLDER}</summary>`,
-    '',
-    body,
-    '</details>'
-  ].join('\n');
+): string => {
+  const fence = getMarkdownDirectiveFence(body);
+  return [`${fence}details[${MARKDOWN_DETAILS_SUMMARY_PLACEHOLDER}]`, body, fence].join('\n');
+};
 
 export const MARKDOWN_MATH_INSERT_TOOLS: readonly MarkdownMathInsertTool[] = [
   { type: 'math', id: 'inlineMath', label: '行内公式', icon: 'sigma' },

@@ -6,6 +6,8 @@ export type MarkdownToolId =
   | 'bold'
   | 'italic'
   | 'strikethrough'
+  | 'highlight'
+  | 'spoiler'
   | 'quote'
   | 'link'
   | 'image'

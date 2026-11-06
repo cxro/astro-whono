@@ -142,11 +142,37 @@ describe('admin editor markdown transforms', () => {
 
     const source = 'Intro\n\nAlpha\nBeta\n\nOutro';
     const wrappedEdit = applyMarkdownToolToText(source, { from: 7, to: 17 }, MARKDOWN_DETAILS_INSERT_TOOL.id);
-    const wrappedValue = 'Intro\n\n<details>\n<summary>标题</summary>\n\nAlpha\nBeta\n</details>\n\nOutro';
+    const wrappedValue = 'Intro\n\n:::details[标题]\nAlpha\nBeta\n:::\n\nOutro';
 
     expectMarkdownEdit(source, wrappedEdit, {
       value: wrappedValue,
       selection: getDetailsSummarySelection(wrappedValue)
+    });
+  });
+
+  it('lengthens the details fence when the body already has directive fences', () => {
+    const source = ':::note\nA\n:::';
+    const edit = applyMarkdownToolToText(source, { from: 0, to: source.length }, MARKDOWN_DETAILS_INSERT_TOOL.id);
+    const expectedValue = '::::details[标题]\n:::note\nA\n:::\n::::\n';
+
+    expectMarkdownEdit(source, edit, {
+      value: expectedValue,
+      selection: getDetailsSummarySelection(expectedValue)
+    });
+  });
+
+  it('wraps highlight and spoiler selections', () => {
+    expectMarkdownEdit('Hi ', applyMarkdownToolToText('Hi ', { from: 3, to: 3 }, 'highlight'), {
+      value: 'Hi ==text==',
+      selection: { from: 5, to: 9 }
+    });
+    expectMarkdownEdit('结局是他', applyMarkdownToolToText('结局是他', { from: 3, to: 4 }, 'spoiler'), {
+      value: '结局是:spoiler[他]',
+      selection: { from: 12, to: 13 }
+    });
+    expectMarkdownEdit('A\nB\nC', applyMarkdownToolToText('A\nB\nC', { from: 0, to: 3 }, 'spoiler'), {
+      value: ':::spoiler\nA\nB\n:::\nC',
+      selection: { from: 11, to: 14 }
     });
   });
 

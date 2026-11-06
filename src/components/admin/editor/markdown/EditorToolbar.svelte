@@ -55,7 +55,9 @@ const listTool = { label: '列表', icon: 'list' } as const;
 const markdownTextTools = [
   { id: 'bold', label: '加粗', icon: 'bold' },
   { id: 'italic', label: '斜体', icon: 'italic' },
-  { id: 'strikethrough', label: '删除线', icon: 'strikethrough' }
+  { id: 'strikethrough', label: '删除线', icon: 'strikethrough' },
+  { id: 'highlight', label: '高亮', icon: 'highlighter' },
+  { id: 'spoiler', label: '模糊', icon: 'eye-off' }
 ] as const;
 const markdownParagraphTools = [
   { id: 'quote', label: '引用', icon: 'quote' }
@@ -76,7 +78,9 @@ const markdownListTools = [
 ] as const;
 const bitsMarkdownTextTools = [
   { id: 'bold', label: '加粗', icon: 'bold' },
-  { id: 'italic', label: '斜体', icon: 'italic' }
+  { id: 'italic', label: '斜体', icon: 'italic' },
+  { id: 'highlight', label: '高亮', icon: 'highlighter' },
+  { id: 'spoiler', label: '模糊', icon: 'eye-off' }
 ] as const;
 const bitsInlineTools = [
   { id: 'link', label: '链接', icon: 'link' },

@@ -14,7 +14,9 @@ import Columns2 from '@lucide/svelte/icons/columns-2';
 import Clock3 from '@lucide/svelte/icons/clock-3';
 import Download from '@lucide/svelte/icons/download';
 import Ellipsis from '@lucide/svelte/icons/ellipsis';
+import EyeOff from '@lucide/svelte/icons/eye-off';
 import Heading from '@lucide/svelte/icons/heading';
+import Highlighter from '@lucide/svelte/icons/highlighter';
 import Image from '@lucide/svelte/icons/image';
 import ImagePlus from '@lucide/svelte/icons/image-plus';
 import Images from '@lucide/svelte/icons/images';
@@ -77,7 +79,9 @@ const icons = {
   'clock-3': Clock3,
   download: Download,
   ellipsis: Ellipsis,
+  'eye-off': EyeOff,
   heading: Heading,
+  highlighter: Highlighter,
   image: Image,
   'image-plus': ImagePlus,
   images: Images,

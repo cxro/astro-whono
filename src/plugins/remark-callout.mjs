@@ -1,7 +1,7 @@
 import { visit } from 'unist-util-visit';
 
 const CALLOUT_TYPES = new Set(['note', 'tip', 'info', 'warning']);
-const NON_CALLOUT_DIRECTIVES = new Set(['friend', 'faq']);
+const NON_CALLOUT_DIRECTIVES = new Set(['friend', 'faq', 'details', 'spoiler']);
 
 const getText = (node) => {
   if (!node) return '';

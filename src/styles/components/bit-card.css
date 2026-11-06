@@ -1,6 +1,7 @@
 /* Bit card
    Shared card styles for the public bits list and the admin bits preview.
 */
+@import "./markdown-inline.css";
 
 .bit-card {
   padding: 18px 18px 14px;

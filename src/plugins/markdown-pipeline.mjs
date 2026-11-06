@@ -12,6 +12,7 @@ import {
 import { rehypeAboutDirectives, remarkAboutDirectives } from './about-directives.mjs';
 import remarkCallout from './remark-callout.mjs';
 import remarkContentDirectives from './remark-content-directives.mjs';
+import remarkMark from './remark-mark.mjs';
 import { rehypeBasePath } from './rehype-base-path.mjs';
 import { rehypeRawHtmlLocalImages } from './rehype-raw-html-local-images.mjs';
 import { sanitizeSchema } from './sanitize-schema.mjs';
@@ -86,6 +87,16 @@ export const markdownFeatureContract = Object.freeze([
     }
   },
   {
+    id: 'content-directives',
+    syntax: 'remark-directive',
+    projectPlugins: ['remark-directive', 'remark-content-directives']
+  },
+  {
+    id: 'highlight',
+    syntax: '==text==',
+    projectPlugins: ['remark-mark']
+  },
+  {
     id: 'raw-html-sanitize',
     syntax: 'raw-html',
     sanitizeSource: 'src/plugins/sanitize-schema.mjs',
@@ -102,7 +113,7 @@ export const publicMarkdownRemarkSegments = Object.freeze([
   },
   {
     id: 'project-remark',
-    plugins: ['remark-math', 'remark-directive', 'remark-about-directives', 'remark-callout', 'remark-content-directives']
+    plugins: ['remark-math', 'remark-directive', 'remark-about-directives', 'remark-callout', 'remark-content-directives', 'remark-mark']
   }
 ]);
 
@@ -118,7 +129,7 @@ export const previewMarkdownRemarkSegments = Object.freeze([
   },
   {
     id: 'project-remark',
-    plugins: ['remark-math', 'remark-directive', 'remark-about-directives', 'remark-callout', 'remark-content-directives']
+    plugins: ['remark-math', 'remark-directive', 'remark-about-directives', 'remark-callout', 'remark-content-directives', 'remark-mark']
   }
 ]);
 
@@ -280,7 +291,8 @@ export const createProjectMarkdownRemarkPlugins = ({ aboutEnabled } = {}) => [
   remarkDirective,
   withOptions(remarkAboutDirectives, aboutEnabled === undefined ? undefined : { enabled: aboutEnabled }),
   remarkCallout,
-  remarkContentDirectives
+  remarkContentDirectives,
+  remarkMark
 ];
 
 /** @param {ProjectMarkdownRehypeOptions} [options] */

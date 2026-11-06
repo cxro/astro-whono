@@ -46,6 +46,8 @@ describe('markdown pipeline contract', () => {
       'code-block',
       'gfm',
       'smartypants',
+      'content-directives',
+      'highlight',
       'raw-html-sanitize'
     ]);
 
@@ -76,7 +78,7 @@ describe('markdown pipeline contract', () => {
       },
       {
         id: 'project-remark',
-        plugins: ['remark-math', 'remark-directive', 'remark-about-directives', 'remark-callout', 'remark-content-directives']
+        plugins: ['remark-math', 'remark-directive', 'remark-about-directives', 'remark-callout', 'remark-content-directives', 'remark-mark']
       }
     ]);
     expect(publicConfig.processor.name).toBe('unified');

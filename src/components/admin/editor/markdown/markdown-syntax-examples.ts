@@ -2,6 +2,9 @@ export type MarkdownSyntaxIcon =
   | 'bold'
   | 'italic'
   | 'strikethrough'
+  | 'highlighter'
+  | 'eye-off'
+  | 'list-collapse'
   | 'quote'
   | 'link'
   | 'image'
@@ -36,10 +39,13 @@ export const MARKDOWN_SYNTAX_EXAMPLES: readonly MarkdownSyntaxExample[] = [
   { label: '粗体', icon: 'bold', syntax: '**粗体文本**' },
   { label: '斜体', icon: 'italic', syntax: '*斜体文本*' },
   { label: '删除线', icon: 'strikethrough', syntax: '~~文本~~' },
+  { label: '高亮', icon: 'highlighter', syntax: '==文本==' },
+  { label: '模糊', icon: 'eye-off', syntax: ':spoiler[文本]' },
   { label: '链接', icon: 'link', syntax: '[链接描述](url)' },
   { label: '图片', icon: 'image', syntax: '![alt](url "图片描述")' },
   { label: '引用', icon: 'quote', syntax: '> 引用文本' },
   { label: '提示块', icon: 'message-square-text', syntax: ':::note[标题]' },
+  { label: '折叠内容', icon: 'list-collapse', syntax: ':::details[标题]' },
   { label: '行内公式', icon: 'sigma', syntax: '$$x$$' },
   { label: '块级公式', icon: 'square-sigma', syntax: '$$\nx\n$$' },
   { label: '表情', icon: 'smile', syntax: '🙂' },

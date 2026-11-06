@@ -7,7 +7,8 @@ import {
 import {
   MARKDOWN_DETAILS_BODY_PLACEHOLDER,
   MARKDOWN_DETAILS_SUMMARY_PLACEHOLDER,
-  buildMarkdownDetailsText
+  buildMarkdownDetailsText,
+  getMarkdownDirectiveFence
 } from './insert-tools';
 
 export type EditorTextSelection = {
@@ -262,6 +263,17 @@ const insertMarkdownDetailsBlock = (
   });
 };
 
+// 单行选区用行内 :spoiler[...]，多行选区包成 :::spoiler 块。
+const wrapSpoilerSelection = (value: string, selection: EditorTextSelection): MarkdownTextEdit => {
+  const boundedSelection = getBoundedSelection(value, selection);
+  const selected = value.slice(boundedSelection.from, boundedSelection.to);
+  if (!selected.includes('\n')) {
+    return wrapSelection(value, boundedSelection, ':spoiler[', ']', 'text');
+  }
+  const fence = getMarkdownDirectiveFence(selected);
+  return wrapBlockSelection(value, boundedSelection, `${fence}spoiler\n`, `\n${fence}`, 'text');
+};
+
 export const replaceMarkdownText = (
   value: string,
   range: EditorTextSelection,
@@ -286,6 +298,10 @@ export const applyMarkdownToolToText = (
       return wrapSelection(value, selection, '*', '*', 'text');
     case 'strikethrough':
       return wrapSelection(value, selection, '~~', '~~', 'text');
+    case 'highlight':
+      return wrapSelection(value, selection, '==', '==', 'text');
+    case 'spoiler':
+      return wrapSpoilerSelection(value, selection);
     case 'code':
       return wrapSelection(value, selection, '`', '`', 'code');
     case 'quote':
