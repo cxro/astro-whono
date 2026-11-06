@@ -292,6 +292,107 @@ describe('admin-console/shared', () => {
     expect(emptyGroupCompatible.ui.articleToc).toEqual({ showEntry: true });
   });
 
+  it('shows article tags only at the bottom when a legacy snapshot lacks the position switches', () => {
+    const legacySnapshot = structuredClone(getEditableThemeSettingsPayload().settings) as Record<string, any>;
+    delete legacySnapshot.ui.articleMeta.showHeaderTags;
+    delete legacySnapshot.ui.articleFooter;
+
+    const canonical = canonicalizeAdminThemeSettings(legacySnapshot);
+    expect(canonical.ui.articleMeta.showHeaderTags).toBe(false);
+    expect(canonical.ui.articleFooter).toEqual({ showTags: true, showPrevNext: true, sharePlatforms: ['x', 'facebook', 'email', 'copy'] });
+
+    const compatible = fillAdminThemeSettingsCompatibilityDefaults(legacySnapshot, canonical) as Record<string, any>;
+    expect(compatible.ui.articleMeta.showHeaderTags).toBe(false);
+    expect(compatible.ui.articleFooter).toEqual({ showTags: true, showPrevNext: true, sharePlatforms: ['x', 'facebook', 'email', 'copy'] });
+    const mismatchPaths = createAdminThemeSettingsCanonicalMismatchIssues(compatible, canonical).map((issue) => issue.path);
+    expect(mismatchPaths.filter((issuePath) => /^ui\.article(Meta|Footer)/.test(issuePath))).toEqual([]);
+  });
+
+  it('keeps bottom tags off for a legacy snapshot that turned tags off', () => {
+    const legacySnapshot = structuredClone(getEditableThemeSettingsPayload().settings) as Record<string, any>;
+    legacySnapshot.ui.articleMeta.showTags = false;
+    delete legacySnapshot.ui.articleFooter;
+
+    const canonical = canonicalizeAdminThemeSettings(legacySnapshot);
+    expect(canonical.ui.articleFooter).toEqual({ showTags: false, showPrevNext: true, sharePlatforms: ['x', 'facebook', 'email', 'copy'] });
+
+    const emptyGroupSnapshot = structuredClone(legacySnapshot);
+    emptyGroupSnapshot.ui.articleFooter = {};
+    const emptyGroupCompatible = fillAdminThemeSettingsCompatibilityDefaults(
+      emptyGroupSnapshot,
+      canonicalizeAdminThemeSettings(emptyGroupSnapshot)
+    ) as Record<string, any>;
+    expect(emptyGroupCompatible.ui.articleFooter).toEqual({ showTags: false, showPrevNext: true, sharePlatforms: ['x', 'facebook', 'email', 'copy'] });
+  });
+
+  it('canonicalizes articleMeta.showHeaderTags strictly and validates it as a boolean', () => {
+    const raw = structuredClone(getEditableThemeSettingsPayload().settings) as Record<string, any>;
+    raw.ui.articleMeta.showHeaderTags = 'true';
+
+    const canonical = canonicalizeAdminThemeSettings(raw);
+    expect(canonical.ui.articleMeta.showHeaderTags).toBe(false);
+    expect(validateAdminThemeSettings(raw as EditableThemeSettings).map((issue) => issue.path)).toContain(
+      'ui.articleMeta.showHeaderTags'
+    );
+
+    raw.ui.articleMeta.showHeaderTags = true;
+    expect(canonicalizeAdminThemeSettings(raw).ui.articleMeta.showHeaderTags).toBe(true);
+    expect(validateAdminThemeSettings(raw as EditableThemeSettings)).toEqual([]);
+  });
+
+  it('validates articleFooter switches and allows bottom and header tags together', () => {
+    const raw = structuredClone(getEditableThemeSettingsPayload().settings) as Record<string, any>;
+    raw.ui.articleFooter.showTags = 'false';
+    raw.ui.articleFooter.showPrevNext = 'false';
+    raw.ui.articleFooter.sharePlatforms = ['copy'];
+
+    const canonical = canonicalizeAdminThemeSettings(raw);
+    expect(canonical.ui.articleFooter).toEqual({ showTags: true, showPrevNext: true, sharePlatforms: ['copy'] });
+    const issuePaths = validateAdminThemeSettings(raw as EditableThemeSettings).map((issue) => issue.path);
+    expect(issuePaths).toContain('ui.articleFooter.showTags');
+    expect(issuePaths).toContain('ui.articleFooter.showPrevNext');
+
+    raw.ui.articleFooter = { showTags: true, showPrevNext: false, sharePlatforms: ['copy'] };
+    raw.ui.articleMeta.showHeaderTags = true;
+    raw.ui.articleMeta.showTags = false;
+    const independent = canonicalizeAdminThemeSettings(raw);
+    expect(independent.ui.articleFooter).toEqual({ showTags: true, showPrevNext: false, sharePlatforms: ['copy'] });
+    expect(independent.ui.articleMeta.showHeaderTags).toBe(true);
+    expect(independent.ui.articleMeta.showTags).toBe(false);
+    expect(validateAdminThemeSettings(raw as EditableThemeSettings)).toEqual([]);
+  });
+
+  it('validates share platforms and stores them in display order', () => {
+    const raw = structuredClone(getEditableThemeSettingsPayload().settings) as Record<string, any>;
+    const issuePaths = () => validateAdminThemeSettings(raw as EditableThemeSettings).map((issue) => issue.path);
+
+    raw.ui.articleFooter.sharePlatforms = 'x';
+    expect(canonicalizeAdminThemeSettings(raw).ui.articleFooter.sharePlatforms).toEqual(['x', 'facebook', 'email', 'copy']);
+    expect(issuePaths()).toContain('ui.articleFooter.sharePlatforms');
+
+    raw.ui.articleFooter.sharePlatforms = ['x', 'wechat'];
+    expect(canonicalizeAdminThemeSettings(raw).ui.articleFooter.sharePlatforms).toEqual(['x']);
+    expect(issuePaths()).toContain('ui.articleFooter.sharePlatforms');
+
+    raw.ui.articleFooter.sharePlatforms = ['copy', 'weibo', 'x'];
+    expect(canonicalizeAdminThemeSettings(raw).ui.articleFooter.sharePlatforms).toEqual(['x', 'weibo', 'copy']);
+    expect(issuePaths()).not.toContain('ui.articleFooter.sharePlatforms');
+
+    raw.ui.articleFooter.sharePlatforms = [];
+    expect(canonicalizeAdminThemeSettings(raw).ui.articleFooter.sharePlatforms).toEqual([]);
+    expect(issuePaths()).not.toContain('ui.articleFooter.sharePlatforms');
+  });
+
+  it('rejects a saved share list that is not in display order', () => {
+    const raw = structuredClone(getEditableThemeSettingsPayload().settings) as Record<string, any>;
+    raw.ui.articleFooter.sharePlatforms = ['copy', 'x'];
+
+    const paths = createAdminThemeSettingsCanonicalMismatchIssues(raw, canonicalizeAdminThemeSettings(raw))
+      .map((issue) => issue.path);
+
+    expect(paths.some((issuePath) => issuePath.startsWith('ui.articleFooter.sharePlatforms'))).toBe(true);
+  });
+
   it('canonicalizes articleToc.showEntry strictly and validates it as a boolean', () => {
     const raw = structuredClone(getEditableThemeSettingsPayload().settings) as Record<string, any>;
     raw.ui.articleToc.showEntry = 'false';

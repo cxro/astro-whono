@@ -45,7 +45,7 @@ export const bindAdminThemeFieldEvents = ({
     inputSiteAdminOverviewPublicVisible,
     inputArticleMetaDateLabel,
     inputArticleMetaShowDate,
-    inputArticleMetaShowTags,
+    inputArticleMetaShowHeaderTags,
     inputArticleMetaShowWordCount,
     inputArticleMetaShowReadingTime,
     inputHomeIntroMore,
@@ -86,7 +86,7 @@ export const bindAdminThemeFieldEvents = ({
   });
   inputArticleMetaDateLabel.addEventListener('input', refreshArticleMetaPreview);
   inputArticleMetaShowDate.addEventListener('change', refreshArticleMetaPreview);
-  inputArticleMetaShowTags.addEventListener('change', refreshArticleMetaPreview);
+  inputArticleMetaShowHeaderTags.addEventListener('change', refreshArticleMetaPreview);
   inputArticleMetaShowWordCount.addEventListener('change', refreshArticleMetaPreview);
   inputArticleMetaShowReadingTime.addEventListener('change', refreshArticleMetaPreview);
   inputHomeIntroMore.addEventListener('input', refreshHomeIntroPreview);

@@ -8,6 +8,7 @@ The format is based on Keep a Changelog, and this project aims to follow Semanti
 ## [Unreleased]
 
 ### Added
+- 文章页正文底部新增标签与分享按钮（X、Facebook、邮件、复制链接）；文章标签默认从标题下方移到这里，点击可进入标签页；Theme Console 可分别开关列表、标题下方和正文底部的标签（可同时显示）和上一篇/下一篇导航，并选择要显示的分享按钮（另可选微博、Telegram、LinkedIn）。
 - 文章页在宽屏（1440px 及以上）的正文右侧显示目录：H2/H3 自动编号，滚动时高亮当前章节；标题已自带编号的文章不重复编号。
 - Theme Console 新增「文章目录」开关：可关闭文章页右侧目录，默认开启。
 - Admin Console 支持将随笔、小记正文图片和絮语配图上传到 S3 兼容对象存储；Images Console 可浏览云端图片并复制 URL。未配置云存储时仍使用本地文件（[PR #38](https://github.com/cxro/astro-whono/pull/38)，by [@Nilbug](https://github.com/Nilbug)）。
@@ -27,6 +28,7 @@ The format is based on Keep a Changelog, and this project aims to follow Semanti
 - 移除 `/admin/checks/` Checks Console：slug 与 settings 问题构建时会报错，无法生成归档路由的标签改为在本地后台保存时拦截，图片引用检查不再提供。
 
 ### Fixed
+- 修复文章分享时没有预览图的问题：默认分享图文件早已不存在，现改用新的 `og.png`。
 - 修复文章中通过后台「画廊」插入的本地图片在构建后的页面上无法显示的问题：画廊等原始 HTML `<img>` 中的相对路径图片现在与 Markdown 图片一样参与构建处理；引用的本地图片不存在时构建会报错（[#54](https://github.com/cxro/astro-whono/issues/54)）。
 - 修复子路径部署时，正文中以 `/` 开头的图片路径（如 `/images/...`，含手写 HTML 与 Markdown 图片）遗漏部署路径、图片无法显示的问题。
 - 修复子路径部署时，正文中以 `/` 开头的站内链接（如 `[指南](/archive/...)`）遗漏部署路径的问题。正文里以 `/` 开头的链接现在一律视为站内地址；如需链接到同域名下的其他应用，请使用完整网址（`https://...`）。

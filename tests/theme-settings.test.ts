@@ -179,6 +179,107 @@ describe('theme-settings revision semantics', () => {
     expect(state.ok).toBe(true);
   });
 
+  it('defaults article tags to the bottom and keeps the console unlocked when ui.json lacks the position switches', async () => {
+    const settingsDir = await createTempSettingsFixture();
+    const uiPath = path.join(settingsDir, 'ui.json');
+    const uiJson = JSON.parse(await readFile(uiPath, 'utf8')) as Record<string, any>;
+    delete uiJson.articleMeta.showHeaderTags;
+    delete uiJson.articleFooter;
+    await writeFile(uiPath, `${JSON.stringify(uiJson, null, 2)}
+`, 'utf8');
+
+    const resolved = getThemeSettings();
+
+    expect(resolved.settings.ui.articleMeta.showHeaderTags).toBe(false);
+    expect(resolved.sources.ui.articleMetaShowHeaderTags).toBe('default');
+    expect(resolved.settings.ui.articleFooter).toEqual({
+      showTags: true,
+      showPrevNext: true,
+      sharePlatforms: ['x', 'facebook', 'email', 'copy']
+    });
+    expect(resolved.sources.ui.articleFooterShowPrevNext).toBe('default');
+    expect(resolved.sources.ui.articleFooterSharePlatforms).toBe('default');
+    expect(getThemeSettingsReadDiagnostics(resolved)).toEqual([]);
+    expect(getEditableThemeSettingsState(resolved).ok).toBe(true);
+  });
+
+  it('keeps bottom tags off when an older ui.json turned articleMeta.showTags off', async () => {
+    const settingsDir = await createTempSettingsFixture();
+    const uiPath = path.join(settingsDir, 'ui.json');
+    const uiJson = JSON.parse(await readFile(uiPath, 'utf8')) as Record<string, any>;
+    uiJson.articleMeta.showTags = false;
+    delete uiJson.articleFooter;
+    await writeFile(uiPath, `${JSON.stringify(uiJson, null, 2)}
+`, 'utf8');
+
+    const resolved = getThemeSettings();
+
+    expect(resolved.settings.ui.articleFooter).toEqual({
+      showTags: false,
+      showPrevNext: true,
+      sharePlatforms: ['x', 'facebook', 'email', 'copy']
+    });
+    expect(resolved.sources.ui.articleFooterShowTags).toBe('legacy');
+    expect(getEditableThemeSettingsState(resolved).ok).toBe(true);
+  });
+
+  it('keeps an empty share list as all platforms off', async () => {
+    const settingsDir = await createTempSettingsFixture();
+    const uiPath = path.join(settingsDir, 'ui.json');
+    const uiJson = JSON.parse(await readFile(uiPath, 'utf8')) as Record<string, any>;
+    uiJson.articleFooter.sharePlatforms = [];
+    await writeFile(uiPath, `${JSON.stringify(uiJson, null, 2)}
+`, 'utf8');
+
+    const resolved = getThemeSettings();
+
+    expect(resolved.settings.ui.articleFooter.sharePlatforms).toEqual([]);
+    expect(resolved.sources.ui.articleFooterSharePlatforms).toBe('new');
+    expect(getEditableThemeSettingsState(resolved).ok).toBe(true);
+  });
+
+  it('renders a hand-edited share list in the fixed order and flags the file for the console', async () => {
+    const settingsDir = await createTempSettingsFixture();
+    const uiPath = path.join(settingsDir, 'ui.json');
+    const uiJson = JSON.parse(await readFile(uiPath, 'utf8')) as Record<string, any>;
+    uiJson.articleFooter.sharePlatforms = ['copy', 'wechat', 'x', 'x'];
+    await writeFile(uiPath, `${JSON.stringify(uiJson, null, 2)}
+`, 'utf8');
+
+    const resolved = getThemeSettings();
+
+    expect(resolved.settings.ui.articleFooter.sharePlatforms).toEqual(['x', 'copy']);
+    expect(getThemeSettingsReadDiagnostics(resolved).map((diagnostic) => diagnostic.code)).toEqual(['schema-mismatch']);
+  });
+
+  it('falls back to the default share list when the field is not an array', async () => {
+    const settingsDir = await createTempSettingsFixture();
+    const uiPath = path.join(settingsDir, 'ui.json');
+    const uiJson = JSON.parse(await readFile(uiPath, 'utf8')) as Record<string, any>;
+    uiJson.articleFooter.sharePlatforms = 'x';
+    await writeFile(uiPath, `${JSON.stringify(uiJson, null, 2)}
+`, 'utf8');
+
+    const resolved = getThemeSettings();
+
+    expect(resolved.settings.ui.articleFooter.sharePlatforms).toEqual(['x', 'facebook', 'email', 'copy']);
+    expect(resolved.sources.ui.articleFooterSharePlatforms).toBe('default');
+  });
+
+  it('does not share the default share list between resolved copies', async () => {
+    const settingsDir = await createTempSettingsFixture();
+    const uiPath = path.join(settingsDir, 'ui.json');
+    const uiJson = JSON.parse(await readFile(uiPath, 'utf8')) as Record<string, any>;
+    delete uiJson.articleFooter.sharePlatforms;
+    await writeFile(uiPath, `${JSON.stringify(uiJson, null, 2)}
+`, 'utf8');
+
+    const first = getThemeSettings();
+    first.settings.ui.articleFooter.sharePlatforms.length = 0;
+
+    expect(getThemeSettings().settings.ui.articleFooter.sharePlatforms).toEqual(['x', 'facebook', 'email', 'copy']);
+  });
+
   it('reads an explicit articleToc.showEntry = false from ui.json', async () => {
     const settingsDir = await createTempSettingsFixture();
     const uiPath = path.join(settingsDir, 'ui.json');

@@ -83,9 +83,12 @@ export type AdminThemeControls = RequiredElements<{
   inputArticleMetaShowDate: HTMLInputElement | null;
   inputArticleMetaDateLabel: HTMLInputElement | null;
   inputArticleMetaShowTags: HTMLInputElement | null;
+  inputArticleMetaShowHeaderTags: HTMLInputElement | null;
   inputArticleMetaShowWordCount: HTMLInputElement | null;
   inputArticleMetaShowReadingTime: HTMLInputElement | null;
   inputArticleTocShowEntry: HTMLInputElement | null;
+  inputArticleFooterShowTags: HTMLInputElement | null;
+  inputArticleFooterShowPrevNext: HTMLInputElement | null;
   inputPageBitsAuthorName: HTMLInputElement | null;
   inputPageBitsAuthorAvatar: HTMLInputElement | null;
   inputHomeShowHero: HTMLInputElement | null;
@@ -174,9 +177,12 @@ export const queryAdminThemeControls = (): AdminThemeControls | null => {
     inputArticleMetaShowDate: byId<HTMLInputElement>('ui-article-meta-show-date'),
     inputArticleMetaDateLabel: byId<HTMLInputElement>('ui-article-meta-date-label'),
     inputArticleMetaShowTags: byId<HTMLInputElement>('ui-article-meta-show-tags'),
+    inputArticleMetaShowHeaderTags: byId<HTMLInputElement>('ui-article-meta-show-header-tags'),
     inputArticleMetaShowWordCount: byId<HTMLInputElement>('ui-article-meta-show-word-count'),
     inputArticleMetaShowReadingTime: byId<HTMLInputElement>('ui-article-meta-show-reading-time'),
     inputArticleTocShowEntry: byId<HTMLInputElement>('ui-article-toc-show-entry'),
+    inputArticleFooterShowTags: byId<HTMLInputElement>('ui-article-footer-show-tags'),
+    inputArticleFooterShowPrevNext: byId<HTMLInputElement>('ui-article-footer-show-prev-next'),
     inputPageBitsAuthorName: byId<HTMLInputElement>('page-bits-author-name'),
     inputPageBitsAuthorAvatar: byId<HTMLInputElement>('page-bits-author-avatar'),
     inputHomeShowHero: byId<HTMLInputElement>('home-show-hero'),

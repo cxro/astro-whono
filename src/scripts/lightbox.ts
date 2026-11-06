@@ -601,6 +601,26 @@ export const initAboutSiteInfoCopyButtons = () => {
   });
 };
 
+export const initArticleLinkCopyButton = () => {
+  const button = document.querySelector<HTMLButtonElement>('[data-article-link-copy]');
+  if (!button) return;
+
+  button.disabled = false;
+  button.addEventListener('click', async () => {
+    const copied = await copyTextToClipboard(`${location.origin}${location.pathname}`);
+    if (!copied) return;
+
+    button.dataset.state = 'copied';
+    button.setAttribute('aria-label', '已复制文章链接');
+    button.setAttribute('title', '已复制文章链接');
+    window.setTimeout(() => {
+      button.dataset.state = 'idle';
+      button.setAttribute('aria-label', '复制文章链接');
+      button.setAttribute('title', '复制文章链接');
+    }, 2000);
+  });
+};
+
 export const initBitsLightbox = (options: LightboxOptions = {}) => {
   const controller = createLightboxController({
     enableZoom: true,

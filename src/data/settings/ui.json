@@ -14,11 +14,22 @@
     "showDate": true,
     "dateLabel": "发布于：",
     "showTags": true,
+    "showHeaderTags": false,
     "showWordCount": true,
     "showReadingTime": true
   },
   "articleToc": {
     "showEntry": true
+  },
+  "articleFooter": {
+    "showTags": true,
+    "showPrevNext": true,
+    "sharePlatforms": [
+      "x",
+      "facebook",
+      "email",
+      "copy"
+    ]
   },
   "layout": {
     "sidebarDivider": "default"

@@ -1,4 +1,5 @@
 import type {
+  ArticleSharePlatformId,
   EditableThemeSettings,
   HeroPresetId,
   HomeIntroLinkKey,
@@ -100,6 +101,24 @@ export const ADMIN_HOME_INTRO_LINK_OPTIONS = [
   label: string;
   href: string;
 }[];
+
+// 分享按钮的可选平台，数组顺序即文章页上的显示顺序。
+export const ADMIN_ARTICLE_SHARE_PLATFORM_OPTIONS = [
+  { id: 'x', label: 'X' },
+  { id: 'facebook', label: 'Facebook' },
+  { id: 'weibo', label: '微博' },
+  { id: 'telegram', label: 'Telegram' },
+  { id: 'linkedin', label: 'LinkedIn' },
+  { id: 'email', label: '邮件' },
+  { id: 'copy', label: '复制链接' }
+] as const satisfies readonly { id: ArticleSharePlatformId; label: string }[];
+export const ADMIN_ARTICLE_SHARE_PLATFORM_DEFAULT = ['x', 'facebook', 'email', 'copy'] as const satisfies readonly ArticleSharePlatformId[];
+
+// 空数组表示全部关闭；非数组返回 undefined，由调用方回退默认值。未知值和重复项被丢弃，结果按固定顺序排列。
+export const normalizeArticleSharePlatforms = (value: unknown): ArticleSharePlatformId[] | undefined => {
+  if (!Array.isArray(value)) return undefined;
+  return ADMIN_ARTICLE_SHARE_PLATFORM_OPTIONS.map(({ id }) => id).filter((id) => value.includes(id));
+};
 
 export const ADMIN_SOCIAL_PRESET_IDS = ['github', 'x', 'email'] as const satisfies readonly SiteSocialPresetId[];
 export const ADMIN_SOCIAL_PRESET_ORDER_DEFAULT: Record<SiteSocialPresetId, number> = {
@@ -411,6 +430,7 @@ export const canonicalizeAdminThemeSettings = (
   const rawPresetOrder = isRecord(socialLinks.presetOrder) ? socialLinks.presetOrder : {};
   const rawUiArticleMeta: LooseRecord = isRecord(ui.articleMeta) ? ui.articleMeta : {};
   const rawUiArticleToc: LooseRecord = isRecord(ui.articleToc) ? ui.articleToc : {};
+  const rawUiArticleFooter: LooseRecord = isRecord(ui.articleFooter) ? ui.articleFooter : {};
   const rawUiSidebarActions: LooseRecord = isRecord(ui.sidebarActions) ? ui.sidebarActions : {};
   const rawUiLayout: LooseRecord = isRecord(ui.layout) ? ui.layout : {};
   const rawUiTypography: LooseRecord = isRecord(ui.typography) ? ui.typography : {};
@@ -597,6 +617,7 @@ export const canonicalizeAdminThemeSettings = (
         showDate: typeof rawUiArticleMeta.showDate === 'boolean' ? rawUiArticleMeta.showDate : true,
         dateLabel: normalizeSingleLine(rawUiArticleMeta.dateLabel, ADMIN_ARTICLE_META_DATE_LABEL_DEFAULT),
         showTags: typeof rawUiArticleMeta.showTags === 'boolean' ? rawUiArticleMeta.showTags : true,
+        showHeaderTags: typeof rawUiArticleMeta.showHeaderTags === 'boolean' ? rawUiArticleMeta.showHeaderTags : false,
         showWordCount: typeof rawUiArticleMeta.showWordCount === 'boolean' ? rawUiArticleMeta.showWordCount : true,
         showReadingTime: typeof rawUiArticleMeta.showReadingTime === 'boolean'
           ? rawUiArticleMeta.showReadingTime
@@ -604,6 +625,15 @@ export const canonicalizeAdminThemeSettings = (
       },
       articleToc: {
         showEntry: typeof rawUiArticleToc.showEntry === 'boolean' ? rawUiArticleToc.showEntry : true
+      },
+      articleFooter: {
+        // 与 theme-settings 一致：缺字段时沿用旧的 articleMeta.showTags。
+        showTags: typeof rawUiArticleFooter.showTags === 'boolean'
+          ? rawUiArticleFooter.showTags
+          : rawUiArticleMeta.showTags !== false,
+        showPrevNext: typeof rawUiArticleFooter.showPrevNext === 'boolean' ? rawUiArticleFooter.showPrevNext : true,
+        sharePlatforms: normalizeArticleSharePlatforms(rawUiArticleFooter.sharePlatforms)
+          ?? [...ADMIN_ARTICLE_SHARE_PLATFORM_DEFAULT]
       },
       layout: {
         sidebarDivider: isAdminSidebarDividerVariant(rawSidebarDivider)
@@ -675,6 +705,10 @@ export const createAdminWritableThemeSettingsGroups = (
     sidebarActions: { ...settings.ui.sidebarActions },
     articleMeta: { ...settings.ui.articleMeta },
     articleToc: { ...settings.ui.articleToc },
+    articleFooter: {
+      ...settings.ui.articleFooter,
+      sharePlatforms: [...settings.ui.articleFooter.sharePlatforms]
+    },
     layout: { ...settings.ui.layout },
     typography: { ...settings.ui.typography }
   }
@@ -1020,7 +1054,11 @@ export const validateAdminThemeSettings = (
   }
 
   if (typeof settings.ui?.articleMeta?.showTags !== 'boolean') {
-    pushIssue('ui.articleMeta.showTags', '文章元信息里的“显示标签”必须是布尔值');
+    pushIssue('ui.articleMeta.showTags', '文章元信息里的“列表显示标签”必须是布尔值');
+  }
+
+  if (typeof settings.ui?.articleMeta?.showHeaderTags !== 'boolean') {
+    pushIssue('ui.articleMeta.showHeaderTags', '文章元信息里的“文章标题下方显示标签”必须是布尔值');
   }
 
   if (typeof settings.ui?.articleMeta?.showWordCount !== 'boolean') {
@@ -1033,6 +1071,20 @@ export const validateAdminThemeSettings = (
 
   if (typeof settings.ui?.articleToc?.showEntry !== 'boolean') {
     pushIssue('ui.articleToc.showEntry', '文章目录里的“显示右侧目录”必须是布尔值');
+  }
+
+  if (typeof settings.ui?.articleFooter?.showTags !== 'boolean') {
+    pushIssue('ui.articleFooter.showTags', '文章底部里的“显示标签”必须是布尔值');
+  }
+
+  if (typeof settings.ui?.articleFooter?.showPrevNext !== 'boolean') {
+    pushIssue('ui.articleFooter.showPrevNext', '文章底部里的“显示上一篇 / 下一篇”必须是布尔值');
+  }
+
+  const sharePlatforms: unknown = settings.ui?.articleFooter?.sharePlatforms;
+  const knownSharePlatforms: readonly unknown[] = ADMIN_ARTICLE_SHARE_PLATFORM_OPTIONS.map(({ id }) => id);
+  if (!Array.isArray(sharePlatforms) || sharePlatforms.some((id) => !knownSharePlatforms.includes(id))) {
+    pushIssue('ui.articleFooter.sharePlatforms', '文章底部里的“分享按钮”必须是受支持的平台列表');
   }
 
   if (typeof settings.ui?.sidebarActions?.showRssLink !== 'boolean') {
@@ -1276,7 +1328,9 @@ const fillAdminThemeSettingsSiteCompatibilityDefaults = (
 /* ui.* 分组兼容回填的字段表：新增分组只需在此登记，不再复制合并块。 */
 const UI_COMPATIBILITY_GROUP_FIELDS: ReadonlyArray<readonly [string, readonly string[]]> = [
   ['sidebarActions', ['showRssLink', 'showThemeToggle', 'showAdminEntry']],
+  ['articleMeta', ['showHeaderTags']],
   ['articleToc', ['showEntry']],
+  ['articleFooter', ['showTags', 'showPrevNext', 'sharePlatforms']],
   ['typography', ['readable', 'copy', 'mono', 'brand']]
 ];
 

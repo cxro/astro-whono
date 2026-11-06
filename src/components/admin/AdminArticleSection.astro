@@ -1,7 +1,10 @@
 ---
 import AdminHelpTip from './AdminHelpTip.astro';
 import AdminSettingSwitch from './AdminSettingSwitch.astro';
-import { ADMIN_ARTICLE_META_DATE_LABEL_MAX_LENGTH } from '../../lib/admin-console/theme-shared';
+import {
+  ADMIN_ARTICLE_META_DATE_LABEL_MAX_LENGTH,
+  ADMIN_ARTICLE_SHARE_PLATFORM_OPTIONS
+} from '../../lib/admin-console/theme-shared';
 ---
 
 <fieldset class="admin-section">
@@ -30,12 +33,19 @@ import { ADMIN_ARTICLE_META_DATE_LABEL_MAX_LENGTH } from '../../lib/admin-consol
         </label>
       </AdminSettingSwitch>
     </div>
-    <AdminSettingSwitch id="ui-article-meta-show-tags">显示标签</AdminSettingSwitch>
+    <AdminSettingSwitch id="ui-article-meta-show-header-tags">
+      文章标题下方显示标签
+      <Fragment slot="description">最多显示 3 个。</Fragment>
+    </AdminSettingSwitch>
+    <AdminSettingSwitch id="ui-article-meta-show-tags">
+      列表显示标签
+      <Fragment slot="description">首页和文章列表展示标签。</Fragment>
+    </AdminSettingSwitch>
     <AdminSettingSwitch id="ui-article-meta-show-word-count">显示字数</AdminSettingSwitch>
     <AdminSettingSwitch id="ui-article-meta-show-reading-time">显示阅读时长</AdminSettingSwitch>
     <p class="admin-help admin-preview">
       <span class="admin-preview__label">预览</span>
-      <span id="article-meta-preview-value" class="admin-preview__value">{'发布于：2026-03-18 · #Astro\u00A0\u00A0#写作 · 共 2,416 字 · 约 6 分钟'}</span>
+      <span id="article-meta-preview-value" class="admin-preview__value">发布于：2026-03-18 · 共 2,416 字 · 约 6 分钟</span>
     </p>
   </div>
 
@@ -47,6 +57,38 @@ import { ADMIN_ARTICLE_META_DATE_LABEL_MAX_LENGTH } from '../../lib/admin-consol
       显示右侧目录
       <Fragment slot="description">仅 /archive/ 文章详情页，窗口宽度 1440px 及以上时显示。</Fragment>
     </AdminSettingSwitch>
+  </div>
+
+  <div class="admin-subsection" role="group" aria-labelledby="ui-article-footer-title">
+    <div class="admin-subsection__head">
+      <h3 id="ui-article-footer-title" class="admin-subsection__title">文章底部</h3>
+    </div>
+    <AdminSettingSwitch id="ui-article-footer-show-tags">
+      显示标签
+      <Fragment slot="description">显示全部标签，可点击进入标签页。</Fragment>
+    </AdminSettingSwitch>
+    <AdminSettingSwitch id="ui-article-footer-show-prev-next">显示上一篇 / 下一篇</AdminSettingSwitch>
+    <div
+      class="admin-setting-choices"
+      role="group"
+      aria-labelledby="ui-article-footer-share-title"
+      aria-describedby="ui-article-footer-share-desc"
+    >
+      <div class="admin-setting__text">
+        <span id="ui-article-footer-share-title" class="admin-setting__title">分享按钮</span>
+        <p id="ui-article-footer-share-desc" class="admin-setting__desc">
+          全部取消则不显示。未设置 SITE_URL 时只有复制链接生效。
+        </p>
+      </div>
+      <div class="admin-setting-choices__list">
+        {ADMIN_ARTICLE_SHARE_PLATFORM_OPTIONS.map(({ id, label }) => (
+          <label class="admin-toggle-row">
+            <input type="checkbox" value={id} data-article-share-platform />
+            {label}
+          </label>
+        ))}
+      </div>
+    </div>
   </div>
 
   <div class="admin-subsection" role="group" aria-labelledby="ui-code-title">

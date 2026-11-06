@@ -294,6 +294,73 @@
   border-bottom-color: var(--accent);
 }
 
+/* 文章底部：标签与分享 */
+.article-footer {
+  margin-top: 40px;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 24px;
+}
+
+.article-footer__tags {
+  display: flex;
+  gap: 6px;
+  min-width: 0;
+  font-family: var(--font-copy);
+  font-size: 14px;
+  color: var(--accent);
+}
+
+.article-footer__tags-icon {
+  flex: none;
+  margin-top: 5px;
+  color: var(--muted);
+}
+
+.article-footer__tag-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 14px;
+  min-width: 0;
+}
+
+.article-footer__tag {
+  color: inherit;
+  overflow-wrap: anywhere;
+  text-underline-offset: 3px;
+}
+
+a.article-footer__tag:hover {
+  text-decoration: underline;
+}
+
+/* 负外边距抵消按钮内留白，让图标与正文右缘对齐。 */
+.article-footer__share {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 4px;
+  margin-left: auto;
+  margin-right: -9px;
+}
+
+.article-footer__share .icon-button .icon {
+  width: 16px;
+  height: 16px;
+}
+
+.article-footer__copy:not([data-state="copied"]) .article-footer__check-icon,
+.article-footer__copy[data-state="copied"] .article-footer__link-icon {
+  display: none;
+}
+
+@media (max-width: 900px) {
+  .article-footer__share {
+    margin-right: -14px;
+  }
+}
+
 /* 文章上下篇导航 */
 .prev-next {
   margin-top: 40px;

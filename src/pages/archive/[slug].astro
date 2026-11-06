@@ -4,6 +4,7 @@ import { getEssaySlug, getVisibleEssayRouteEntries, type EssayEntry } from '../.
 import ArticleLayout from '../../layouts/ArticleLayout.astro';
 import { createWithBase } from '../../utils/format';
 import { getThemeSettings, getVisibleArticleMetaTags } from '../../lib/theme-settings';
+import { getTagPath, normalizeTagLabel } from '../../lib/tags';
 
 type ArticleNeighborLink = {
   href: string;
@@ -38,8 +39,15 @@ const { entry, prev, next } = Astro.props as {
   next: ArticleNeighborLink | null;
 };
 const { Content, headings } = await render(entry);
-const { articleMeta: articleMetaSettings, articleToc } = getThemeSettings().settings.ui;
+const { articleMeta: articleMetaSettings, articleToc, articleFooter } = getThemeSettings().settings.ui;
 const visibleTags = getVisibleArticleMetaTags(entry.data.tags, 'detail');
+const withBase = createWithBase(import.meta.env.BASE_URL ?? '/');
+// 标签页只由归档文章生成，archive: false 的文章不保证标签有页面，显示纯文本。
+const hasTagPages = entry.data.archive !== false;
+const tags = entry.data.tags
+  .map((tag) => normalizeTagLabel(tag))
+  .filter(Boolean)
+  .map((label) => ({ label, href: hasTagPages ? withBase(getTagPath('archive', label)) : null }));
 ---
 
 <ArticleLayout
@@ -47,7 +55,9 @@ const visibleTags = getVisibleArticleMetaTags(entry.data.tags, 'detail');
   prev={prev}
   next={next}
   articleMetaSettings={articleMetaSettings}
+  articleFooterSettings={articleFooter}
   visibleTags={visibleTags}
+  tags={tags}
   headings={headings}
   showToc={articleToc.showEntry}
 >

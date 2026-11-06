@@ -749,6 +749,33 @@
   vertical-align: -2px;
 }
 
+/* 多选设置行：标题 + 说明在上，复选框换行排列在下。 */
+.admin-setting-choices {
+  display: grid;
+  gap: 4px;
+  min-width: 0;
+}
+
+.admin-setting-choices .admin-setting__title {
+  cursor: default;
+}
+
+.admin-setting-choices__list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0 20px;
+}
+
+.admin-setting-choices__list input {
+  margin: 0;
+  accent-color: var(--text);
+}
+
+/* 保存、校验或锁定期间与开关行一样变灰。 */
+.admin-setting-choices:has(input:disabled) :is(.admin-setting__title, .admin-toggle-row) {
+  color: var(--admin-control-text-disabled);
+}
+
 /* 开关不可用（依赖未满足，或保存、校验期间）时标题一并变灰。 */
 .admin-setting:has(.admin-switch__input:disabled) .admin-setting__title {
   color: var(--admin-control-text-disabled);

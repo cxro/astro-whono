@@ -1,9 +1,12 @@
 ---
 import type { MarkdownHeading } from 'astro';
+import { hasSiteUrl } from '../../site.config.mjs';
 import BaseLayout from './BaseLayout.astro';
+import BrandIcon from '../components/BrandIcon.astro';
 import UiIcon from '../components/UiIcon.astro';
 import Lightbox from '../components/Lightbox.astro';
 import '../styles/article.css';
+import { getArticleShareLinks } from '../lib/article-share';
 import { getArticleTocHeadings } from '../lib/article-toc';
 import { getEssayDerivedText, type EssayEntry } from '../lib/content';
 import { containsMarkdownMath } from '../lib/markdown-math';
@@ -12,8 +15,8 @@ import {
   MARKDOWN_MATH_STYLESHEET_HREF,
   MARKDOWN_MATH_STYLESHEET_ID
 } from '../lib/markdown-math-styles';
-import type { ArticleMetaSettings, SidebarNavId } from '../lib/theme-settings';
-import { formatISODateUtc } from '../utils/format';
+import type { ArticleFooterSettings, ArticleMetaSettings, SidebarNavId } from '../lib/theme-settings';
+import { createWithBase, formatISODateUtc } from '../utils/format';
 import { truncateText } from '../utils/excerpt';
 
 type ArticleNeighborLink = {
@@ -21,12 +24,19 @@ type ArticleNeighborLink = {
   title: string;
 };
 
+type ArticleTagLink = {
+  label: string;
+  href: string | null;
+};
+
 const {
   entry,
   prev,
   next,
   articleMetaSettings,
+  articleFooterSettings,
   visibleTags = [],
+  tags = [],
   headings = [],
   showToc = true
 } = Astro.props as {
@@ -34,13 +44,15 @@ const {
   prev: ArticleNeighborLink | null;
   next: ArticleNeighborLink | null;
   articleMetaSettings: ArticleMetaSettings;
+  articleFooterSettings: ArticleFooterSettings;
   visibleTags?: string[];
+  tags?: ArticleTagLink[];
   headings?: MarkdownHeading[];
   showToc?: boolean;
 };
 
 const entryTags: string[] = entry?.data?.tags ?? [];
-const defaultImage = '/og.svg';
+const defaultImage = createWithBase(import.meta.env.BASE_URL ?? '/')('/og.png');
 const coverImage = entry?.data?.cover ?? null;
 const ogImage = coverImage ?? defaultImage;
 const derivedText = getEssayDerivedText(entry);
@@ -62,8 +74,10 @@ const articleReadingStats = articleMetaSettings.showWordCount || articleMetaSett
     })()
   : { wordCount: 0, readingMinutes: 0 };
 const numberFormatter = new Intl.NumberFormat('zh-CN');
+const headerTags = articleMetaSettings.showHeaderTags ? visibleTags : [];
+const footerTags = articleFooterSettings.showTags ? tags : [];
 const shouldShowMetaLine = articleMetaSettings.showDate
-  || (articleMetaSettings.showTags && visibleTags.length > 0)
+  || headerTags.length > 0
   || articleMetaSettings.showWordCount
   || articleMetaSettings.showReadingTime;
 // 目录开关（ui.articleToc.showEntry）关闭时不生成目录数据，下游 DOM、网格与脚本随之不生效。
@@ -71,6 +85,15 @@ const tocHeadings = showToc ? getArticleTocHeadings(headings) : [];
 const hasToc = tocHeadings.length > 0;
 // 一级编号达到两位数（"10."）时加宽编号列。
 const hasWideTocNumbers = tocHeadings.some((heading) => heading.level === 1 && (heading.number?.length ?? 0) > 2);
+// 分享平台需要完整地址；未设置 SITE_URL 的构建只保留复制链接，dev 用本地地址方便预览。
+const shareUrl = hasSiteUrl && Astro.site
+  ? new URL(Astro.url.pathname, Astro.site).toString()
+  : (import.meta.env.DEV ? Astro.url.href : null);
+const shareLinks = shareUrl
+  ? getArticleShareLinks(shareUrl, entry.data.title, articleFooterSettings.sharePlatforms)
+  : [];
+const showCopyLink = articleFooterSettings.sharePlatforms.includes('copy');
+const hasShare = shareLinks.length > 0 || showCopyLink;
 
 ---
 
@@ -118,9 +141,9 @@ const hasWideTocNumbers = tocHeadings.some((heading) => heading.level === 1 && (
               <time datetime={displayDate.toISOString()}>{`${displayDateLabel}${formatISODateUtc(displayDate)}`}</time>
             </span>
           ) : null}
-          {articleMetaSettings.showTags && visibleTags.length ? (
+          {headerTags.length ? (
             <span class="meta-line__item meta-line__item--tags">
-              {visibleTags.map((tag) => (
+              {headerTags.map((tag) => (
                 <span class="tag">#{tag}</span>
               ))}
             </span>
@@ -166,7 +189,51 @@ const hasWideTocNumbers = tocHeadings.some((heading) => heading.level === 1 && (
       <slot />
     </div>
   </div>
-  {(prev || next) ? (
+  {footerTags.length > 0 || hasShare ? (
+    <div class="article-footer">
+      {footerTags.length ? (
+        <div class="article-footer__tags">
+          <UiIcon name="bookmark" class="article-footer__tags-icon" size={14} />
+          <div class="article-footer__tag-list">
+            {footerTags.map((tag) => tag.href ? (
+              <a class="article-footer__tag" href={tag.href}>#{tag.label}</a>
+            ) : (
+              <span class="article-footer__tag">#{tag.label}</span>
+            ))}
+          </div>
+        </div>
+      ) : null}
+      {hasShare ? (
+        <div class="article-footer__share" role="group" aria-label="分享文章">
+          {shareLinks.map((link) => (
+            <a
+              class="icon-button"
+              href={link.href}
+              aria-label={link.label}
+              title={link.label}
+              {...(link.id === 'email' ? {} : { target: '_blank', rel: 'noopener noreferrer' })}
+            >
+              <BrandIcon name={link.id} class="icon" size={16} />
+            </a>
+          ))}
+          {showCopyLink ? (
+            <button
+              class="icon-button article-footer__copy"
+              type="button"
+              aria-label="复制文章链接"
+              title="复制文章链接"
+              data-article-link-copy
+              disabled
+            >
+              <UiIcon name="link" class="icon article-footer__link-icon" size={16} />
+              <UiIcon name="check" class="icon article-footer__check-icon" size={16} />
+            </button>
+          ) : null}
+        </div>
+      ) : null}
+    </div>
+  ) : null}
+  {articleFooterSettings.showPrevNext && (prev || next) ? (
     <nav class="prev-next" aria-label="上一篇/下一篇">
       <div class="prev-next__item">
         {prev ? (
@@ -206,10 +273,11 @@ const hasWideTocNumbers = tocHeadings.some((heading) => heading.level === 1 && (
   />
 
   <script>
-    import { initArticleLightbox, initCodeCopyButtons } from '../scripts/lightbox';
+    import { initArticleLightbox, initArticleLinkCopyButton, initCodeCopyButtons } from '../scripts/lightbox';
     import { initArticleToc } from '../scripts/article-toc';
 
     initCodeCopyButtons();
+    initArticleLinkCopyButton();
     initArticleLightbox({
       dialogId: 'lightbox',
       containerSelector: '.prose',
