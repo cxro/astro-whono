@@ -9,6 +9,7 @@ The format is based on Keep a Changelog, and this project aims to follow Semanti
 
 ### Changed
 - 依赖升级到 Astro 7.4.12，fast-xml-parser 固定到 5.12.1，修复依赖审计中的安全告警；页面渲染与 RSS 输出不变。
+- KaTeX 升级到 0.19.1（npm 已将 0.18.11 标为弃用）；公式渲染不变。
 
 ## [0.6.0] - 2026-11-05
 
