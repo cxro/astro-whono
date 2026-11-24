@@ -88,7 +88,7 @@
       "picomatch": "2.3.2"
     },
     "fast-uri": "3.1.9",
-    "fast-xml-parser": "5.7.0",
+    "fast-xml-parser": "5.12.1",
     "h3": "1.15.9",
     "katex": "$katex",
     "postcss": "8.5.32",

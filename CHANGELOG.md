@@ -7,6 +7,9 @@ The format is based on Keep a Changelog, and this project aims to follow Semanti
 
 ## [Unreleased]
 
+### Changed
+- 依赖升级到 Astro 7.4.12，fast-xml-parser 固定到 5.12.1，修复依赖审计中的安全告警；页面渲染与 RSS 输出不变。
+
 ## [0.6.0] - 2026-11-05
 
 ### Added
